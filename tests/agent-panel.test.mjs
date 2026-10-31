@@ -24,7 +24,10 @@ test('real Electron panel renders literal messages and dispatches advanced contr
           seed.threads[0].attachments = [{ id: 'attached', name: 'local.txt', mimeType: 'text/plain', bytes: 12, available: true }];
           seed.threads[0].messages[0].attachments = structuredClone(seed.threads[0].attachments);
           const calls = [];
-          VekAgentPanel.mount(document.querySelector('#panel'), async (name, payload) => { calls.push({ name, payload }); if (name === 'agents:threads:pin') seed.threads[0].pinned = true; if (name === 'agents:attachments:remove') seed.threads[0].attachments[0].detachedAt = new Date().toISOString(); if (name === 'agents:attachments:restore') delete seed.threads[0].attachments[0].detachedAt; return structuredClone(seed); });
+          VekAgentPanel.mount(document.querySelector('#panel'), async (name, payload) => { calls.push({ name, payload }); if (name === 'agents:threads:pin') seed.threads[0].pinned = true; if (name === 'agents:attachments:remove') seed.threads[0].attachments[0].detachedAt = new Date().toISOString(); if (name === 'agents:attachments:restore') delete seed.threads[0].attachments[0].detachedAt; if (name === 'agents:file:claude:preview') return { ...structuredClone(seed), claudeImportPreview: { token:'preview-token', sourceName:'fixture.jsonl', branches:[{id:'first',label:'First branch'},{id:'second',label:'Second branch'}], excludedEntries:1, missingParents:0, previewText:'First selected branch' } };
+            if (name === 'agents:claude:branch') return { ...structuredClone(seed), claudeBranchPreview:{leafId:payload.leafId,text:'Second selected branch preview'} };
+            if (name === 'agents:claude:import') { seed.threads.push({id:'imported',projectId:'project',providerId:'p',title:'Imported Claude',status:'idle',messages:[],runs:[],claudeHistory:{sourceName:'fixture.jsonl',activity:{toolEvents:[{id:'tool',name:'Read',status:'completed',input:'Input literal',result:'<img src=x onerror=window.toolXss=true>'}],subagents:[{id:'child',status:'completed',messages:[{role:'assistant',content:'Nested child result'}]}]}}});return {...structuredClone(seed),importedThreadId:'imported'}; }
+            return structuredClone(seed); });
           VekAgentPanel.update(seed);
           const button = label => [...document.querySelectorAll('button')].find(node => node.textContent === label);
           const click = async label => { const node = button(label); if (!node) throw new Error('Missing button: ' + label); node.click(); await new Promise(resolve => setTimeout(resolve, 15)); };
@@ -45,10 +48,15 @@ test('real Electron panel renders literal messages and dispatches advanced contr
           const kind = document.querySelector('[data-focus="editor-kind"]'); kind.value = 'cron'; kind.onchange();
           const prompt = document.querySelector('[data-focus="editor-prompt"]'); prompt.value = 'Cron local test'; prompt.oninput();
           await document.querySelector('.va-dialog').onsubmit({ preventDefault() {} });
-          return { literal, draft, draftValue, noAutoSend, memoryVisible, calls };
+          await click('Conversations'); await click('Import Claude history');
+          const branch = document.querySelector('[data-focus="editor-leafId"]'); branch.value='second'; branch.onchange(); await new Promise(resolve=>setTimeout(resolve,30));
+          const changedBranchPreview=document.body.textContent.includes('Second selected branch preview');
+          await document.querySelector('.va-dialog').onsubmit({preventDefault(){}});
+          const importedActivity=document.body.textContent.includes('Nested child result')&&document.body.textContent.includes('<img src=x onerror=window.toolXss=true>')&&!window.toolXss&&!document.querySelector('img');
+          return { literal, draft, draftValue, noAutoSend, memoryVisible, changedBranchPreview, importedActivity, calls };
         }.toString())}+')()');
-        assert.equal(result.literal,true);assert.equal(result.draft,true);assert.equal(result.draftValue,'Voice transcription draft');assert.equal(result.noAutoSend,true);assert.equal(result.memoryVisible,true);
-        for(const action of ['agents:threads:pin','agents:file:export','agents:file:import','agents:files:attach','agents:files:open','agents:attachments:remove','agents:attachments:restore','agents:threads:resend','agents:proposals:accept','agents:automations:create'])assert(result.calls.some(call=>call.name===action),action);
+        assert.equal(result.literal,true);assert.equal(result.draft,true);assert.equal(result.draftValue,'Voice transcription draft');assert.equal(result.noAutoSend,true);assert.equal(result.memoryVisible,true);assert.equal(result.changedBranchPreview,true);assert.equal(result.importedActivity,true);
+        for(const action of ['agents:file:claude:preview','agents:claude:branch','agents:claude:import','agents:threads:pin','agents:file:export','agents:file:import','agents:files:attach','agents:files:open','agents:attachments:remove','agents:attachments:restore','agents:threads:resend','agents:proposals:accept','agents:automations:create'])assert(result.calls.some(call=>call.name===action),action);
         assert(result.calls.some(call=>call.name==='agents:file:export'&&call.payload.metadataOnly===true));
         const cron=result.calls.find(call=>call.name==='agents:automations:create');assert.equal(cron.payload.kind,'cron');assert.equal(cron.payload.timeZone,'UTC');
         console.log('AGENT_PANEL_PASS');window.destroy();app.exit(0);

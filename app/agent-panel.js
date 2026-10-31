@@ -62,6 +62,40 @@
       render();
     } catch (failure) { error = failure.message || String(failure); render(); }
   }
+  async function importClaude() {
+    if (!snapshot.projects.length) return newProject();
+    if (!snapshot.providers.length) { view = 'providers'; render(); return; }
+    const result = await action('agents:file:claude:preview', {}), preview = result?.claudeImportPreview;
+    if (!preview) return;
+    openEditor('Import Claude conversation', [
+      { key: 'notice', type: 'notice', label: `${preview.sourceName} · ${preview.branches.length} branches · ${preview.excludedEntries} sidechain/meta entries excluded · ${preview.missingParents} missing parent boundaries. Images/PDFs and external file references are not copied. Continuing creates a new provider session with copied text; it does not resume the source CLI session.` },
+      { key: 'leafId', label: 'Conversation branch', type: 'select', onChange: async value => { const current = editor; const result = await action('agents:claude:branch', { token: preview.token, leafId: value }); if (editor === current && result?.claudeBranchPreview) { current.fields.find(field => field.key === 'preview').label = `Selected branch preview:\n${result.claudeBranchPreview.text}`; render(); } }, options: preview.branches.map(item => [item.id, item.label]), value: preview.branches[0].id },
+      { key: 'projectId', label: 'Import into project', type: 'select', options: snapshot.projects.map(item => [item.id, item.name]), value: snapshot.projects[0].id },
+      { key: 'providerId', label: 'Agent for future prompts', type: 'select', options: snapshot.providers.map(item => [item.id, item.name]), value: snapshot.providers.find(item => item.protocol === 'claude-stream-json')?.id || snapshot.providers[0].id },
+      { key: 'title', label: 'Conversation title', value: `Claude: ${preview.sourceName}` },
+      { key: 'preview', type: 'notice', label: `Selected branch preview:\n${preview.previewText}` },
+    ], async values => { const imported = await action('agents:claude:import', { ...values, token: preview.token }, true); if (imported?.importedThreadId) { selectedId = imported.importedThreadId; view = 'threads'; render(); } });
+    editor.onCancel = () => invoke('agents:claude:discard', { token: preview.token }).catch(() => {});
+  }
+  function nativeActivity(record, label) {
+    const section = make('details', '', 'va-run-details'); section.append(make('summary', label));
+    if (record.nativeEventsTruncated || record.toolEventsTruncated) section.append(make('p', 'Activity display reached its storage limit; some content is omitted.', 'va-hint'));
+    for (const event of record.toolEvents || []) {
+      const row = make('details'); row.append(make('summary', `${event.name} · ${event.status || 'observed'}${event.parentToolUseId ? ' · nested' : ''}`));
+      if (event.input !== undefined) row.append(make('strong', 'Input'), make('pre', event.input));
+      if (event.result !== undefined) row.append(make('strong', 'Result'), make('pre', event.result || '(empty result)'));
+      if (event.elapsedSeconds !== undefined) row.append(make('p', `${event.elapsedSeconds} seconds reported`));
+      if (event.endReason) row.append(make('p', event.endReason, 'va-hint')); section.append(row);
+    }
+    for (const child of record.subagents || []) {
+      const row = make('details'); row.append(make('summary', `Subagent · ${child.description || child.id} · ${child.status}`));
+      if (child.summary) row.append(make('p', child.summary));
+      for (const message of child.messages || []) row.append(make('strong', message.role === 'assistant' ? 'Agent' : 'Tool/user message'), make('pre', message.content));
+      if (child.usage) row.append(make('pre', JSON.stringify(child.usage)));
+      if (child.endReason) row.append(make('p', child.endReason, 'va-hint')); section.append(row);
+    }
+    return section;
+  }
   function newProject() {
     openEditor('Add a project', [
       { key: 'name', label: 'Project name', required: true, placeholder: 'My project' },
@@ -249,7 +283,12 @@
       const history=make('details','','va-run-details');history.append(make('summary','Turn file snapshots'));
       for(const [index,run]of runs.entries())if(run.fileChanges){const changes=run.fileChanges,row=make('section','','va-turn-snapshot');row.append(make('strong',`Turn ${index+1} · ${run.status} · ${changes.status}`));if(changes.error)row.append(make('p',changes.error,'va-hint'));const actions=make('div','','va-actions');if(changes.before&&changes.after)actions.append(button('View file changes',()=>showFileChanges(t,run)));if(t.status!=='running'){if(changes.before)actions.append(button('Restore before…',()=>showFileChanges(t,run,'before')));if(changes.after)actions.append(button('Restore after…',()=>showFileChanges(t,run,'after')));}row.append(actions);history.append(row);}main.append(history);
     }
-    if (latest?.toolEvents?.length) { const tools = make('details', '', 'va-turn-tools'); tools.append(make('summary', `Native tools · ${latest.toolEvents.length}${latest.toolEventsTruncated ? '+' : ''}`)); for (const event of latest.toolEvents) { const row = make('details'); row.append(make('summary', event.name), make('pre', event.input)); tools.append(row); } main.append(tools); }
+    if (t.claudeHistory || runs.some(run => run.toolEvents?.length || run.subagents?.length)) {
+      const activity = make('details', '', 'va-run-details va-native-history'); activity.append(make('summary', 'Native activity history'));
+      if (t.claudeHistory) { const source = t.claudeHistory; activity.append(make('p', `Imported Claude history · ${source.sourceName} · copied transcript, new session on continuation`, 'va-hint'), nativeActivity(source.activity || {}, 'Imported Claude activity')); }
+      for (const [index, run] of runs.entries()) if (run.toolEvents?.length || run.subagents?.length) activity.append(nativeActivity(run, `Turn ${index + 1} native activity`));
+      main.append(activity);
+    }
     for (const approval of latest?.approvals || []) if (approval.status === 'pending') {
       const card = make('section', '', 'va-approval'); card.append(make('strong', 'Local agent needs approval'), make('p', approval.title), make('pre', `${approval.cwd}\n${approval.command || approval.kind}`));
       const actions = make('div', '', 'va-actions'); for (const [decision, label] of [['accept', 'Approve this request'], ['decline', 'Decline'], ['cancel', 'Cancel turn']]) actions.append(button(label, () => action('agents:control:approval', { id: t.id, approvalId: approval.id, decision }), decision === 'accept' ? 'va-primary' : ''));
@@ -334,10 +373,11 @@
       if (field.placeholder) input.placeholder = field.placeholder;
       if (field.min) input.min = field.min; if (field.step) input.step = field.step;
       input.oninput = () => { editor.values[field.key] = input.value; };
+      if (field.onChange) input.onchange = () => { editor.values[field.key] = input.value; void field.onChange(input.value); };
       if (field.key === 'kind') input.onchange = () => { editor.values.kind = input.value; render(); };
       label.append(input); form.append(label);
     }
-    const actions = make('div', '', 'va-dialog-actions'); const cancel = button('Cancel', () => { editor = null; error = ''; render(); });
+    const actions = make('div', '', 'va-dialog-actions'); const cancel = button('Cancel', () => { editor.onCancel?.(); editor = null; error = ''; render(); });
     const save = make('button', pending ? 'Saving…' : 'Save', 'va-button va-primary'); save.disabled = pending; actions.append(cancel, save); form.append(actions);
     if (error) { const message = make('div', error, 'va-error'); message.role = 'alert'; form.append(message); }
     form.onsubmit = async event => { event.preventDefault(); try { await editor.submit({ ...editor.values }); } catch (failure) { error = failure.message || String(failure); render(); } };
@@ -350,7 +390,7 @@
     const oldMessages = root.querySelector('[data-scroll="messages"]'); const atEnd = !oldMessages || oldMessages.scrollHeight - oldMessages.scrollTop - oldMessages.clientHeight < 50; const oldScroll = oldMessages?.scrollTop || 0;
     root.classList.add('vek-agent-panel'); root.replaceChildren();
     const head = make('div', '', 'va-header'); const title = make('div'); title.append(make('h1', 'Agent workspace'), make('p', 'Your projects, conversations, and local agents.'));
-    const globalActions = make('div', '', 'va-actions'); globalActions.append(button('Import JSON', () => action('agents:file:import', {})), button('Export JSON', () => action('agents:file:export', {})), button('Export without files', () => action('agents:file:export', { metadataOnly: true })), button('New conversation', newThread, 'va-primary')); head.append(title, globalActions); root.append(head);
+    const globalActions = make('div', '', 'va-actions'); globalActions.append(button('Import JSON', () => action('agents:file:import', {})), button('Import Claude history', importClaude), button('Export JSON', () => action('agents:file:export', {})), button('Export without files', () => action('agents:file:export', { metadataOnly: true })), button('New conversation', newThread, 'va-primary')); head.append(title, globalActions); root.append(head);
     const tabs = make('nav', '', 'va-tabs'); tabs.setAttribute('aria-label', 'Agent workspace sections');
     for (const [id, name] of [['threads', 'Conversations'], ['automations', 'Automations'], ['providers', 'Agents']]) { const tab = button(name, () => { view = id; error = ''; render(); }, view === id ? 'is-active' : ''); tab.setAttribute('aria-current', view === id ? 'page' : 'false'); tabs.append(tab); } root.append(tabs);
     if (error && !editor) { const alert = make('div', error, 'va-error'); alert.role = 'alert'; root.append(alert); }

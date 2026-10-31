@@ -1,0 +1,37 @@
+✔ real Electron panel renders literal messages and dispatches advanced controls without model calls (646.169334ms)
+✔ Claude tool progress/result evidence handles out-of-order results, failure and nested tool ownership (2.076333ms)
+✔ Claude task lifecycle ignores stale run notifications and preserves terminal state on later progress (0.152208ms)
+✔ Claude activity truncation is bounded and unresolved activity is never called completed (3.438333ms)
+✔ Claude child messages deduplicate and archive evidence is sanitized without granting capabilities (0.474042ms)
+✔ Claude selected chain recovers parallel tool results without sibling answer/sidechain contamination (3.447584ms)
+✔ Claude parent links define ordering even when selected source lines are reordered (0.280875ms)
+✔ Claude import is read-only, explicit and inert; continuation starts own session then resumes it (310.131417ms)
+✔ Claude source mutation, replacement inode and symlink after preview cannot silently change import (123.155333ms)
+✔ Claude preview tokens are ephemeral, capped, discarded and expire without importing (172.521084ms)
+✔ Claude history rejects bad tail/UTF-8, cycles, conflicting UUIDs, mixed sessions and unknown branches (0.633083ms)
+✔ Claude history compaction/missing parents remain explicit boundaries; duplicate identical entries do not duplicate text (0.207958ms)
+✔ Claude history file/frame limits reject before importing or executing (203.07675ms)
+✔ Claude imported display activity survives native archive roundtrip with no source resume or file recovery rights (166.556666ms)
+✔ Claude native streams UTF-8 once, records tools/usage, attaches actual image/PDF/text, resumes after restart (454.885042ms)
+✔ Claude approvals are request-scoped explicit accept/decline and preserve the exact original input (340.901666ms)
+✔ Claude cancelled permissions expire without a response and duplicate request identities fail closed (678.697875ms)
+✔ Claude steering is an honest queued follow-up, stop interrupts, and approval cancel stops the turn (270.5155ms)
+✔ Claude disconnect cannot become successful completion (189.190917ms)
+✔ Claude malformed cannot become successful completion (192.998667ms)
+✔ Claude oversize cannot become successful completion (218.248542ms)
+✔ Claude wrong-session cannot become successful completion (189.910584ms)
+✔ Claude failure cannot become successful completion (196.19225ms)
+✔ Claude edit/fork/import and changed executable arguments cannot reuse native session authority (342.096542ms)
+✔ Claude launch preflights combined attachments and rejects conflicting protocol flags (0.370666ms)
+✔ Claude oversized combined attachments fail before spawn and leave no fabricated run (187.184875ms)
+✔ Claude output shares the actual byte budget and immediate cancellation sends no user prompt (262.616792ms)
+✔ real Claude wire retains parallel block tools/results and child lifecycle without polluting main answer (289.845709ms)
+✔ real Claude stop settles pending subagent activity as interrupted (193.604209ms)
+ℹ tests 29
+ℹ suites 0
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4086.143458

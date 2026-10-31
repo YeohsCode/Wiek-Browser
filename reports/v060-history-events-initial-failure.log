@@ -1,0 +1,59 @@
+✔ Claude tool progress/result evidence handles out-of-order results, failure and nested tool ownership (5.300041ms)
+✔ Claude task lifecycle ignores stale run notifications and preserves terminal state on later progress (0.151917ms)
+✔ Claude activity truncation is bounded and unresolved activity is never called completed (2.868667ms)
+✔ Claude child messages deduplicate and archive evidence is sanitized without granting capabilities (0.326042ms)
+✖ Claude selected chain recovers parallel tool results without sibling answer/sidechain contamination (3.479459ms)
+✔ Claude parent links define ordering even when selected source lines are reordered (0.304417ms)
+✖ Claude import is read-only, explicit and inert; continuation starts own session then resumes it (182.421708ms)
+✔ Claude source mutation, replacement inode and symlink after preview cannot silently change import (120.21125ms)
+✔ Claude preview tokens are ephemeral, capped, discarded and expire without importing (132.926583ms)
+✔ Claude history rejects bad tail/UTF-8, cycles, conflicting UUIDs, mixed sessions and unknown branches (0.591458ms)
+✔ Claude history compaction/missing parents remain explicit boundaries; duplicate identical entries do not duplicate text (0.284375ms)
+✔ Claude history file/frame limits reject before importing or executing (179.570208ms)
+✔ Claude imported display activity survives native archive roundtrip with no source resume or file recovery rights (144.661333ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 11
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 847.403208
+
+✖ failing tests:
+
+test at tests/claude-history.test.mjs:24:1
+✖ Claude selected chain recovers parallel tool results without sibling answer/sidechain contamination (3.479459ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  3 !== 2
+  
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/claude-history.test.mjs:26:9)
+      at Test.runInAsyncScope (node:async_hooks:213:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.start (node:internal/test_runner/test:1003:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 3,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/claude-history.test.mjs:38:1
+✖ Claude import is read-only, explicit and inert; continuation starts own session then resumes it (182.421708ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  3 !== 2
+  
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/claude-history.test.mjs:39:87)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 3,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

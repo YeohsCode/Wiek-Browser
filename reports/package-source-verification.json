@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-31T07:36:14.522Z",
-  "version": "0.5.0",
+  "generatedAt": "2026-10-31T08:03:00.732Z",
+  "version": "0.6.0",
   "versionMatches": true,
-  "checkedFiles": 143,
+  "checkedFiles": 145,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -19,17 +19,17 @@
     },
     {
       "file": "app/agent-panel.css",
-      "sha256": "99e060411a7c6d0d1a9e96406edbc773ca722cdc87b5e135e76ba53e32605625",
+      "sha256": "02f358fcd81ebb0edf235f4670139b7ee027327b18b1fb1ddef34d725f4b054d",
       "matches": true
     },
     {
       "file": "app/agent-panel.js",
-      "sha256": "056b6ac76ff66462034931dff3babc3ff9dce3fac16e042a925ecd36103796fc",
+      "sha256": "96be8c47001ff62f4151f9e1d96dc54e087e28be6e013811d39016f2f924aa7b",
       "matches": true
     },
     {
       "file": "app/agent-service.cjs",
-      "sha256": "4cfbf1a0c51a8e6dc9ac29956ee810e8ecf23871727decb45ce3b0365f5ff7f1",
+      "sha256": "3beeacbf169f49ba552188aef7d931af373f6e017ecca94f642bb00444d0ec5a",
       "matches": true
     },
     {
@@ -63,8 +63,18 @@
       "matches": true
     },
     {
+      "file": "app/claude-events.cjs",
+      "sha256": "939b5e58fe03906b1d0d5da7d6b2cd7495403228e98968d321cdae5eaa5a43c2",
+      "matches": true
+    },
+    {
+      "file": "app/claude-history.cjs",
+      "sha256": "9e9363a34ab5822977c4ad8c0a6f6eaa877a24ce22d80b68b802e96ccbf5c091",
+      "matches": true
+    },
+    {
       "file": "app/claude-session.cjs",
-      "sha256": "503035c68e763050a119a419718dd03ce1cc68707dbe4bbb839727387b593aaa",
+      "sha256": "9ce891cd8b64eec7921fe3b35575b42654e821a43d150dfc1013dc82032fc0b4",
       "matches": true
     },
     {
@@ -89,7 +99,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "ab08b1e8d2505e259bb9e61dc2d874609ffbc63ed2ac7d8871a7f18d4e3e6219",
+      "sha256": "1ffd849bad3cdca4abc3ba5ebc1cf4b7de708b674a152ff4984269e367a9b1cb",
       "matches": true
     },
     {
@@ -714,7 +724,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "9302d66429ca50a7eb603c3ef73016f458ac9a527a86a10421239fcedc95cef2",
+      "sha256": "c2d079465b831866b588eaf0101b2541f9cd3f47d30eaf3ff3bbb079063454ff",
       "matches": true
     },
     {

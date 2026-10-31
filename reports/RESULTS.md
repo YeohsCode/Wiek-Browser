@@ -1,37 +1,37 @@
-# Vek Browser 0.5.0 当前结果
+# Vek Browser 0.6.0 当前结果
 
-本轮新增显式启用的Claude原生stream-json会话：流式回复、绑定项目/配置的重启续接、逐次权限审批与取消、原生工具事件、实际image/PDF/text附件，以及有明确scope的用量。现有Agent turn文件快照生命周期已接入该协议。**全量Ego功能复刻仍未完成。**
+本轮补Claude JSONL历史选择文件、分支预览与导入，以及原生工具结果/耗时、子Agent消息和已观察状态。导入后由用户发送prompt才建立新的原生会话；源文件不会获得执行或文件恢复权限。**全量Ego复刻仍未完成。**
 
 | 验证 | 完成结果与证据 |
 |---|---|
-| 最终包同源SDK E2E | **Vek 69/69，1248断言**；沿用同SDK/fixture/case哈希的Ego完整基准 **68/69，1235断言**，两侧0跳过/0未运行。[对比](comparison.md)、[本轮日志](v050-package-sdk.log) |
-| 本地全套 | **169/169**，包含13项新增Claude协议和11项turn快照测试。[日志](v050-service-tests.log) |
-| 最终打包宿主集成 | **59/59**，包含Claude wire真实改文件→before/after→diff→恢复→第二轮resume，以及既有browser/MCP/files/voice/permissions。[日志](v050-package-workbench.log) |
-| Claude协议专项 | **13/13**：真实Node子进程NDJSON、UTF-8/去重、附件、重启、请求审批/撤销、取消/排队、断连/坏帧/超限/错误session、失败结果、配置变更和导入隔离。[日志](v050-claude-tests.log) |
-| 官方Claude CLI readiness | **2.1.31 initialize成功**；隔离HOME、无继承认证，0user messages/0model calls。只证明本地握手。[报告](v050-claude-readiness.json) |
-| 原生UI | 实际composer发起→等待审批无回复→点击Decline→恰好一次deny→完成，展开实际工具输入和累计费用/用量。[QA](v050-native-ui-qa.md)、[磁盘核对](v050-native-ui-check.json) |
-| 打包/上游身份 | **143个文件匹配**，81个上游测试/fixture未改，SDK bundle与两侧比较一致。[校验](v050-package-verification.log) |
-| 保留验证 | 未变SDK版本532/532单测、CDP22/22；未冒充本轮重跑。v0.4文件恢复UI记录保留，相关实现本轮仍在全套/宿主中通过 |
-| 官方31任务线上模型benchmark | **未运行**，缺本任务专用模型认证与必要站点测试登录；不计通过或Ego服务跳过 |
+| SDK E2E | **Vek 69/69，1248断言**；同输入哈希的保留Ego基准 **68/69，1235断言**；两侧0跳过/0未运行。[对比](comparison.md)、[本轮日志](v060-package-sdk.log) |
+| 当前本地全套 | **184/184**，新增9历史、4事件、2实际协议进程回归；最终UI布局修正后已重跑。[日志](v060-service-tests.log) |
+| 打包宿主 | **67/67**，新增preview/import→新owned session、真实并行工具结果、子消息隔离、来源变更拒绝，保留browser/MCP/files/voice/permissions与turn恢复检查。[日志](v060-package-workbench.log) |
+| Claude集中专项 | **29/29**，包括15项原生协议、13项history/events和真实Electron panel；当前全套包含这些全部用例。[专项日志](v060-claude-tests.log) |
+| 官方Claude CLI readiness | **2.1.31 initialize成功**，包括forwardSubagentText请求字段；隔离HOME/无继承认证，0user messages/0model calls。[报告](v060-claude-readiness.json) |
+| 原生UI | 实际文件选择→切换分支预览→导入idle且0执行→本地协议任务→新session→工具结果/子消息/重启持久化；修正活动过多时的滚动与输入区可达。[QA](v060-native-ui-qa.md)、[磁盘/wire核对](v060-native-ui-check.json) |
+| 打包/上游身份 | **145个文件匹配**，81上游测试/fixture未改，SDK bundle与两侧比较一致。[校验](v060-package-verification.log) |
+| 保留验证 | 未变SDK532/532单测、CDP22/22；未冒充本轮重跑。Ego基准是较早完整记录，保留时间与同hash检查 |
+| 官方31线上模型任务 | **未运行**，仍缺任务专用模型配置与必要站点测试登录；不计通过或Ego服务跳过 |
 
-## 行为与范围
+## 本轮行为与边界
 
-Claude配置通常为 `command: claude, args: [], inputMode: stdin, modelArgs: [], protocol: claude-stream-json`。发现已安装CLI时默认禁用；运行时生成会话/格式/权限参数，不加载user/project settings或hooks，当前MCP配置为空。默认权限规则可能自行允许普通操作，这不是OS sandbox，也不宣称每个tool_use都会弹审批。
+历史只读用户明确选定的单个JSONL，不扫描个人目录、不跟随外部文件引用。32MiB/20000行/4MiB每行，strict UTF-8/完整JSON/UUID/session/循环与重复冲突校验；bad tail拒绝。按parent链选择分支，并仅恢复与选中工具和assistant API消息对应的并行结果。sidechain/team/meta不混入主对话，压缩/missing-parent边界不强拼。
 
-每轮一个CLI进程和一条user message，正确session/init后才持久化原生ID。重启用明确resume ID；配置/项目改变、编辑/rollback/fork/import不会误接旧原生会话。Claude的steer排队到下一轮。未决审批不会自动批准；allow仅针对本次原始input，不发送持久权限变更。
+原生UI在预览中选择已有project/provider，提交重新检查相同inode与hash。内存token限4个/15分钟/成功使用一次。导入0个执行run，不继承native resume binding、文件恢复引用、pending审批或可执行配置；图片/PDF只留未复制占位。继续时用可见文本建立新会话，之后resume该新会话；**不等价源CLI原生resume/fork或完整隐藏上下文迁移**。
 
-消息按ID/content index去重，子Agent文本不混入父回答。只有明确result才完成，提前断连/不同session/坏帧/超限均失败。main-loop tokens与provider累计model totals分开；sessionCostUsd是会话累计估算，不能跨轮相加当作账单。附件发送实际内容，Claude合计24MiB限制在spawn前检查。
+实时显示工具input/result/status/duration，处理并行多content block、结果先到和嵌套归属。子消息独立展示，task旧run迟到事件不能覆盖较新run。没有terminal的活动标unresolved，失败/停止/崩溃标interrupted。最多200工具/100子活动/200子消息/256KiB显示文本，超限标记；不会自动读output_file。
 
-最新官方SDK 0.3.316类型声明用于协议参考；该版可选native运行时下载未完成并已停止，其部分文件没有被作为readiness证据。完整官方CLI 2.1.31来自npm并只执行无推理握手；真实模型turn、认证和最新版完整兼容均未验证。源码与打包应用的protocol代码相同，参考包不进入发行包。
+历史run活动和imported活动可展开，native JSON archive保留白名单化显示证据。活动历史收敛为一个可滚动折叠区，外层会话可滚动到输入和发送按钮。
 
-[设计](../analysis/claude-native-design.md) · [计划](../PLAN.md) · [功能对照](../analysis/feature-parity.md) · [文档索引](../docs/README.md)
+仍为每轮单CLI进程，明确result结束本轮；不保持result之后的后台子Agent，不宣称完整后台任务生命周期。官方CLI只做无推理握手，实际模型执行和当前最新版完整兼容未验证。最初一次history专项失败（并行result误列为第三个分支）已修复；[初始失败日志](v060-history-events-initial-failure.log)保留，当前全套和宿主均通过。
 
-## 剩余工作
+[设计](../analysis/claude-history-design.md) · [计划](../PLAN.md) · [功能清单](../analysis/feature-parity.md) · [文档索引](../docs/README.md)
 
-下一步优先Claude原生历史选择导入、完整工具结果/子Agent展示和会话完整性，再逐项补其他6种原生provider。另有linked worktree/快照保留/远程PR、完整Chrome/Safari/web storage/扩展迁移、MCP OAuth/MRTR/订阅、OS跨应用能力与翻译、退出后调度、memory index、Ego专有服务与线上benchmark。
+## 下一步与剩余工作
 
-自动快照仍为项目opt-in、普通.git/已有HEAD/同HEAD恢复、2MiB每文件/32MiB总内容/2000路径/1000refs；linked worktree等不支持。文件恢复保留预览、准确名称确认、状态指纹与保护checkpoint；不等于仅回滚对话。[v0.4设计](../analysis/turn-checkpoints-design.md)。
+优先OpenCode原生会话与模型能力目录，再推进其他provider。仍缺其他6种native协议、Codex/其他原生历史、Claude源会话原生迁移和多文件子历史/后台守护、原生MCP自动注入，以及linked worktree/远程PR、完整资料/web storage/扩展迁移、MCP OAuth/MRTR/订阅、OS跨应用与翻译、退出后调度、memory index、Ego专有服务与线上benchmark。
 
-包：`dist/mac-arm64/Vek Browser.app`，正常用户版已重新打开并实际报告0.5.0。无远程发布。引擎仍为Electron42.11.18 / Chromium148.0.7778.280；Ego为Chromium156，不能据69项测试声称引擎全面等价。
+已有turn快照的小Git仓库/同HEAD等限制不变。CLI stop仍是关闭请求，紧接同目录start需等待host实际退出。应用：`dist/mac-arm64/Vek Browser.app`，正常用户版已重新打开并报告0.6.0。无远程发布；Electron42.11.18 / Chromium148.0.7778.280仍不等价Ego Chromium156的完整引擎能力。
 
-[待审批](v050-native-approval.png) · [工具与用量](v050-native-tools-usage.png) · [机器可读结果](delivery-summary.json)
+[原生分支预览](v060-native-history-preview.png) · [子消息/输入区](v060-native-child-and-composer.png) · [结构化结果](delivery-summary.json)

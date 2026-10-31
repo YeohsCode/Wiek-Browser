@@ -1,5 +1,7 @@
 # Claude 原生会话 / Vek 0.5.0
 
+本文为0.5检查点。历史导入、工具结果和子Agent显示的后续实现及限制见 [0.6设计](claude-history-design.md)。
+
 ## 功能来源与实现来源
 
 Ego 0.6.1.13 发货 daemon 已有 Claude adapter 消费 Claude Agent SDK 的静态连接证据，见 [发货调查](shipped-daemon-features.md) 的 `run:65604` / `run:67169`；运行和完整 UI 对齐仍未知。本轮没有重新解包或复制闭源实现，也未扩大 REA 已有的覆盖声明。

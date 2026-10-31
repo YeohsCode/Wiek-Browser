@@ -5,6 +5,8 @@ const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
 const { randomUUID, createHash } = require('node:crypto');
 const { claudeLaunch, connectClaude } = require('./claude-session.cjs');
+const { readHistory, parseHistory, selectBranch } = require('./claude-history.cjs');
+const { copyClaudeActivity } = require('./claude-events.cjs');
 
 const now = () => new Date().toISOString();
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -191,7 +193,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   const message = (role, content, runId) => ({ id: randomUUID(), role, content, createdAt: now(), ...(runId ? { runId } : {}) });
   for (const thread of state.threads) {
     let recovered = false;
-    for (const run of thread.runs || []) if (run.status === 'running') { run.status = 'interrupted'; run.phase = 'settled'; run.completedAt = now(); if (run.fileChanges) { run.fileChanges.status = 'interrupted'; run.fileChanges.error = 'Browser stopped before snapshot finalization. No after state was inferred.'; } for (const approval of run.approvals || []) if (approval.status === 'pending') approval.status = 'expired'; recovered = true; }
+    for (const run of thread.runs || []) if (run.status === 'running') { for (const item of [...(run.toolEvents || []), ...(run.subagents || [])]) if (['running','observed'].includes(item.status)) { item.status='interrupted'; item.endReason='Browser stopped before activity finalization'; } run.status = 'interrupted'; run.phase = 'settled'; run.completedAt = now(); if (run.fileChanges) { run.fileChanges.status = 'interrupted'; run.fileChanges.error = 'Browser stopped before snapshot finalization. No after state was inferred.'; } for (const approval of run.approvals || []) if (approval.status === 'pending') approval.status = 'expired'; recovered = true; }
     if (thread.status === 'running' || recovered) {
       thread.status = 'interrupted'; delete thread.activeRunId;
       thread.messages.push(message('system', 'The previous run was interrupted when the browser stopped. It has not been resumed automatically.'));
@@ -209,6 +211,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     try { if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, signal); else child.kill(signal); } catch (error) { if (error.code !== 'ESRCH') child.kill(signal); }
   }
   const maxAttachmentBytes = 20 * 1024 * 1024, maxAttachments = 10, maxArchiveBytes = 32 * 1024 * 1024;
+  const claudePreviews = new Map();
   const attachmentsRoot = path.join(directory, 'attachments');
   function attachmentType(name, bytes) {
     const ext = path.extname(name).toLowerCase();
@@ -314,6 +317,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       if(launchError)run.error=launchError.message;
       if (active.native && !active.native.completed && !active.stopReason && !run.error) run.error = 'Native provider disconnected before turn completed';
       const outcome = active.stopReason || (run.error || (code !== 0 && !active.native?.completed) ? 'failed' : 'completed');
+      active.finishClaudeActivity?.(outcome);
       run.providerOutcome=outcome;run.phase='finalizing';
       if(checkpointed){publish();try{run.fileChanges=await turnCheckpoints.after({thread:clone(thread),project:clone(project),run:{...clone(run),status:outcome}});}catch(error){run.fileChanges={...run.fileChanges,status:'partial',error:error.message};}}
       run.status=outcome;run.phase='settled';run.completedAt=now();run.exitCode=code;run.signal=signal;
@@ -579,11 +583,16 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         });
         const runs = item.runs.map((run) => {
           if (!run || typeof run.stdout !== 'string' || typeof run.stderr !== 'string') throw fail('Invalid imported run output');
-          return { id: randomUUID(), status: ['completed', 'failed', 'stopped', 'interrupted'].includes(run.status) ? run.status : 'interrupted', startedAt: String(run.startedAt || now()).slice(0, 64), completedAt: String(run.completedAt || now()).slice(0, 64), stdout: run.stdout.slice(0, maxOutputBytes), stderr: run.stderr.slice(0, maxOutputBytes), exitCode: Number.isInteger(run.exitCode) ? run.exitCode : null, truncated: !!run.truncated };
+          return { ...copyClaudeActivity(run), id: randomUUID(), status: ['completed', 'failed', 'stopped', 'interrupted'].includes(run.status) ? run.status : 'interrupted', startedAt: String(run.startedAt || now()).slice(0, 64), completedAt: String(run.completedAt || now()).slice(0, 64), stdout: run.stdout.slice(0, maxOutputBytes), stderr: run.stderr.slice(0, maxOutputBytes), exitCode: Number.isInteger(run.exitCode) ? run.exitCode : null, truncated: !!run.truncated };
         });
         const markers = (Array.isArray(item.markers) ? item.markers : []).map((marker) => ({ id: randomUUID(), label: nonempty(marker.label, 'marker', 256), ...(messageIds.has(marker.messageId) ? { messageId: messageIds.get(marker.messageId) } : {}), createdAt: now() }));
         const revisions = (Array.isArray(item.revisions) ? item.revisions : []).map((revision) => ({ id: randomUUID(), kind: String(revision.kind || 'import').slice(0, 64), createdAt: now(), messages: (Array.isArray(revision.messages) ? revision.messages : []).map((entry) => { if (!['user', 'assistant', 'system'].includes(entry.role) || typeof entry.content !== 'string') throw fail('Invalid revision message'); return message(entry.role, entry.content); }) }));
         const thread = newThread(projectIds.get(item.projectId), providerIds.get(item.providerId), item.title, { messages, runs, markers, revisions, status: item.status === 'running' ? 'interrupted' : 'idle', notes: String(item.notes || '').slice(0, 65536), archived: !!item.archived, pinned: !!item.pinned, ...(typeof item.model === 'string' ? { model: item.model.slice(0, 256) } : {}), ...(item.goal?.text ? { goal: { text: String(item.goal.text).slice(0, 65536), status: item.goal.status === 'complete' ? 'complete' : 'active' } } : {}) });
+        if (item.claudeHistory) {
+          const origin = item.claudeHistory;
+          if (typeof origin.sourceName !== 'string' || !/^[a-f0-9]{64}$/.test(origin.sha256) || typeof origin.sessionId !== 'string' || origin.sessionId.length > 256) throw fail('Invalid imported Claude history provenance');
+          thread.claudeHistory = { sourceName: origin.sourceName.slice(0, 256), sha256: origin.sha256, sessionId: origin.sessionId, ...(typeof origin.leafId === 'string' ? { leafId: origin.leafId.slice(0, 256) } : {}), importedAt: now(), activity: copyClaudeActivity(origin.activity) };
+        }
         const attachmentIds = new Map();
         if (item.attachments !== undefined && (!Array.isArray(item.attachments) || item.attachments.length > 100 || item.attachments.filter((attachment) => !attachment.detachedAt).length > maxAttachments)) throw fail('Imported attachment count exceeds its limits');
         for (const attachment of item.attachments || []) {
@@ -675,6 +684,33 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         if (active.claude) { active.claude.approve(approval.id, payload.decision); if (payload.decision === 'cancel') await stopThread(id); break; }
         active.native.write({ id: active.native.approvalIds.get(approval.id), result: { decision: payload.decision } }); active.native.approvalIds.delete(approval.id);
         approval.status = payload.decision === 'accept' ? 'accepted' : payload.decision === 'decline' ? 'declined' : 'cancelled'; approval.decidedAt = now(); break;
+      }
+      case 'agents:claude:preview': {
+        for (const [key, value] of claudePreviews) if (value.expiresAt < Date.now()) claudePreviews.delete(key);
+        if (claudePreviews.size >= 4) throw fail('Close an existing Claude import preview first (maximum four)');
+        const source = readHistory(payload.path), parsed = parseHistory(source.data), token = randomUUID();
+        const first = selectBranch(parsed, parsed.branches[0].id);
+        const expiresAt = Date.now() + 15 * 60 * 1000;
+        claudePreviews.set(token, { path: payload.path, fingerprint: source.fingerprint, identity: source.identity, parsed, sourceName: source.sourceName, expiresAt });
+        return { ...snapshot(), claudeImportPreview: { token, sourceName: source.sourceName, sha256: source.fingerprint, sessionId: parsed.sessionId, branches: parsed.branches, skippedEntries: parsed.skipped, excludedEntries: parsed.excluded, missingParents: parsed.missingParents, attachmentsOmitted: first.attachmentsOmitted, previewText: first.messages.map(entry => `${entry.role}: ${entry.content}`).join('\n\n').slice(0, 12000), expiresAt: new Date(expiresAt).toISOString() } };
+      }
+      case 'agents:claude:branch': {
+        const preview = claudePreviews.get(payload.token);
+        if (!preview || preview.expiresAt < Date.now()) throw fail('Claude import preview is unavailable or expired');
+        const chosen = selectBranch(preview.parsed, payload.leafId);
+        return { ...snapshot(), claudeBranchPreview: { leafId: payload.leafId, text: chosen.messages.map(entry => `${entry.role}: ${entry.content}`).join('\n\n').slice(0, 12000), attachmentsOmitted: chosen.attachmentsOmitted, messageCount: chosen.messages.length } };
+      }
+      case 'agents:claude:discard': claudePreviews.delete(payload.token); break;
+      case 'agents:claude:import': {
+        const preview = claudePreviews.get(payload.token);
+        if (!preview || preview.expiresAt < Date.now()) throw fail('Claude import preview is unavailable or expired; select the file again');
+        const source = readHistory(preview.path);
+        if (source.identity !== preview.identity || source.fingerprint !== preview.fingerprint) throw fail('Claude history changed since preview; select the file again');
+        const chosen = selectBranch(preview.parsed, payload.leafId);
+        const imported = newThread(payload.projectId, payload.providerId, payload.title || `Claude: ${preview.sourceName}`, { messages: [message('system', 'Imported Claude transcript. Continuing starts a new provider session with copied visible text; source tools, attachments and session IDs do not grant execution or file recovery authority.'), ...chosen.messages.map(entry => ({ ...message(entry.role, entry.content), ...(entry.createdAt ? { createdAt: entry.createdAt } : {}) }))] });
+        imported.claudeHistory = { sourceName: preview.sourceName, sha256: preview.fingerprint, sessionId: preview.parsed.sessionId, leafId: payload.leafId, importedAt: now(), excludedEntries: preview.parsed.excluded, missingParents: preview.parsed.missingParents, attachmentsOmitted: chosen.attachmentsOmitted, activity: chosen.activity };
+        state.threads.push(imported); claudePreviews.delete(payload.token); publish();
+        return { ...snapshot(), importedThreadId: imported.id };
       }
       case 'agents:export': {
         let estimatedBytes = 0;
@@ -794,6 +830,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     publish(); armScheduler(); return snapshot();
   }
   async function close() {
+    claudePreviews.clear();
     if (closed) return;
     closed = true; clearTimeout(scheduleTimer); clearTimeout(publishTimer);
     for (const check of [...waiters]) check('closed');

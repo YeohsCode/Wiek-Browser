@@ -3,7 +3,8 @@
 // Independent client of Claude Code's public stream-json/control protocol.
 // One Vek run owns one CLI process and one prompt. Follow-ups use --resume.
 const fs = require('node:fs');
-const { randomUUID } = require('node:crypto');
+const { randomUUID, createHash } = require('node:crypto');
+const { createClaudeEvents } = require('./claude-events.cjs');
 const { StringDecoder } = require('node:string_decoder');
 const error = message => new Error(message);
 const stamp = () => new Date().toISOString();
@@ -67,12 +68,8 @@ function connectClaude({ child, launch, active, run, thread, project, text, cons
   const session = id => {
     if (id !== launch.sessionId) throw error('Claude emitted a different session id; this run will not attach to that session');
   };
-  const tool = block => {
-    if (block.type !== 'tool_use' || typeof block.id !== 'string' || seen.has(`tool:${block.id}`)) return;
-    if ((run.toolEvents?.length || 0) >= 200) { run.toolEventsTruncated = true; return; }
-    seen.add(`tool:${block.id}`); run.toolEvents ||= [];
-    run.toolEvents.push({ id: bounded(block.id, 256), name: bounded(block.name, 256), input: bounded(JSON.stringify(block.input || {})), createdAt: stamp() });
-  };
+  const activity = createClaudeEvents(run);
+  active.finishClaudeActivity = outcome => activity.finish(outcome);
   function event(value) {
     if (!value || typeof value !== 'object' || Array.isArray(value) || typeof value.type !== 'string') throw error('Claude emitted an invalid protocol object');
     if (terminal) return;
@@ -102,6 +99,7 @@ function connectClaude({ child, launch, active, run, thread, project, text, cons
       permissions.set(approval.id, { requestId: id, input: data.input, approval }); publish(); return;
     }
     if (value.session_id !== undefined) session(value.session_id);
+    if (initialized) { activity.accept(value); publish(); }
     // Subagent messages belong to their tool invocation. They must not become
     // the parent answer or interfere with its streaming message identity.
     if (value.parent_tool_use_id != null) return;
@@ -128,11 +126,11 @@ function connectClaude({ child, launch, active, run, thread, project, text, cons
     }
     if (value.type === 'assistant') {
       if (!initialized || typeof value.message?.id !== 'string' || !Array.isArray(value.message.content)) throw error('Claude assistant message is malformed');
-      const key = `message:${value.message.id}`; if (seen.has(key)) return;
-      if (seen.size >= 10000) throw error('Claude event identity limit exceeded'); seen.add(key);
+      if (seen.size >= 10000) throw error('Claude event identity limit exceeded');
       value.message.content.forEach((block, index) => {
-        if (block.type === 'text' && typeof block.text === 'string' && !streamed.get(value.message.id)?.has(index)) consume('stdout', Buffer.from(block.text));
-        tool(block);
+        const key = createHash('sha256').update(JSON.stringify([value.message.id, index, block])).digest('hex');
+        if (block.type === 'text' && typeof block.text === 'string' && !seen.has(key) && !streamed.get(value.message.id)?.size) consume('stdout', Buffer.from(block.text));
+        seen.add(key);
       }); publish(); return;
     }
     if (value.type === 'result') {
@@ -189,7 +187,7 @@ function connectClaude({ child, launch, active, run, thread, project, text, cons
     if (!terminal && buffer.trim() && !active.stopReason) run.error = 'Claude provider disconnected with an incomplete protocol frame';
   });
   active.native.ready = (async () => {
-    await request({ subtype: 'initialize', hooks: null });
+    await request({ subtype: 'initialize', hooks: null, forwardSubagentText: true });
     if (active.stopReason || closed) return;
     const messageId = randomUUID(); run.nativeUserMessageId = messageId;
     sent = true;

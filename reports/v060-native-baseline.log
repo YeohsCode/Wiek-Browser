@@ -1,0 +1,25 @@
+✔ opt-in native provider performs initialize/start/delta/usage and resumes the actual returned thread id (379.67925ms)
+✔ native steering uses turn/steer within the same run and interrupt stops a real protocol process (304.711792ms)
+✔ native approval requests wait for an explicit limited decision and never auto-approve (324.615167ms)
+✔ a native disconnect without turn/completed is a failure rather than a fake successful reply (202.863916ms)
+✔ Claude native streams UTF-8 once, records tools/usage, attaches actual image/PDF/text, resumes after restart (511.222625ms)
+✔ Claude approvals are request-scoped explicit accept/decline and preserve the exact original input (333.99775ms)
+✔ Claude cancelled permissions expire without a response and duplicate request identities fail closed (664.779917ms)
+✔ Claude steering is an honest queued follow-up, stop interrupts, and approval cancel stops the turn (296.659708ms)
+✔ Claude disconnect cannot become successful completion (198.781083ms)
+✔ Claude malformed cannot become successful completion (181.261459ms)
+✔ Claude oversize cannot become successful completion (215.790458ms)
+✔ Claude wrong-session cannot become successful completion (193.87325ms)
+✔ Claude failure cannot become successful completion (194.547709ms)
+✔ Claude edit/fork/import and changed executable arguments cannot reuse native session authority (358.806666ms)
+✔ Claude launch preflights combined attachments and rejects conflicting protocol flags (0.249958ms)
+✔ Claude oversized combined attachments fail before spawn and leave no fabricated run (209.149834ms)
+✔ Claude output shares the actual byte budget and immediate cancellation sends no user prompt (263.682875ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3707.837834

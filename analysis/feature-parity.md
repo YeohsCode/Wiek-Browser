@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.5.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5增量和当前报告为准。
+当前版本 **0.6.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -283,3 +283,12 @@ V1 兼容 helper、CDP/fetch、site tools 与 migration guard 的入口见 `pack
 新增13个协议测试、本地全套169/169，打包宿主59/59；官方Claude CLI 2.1.31在隔离HOME/无继承认证下initialize成功，0user messages/0model calls。它只证明握手，不能替代模型执行和当前最新CLI验证。最新0.3.316类型声明用于接口参考；该版本可选native下载未完成，其部分文件没有被当成可运行CLI。
 
 仍partial：Claude历史手动选择导入、完整工具结果/subagent展示、原生fork/完整模型能力、MCP gateway自动注入、其他6种nativeprovider和真实付费turn。已有通用CLI或13fixture通过不等于八种原生协议均可用。细节见 [Claude设计](claude-native-design.md) 与 [当前验收](../reports/RESULTS.md)。
+
+
+## 0.6.0 当前增量：Claude历史与活动记录
+
+本段覆盖0.5中的“Claude历史/工具结果UI缺失”。现有明确选定JSONL→分支预览→来源inode/hash复核→新对话导入；parent链与并行工具结果有界恢复，sidechain/meta隔离，坏尾/循环/混合session拒绝。来源session/外部路径/工具命令不产生执行或恢复权限；后续prompt以可见文本建立新native session，不能称源CLI原生resume/fork迁移。
+
+实时记录tool_result/progress、parent_tool_use_id子消息、task生命周期/usage；旧run迟到事件不覆盖新run。未收到终态明确为unresolved/interrupted。展示有字节/条数上限，不自动读output_file，不在父result后守护后台子任务。所有历史run可查看，native JSON archive保留白名单显示证据。
+
+新增15项专项回归，全套184/184、最终宿主67/67；UI/SDK/官方CLI initialize层级见当前结果。模型推理未执行。其他6种原生provider、模型能力目录、原生源会话迁移、多文件子历史和后台守护仍partial/missing。[设计](claude-history-design.md)。

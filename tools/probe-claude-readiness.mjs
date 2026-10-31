@@ -30,7 +30,7 @@ if(version.status===0){
   }catch{report.error='Invalid JSON'} }
  });
  child.stderr.on('data',chunk=>{if(stderr.length<4096)stderr+=chunk.toString('utf8').slice(0,4096-stderr.length)});
- child.stdin.on('error',()=>{});child.stdin.write(JSON.stringify({type:'control_request',request_id:requestId,request:{subtype:'initialize',hooks:null}})+'\n');
+ child.stdin.on('error',()=>{});child.stdin.write(JSON.stringify({type:'control_request',request_id:requestId,request:{subtype:'initialize',hooks:null,forwardSubagentText:true}})+'\n');
  await new Promise(resolve=>{child.once('error',e=>{report.error=e.message;resolve()});child.once('close',(code,signal)=>{report.exitCode=code;report.signal=signal;resolve()})});clearTimeout(timer);
  if(!report.initialize&&!report.error)report.error=stderr||'Exited without initialize response';report.stoppedAfterHandshake=stopping;
 }

@@ -110,3 +110,18 @@ test('Claude output shares the actual byte budget and immediate cancellation sen
  const previous=(await f.audit()).filter(x=>x.type==='user').length;
  await f.prompt('Cancelled before initialize completes');await f.service.dispatch('agents:control:stop',{id:f.id});assert.equal(f.thread().status,'stopped');assert.equal((await f.audit()).filter(x=>x.type==='user').length,previous);
 });
+
+
+test('real Claude wire retains parallel block tools/results and child lifecycle without polluting main answer',async t=>{
+ const f=await fixture(t);await f.prompt('[activity]');const done=await f.settled(),run=done.runs[0];
+ assert.equal(done.status,'completed');assert.equal(run.toolEvents.find(x=>x.id==='parallel-one').result,'Actual tool output');assert.equal(run.toolEvents.find(x=>x.id==='parallel-two').status,'failed');assert.equal(run.toolEvents.find(x=>x.id==='nested').parentToolUseId,'agent-peer');
+ const child=run.subagents.find(x=>x.id==='agent-peer');assert.equal(child.status,'completed');assert.equal(child.summary,'Child reviewed');assert.equal(child.messages.filter(x=>x.role==='assistant').length,1);assert.equal(run.stdout.includes('Child-only'),false);
+ assert.equal((await f.audit()).find(x=>x.request?.subtype==='initialize').request.forwardSubagentText,true);
+ await f.restart();assert.equal(f.thread().runs[0].subagents.find(x=>x.id==='agent-peer').status,'completed');
+ const exported=JSON.parse((await f.service.dispatch('agents:export')).exportData.content);await f.service.dispatch('agents:import',{data:exported});assert.equal(f.service.snapshot().threads.at(-1).runs[0].toolEvents.find(x=>x.id==='parallel-one').result,'Actual tool output');
+});
+
+test('real Claude stop settles pending subagent activity as interrupted',async t=>{
+ const f=await fixture(t);await f.prompt('[activity-slow]');await wait(f.thread,x=>x.runs[0].subagents?.some(v=>v.id==='agent-peer'&&v.status==='running'));
+ await f.service.dispatch('agents:control:stop',{id:f.id});const run=f.thread().runs[0];assert.equal(run.status,'stopped');assert.equal(run.subagents.find(x=>x.id==='agent-peer').status,'interrupted');assert.equal(run.toolEvents.find(x=>x.id==='parallel-one').status,'completed');
+});

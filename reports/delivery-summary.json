@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-31T07:39:36.146551+00:00",
-  "version": "0.5.0",
+  "generatedAt": "2026-10-31T08:07:51.584817+00:00",
+  "version": "0.6.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -30,7 +30,7 @@
           "notRun": 0,
           "assertions": 1248
         },
-        "wallTimeMs": 154784,
+        "wallTimeMs": 155258,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
       }
@@ -43,14 +43,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 169,
+    "pass": 184,
     "fail": 0,
-    "log": "v050-service-tests.log"
+    "log": "v060-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 59,
+    "pass": 67,
     "fail": 0,
-    "log": "v050-package-workbench.log"
+    "log": "v060-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -64,7 +64,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 143,
+    "sourceFilesChecked": 145,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -87,15 +87,16 @@
   },
   "completeProductParity": false,
   "newCapabilities": [
-    "Opt-in Claude stream-json/control native sessions",
-    "Bound native session resume after restart with configuration/project identity",
-    "Request-scoped permissions, cancellation and conservative failure handling",
-    "Real image/PDF/text attachments and bounded native tool events",
-    "Main-loop usage and explicitly cumulative session cost estimates",
-    "Claude execution integrated with turn file snapshots, diffs and restore"
+    "Explicit single-file Claude JSONL branch preview/import with hash/inode recheck",
+    "Inert imported transcript with new owned session on continuation",
+    "Bounded native tool results, progress and nested task/message evidence",
+    "Conservative unresolved/interrupted activity and stale task-run protection",
+    "Whitelisted activity retention across native archive import/export",
+    "Scrollable activity history and reachable composer"
   ],
   "remainingGaps": [
-    "Claude native history import, complete tool/subagent results, six other native provider protocols and paid generation validation",
+    "Six other native provider protocols, model capability catalogues, source native session/history migration and paid generation validation",
+    "Claude multi-file child history and post-result background task lifecycle",
     "Complete Chrome/Safari profile/web storage/extensions migration",
     "Custom Chromium engine equivalence",
     "Linked worktrees, checkpoint retention and remote PR workflow",
@@ -103,7 +104,8 @@
     "OS-wide selection/screenshot/recording and translation",
     "OS scheduling while application is closed",
     "Complete memory index and Ego proprietary services",
-    "31 live-site model benchmark not run"
+    "31 live-site model benchmark not run",
+    "CLI stop requests shutdown; immediate same-profile restart must wait for actual exit"
   ],
   "turnCheckpointTests": {
     "pass": 11,
@@ -121,18 +123,10 @@
     "defaultUserDataAppVersion": "0.4.0",
     "note": "Historical 0.4 native restore UI; current full suite still exercises turn snapshots."
   },
-  "uiQa": {
-    "log": "v050-native-ui-qa.md",
-    "realNativeApprovalUi": true,
-    "noAutomaticApproval": true,
-    "exactlyOneDeclineResponse": true,
-    "realToolsAndUsage": true,
-    "defaultUserDataAppVersion": "0.5.0"
-  },
   "claudeProtocolTests": {
-    "pass": 13,
+    "pass": 15,
     "fail": 0,
-    "log": "v050-claude-tests.log",
+    "log": "v060-service-tests.log",
     "modelCalls": 0,
     "fixtureOnly": true
   },
@@ -143,7 +137,33 @@
     "inheritedAuthentication": false,
     "userMessages": 0,
     "modelCalls": 0,
-    "report": "v050-claude-readiness.json",
-    "latestNativeRuntimeTested": false
+    "report": "v060-claude-readiness.json",
+    "latestNativeRuntimeTested": false,
+    "forwardSubagentTextInitializeAccepted": true
+  },
+  "previousClaudeUiQa": {
+    "log": "v050-native-ui-qa.md",
+    "realNativeApprovalUi": true,
+    "noAutomaticApproval": true,
+    "exactlyOneDeclineResponse": true,
+    "realToolsAndUsage": true,
+    "defaultUserDataAppVersion": "0.5.0",
+    "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
+  },
+  "uiQa": {
+    "log": "v060-native-ui-qa.md",
+    "realNativeFilePicker": true,
+    "selectedBranchPreviewUpdates": true,
+    "noExecutionOnImport": true,
+    "newOwnedSessionOnContinuation": true,
+    "realToolsChildMessagesAndRestartPersistence": true,
+    "composerReachableWithActivityExpanded": true,
+    "defaultUserDataAppVersion": "0.6.0"
+  },
+  "claudeFocusedTests": {
+    "pass": 29,
+    "fail": 0,
+    "log": "v060-claude-tests.log",
+    "includedInCurrentFullSuite": true
   }
 }

@@ -5,6 +5,18 @@ const send=v=>process.stdout.write(JSON.stringify(v)+'\n');
 const audit=v=>fs.appendFileSync((process.env.VEK_CLAUDE_AUDIT||argv.find(v=>v.startsWith('--vek-audit=')).slice(12)),JSON.stringify(v)+'\n');
 audit({argv}); let prompt='',timeout;
 const result=(extra={})=>send({type:'result',subtype:'success',is_error:false,session_id:session,uuid:'result-id',result:'fallback only',usage:{input_tokens:20,output_tokens:6,cache_read_input_tokens:3,cache_creation_input_tokens:2},total_cost_usd:0.004,...extra});
+const activity=complete=>{
+ const message=content=>send({type:'assistant',session_id:session,message:{id:'api-multi-block',content}});
+ message([{type:'tool_use',id:'parallel-one',name:'Read',input:{file_path:'fixture-one'}}]);
+ message([{type:'tool_use',id:'parallel-two',name:'Read',input:{file_path:'fixture-two'}}]);
+ send({type:'user',session_id:session,message:{content:[{type:'tool_result',tool_use_id:'parallel-one',content:'Actual tool output'},{type:'tool_result',tool_use_id:'parallel-two',is_error:true,content:'Actual tool error'}]}});
+ send({type:'tool_progress',session_id:session,tool_use_id:'parallel-one',tool_name:'Read',parent_tool_use_id:null,elapsed_time_seconds:2});
+ send({type:'system',subtype:'task_started',session_id:session,task_id:'task-peer',tool_use_id:'agent-peer',run_id:'02',description:'Local child review'});
+ const child={type:'assistant',session_id:session,parent_tool_use_id:'agent-peer',message:{id:'child-peer',content:[{type:'text',text:'Child-only <literal> answer'},{type:'tool_use',id:'nested',name:'Read',input:{file_path:'never-read-by-ui'}}]}};
+ send(child);send(child);
+ send({type:'user',session_id:session,parent_tool_use_id:'agent-peer',message:{content:[{type:'tool_result',tool_use_id:'nested',content:'Nested tool output'}]}});
+ if(complete){send({type:'system',subtype:'task_notification',session_id:session,task_id:'task-peer',tool_use_id:'agent-peer',run_id:'02',status:'completed',summary:'Child reviewed',output_file:'/never-read-task-output'});send({type:'system',subtype:'task_notification',session_id:session,task_id:'task-peer',tool_use_id:'agent-peer',run_id:'01',status:'failed',summary:'Stale event ignored'});}
+};
 const finish=text=>{
  send({type:'stream_event',session_id:session,event:{type:'message_start',message:{id:'msg-answer'}}});
  const wire=Buffer.from(JSON.stringify({type:'stream_event',session_id:session,event:{type:'content_block_delta',index:0,delta:{type:'text_delta',text}}})+'\n');
@@ -32,7 +44,8 @@ rl.createInterface({input:process.stdin}).on('line',line=>{
      const req={type:'control_request',request_id:'permission-one',request:{subtype:'can_use_tool',tool_name:'Bash',input:{command:'printf fixture-only',other:'<literal>'},title:'Fixture permission'}};send(req);
      if(prompt.includes('[cancelled-approval]')){send({type:'control_cancel_request',request_id:req.request_id});timeout=setTimeout(()=>finish('Expired permission, no action'),400);}
      if(prompt.includes('[duplicate-request]'))send(req);
-   }else if(prompt.includes('[slow]'))timeout=setTimeout(()=>finish('Slow answer'),5000);
-   else { if(prompt.includes('[edit-file]'))fs.writeFileSync('note.txt','Claude protocol fixture edit\n');finish('Hello 世界: '+prompt); }
+   }else if(prompt.includes('[activity-slow]')){activity(false);timeout=setTimeout(()=>finish('Activity done'),5000);}
+   else if(prompt.includes('[slow]'))timeout=setTimeout(()=>finish('Slow answer'),5000);
+   else { if(prompt.includes('[activity]'))activity(true);if(prompt.includes('[edit-file]'))fs.writeFileSync('note.txt','Claude protocol fixture edit\n');finish('Hello 世界: '+prompt); }
  }else if(v.type==='control_response')finish('Decision: '+v.response.response.behavior);
 }).on('close',()=>{clearTimeout(timeout);process.exit(0);});

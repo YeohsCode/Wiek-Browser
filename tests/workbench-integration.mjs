@@ -8,6 +8,7 @@ import os from 'node:os';
 import http from 'node:http';
 import { execFileSync } from 'node:child_process';
 import WebSocket from 'ws';
+import {randomUUID} from 'node:crypto';
 const dataDir = path.resolve(process.env.VEK_DATA_DIR || 'data/workbench-e2e');
 const cli = path.resolve(process.env.VEK_WORKBENCH_CLI || 'cli/vek-browser.mjs');
 execFileSync(process.execPath,[cli,'start'],{env:{...process.env,VEK_DATA_DIR:dataDir},stdio:'pipe'});
@@ -69,6 +70,24 @@ try {
   const nativeDiff=await action('agents:changes:diff',{id:claudeId,runId:nativeRun.id});check(nativeDiff.worktreeDiff.includes('Claude protocol fixture edit'),'Claude turn file diff contains real provider edits');
   const nativePreview=await action('agents:changes:preview',{id:claudeId,runId:nativeRun.id});await action('agents:changes:restore',{id:claudeId,runId:nativeRun.id,expectedState:nativePreview.expectedState,confirm:true});check(await fs.readFile(path.join(directory,'note.txt'),'utf8')==='after\n','Claude turn file restore recovers the real pre-turn bytes');
   await action('agents:threads:prompt',{id:claudeId,prompt:'Resume this test session'});const resumed=await waitThread(claudeId);check(resumed.status==='completed'&&resumed.nativeThreadId===native.nativeThreadId&&resumed.runs.length===2,'packaged Claude second turn resumes its persisted session');
+  const historySession=randomUUID(),historyIds=Array.from({length:4},()=>randomUUID()),historyFile=path.join(directory,'selected-claude-history.jsonl');
+  const historyRows=[
+    {type:'user',uuid:historyIds[0],parentUuid:null,sessionId:historySession,message:{role:'user',content:'Imported request'}},
+    {type:'assistant',uuid:historyIds[1],parentUuid:historyIds[0],sessionId:historySession,message:{id:'historical-api',role:'assistant',content:[{type:'tool_use',id:'history-tool',name:'Read',input:{file_path:'/never-follow'}}]}},
+    {type:'user',uuid:historyIds[2],parentUuid:historyIds[1],sessionId:historySession,message:{role:'user',content:[{type:'tool_result',tool_use_id:'history-tool',content:'Historical result'}]}},
+    {type:'assistant',uuid:historyIds[3],parentUuid:historyIds[2],sessionId:historySession,message:{role:'assistant',content:'Imported answer'}}];
+  const historyBytes=historyRows.map(row=>JSON.stringify(row)).join('\n')+'\n';await fs.writeFile(historyFile,historyBytes);
+  const historyPreview=(await action('agents:claude:preview',{path:historyFile})).claudeImportPreview;check(historyPreview.branches.length===1&&historyPreview.sessionId===historySession,'packaged Claude JSONL preview resolves the actual selected branch');
+  const historical=await action('agents:claude:import',{token:historyPreview.token,leafId:historyIds[3],projectId,providerId:claudeProviderId,title:'Imported Claude fixture'}),historicalId=historical.importedThreadId;
+  const importedThread=await action('agents:threads:read',{id:historicalId});check(importedThread.runs.length===0&&!importedThread.nativeThreadId,'history import does not execute or inherit native session authority');
+  check(importedThread.claudeHistory.activity.toolEvents[0].result==='Historical result','history retains actual tool-result evidence');
+  check(await fs.readFile(historyFile,'utf8')===historyBytes,'history source file remains byte-identical');
+  await action('agents:threads:prompt',{id:historicalId,prompt:'[activity] Continue copied conversation'});const activityThread=await waitThread(historicalId),activityRun=activityThread.runs.at(-1);
+  check(activityThread.status==='completed'&&activityThread.nativeThreadId!==historySession,'imported transcript continues in a new owned native session');
+  check(activityRun.toolEvents.some(row=>row.id==='parallel-one'&&row.result==='Actual tool output')&&activityRun.toolEvents.some(row=>row.id==='parallel-two'&&row.status==='failed'),'packaged host retains parallel native tool results');
+  check(activityRun.subagents.some(row=>row.id==='agent-peer'&&row.status==='completed'&&row.messages.some(m=>m.content.includes('Child-only')))&&!activityRun.stdout.includes('Child-only'),'packaged host groups child lifecycle/transcript without mixing the parent answer');
+  const stale=(await action('agents:claude:preview',{path:historyFile})).claudeImportPreview;await fs.appendFile(historyFile,'{}\n');await assert.rejects(action('agents:claude:import',{token:stale.token,leafId:historyIds[3],projectId,providerId:claudeProviderId}),/changed since preview/);checks++;
+  await fs.writeFile(historyFile,historyBytes);
   await action('agents:threads:pin',{id:threadId});await action('agents:threads:archive',{id:threadId});thread=await action('agents:threads:read',{id:threadId});check(thread.pinned&&thread.archived,'thread organization persists');
   await action('agents:threads:unarchive',{id:threadId});
   const catalog=await action('catalog:list',{projectId});check(Array.isArray(catalog.entries),'installed instruction catalog available');

@@ -519,6 +519,11 @@ async function uiAction(action, value, selectedSpaceId) {
     if (pick.filePaths[0]) { if (fs.statSync(pick.filePaths[0]).size > 32 * 1024 * 1024) throw new Error('Agent archive exceeds 32 MiB'); await agentService.dispatch('agents:import', { data: JSON.parse(fs.readFileSync(pick.filePaths[0], 'utf8')) }); }
     return uiState();
   }
+  if (action === 'agents:file:claude:preview') {
+    const pick = await dialog.showOpenDialog(window, { title: 'Select a Claude conversation JSONL file', properties: ['openFile'], filters: [{ name: 'Claude conversation', extensions: ['jsonl'] }] });
+    if (!pick.canceled && pick.filePaths[0]) return agentService.dispatch('agents:claude:preview', { path: pick.filePaths[0] });
+    return agentService.snapshot();
+  }
   if (action.startsWith('agents:')) return agentService.dispatch(action, value);
   const s = store.spaces.find(s => s.id === (selectedSpaceId??store.selected));
   const t = s && tabs.get(s.activeTab);

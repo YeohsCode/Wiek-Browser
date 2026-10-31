@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-31T15:46:58.158817+00:00",
-  "version": "0.9.1",
+  "generatedAt": "2026-10-31T16:01:35.856667+00:00",
+  "version": "0.10.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -30,7 +30,7 @@
           "notRun": 0,
           "assertions": 1248
         },
-        "wallTimeMs": 153060,
+        "wallTimeMs": 152515,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
       }
@@ -43,14 +43,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 248,
+    "pass": 264,
     "fail": 0,
-    "log": "v091-service-tests.log"
+    "log": "v100-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 99,
+    "pass": 109,
     "fail": 0,
-    "log": "v091-package-workbench.log"
+    "log": "v100-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -64,7 +64,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 151,
+    "sourceFilesChecked": 152,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -87,14 +87,14 @@
   },
   "completeProductParity": false,
   "newCapabilities": [
-    "CLI stop verifies live browser PID/instance identity before shutdown",
-    "Successful stop waits for actual host termination and provider/checkpoint finalization",
-    "Explicit bounded timeout without force-kill or metadata removal",
-    "Actual Electron same-profile immediate stop/start repeated three times with persistent run and final diff",
-    "0.9 Codex replay/tool/child capabilities retained and rechecked in full local and browser suites"
+    "Claude native initialize model discovery without user frames, Vek runs or owned session identity",
+    "Observed aliases/canonical IDs and optional effort/adaptive fields; absence remains unknown",
+    "Fresh capability validation before user input and explicit effort control acknowledgement",
+    "Default model reset on resumed process; canonical selection retained in UI",
+    "Discovery cancellation/concurrency/project leases and archive authority boundaries"
   ],
   "remainingGaps": [
-    "Five other native provider protocols, Claude model catalogue, source native session/history migration and paid generation validation",
+    "Five other native provider protocols, source native session/history migration and paid generation validation",
     "Codex encrypted-only/unknown history edits, exact native token/window context replay, cross-file child history and native source resume/fork remain unsupported",
     "Claude multi-file child history and post-result background task lifecycle",
     "OpenCode external history/native fork/background children and Vek MCP injection",
@@ -251,7 +251,7 @@
     }
   ],
   "observedFailures": [],
-  "validationOrderNote": "Final 0.9.1 runtime and API docs were packaged before the packaged lifecycle/workbench and full 69-case SDK runs. Final package has 151 matching source files and 81 unchanged upstream inputs. 0.9 native Agent UI evidence is retained, not claimed as re-performed.",
+  "validationOrderNote": "Final 0.10.0 runtime was tested by 264 local checks, 109 packaged workbench checks, actual model UI and the complete 69-case SDK. Final package has 152 matching source files and 81 unchanged upstream inputs. CLI packaged lifecycle and older Codex UI evidence are retained, not claimed as re-performed.",
   "codexReplayActivityTests": {
     "newTests": 21,
     "fixtureOnly": true,
@@ -289,5 +289,33 @@
     "sourceLog": "v091-service-tests.log",
     "packagedLog": "v091-package-lifecycle-tests.log",
     "normalAppStatus": "v091-normal-app-status.json"
+  },
+  "claudeModelTests": {
+    "newTests": 16,
+    "focusedPass": 45,
+    "fail": 0,
+    "fixtureOnly": true,
+    "log": "v100-claude-tests.log",
+    "fullSuiteLog": "v100-service-tests.log"
+  },
+  "claudeModelReadiness": {
+    "version": "2.1.31",
+    "models": 3,
+    "effortFieldsPresent": false,
+    "isolatedHome": true,
+    "inheritedAuthentication": false,
+    "userMessagesSent": 0,
+    "modelCalls": 0,
+    "report": "v100-claude-model-readiness.json",
+    "protocolIdentity": "v100-claude-protocol-identities.json",
+    "note": "Bundled/cached metadata only, no current entitlement, pricing or effective reasoning validation."
+  },
+  "claudeModelNativeUi": {
+    "report": "v100-native-ui-qa.md",
+    "wireCheck": "v100-native-ui-check.json",
+    "fixtureOnly": true,
+    "discoveryUserFrames": 0,
+    "effortAcknowledgementBeforeUser": true,
+    "normalAppStatus": "v100-normal-app-status.json"
   }
 }

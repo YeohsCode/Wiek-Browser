@@ -131,17 +131,20 @@
     });
   }
   function modelEditor(t) {
-    if (['opencode-acp','codex-app-server'].includes(provider(t.providerId)?.protocol)) {
+    if (['opencode-acp','codex-app-server','claude-stream-json'].includes(provider(t.providerId)?.protocol)) {
       if (!t.nativeCatalog) return action('agents:threads:discover-models', { id: t.id });
-      const codex=provider(t.providerId)?.protocol==='codex-app-server';
-      const effortOptions=model=>[['','Agent default'],...(t.nativeCatalog.models.find(m=>m.id===model)?.reasoningEfforts||[]).map(e=>[e,e])];
+      const codex=provider(t.providerId)?.protocol==='codex-app-server',claude=provider(t.providerId)?.protocol==='claude-stream-json',efforts=codex||claude;
+      const effortOptions=model=>[['','Agent default'],...(t.nativeCatalog.models.find(m=>m.id===(model||(claude?'default':''))||(claude&&m.resolvedModel===model)||(!model&&codex&&m.isDefault))?.reasoningEfforts||[]).map(e=>[e,e])];
+      const models=t.nativeCatalog.models.map(m=>[m.id,m.name]);
+      if(claude&&t.model&&!models.some(([id])=>id===t.model)){const resolved=t.nativeCatalog.models.find(m=>m.resolvedModel===t.model);if(resolved)models.push([t.model,`${resolved.name} · ${t.model}`]);}
       const fields=[
         {key:'notice',type:'notice',label:`Observed from the native agent on ${date(t.nativeCatalog.observedAt)}${t.nativeCatalog.truncated?' · catalogue limited to 256 models':''}. A catalogue can be bundled or cached and does not verify account access. Empty model keeps the agent default.`},
-        {key:'model',label:'Model',type:'select',options:[['',codex?'Use agent catalogue default':'Keep current agent model'],...t.nativeCatalog.models.map(m=>[m.id,m.name])],value:t.model||'',...(codex?{onChange:value=>{editor.values.reasoningEffort='';editor.fields.find(f=>f.key==='reasoningEffort').options=effortOptions(value);render();}}:{})},
-        ...(codex?[{key:'reasoningEffort',label:'Reasoning effort',type:'select',options:effortOptions(t.model),value:t.reasoningEffort||''}]:[]),
+        {key:'model',label:'Model',type:'select',options:[['',codex?'Use agent catalogue default':claude?'Use Claude process default':'Keep current agent model'],...models],value:t.model||'',...(efforts?{onChange:value=>{editor.values.reasoningEffort='';editor.fields.find(f=>f.key==='reasoningEffort').options=effortOptions(value);render();}}:{})},
+        ...(efforts?[{key:'reasoningEffort',label:'Reasoning effort',type:'select',options:effortOptions(t.model),value:t.reasoningEffort||''}]:[]),
+        ...(claude?[{key:'claude-capabilities',type:'notice',label:t.nativeCatalog.models.map(m=>`${m.name}: effort ${m.supportsEffort===undefined?'unknown':m.supportsEffort?'supported':'unsupported'} · ${(m.reasoningEfforts||[]).join(', ')||'no declared levels'}`).join('\n')}]:[]),
         ...(codex?[{key:'capabilities',type:'notice',label:t.nativeCatalog.models.map(m=>`${m.name}: ${(m.inputModalities||[]).join(', ')} · efforts ${(m.reasoningEfforts||[]).join(', ')||'unspecified'}`).join('\n')}]:[])
       ];
-      return openEditor('Native session model',fields,values=>action('agents:threads:model',{id:t.id,model:values.model,...(codex?{reasoningEffort:values.reasoningEffort}:{})},true));
+      return openEditor('Native session model',fields,values=>action('agents:threads:model',{id:t.id,model:values.model,...(efforts?{reasoningEffort:values.reasoningEffort}:{})},true));
     }
     openEditor('Conversation model', [{ key: 'model', label: `Model name · configured catalogue: ${(provider(t.providerId)?.models || []).join(', ') || 'none (CLI default available)'}`, value: t.model || '' }], values => action('agents:threads:model', { id: t.id, model: values.model }, true));
   }
@@ -301,7 +304,7 @@
     const actions = make('div', '', 'va-actions'); actions.append(make('span', t.status, `va-status va-status-${t.status}`), button('Rename', () => openEditor('Rename conversation', [{ key: 'title', label: 'Title', required: true }], values => action('agents:threads:rename', { id: t.id, title: values.title }, true), { title: t.title })), button('Delete', () => askDelete('Delete conversation', `Delete “${t.title}”, its stored messages, and linked automations?`, () => action('agents:threads:delete', { id: t.id }, true)), 'va-danger'));
     const more = make('details', '', 'va-thread-more'); more.append(make('summary', 'Conversation tools'));
     const extras = make('div', '', 'va-actions'); extras.append(button(t.pinned ? 'Unpin' : 'Pin', () => action(t.pinned ? 'agents:threads:unpin' : 'agents:threads:pin', { id: t.id })), button(t.archived ? 'Unarchive' : 'Archive', () => action(t.archived ? 'agents:threads:unarchive' : 'agents:threads:archive', { id: t.id })), button('Notes & goal', () => notesEditor(t)), button('Fork', () => branch(t, 'fork')), button('Sidechat', () => branch(t, 'sidechat')), button('Model', () => modelEditor(t)));
-    if (['opencode-acp','codex-app-server'].includes(provider(t.providerId)?.protocol)) { const refresh = button('Discover models', () => action('agents:threads:discover-models', { id: t.id })); refresh.disabled = pending || ['running', 'discovering'].includes(t.status); extras.append(refresh); }
+    if (['opencode-acp','codex-app-server','claude-stream-json'].includes(provider(t.providerId)?.protocol)) { const refresh = button('Discover models', () => action('agents:threads:discover-models', { id: t.id })); refresh.disabled = pending || ['running', 'discovering'].includes(t.status); extras.append(refresh); }
     extras.append(button('Child agent', () => childAgentEditor(t)), button('Hand off', () => childAgentEditor(t, true)),button('Conversation file diff',()=>showFileChanges(t))); more.append(extras); toolbar.append(title, actions); main.append(toolbar, more);
     if (t.goal) main.append(make('p', `Goal · ${t.goal.status}: ${t.goal.text}`, 'va-goal'));
     if (t.markers?.length) { const markers = make('div', '', 'va-markers'); for (const marker of t.markers) markers.append(button(`★ ${marker.label} ×`, () => action('agents:threads:marker:remove', { id: t.id, markerId: marker.id }))); main.append(markers); }

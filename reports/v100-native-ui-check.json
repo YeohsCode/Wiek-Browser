@@ -1,0 +1,32 @@
+{
+  "version": "0.10.0",
+  "discovery": {
+    "runs": 0,
+    "messages": 0,
+    "nativeThreadId": null,
+    "discovery": "completed",
+    "models": [
+      {
+        "id": "default",
+        "supportsEffort": true
+      },
+      {
+        "id": "fixture/old"
+      }
+    ],
+    "userFrames": 0
+  },
+  "model": "default",
+  "reasoningEffort": "high",
+  "completed": true,
+  "utf8Preserved": true,
+  "modelArg": "--model=default",
+  "initializeCount": 2,
+  "effortOverlay": {
+    "effortLevel": "high"
+  },
+  "effortBeforeUser": true,
+  "userFrames": 1,
+  "fixtureOnly": true,
+  "modelCalls": 0
+}

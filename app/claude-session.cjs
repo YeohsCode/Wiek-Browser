@@ -3,6 +3,7 @@
 // Independent client of Claude Code's public stream-json/control protocol.
 // One Vek run owns one CLI process and one prompt. Follow-ups use --resume.
 const fs = require('node:fs');
+const {readClaudeCatalogue,validateClaudeModel}=require('./claude-models.cjs');
 const { randomUUID, createHash } = require('node:crypto');
 const { createClaudeEvents } = require('./claude-events.cjs');
 const { StringDecoder } = require('node:string_decoder');
@@ -29,7 +30,7 @@ function claudeLaunch({ args, model, resumeId, attachments }) {
   const sessionId = resumeId || randomUUID();
   // Runtime owns these flags. Refuse conflicting configuration rather than
   // allowing --continue or permission bypass to change the selected session.
-  const reserved = /^(?:-p|-r|-c|--(?:print|resume|continue|session-id|fork-session|input-format|output-format|verbose|include-partial-messages|permission-mode|permission-prompt-tool|dangerously-skip-permissions|allow-dangerously-skip-permissions|model|setting-sources|settings|mcp-config|strict-mcp-config|allowedTools|allowed-tools|disallowedTools|disallowed-tools|tools))(?:=|$)/;
+  const reserved = /^(?:-p|-r|-c|--(?:print|resume|continue|session-id|fork-session|input-format|output-format|verbose|include-partial-messages|effort|permission-mode|permission-prompt-tool|dangerously-skip-permissions|allow-dangerously-skip-permissions|model|setting-sources|settings|mcp-config|strict-mcp-config|allowedTools|allowed-tools|disallowedTools|disallowed-tools|tools))(?:=|$)/;
   if (args.some(arg => reserved.test(arg) || /\{\{?(prompt|model)\}?\}/.test(arg))) throw error('Claude native protocol owns session, prompt, model, tool, settings and permission arguments; use extra argv only for independent CLI options');
   return { sessionId, blocks, args: [...args,
     '--print', '--verbose', '--input-format', 'stream-json', '--output-format', 'stream-json', '--include-partial-messages',
@@ -40,7 +41,7 @@ function claudeLaunch({ args, model, resumeId, attachments }) {
   ] };
 }
 
-function connectClaude({ child, launch, active, run, thread, project, text, consume, publish, killTree, onSession }) {
+function connectClaude({ child, launch, active, run, thread, project, text, consume, publish, killTree, onSession, discoverOnly = false }) {
   let buffer = '', closed = false, terminal = false, initialized = false, sent = false, sequence = 0;
   const decoder = new StringDecoder('utf8'), pending = new Map(), permissions = new Map(), seen = new Set(), streamed = new Map();
   const timers = new Set();
@@ -51,7 +52,7 @@ function connectClaude({ child, launch, active, run, thread, project, text, cons
   };
   const terminate = () => { killTree(child, 'SIGTERM'); timer(() => killTree(child, 'SIGKILL'), 1000); };
   const failure = cause => {
-    if (closed || active.finalizing || terminal) return;
+    if (closed || active.finalizing || terminal || active.stopReason) return;
     run.error = bounded(cause.message || cause, 8192); terminal = true; terminate();
   };
   const request = data => new Promise((resolve, reject) => {
@@ -187,8 +188,18 @@ function connectClaude({ child, launch, active, run, thread, project, text, cons
     if (!terminal && buffer.trim() && !active.stopReason) run.error = 'Claude provider disconnected with an incomplete protocol frame';
   });
   active.native.ready = (async () => {
-    await request({ subtype: 'initialize', hooks: null, forwardSubagentText: true });
+    const init=await request({ subtype: 'initialize', hooks: null, forwardSubagentText: true });
     if (active.stopReason || closed) return;
+    if(discoverOnly||thread.nativeCatalog?.source==='claude-initialize'||thread.reasoningEffort){
+      thread.nativeCatalog=readClaudeCatalogue(init);
+      if(!discoverOnly)validateClaudeModel(thread,thread.nativeCatalog);
+      publish();
+    }
+    if(discoverOnly){onSession();active.native.completed=true;terminal=true;child.stdin.end();timer(terminate,1000);return;}
+    if(thread.reasoningEffort){
+      await request({subtype:'apply_flag_settings',settings:{effortLevel:thread.reasoningEffort}});
+      if(active.stopReason||closed)return;
+    }
     const messageId = randomUUID(); run.nativeUserMessageId = messageId;
     sent = true;
     write({ type: 'user', uuid: messageId, session_id: launch.sessionId, parent_tool_use_id: null,

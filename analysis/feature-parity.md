@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.9.1**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
+当前版本 **0.10.0**，更新于 2026-11-01；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -318,3 +318,9 @@ Codex原生模型发现只initialize/initialized/model/list，不创建thread/tu
 ## 0.9.1 当前增量：CLI关闭完成
 
 stop先核对已连接host的PID/instance，再请求shutdown，成功返回前等待实际PID退出；超时明确失败，不强杀或移除metadata。默认30s，可选100..120000ms。真实Electron + 延迟终止provider + 临时Git仓库验证最终文件/快照落盘和同目录三次立即重启；独立Node host验证超时与身份拒绝。多CLI并发start选主仍未实现，不把顺序重启修复称为完整生命周期等价。[设计](cli-lifecycle.md)。
+
+## 0.10.0 当前增量：Claude目录与声明能力
+
+initialize目录发现不发送user、不产生Vek run或已拥有session，使用实际并发与项目lease并可停止。最多256项、alias/resolvedModel、显式effort/adaptive元数据；缺字段unknown，冲突/错误类型拒绝。每次有目录的turn重新校验；显式effort经apply_flag_settings确认后才发user，旧CLI不支持则明确失败。空模型明确重置新resume进程default，canonical UI选择保持。
+
+新增16项回归，本地264/264；官方CLI2.1.31隔离初始化只返回3项目录，无effort字段，0user/0模型调用。现代控制由官方SDK类型和合成wire单独验证，不声称实际模型effort或权益成功。source原生迁移/后台任务和其他5种原生provider仍缺；打包/UI/SDK见 [RESULTS](../reports/RESULTS.md)，设计见 [claude-model-catalogue](claude-model-catalogue.md)。

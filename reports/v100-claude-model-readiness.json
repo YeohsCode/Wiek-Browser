@@ -1,0 +1,40 @@
+{
+  "generatedAt": "2026-10-31T15:53:03.008Z",
+  "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/references/claude-protocol/cli-2.1.31/package/cli.js",
+  "sha256": "6f23f1b19e1190ba38b9e7c24ea7576cbdbd0436e2e6dff424d4c2b31f80ca6a",
+  "version": "2.1.31 (Claude Code)",
+  "versionExit": 0,
+  "isolatedHome": true,
+  "inheritedAuthentication": false,
+  "userMessagesSent": 0,
+  "modelCalls": 0,
+  "initialize": true,
+  "notes": "Initialize model metadata only: no prompt, authentication or inference tested. Names/descriptions may be bundled or cached for this exact CLI version; no entitlement or current pricing verification.",
+  "responseKeys": [
+    "commands",
+    "output_style",
+    "available_output_styles",
+    "models",
+    "account"
+  ],
+  "models": [
+    {
+      "value": "default",
+      "displayName": "Default (recommended)",
+      "description": "Use the default model (currently Sonnet 4.5) · $3/$15 per Mtok"
+    },
+    {
+      "value": "opus",
+      "displayName": "Opus",
+      "description": "Opus 4.5 · Most capable for complex work · $5/$25 per Mtok"
+    },
+    {
+      "value": "haiku",
+      "displayName": "Haiku",
+      "description": "Haiku 4.5 · Fastest for quick answers · $1/$5 per Mtok"
+    }
+  ],
+  "exitCode": 0,
+  "signal": null,
+  "stoppedAfterHandshake": true
+}

@@ -1,0 +1,20 @@
+{
+  "sdkVersion": "0.3.316",
+  "cliRuntimeVersion": "2.1.31",
+  "officialDocs": "https://code.claude.com/docs/en/agent-sdk/typescript",
+  "note": "Only public type/wire shape inspection; no runtime SDK dependency or Ego source copying. Modern optional fields are not assumed present on older CLI.",
+  "files": [
+    {
+      "file": "package.json",
+      "sha256": "fc58915a56a8a4b39f0ee7c7121a7b2fa363b3be3dc314878ad775e74891f01b"
+    },
+    {
+      "file": "sdk.d.ts",
+      "sha256": "c7b4242562a4501812a86af97d4fb6d9cd3f631798442f692339b8a90a0c0f8a"
+    },
+    {
+      "file": "sdk.mjs",
+      "sha256": "dc85a850b6806de3c5dd19b9c1412ac7410546741e5f79a4e7a8e984e4135442"
+    }
+  ]
+}

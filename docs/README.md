@@ -1,6 +1,6 @@
 # 文档索引
 
-当前版本 **0.9.1**；下一项为 Claude 模型目录及其余5种原生provider。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
+当前版本 **0.10.0**；下一项为其余5种原生provider，优先Cursor公开协议。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
 
 | 用途 | 文档 |
 |---|---|
@@ -12,6 +12,7 @@
 | 本地 API | [API.md](../skills/vek-browser/API.md) |
 | REA 来源、证据与覆盖限制 | [rea-investigation.md](../analysis/rea-investigation.md)、[daemon](../analysis/shipped-daemon-features.md)、[client](../analysis/client-resource-feature-ledger.md) |
 | Agent/Codex/附件 | [扩展设计](../analysis/agent-service-extensions.md)、[附件](../analysis/agent-attachments.md) |
+| Claude 原生模型目录 | [claude-model-catalogue.md](../analysis/claude-model-catalogue.md) |
 | Claude历史/工具结果/子Agent | [claude-history-design.md](../analysis/claude-history-design.md) |
 | Codex目录与所选历史 | [codex-capabilities-history.md](../analysis/codex-capabilities-history.md) |
 | CLI 停止与重启 | [cli-lifecycle.md](../analysis/cli-lifecycle.md) |

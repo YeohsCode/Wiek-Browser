@@ -5,6 +5,7 @@ const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
 const { randomUUID, createHash } = require('node:crypto');
 const { claudeLaunch, connectClaude } = require('./claude-session.cjs');
+const {validateClaudeModel}=require('./claude-models.cjs');
 const { readHistory, parseHistory, selectBranch } = require('./claude-history.cjs');
 const { copyClaudeActivity } = require('./claude-events.cjs');
 const { connectAcp, acpAttachments } = require('./acp-session.cjs');
@@ -299,7 +300,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     if (closed || running.has(thread.id)) throw fail('Stop active work before discovering models');
     if (running.size >= maxConcurrentRuns) throw fail('Agent concurrency limit reached');
     const project = locate('projects', thread.projectId), provider = locate('providers', thread.providerId), command = executable(provider.command);
-    if (!['opencode-acp','codex-app-server'].includes(provider.protocol) || !provider.enabled || !command) throw fail('Choose an enabled native OpenCode or Codex executable for model discovery');
+    if (!['opencode-acp','codex-app-server','claude-stream-json'].includes(provider.protocol) || !provider.enabled || !command) throw fail('Choose an enabled native OpenCode, Codex or Claude executable for model discovery');
     if (turnCheckpoints?.locked?.(project.id) || [...running.values()].some(active => active.projectPath === project.path)) throw fail('Project is busy; finish active work before discovering models');
     const { contextEnv } = providerContext(thread, project, provider);
     const binding = createHash('sha256').update(JSON.stringify([provider.protocol, command, provider.args, project.path])).digest('hex');
@@ -315,9 +316,10 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       running.delete(thread.id); publish(); resolveDone(); armScheduler();
     };
     try {
-      const child = spawn(command, provider.args, { cwd: project.path, env: { ...process.env, ...contextEnv }, shell: false, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe','pipe','pipe'] }); active.child = child;
-      const connect = provider.protocol === 'codex-app-server' ? connectCodexDiscovery : connectAcp;
-      connect({ child, active, run, thread, project, discoverOnly: true, consume: () => {}, publish: publishSoon, killTree, onSession: () => { thread.nativeSessionBinding = binding; } });
+      const claude=provider.protocol==='claude-stream-json'?claudeLaunch({args:provider.args,attachments:[]}):null;
+      const child = spawn(command, claude?claude.args:provider.args, { cwd: project.path, env: { ...process.env, ...contextEnv }, shell: false, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe','pipe','pipe'] }); active.child = child;
+      const connect = claude?connectClaude:provider.protocol === 'codex-app-server' ? connectCodexDiscovery : connectAcp;
+      connect({ child, ...(claude?{launch:claude}:{}), active, run, thread, project, discoverOnly: true, consume: () => {}, publish: publishSoon, killTree, onSession: () => { thread.nativeSessionBinding = binding; } });
       child.stderr.on('data', chunk => { if (run.stderr.length < 8192) run.stderr += chunk.toString('utf8').slice(0, 8192 - run.stderr.length); });
       child.stdin.on('error', () => {}); child.on('error', error => { run.error = error.message; }); child.on('close', () => finish());
     } catch (error) { finish(error); }
@@ -343,7 +345,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     const nativeBinding = createHash('sha256').update(JSON.stringify([provider.protocol || 'cli', command, provider.args, project.path])).digest('hex');
     if (thread.nativeSessionBinding !== nativeBinding) { delete thread.nativeThreadId; delete thread.nativeContextSent; delete thread.nativeCatalog; delete thread.nativeSessionBinding; }
     const acp = provider.protocol === 'opencode-acp' ? acpAttachments(attachments) : null;
-    const claude = provider.protocol === 'claude-stream-json' ? claudeLaunch({ args: provider.args, model: thread.model, resumeId: thread.nativeThreadId, attachments }) : null;
+    const claude = provider.protocol === 'claude-stream-json' ? claudeLaunch({ args: provider.args, model: thread.model||(thread.nativeCatalog?.source==='claude-initialize'?'default':''), resumeId: thread.nativeThreadId, attachments }) : null;
     const run = { id: randomUUID(), status: 'running', startedAt: now(), stdout: '', stderr: '', truncated: false, ...(automationId ? { automationId } : {}), ...(automationReservationId ? { automationReservationId } : {}) };
     const userMessage = message('user', prompt, run.id);
     if (attachments.length) userMessage.attachments = attachments.map(({ id, name, mimeType, bytes, storedPath }) => ({ id, name, mimeType, bytes, storedPath }));
@@ -800,8 +802,9 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         const thread = locate('threads', id); editable(thread); const protocol = locate('providers', thread.providerId).protocol;
         const model = payload.model ? nonempty(payload.model, 'model', 256) : '';
         if (model && ['opencode-acp','codex-app-server'].includes(protocol) && thread.nativeCatalog && !thread.nativeCatalog.models.some(item => item.id === model)) throw fail('Choose an observed native model');
+        if(protocol==='claude-stream-json'&&thread.nativeCatalog)validateClaudeModel({model},thread.nativeCatalog);
         const effort = payload.reasoningEffort ? nonempty(payload.reasoningEffort,'reasoning effort',64) : '';
-        if (effort) { if (protocol !== 'codex-app-server' || !thread.nativeCatalog) throw fail('Discover Codex model capabilities before choosing reasoning effort'); validateCodexModel({model,reasoningEffort:effort},thread.nativeCatalog); }
+        if (effort) { if (!['codex-app-server','claude-stream-json'].includes(protocol) || !thread.nativeCatalog) throw fail('Discover native model capabilities before choosing reasoning effort'); (protocol==='claude-stream-json'?validateClaudeModel:validateCodexModel)({model,reasoningEffort:effort},thread.nativeCatalog); }
         thread.model=model; if(effort)thread.reasoningEffort=effort;else delete thread.reasoningEffort; thread.updatedAt = now(); break;
       }
       case 'agents:attachments:add': { const thread = locate('threads', id); editable(thread); addAttachmentPaths(thread, payload.paths || [payload.path]); break; }

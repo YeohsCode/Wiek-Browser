@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-31T15:46:16.161Z",
-  "version": "0.9.1",
+  "generatedAt": "2026-10-31T16:01:06.559Z",
+  "version": "0.10.0",
   "versionMatches": true,
-  "checkedFiles": 151,
+  "checkedFiles": 152,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -29,12 +29,12 @@
     },
     {
       "file": "app/agent-panel.js",
-      "sha256": "362c91c4e9d70a7b4ca0204fa903cd775d06c1e6ceda9b91e6e8160be489b0d5",
+      "sha256": "fdca102aba594ce16ddbd82836879ef0c6c0644a2c154014c1b380d8c996a95f",
       "matches": true
     },
     {
       "file": "app/agent-service.cjs",
-      "sha256": "5bb949964130118df5ef31cde1a28305e6dd482bca74621c2a069faad1bd897a",
+      "sha256": "84517385eeb063f6de9901eb020041ae48e91481bdadd3ed2aece0c2c18a1714",
       "matches": true
     },
     {
@@ -78,8 +78,13 @@
       "matches": true
     },
     {
+      "file": "app/claude-models.cjs",
+      "sha256": "145aadf3f33a4a34dda49edaafcc025dca4df6565e8bd66a5d93be4397bb52a6",
+      "matches": true
+    },
+    {
       "file": "app/claude-session.cjs",
-      "sha256": "9ce891cd8b64eec7921fe3b35575b42654e821a43d150dfc1013dc82032fc0b4",
+      "sha256": "4b558a2f62f5e4d773ba1f225a038b8093aee276d30afccf02d0c81a67178016",
       "matches": true
     },
     {
@@ -754,7 +759,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "5c7666c9cba1349dc308c328c6319ff62b4b3df61f9e3577464b606144e884bd",
+      "sha256": "707ff7a9d2935eaac6ee6c539c87cc98aa806bfa5c260af8706f8e7999eb228a",
       "matches": true
     },
     {

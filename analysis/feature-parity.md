@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.7.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7增量和当前报告为准。
+当前版本 **0.8.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -300,3 +300,11 @@ V1 兼容 helper、CDP/fetch、site tools 与 migration guard 的入口见 `pack
 单次allow/reject权限、全部pending取消、原生cancel通知、工具partial result/diff、child-session消息隔离和有界活动、context/usage、实际附件capability检查，均通过真实合成进程；Electron panel也验证目录选择和不可批准状态。打包宿主验证模型发现→选择→任务编辑→真实diff/恢复→审批→停止。官方OpenCode 1.19.5隔离HOME/XDG+净化env发现9模型选项，无prompt/无模型调用；不证明认证或推理成功。
 
 新增18项ACP专项，全套202/202、宿主79/79；最终SDK/原生UI结果以当前报告为准。仍缺其余5种原生provider、Codex/Claude同类目录、OpenCode外部历史/原生fork/后台任务、MCP自动注入。Agent自身配置/插件/MCP不被空client mcpServers禁用；无OS沙箱等价声明。详见 [设计](opencode-acp-design.md)。全产品parity仍为false。
+
+## 0.8.0 当前增量：Codex目录与所选历史
+
+Codex原生模型发现只initialize/initialized/model/list，不创建thread/turn/run/message。分页目录保留model slug、efforts/default/inputModalities，UI选择模型后只展示其支持的effort；发现后的turn执行前重新刷新与校验。空目录/错误effort/已知不支持的image不会进入turn/start。旧手工model配置仍在无目录时兼容；目录不代表认证或推理可用。
+
+所选单个Codex rollout经过有界fd/UTF-8/JSON/session与duplicate id检查、预览token、inode/hash复核，复制受支持可见user/assistant文字及function-call结果证据。排除生成context、system/developer/reasoning、event重复文本；图片留不可用占位。导入0runs/无native权，继续才建立新owned session；压缩/回滚/未知record布局显式拒绝，不能称完整CLI原生迁移。
+
+新增21项目录/历史测试，本地223/223、宿主92/92。官方CLI0.142.0隔离HOME/CODEX_HOME发现5项目录、生成两条合成raw历史并成功解析，未发送turn/start、0模型调用。打包链路验证真实edit/diff/restore。当前原生UI/SDK完整结果以 [RESULTS](../reports/RESULTS.md) 为准。仍缺Codex复杂历史与实时活动、Claude模型目录、5种其他原生provider及既有OS/MCP/迁移/benchmark范围；全产品parity仍false。[设计](codex-capabilities-history.md)。

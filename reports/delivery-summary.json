@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-31T08:35:28.653214+00:00",
-  "version": "0.7.0",
+  "generatedAt": "2026-10-31T13:13:53.105721+00:00",
+  "version": "0.8.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -30,7 +30,7 @@
           "notRun": 0,
           "assertions": 1248
         },
-        "wallTimeMs": 153201,
+        "wallTimeMs": 153394,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
       }
@@ -43,14 +43,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 202,
+    "pass": 223,
     "fail": 0,
-    "log": "v070-service-tests.log"
+    "log": "v080-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 79,
+    "pass": 92,
     "fail": 0,
-    "log": "v070-package-workbench.log"
+    "log": "v080-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -64,7 +64,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 146,
+    "sourceFilesChecked": 148,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -87,15 +87,17 @@
   },
   "completeProductParity": false,
   "newCapabilities": [
-    "Opt-in OpenCode ACP v1 native sessions and owned load without replay duplication",
-    "Session-derived grouped model catalogue discovery without prompts or execution history",
-    "Fresh model revalidation and native model selection confirmation",
-    "Single-use permissions, pending cancellation and unsupported client delegation rejection",
-    "Actual attachments, tool result/diff and scoped child-session messages with conservative status",
-    "ACP file editing integrated with turn snapshots, immutable diff and confirmed restoration"
+    "Codex paginated native model/reasoning-effort/input capability catalogue discovery without threads or turns",
+    "Fresh capability validation and selected reasoning effort on turn/start",
+    "Explicit selected Codex rollout visible transcript preview/import with inode/hash recheck",
+    "No source session, executable configuration, path or checkpoint authority on import",
+    "Bounded imported function-call/result evidence and generated context/reasoning exclusion",
+    "Codex native UTF-8 streaming, replay isolation and invalid status/thread protection",
+    "Codex empty model selection explicitly sends the observed default used by capability validation"
   ],
   "remainingGaps": [
-    "Five other native provider protocols, Codex/Claude session model catalogues, source native session/history migration and paid generation validation",
+    "Five other native provider protocols, Claude model catalogue, source native session/history migration and paid generation validation",
+    "Codex compacted/rolled-back rollout import and unified real-time tool/subagent activity",
     "Claude multi-file child history and post-result background task lifecycle",
     "OpenCode external history/native fork/background children and Vek MCP injection",
     "Complete Chrome/Safari profile/web storage/extensions migration",
@@ -152,15 +154,14 @@
     "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
   },
   "uiQa": {
-    "log": "v070-native-ui-qa.md",
-    "modelDiscoveryWithoutPrompt": true,
-    "nativeObservedModelPicker": true,
-    "realSingleUseApprovalAndDecline": true,
-    "noPersistentGrantAndUnsupportedAcceptDisabled": true,
-    "realNativeCancel": true,
-    "toolsChildMessagesAndComposerReachable": true,
-    "defaultUserDataAppVersion": "0.7.0",
-    "wireCheck": "v070-native-ui-check.json"
+    "log": "v080-native-ui-qa.md",
+    "nativeModelAndEffortMenus": true,
+    "nativeFilePickerWithOfficialSyntheticRollout": true,
+    "noExecutionOnImport": true,
+    "newOwnedSessionOnContinuation": true,
+    "sourceBytesUnchanged": true,
+    "defaultUserDataAppVersion": "0.8.0",
+    "wireCheck": "v080-native-ui-check.json"
   },
   "claudeFocusedTests": {
     "pass": 29,
@@ -203,11 +204,54 @@
     "modelSelector": "model",
     "report": "v070-opencode-readiness.json"
   },
-  "observedFailures": [
+  "previousOpenCodeUiQa": {
+    "log": "v070-native-ui-qa.md",
+    "modelDiscoveryWithoutPrompt": true,
+    "nativeObservedModelPicker": true,
+    "realSingleUseApprovalAndDecline": true,
+    "noPersistentGrantAndUnsupportedAcceptDisabled": true,
+    "realNativeCancel": true,
+    "toolsChildMessagesAndComposerReachable": true,
+    "defaultUserDataAppVersion": "0.7.0",
+    "wireCheck": "v070-native-ui-check.json"
+  },
+  "codexCapabilitiesHistoryTests": {
+    "pass": 21,
+    "fail": 0,
+    "fixtureOnly": true,
+    "modelCalls": 0,
+    "log": "v080-service-tests.log"
+  },
+  "codexFocusedTests": {
+    "pass": 26,
+    "fail": 0,
+    "log": "v080-codex-tests.log"
+  },
+  "codexReadiness": {
+    "version": "codex-cli 0.142.0",
+    "sha256": "b60ad82e66720a84830460b77e00b207536c38e536f64fb5a6af86bcae3a3bff",
+    "isolatedHome": true,
+    "inheritedAuthentication": false,
+    "turnStartRequests": 0,
+    "modelCalls": 0,
+    "historyItemsInjected": 2,
+    "modelDiscovery": true,
+    "modelCount": 5,
+    "historyFormatParsed": true,
+    "visibleImportedTexts": [
+      "Synthetic offline user",
+      "Synthetic offline answer"
+    ],
+    "report": "v080-codex-readiness.json",
+    "schemaIdentities": "v080-codex-schema-identities.json"
+  },
+  "previousObservedFailures": [
     {
       "log": "v070-service-concurrent-watch-failure.log",
       "test": "project watchers report changes and close without leaking handles",
       "result": "One timeout while full SDK suite was also running; cause not proven. Isolated check and final full 202-test run passed without changing assertions or watcher implementation."
     }
-  ]
+  ],
+  "observedFailures": [],
+  "validationOrderNote": "Full 69-case SDK run preceded the final provider-only default model fix. That fix was revalidated with the full local and packaged workbench suites. Browser bridge and SDK stayed unchanged; final package identities are verified."
 }

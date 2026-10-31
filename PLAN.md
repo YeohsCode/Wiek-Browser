@@ -1,6 +1,6 @@
 # Vek Browser 复刻计划与进度
 
-更新：2026-10-31（Asia/Shanghai）。当前交付版本：**0.7.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
+更新：2026-10-31（Asia/Shanghai）。当前交付版本：**0.8.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
 
 ## 当前检查点
 
@@ -8,13 +8,13 @@
 |---|---|---|
 | 参考制品与调查 | ego-lite MIT 源码、Ego 0.6.1.13 安装包、31 任务 benchmark 已下载；REA daemon/client 证据及覆盖限制保留 | 已完成有界调查；全部 native/client 路径仍未覆盖 |
 | 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Vek 69/69、Ego 68/69 | 当前版本验收完成，非引擎全面等价 |
-| 本地 Agent 工作台 | 通用 CLI、opt-in Codex app-server/Claude stream-json/OpenCode ACP、多 Agent 控制、对话分支/附件/审批、Claude选定历史分支导入及工具/子Agent记录 | 部分完成；其他5种原生 provider、源CLI原生会话迁移/后台任务和真实付费 turn 未验证 |
+| 本地 Agent 工作台 | 通用 CLI、opt-in Codex app-server/Claude stream-json/OpenCode ACP、多 Agent 控制、对话分支/附件/审批、Claude选定历史分支、Codex所选rollout导入及工具证据、Codex模型/effort目录 | 部分完成；其他5种原生 provider、源CLI原生会话迁移/后台任务和真实付费 turn 未验证 |
 | 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，linked worktree 和 PR 流程仍缺失 |
 | MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；OAuth/MRTR/订阅/sampling/elicitation 缺失 |
 | 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 部分完成；应用关闭后不调度，standalone/dedicated 不完整 |
 | 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；无 OS 跨应用采集、翻译或云端润色等价 |
 | 浏览器界面/权限/资料 | 主题/标签布局/快捷键、独立窗口/托盘；权限隔离；Profile 数据归属；Chromium 选择导入和加密 archive | 部分完成；完整迁移/扩展/OS 设备能力仍有缺口 |
-| 交付与基准 | macOS ARM64 应用；202/202 本地测试、79/79 打包宿主集成、81 个上游文件未改 | 本地检查点完成；31 项线上模型任务未运行 |
+| 交付与基准 | macOS ARM64 应用；223/223 本地测试、92/92 打包宿主集成、81 个上游文件未改 | 本地检查点完成；31 项线上模型任务未运行 |
 
 证据入口：[当前结果](reports/RESULTS.md)、[同集对比](reports/comparison.md)、[逐项功能清单](analysis/feature-parity.md)、[机器可读结果](reports/delivery-summary.json)。532 项 SDK 单测沿用未改版结果；不描述为本轮重新运行。
 
@@ -28,6 +28,7 @@
 - [x] 0.5：Claude原生stream-json、绑定会话续接、逐次权限/取消、工具事件、实际附件和用量；协议fixture与官方CLI无推理握手分层验收。
 - [x] 0.6：Claude选定JSONL分支预览/导入、来源变更拒绝、实际工具结果/耗时/子Agent记录、停止和archive边界验证。
 - [x] 0.7：OpenCode ACP v1、无prompt模型发现与选择、owned session续接/重放隔离、单次权限/取消、工具与子消息/usage/附件、turn文件恢复。
+- [x] 0.8：Codex分页模型/effort/输入能力目录、执行前刷新校验、所选rollout可见历史预览/导入、真实CLI无推理格式验证。
 - [ ] 后续：原生 provider、迁移、MCP 剩余能力、OS 集成与线上基准；按下面顺序推进。
 
 ## 执行顺序与阶段验收
@@ -47,7 +48,8 @@
 - [x] 补 Claude 原生流式协议、会话续接、逐次权限审批、用量和附件；仍须按证据核对其他5种原生 provider。
 - [x] Claude所选JSONL历史分支导入、真实工具结果和子Agent活动展示；保留导出再导入中的有界显示记录。
 - [x] OpenCode ACP v1原生接入和session模型目录；协议进程、官方CLI无推理发现与打包宿主分别验证。
-- [ ] 下一项：补Codex原生模型目录和所选历史导入，再逐项推进其余5种provider。
+- [x] Codex原生模型目录和所选rollout可见历史导入；不继承源会话，压缩/回滚文件显式拒绝。
+- [ ] 下一项：Codex压缩/回滚历史语义和实时工具/子Agent活动，再推进Claude目录及其余5种原生provider。
 - [ ] OpenCode外部历史迁移、原生fork、后台子任务和自动MCP注入仍待实现。
 - [ ] Claude源CLI会话原生resume/fork迁移、多文件子历史及后台任务守护仍缺失，当前导入续接明确为新会话加可见文本。
 - [x] 协议 fixture、实际本机非推理 readiness 与真实模型 turn 分开记录；付费模型/账号任务需要专用配置和明确执行授权。
@@ -88,3 +90,5 @@
 另有CLI关闭生命周期待补：stop目前返回关闭请求确认；同目录立即start需要等待runtime退出。后续应将退出等待纳入CLI契约及真实进程回归，当前报告已保留该边界。
 
 0.7 实现与边界见 [opencode-acp-design.md](analysis/opencode-acp-design.md)。新增18项ACP回归，现有Electron panel新增模型目录/发现/审批状态验证；本地全套202/202，打包宿主79/79。官方OpenCode 1.19.5净化环境下initialize+session/new成功，9模型选项，0prompt/0模型调用。首轮发现后仍发送复制的本地历史，旧会话重放不重复入账；目录不等价凭证或模型服务可用。其他5种原生provider与完整产品parity仍未完成。
+
+0.8 实现和边界见 [codex-capabilities-history.md](analysis/codex-capabilities-history.md)。新增21项Codex目录/历史专项，全套223/223、打包宿主92/92；原生panel支持真实目录/effort选择和所选文件预览。官方Codex CLI 0.142.0净化环境发现5项模型目录，创建一次性本地thread并inject两条合成历史，未调用turn/start或模型；不等价认证/推理验证。历史遇压缩/回滚/未知布局拒绝，源会话原生迁移仍缺失。

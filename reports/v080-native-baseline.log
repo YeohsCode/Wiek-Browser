@@ -1,0 +1,39 @@
+✔ ACP model discovery sends no prompt or run, persists actual models, then loads without replaying history (558.9845ms)
+✔ ACP first prompt after discovery retains copied local history and later prompts send only new text (477.310834ms)
+✔ ACP actual chunks/attachments/tools/child evidence/usage survive restart with a scoped resume prompt (400.61875ms)
+✔ ACP approvals select once options only, never persistent grants, and reject unavailable accept (353.665125ms)
+✔ ACP stop cancels pending permissions and emits native cancellation without an automatic grant (191.063333ms)
+✔ ACP discovery occupies the project lease, is cancellable before initialize, and creates no history (185.306042ms)
+✔ ACP grouped model catalogue explicitly marks truncation across groups (0.268917ms)
+✔ ACP legacy model setter is used only when advertised (185.582334ms)
+✔ ACP rejects stale and unconfirmed model selection before prompt (258.636459ms)
+✔ ACP disconnect fails without fabricated completion (177.367292ms)
+✔ ACP malformed fails without fabricated completion (175.32125ms)
+✔ ACP oversize fails without fabricated completion (205.990417ms)
+✔ ACP wrong-session fails without fabricated completion (173.383041ms)
+✔ ACP unknown-stop fails without fabricated completion (188.732083ms)
+✔ ACP rejects a wrong protocol version and unsupported attachment capabilities before prompt (253.856875ms)
+✔ ACP declines filesystem delegation and bounds actual display output (243.077417ms)
+✔ ACP changed provider/import/export cannot transfer native session or model catalogue authority (252.386459ms)
+✔ ACP preflights combined actual attachment bytes before creating a run or spawning (194.648708ms)
+✔ opt-in native provider performs initialize/start/delta/usage and resumes the actual returned thread id (443.357375ms)
+✔ native steering uses turn/steer within the same run and interrupt stops a real protocol process (331.89875ms)
+✔ native approval requests wait for an explicit limited decision and never auto-approve (327.063833ms)
+✔ a native disconnect without turn/completed is a failure rather than a fake successful reply (210.182208ms)
+✔ Claude selected chain recovers parallel tool results without sibling answer/sidechain contamination (7.882042ms)
+✔ Claude parent links define ordering even when selected source lines are reordered (0.311042ms)
+✔ Claude import is read-only, explicit and inert; continuation starts own session then resumes it (396.411333ms)
+✔ Claude source mutation, replacement inode and symlink after preview cannot silently change import (145.407875ms)
+✔ Claude preview tokens are ephemeral, capped, discarded and expire without importing (183.825583ms)
+✔ Claude history rejects bad tail/UTF-8, cycles, conflicting UUIDs, mixed sessions and unknown branches (0.635958ms)
+✔ Claude history compaction/missing parents remain explicit boundaries; duplicate identical entries do not duplicate text (0.231625ms)
+✔ Claude history file/frame limits reject before importing or executing (247.919208ms)
+✔ Claude imported display activity survives native archive roundtrip with no source resume or file recovery rights (171.3115ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4554.970666

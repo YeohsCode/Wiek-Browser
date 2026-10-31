@@ -1,0 +1,34 @@
+✔ opt-in native provider performs initialize/start/delta/usage and resumes the actual returned thread id (395.96875ms)
+✔ native steering uses turn/steer within the same run and interrupt stops a real protocol process (357.489334ms)
+✔ native approval requests wait for an explicit limited decision and never auto-approve (330.737917ms)
+✔ a native disconnect without turn/completed is a failure rather than a fake successful reply (217.749833ms)
+✔ real Electron panel renders literal messages and dispatches advanced controls without model calls (745.162916ms)
+✔ Codex paginated discovery reads actual capabilities with no thread, turn, messages or runs (309.954666ms)
+✔ Codex model/effort selection persists and is freshly validated before native execution (520.878084ms)
+✔ Codex refuses absent models and invalid reasoning effort without mutating selection (205.118458ms)
+✔ Codex cached text-only capability rejects actual image input before turn/start (321.063167ms)
+✔ Codex stale refreshed catalogue prevents inference despite a valid cached selection (268.928875ms)
+✔ Codex discovery can be cancelled before initialize without accepting queued prompts (173.2135ms)
+✔ Codex discovery disconnect is failed rather than successful (197.966083ms)
+✔ Codex discovery malformed is failed rather than successful (194.016291ms)
+✔ Codex discovery repeated-cursor is failed rather than successful (191.9125ms)
+✔ Codex wrong-thread cannot complete a native turn successfully (189.610083ms)
+✔ Codex unknown-status cannot complete a native turn successfully (201.897ms)
+✔ Codex model catalogue bounds pages, hidden choices and repeated pagination (0.351333ms)
+✔ Codex configuration changes invalidate cached catalogue and effort, export cannot transfer native binding (218.85425ms)
+✔ clearing a Codex model explicitly applies the same catalogue default used for capability checks (347.56775ms)
+✔ Codex rollout visible messages and tool results exclude duplicate events, reasoning, generated context and source configuration (3.782583ms)
+✔ Codex preview/import executes nothing, source bytes remain unchanged, continuation creates a new owned session (304.681416ms)
+✔ Codex selected file hash/inode changes invalidate preview and symlink sources are refused (174.147792ms)
+✔ Codex imports refuse bad tail/UTF-8, mixed sessions, conflicting IDs and unsupported edit semantics (0.622334ms)
+✔ Codex message/file/frame limits and unsupported layouts fail explicitly (11.602375ms)
+✔ Codex images remain unavailable placeholders and hidden role instructions are not copied (0.197792ms)
+✔ Codex preview quota and discard are bounded, native archive retains only display provenance (242.021917ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3417.976125

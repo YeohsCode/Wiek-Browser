@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-10-31T13:03:49.527Z",
+  "version": "codex-cli 0.142.0",
+  "versionExit": 0,
+  "cli": "/Applications/Codex.app/Contents/Resources/codex",
+  "sha256": "b60ad82e66720a84830460b77e00b207536c38e536f64fb5a6af86bcae3a3bff",
+  "isolatedHome": true,
+  "inheritedAuthentication": false,
+  "turnStartRequests": 0,
+  "modelCalls": 0,
+  "historyItemsInjected": 2,
+  "modelDiscovery": true,
+  "notes": "Bundled/cached model catalogue does not prove entitlement. Inert raw history items are injected into a disposable local thread without starting a turn.",
+  "initialize": true,
+  "modelCount": 5,
+  "modelsWithEfforts": 5,
+  "threadCreated": true,
+  "rolloutSha256": "bc1e17c3b462862eb498a5f870f2161b631662a4cf21bc122aeab5397caa3d69",
+  "historyFormatParsed": true,
+  "visibleImportedTexts": [
+    "Synthetic offline user",
+    "Synthetic offline answer"
+  ],
+  "generatedContextEntriesExcluded": 1,
+  "recordTypes": [
+    "session_meta",
+    "response_item",
+    "turn_context"
+  ]
+}

@@ -8,17 +8,17 @@ const { createClaudeEvents } = require('./claude-events.cjs');
 const fail = message => new Error(message);
 const uuid = value => typeof value === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(value);
 const main = entry => !entry.isSidechain && !entry.teamName && !entry.isMeta;
-function readHistory(filename) {
-  if (typeof filename !== 'string' || !path.isAbsolute(filename) || filename.includes('\0')) throw fail('Choose an absolute Claude JSONL file path');
+function readHistory(filename, label = 'Claude') {
+  if (typeof filename !== 'string' || !path.isAbsolute(filename) || filename.includes('\0')) throw fail(`Choose an absolute ${label} JSONL file path`);
   const fd = fs.openSync(filename, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK);
   try {
     const before = fs.fstatSync(fd);
-    if (!before.isFile() || before.size > 32 * 1024 * 1024) throw fail('Claude history must be a regular file at most 32 MiB');
+    if (!before.isFile() || before.size > 32 * 1024 * 1024) throw fail(`${label} history must be a regular file at most 32 MiB`);
     // Bounded even when an external writer grows the selected file during read.
     const bytes = Buffer.alloc(before.size + 1); let length = 0, size;
     while (length < bytes.length && (size = fs.readSync(fd, bytes, length, bytes.length - length, null))) length += size;
     const after = fs.fstatSync(fd);
-    if (length !== before.size || before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ctimeMs !== after.ctimeMs) throw fail('Claude history changed while reading; choose it again');
+    if (length !== before.size || before.size !== after.size || before.mtimeMs !== after.mtimeMs || before.ctimeMs !== after.ctimeMs) throw fail(`${label} history changed while reading; choose it again`);
     const data = bytes.subarray(0, length);
     const fingerprint = createHash('sha256').update(data).digest('hex');
     return { data, fingerprint, identity: `${before.dev}:${before.ino}`, sourceName: path.basename(filename) };

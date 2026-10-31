@@ -1,0 +1,37 @@
+{
+  "beforeContinuation": {
+    "runs": 0,
+    "status": "idle",
+    "nativeThreadId": null,
+    "importedTexts": [
+      "Synthetic offline user",
+      "Synthetic offline answer"
+    ],
+    "sourceHashMatches": true
+  },
+  "discovery": {
+    "runs": 0,
+    "messages": 0,
+    "nativeThreadCreated": false,
+    "nativeMethods": [
+      "initialize",
+      "initialized",
+      "model/list",
+      "model/list"
+    ]
+  },
+  "version": "0.8.0",
+  "fixtureOnly": true,
+  "paidModelCalls": 0,
+  "selectedModel": "fixture/a",
+  "selectedEffort": "high",
+  "wireModel": "fixture/a",
+  "wireEffort": "high",
+  "importedStatus": "completed",
+  "threadStartRequests": 2,
+  "threadResumeRequests": 0,
+  "sourceNativeSessionWasNotResumed": true,
+  "copiedPromptContainsHistory": true,
+  "sourceBytesUnchanged": true,
+  "utf8StreamPreserved": true
+}

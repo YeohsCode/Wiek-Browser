@@ -77,6 +77,19 @@
     ], async values => { const imported = await action('agents:claude:import', { ...values, token: preview.token }, true); if (imported?.importedThreadId) { selectedId = imported.importedThreadId; view = 'threads'; render(); } });
     editor.onCancel = () => invoke('agents:claude:discard', { token: preview.token }).catch(() => {});
   }
+  async function importCodex() {
+    if (!snapshot.projects.length) return newProject();
+    if (!snapshot.providers.length) { view='providers';render();return; }
+    const result=await action('agents:file:codex:preview',{}),preview=result?.codexImportPreview;if(!preview)return;
+    openEditor('Import Codex conversation',[
+      {key:'notice',type:'notice',label:`${preview.sourceName} · ${preview.messageCount} messages · ${preview.contextEntries} generated context entries excluded · ${preview.attachmentsOmitted} attachments omitted. Copy visible text into a new session; source tools and paths are display evidence only. Compacted or rolled-back files are unsupported.`},
+      {key:'projectId',label:'Import into project',type:'select',options:snapshot.projects.map(p=>[p.id,p.name]),value:snapshot.projects[0].id},
+      {key:'providerId',label:'Agent for future prompts',type:'select',options:snapshot.providers.map(p=>[p.id,p.name]),value:snapshot.providers.find(p=>p.protocol==='codex-app-server')?.id||snapshot.providers[0].id},
+      {key:'title',label:'Conversation title',value:`Codex: ${preview.sourceName}`},
+      {key:'preview',type:'notice',label:`Conversation preview:\n${preview.previewText}`}
+    ],async values=>{const imported=await action('agents:codex:import',{...values,token:preview.token},true);if(imported?.importedThreadId){selectedId=imported.importedThreadId;view='threads';render();}});
+    editor.onCancel=()=>invoke('agents:codex:discard',{token:preview.token}).catch(()=>{});
+  }
   function nativeActivity(record, label) {
     const section = make('details', '', 'va-run-details'); section.append(make('summary', label));
     if (record.nativeEventsTruncated || record.toolEventsTruncated) section.append(make('p', 'Activity display reached its storage limit; some content is omitted.', 'va-hint'));
@@ -118,12 +131,17 @@
     });
   }
   function modelEditor(t) {
-    if (provider(t.providerId)?.protocol === 'opencode-acp') {
+    if (['opencode-acp','codex-app-server'].includes(provider(t.providerId)?.protocol)) {
       if (!t.nativeCatalog) return action('agents:threads:discover-models', { id: t.id });
-      return openEditor('Native session model', [
-        { key: 'notice', type: 'notice', label: `Observed from the ACP session on ${date(t.nativeCatalog.observedAt)}${t.nativeCatalog.truncated ? ' · catalogue display limited to 256 models' : ''}. An empty selection keeps the agent’s current session model.` },
-        { key: 'model', label: 'Model', type: 'select', options: [['', 'Keep current agent model'], ...t.nativeCatalog.models.map(item => [item.id, item.name])], value: t.model || '' },
-      ], values => action('agents:threads:model', { id: t.id, model: values.model }, true));
+      const codex=provider(t.providerId)?.protocol==='codex-app-server';
+      const effortOptions=model=>[['','Agent default'],...(t.nativeCatalog.models.find(m=>m.id===model)?.reasoningEfforts||[]).map(e=>[e,e])];
+      const fields=[
+        {key:'notice',type:'notice',label:`Observed from the native agent on ${date(t.nativeCatalog.observedAt)}${t.nativeCatalog.truncated?' · catalogue limited to 256 models':''}. A catalogue can be bundled or cached and does not verify account access. Empty model keeps the agent default.`},
+        {key:'model',label:'Model',type:'select',options:[['',codex?'Use agent catalogue default':'Keep current agent model'],...t.nativeCatalog.models.map(m=>[m.id,m.name])],value:t.model||'',...(codex?{onChange:value=>{editor.values.reasoningEffort='';editor.fields.find(f=>f.key==='reasoningEffort').options=effortOptions(value);render();}}:{})},
+        ...(codex?[{key:'reasoningEffort',label:'Reasoning effort',type:'select',options:effortOptions(t.model),value:t.reasoningEffort||''}]:[]),
+        ...(codex?[{key:'capabilities',type:'notice',label:t.nativeCatalog.models.map(m=>`${m.name}: ${(m.inputModalities||[]).join(', ')} · efforts ${(m.reasoningEfforts||[]).join(', ')||'unspecified'}`).join('\n')}]:[])
+      ];
+      return openEditor('Native session model',fields,values=>action('agents:threads:model',{id:t.id,model:values.model,...(codex?{reasoningEffort:values.reasoningEffort}:{})},true));
     }
     openEditor('Conversation model', [{ key: 'model', label: `Model name · configured catalogue: ${(provider(t.providerId)?.models || []).join(', ') || 'none (CLI default available)'}`, value: t.model || '' }], values => action('agents:threads:model', { id: t.id, model: values.model }, true));
   }
@@ -283,7 +301,7 @@
     const actions = make('div', '', 'va-actions'); actions.append(make('span', t.status, `va-status va-status-${t.status}`), button('Rename', () => openEditor('Rename conversation', [{ key: 'title', label: 'Title', required: true }], values => action('agents:threads:rename', { id: t.id, title: values.title }, true), { title: t.title })), button('Delete', () => askDelete('Delete conversation', `Delete “${t.title}”, its stored messages, and linked automations?`, () => action('agents:threads:delete', { id: t.id }, true)), 'va-danger'));
     const more = make('details', '', 'va-thread-more'); more.append(make('summary', 'Conversation tools'));
     const extras = make('div', '', 'va-actions'); extras.append(button(t.pinned ? 'Unpin' : 'Pin', () => action(t.pinned ? 'agents:threads:unpin' : 'agents:threads:pin', { id: t.id })), button(t.archived ? 'Unarchive' : 'Archive', () => action(t.archived ? 'agents:threads:unarchive' : 'agents:threads:archive', { id: t.id })), button('Notes & goal', () => notesEditor(t)), button('Fork', () => branch(t, 'fork')), button('Sidechat', () => branch(t, 'sidechat')), button('Model', () => modelEditor(t)));
-    if (provider(t.providerId)?.protocol === 'opencode-acp') { const refresh = button('Discover models', () => action('agents:threads:discover-models', { id: t.id })); refresh.disabled = pending || ['running', 'discovering'].includes(t.status); extras.append(refresh); }
+    if (['opencode-acp','codex-app-server'].includes(provider(t.providerId)?.protocol)) { const refresh = button('Discover models', () => action('agents:threads:discover-models', { id: t.id })); refresh.disabled = pending || ['running', 'discovering'].includes(t.status); extras.append(refresh); }
     extras.append(button('Child agent', () => childAgentEditor(t)), button('Hand off', () => childAgentEditor(t, true)),button('Conversation file diff',()=>showFileChanges(t))); more.append(extras); toolbar.append(title, actions); main.append(toolbar, more);
     if (t.goal) main.append(make('p', `Goal · ${t.goal.status}: ${t.goal.text}`, 'va-goal'));
     if (t.markers?.length) { const markers = make('div', '', 'va-markers'); for (const marker of t.markers) markers.append(button(`★ ${marker.label} ×`, () => action('agents:threads:marker:remove', { id: t.id, markerId: marker.id }))); main.append(markers); }
@@ -296,8 +314,9 @@
       const history=make('details','','va-run-details');history.append(make('summary','Turn file snapshots'));
       for(const [index,run]of runs.entries())if(run.fileChanges){const changes=run.fileChanges,row=make('section','','va-turn-snapshot');row.append(make('strong',`Turn ${index+1} · ${run.status} · ${changes.status}`));if(changes.error)row.append(make('p',changes.error,'va-hint'));const actions=make('div','','va-actions');if(changes.before&&changes.after)actions.append(button('View file changes',()=>showFileChanges(t,run)));if(!['running','discovering'].includes(t.status)){if(changes.before)actions.append(button('Restore before…',()=>showFileChanges(t,run,'before')));if(changes.after)actions.append(button('Restore after…',()=>showFileChanges(t,run,'after')));}row.append(actions);history.append(row);}main.append(history);
     }
-    if (t.claudeHistory || runs.some(run => run.toolEvents?.length || run.subagents?.length)) {
+    if (t.claudeHistory || t.codexHistory || runs.some(run => run.toolEvents?.length || run.subagents?.length)) {
       const activity = make('details', '', 'va-run-details va-native-history'); activity.append(make('summary', 'Native activity history'));
+      if (t.codexHistory) activity.append(make('p',`Imported Codex history · ${t.codexHistory.sourceName} · copied transcript, new session on continuation`,'va-hint'),nativeActivity(t.codexHistory.activity||{},'Imported Codex activity'));
       if (t.claudeHistory) { const source = t.claudeHistory; activity.append(make('p', `Imported Claude history · ${source.sourceName} · copied transcript, new session on continuation`, 'va-hint'), nativeActivity(source.activity || {}, 'Imported Claude activity')); }
       for (const [index, run] of runs.entries()) if (run.toolEvents?.length || run.subagents?.length) activity.append(nativeActivity(run, `Turn ${index + 1} native activity`));
       main.append(activity);
@@ -406,7 +425,7 @@
     const oldMessages = root.querySelector('[data-scroll="messages"]'); const atEnd = !oldMessages || oldMessages.scrollHeight - oldMessages.scrollTop - oldMessages.clientHeight < 50; const oldScroll = oldMessages?.scrollTop || 0;
     root.classList.add('vek-agent-panel'); root.replaceChildren();
     const head = make('div', '', 'va-header'); const title = make('div'); title.append(make('h1', 'Agent workspace'), make('p', 'Your projects, conversations, and local agents.'));
-    const globalActions = make('div', '', 'va-actions'); globalActions.append(button('Import JSON', () => action('agents:file:import', {})), button('Import Claude history', importClaude), button('Export JSON', () => action('agents:file:export', {})), button('Export without files', () => action('agents:file:export', { metadataOnly: true })), button('New conversation', newThread, 'va-primary')); head.append(title, globalActions); root.append(head);
+    const globalActions = make('div', '', 'va-actions'); globalActions.append(button('Import JSON', () => action('agents:file:import', {})), button('Import Claude history', importClaude), button('Import Codex history', importCodex), button('Export JSON', () => action('agents:file:export', {})), button('Export without files', () => action('agents:file:export', { metadataOnly: true })), button('New conversation', newThread, 'va-primary')); head.append(title, globalActions); root.append(head);
     const tabs = make('nav', '', 'va-tabs'); tabs.setAttribute('aria-label', 'Agent workspace sections');
     for (const [id, name] of [['threads', 'Conversations'], ['automations', 'Automations'], ['providers', 'Agents']]) { const tab = button(name, () => { view = id; error = ''; render(); }, view === id ? 'is-active' : ''); tab.setAttribute('aria-current', view === id ? 'page' : 'false'); tabs.append(tab); } root.append(tabs);
     if (error && !editor) { const alert = make('div', error, 'va-error'); alert.role = 'alert'; root.append(alert); }

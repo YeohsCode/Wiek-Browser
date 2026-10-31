@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-31T08:35:28.869Z",
-  "version": "0.7.0",
+  "generatedAt": "2026-10-31T13:13:53.332Z",
+  "version": "0.8.0",
   "versionMatches": true,
-  "checkedFiles": 146,
+  "checkedFiles": 148,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -29,12 +29,12 @@
     },
     {
       "file": "app/agent-panel.js",
-      "sha256": "1591808a2ebbd7d2886a7c644b592feef4e0d58d73edecbc0d5aafef808476ca",
+      "sha256": "1e25a9892b023bf7da2f5625da8093a64ed500f94c315bdba105c334a69beb8d",
       "matches": true
     },
     {
       "file": "app/agent-service.cjs",
-      "sha256": "19f658c7ef64a74b51d83cf1a6e76bcd56ea81255b2a72fcccb0203b615aebf5",
+      "sha256": "0b421da168f4cc47b0209486ed25b1d7621d4dfa35992a12ad2020cbe3af65ee",
       "matches": true
     },
     {
@@ -74,12 +74,22 @@
     },
     {
       "file": "app/claude-history.cjs",
-      "sha256": "9e9363a34ab5822977c4ad8c0a6f6eaa877a24ce22d80b68b802e96ccbf5c091",
+      "sha256": "c87fa903abb9f6704f436e389e10bd1b721a991db485e5aea912bbd1e92bfcba",
       "matches": true
     },
     {
       "file": "app/claude-session.cjs",
       "sha256": "9ce891cd8b64eec7921fe3b35575b42654e821a43d150dfc1013dc82032fc0b4",
+      "matches": true
+    },
+    {
+      "file": "app/codex-history.cjs",
+      "sha256": "d04d1ab1ca25a8af68b062445eb870e0b6f24505dabd16c56ceea763ccd6d606",
+      "matches": true
+    },
+    {
+      "file": "app/codex-protocol.cjs",
+      "sha256": "fffe57f4be67f3d05fab57ad9d5cc6dcca31a32505078a3eeb120d75f67e3308",
       "matches": true
     },
     {
@@ -104,7 +114,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "0b617d3eb5a08cff1bf5875b981489fd7c5a2d5a09671bc80db1d5e14448e78b",
+      "sha256": "61b6071ca6655dc6f9a92eede9b46dfb431079485b74435162636ae696e0a0a5",
       "matches": true
     },
     {
@@ -729,7 +739,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "aab7664aab14659a4f20bd22bc8d0e499d2f40d1ffab21792c946ad2d1c955de",
+      "sha256": "e9fe03c46b3fc5bbef3c6920b4247f957444d86316b3f5abf839e085676c7170",
       "matches": true
     },
     {

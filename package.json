@@ -1,0 +1,52 @@
+{
+  "name": "vek-browser",
+  "version": "0.3.0",
+  "private": true,
+  "license": "MIT",
+  "description": "A local Chromium browser with task spaces and an MIT-compatible agent runtime",
+  "type": "module",
+  "main": "app/main.cjs",
+  "bin": {
+    "vek-browser": "cli/vek-browser.mjs"
+  },
+  "scripts": {
+    "start": "electron .",
+    "build:sdk": "npm --prefix packages/sdk run build",
+    "test:upstream": "npm --prefix packages/sdk test",
+    "test": "node --test tests/*.test.mjs",
+    "test:e2e": "node tests/run-comparison.mjs",
+    "dist": "electron-builder --mac dir",
+    "test:workbench": "node tests/workbench-integration.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^42.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "app.vek.browser",
+    "productName": "Vek Browser",
+    "electronDist": "node_modules/electron/dist",
+    "asar": false,
+    "files": [
+      "app/**",
+      "cli/**",
+      "packages/sdk/dist/**",
+      "packages/sdk/skill-body/**",
+      "packages/sdk/LICENSE",
+      "skills/ego-browser/**",
+      "NOTICE.md",
+      "package.json",
+      "models/**",
+      "skills/vek-browser/**"
+    ],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Record audio when you choose Voice input in Vek Browser. Audio is transcribed locally."
+      }
+    }
+  }
+}

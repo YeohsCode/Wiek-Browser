@@ -1,0 +1,15 @@
+✔ profile archive writes only ciphertext to a temporary file and restores all supported categories (699.982709ms)
+✔ wrong passphrase and every authenticated header/cipher component fail without returning data (1842.136958ms)
+✔ expired archives and unknown versions, algorithms and MIME types are explicit failures (478.824292ms)
+✔ validation rejects pollution keys, nonplain JSON, accessors and unsupported data fields before encryption (0.744958ms)
+✔ portable URLs, cookie metadata, exact password origins and primitive types are validated (1.108917ms)
+✔ limits reject oversized files, payloads, category counts and structural depth (242.537375ms)
+✔ independent operations are reusable and decoded objects never alias input or one another (466.600417ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3814.687833

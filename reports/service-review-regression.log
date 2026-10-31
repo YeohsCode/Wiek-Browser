@@ -1,0 +1,34 @@
+✔ catalog reads bounded instruction roots, deduplicates symlinks, persists enable/selection and excludes unrelated files (12.677291ms)
+✔ voice executes real fake transcriber with literal argv, cleans recordings and persists config (102.577375ms)
+✔ voice enforces overlap, cancellation and timeout without a fake successful transcript (107.457459ms)
+✔ voice dictionary, language, retained audio, soft deletion and retention apply to actual subprocess output (97.737625ms)
+✔ MCP stdio initializes, paginates tools, isolates thread processes and answers roots/list (114.001833ms)
+✔ known credential values are transient, redacted in results/keys and never forwarded implicitly (75.638584ms)
+✔ MCP tool tasks time out, cancel, reject foreign reads and ignore late replies (129.889334ms)
+✔ malformed and oversized MCP stdout fail pending tasks; unknown tools are rejected (206.807833ms)
+✔ invalid initialize versions and initialization timeouts disconnect cleanly (159.325667ms)
+✔ closing MCP records interrupted tasks and releases the persistent store lock (53.533875ms)
+✔ loopback gateway pairs once, binds scopes, forwards real tools and revokes tokens (100.6465ms)
+✔ HTTP cancellation owns its request and disconnected stdio servers reconnect (145.346417ms)
+(node:17456) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ selected Chromium profile read transaction includes WAL, handles path metacharacters, never needs a key for history/bookmarks (19.687375ms)
+✔ mac v10 decryption validates host binding and rejects wrong/unknown keys (1.294209ms)
+✔ cookies/password import decrypts fixtures, requests key once, reports partitioned/expired failures (59.548958ms)
+✔ vault stores only sealed secrets, deduplicates, requires exact origin, survives restart, and encrypts atomically (8.038458ms)
+✔ catalog never supplies stale project file after symlink replacement or other-project selection (9.1885ms)
+✔ catalog bounds complete UTF-8 context including source headers (4.457542ms)
+✔ voice close is terminal and snapshot applies history retention without a special list call (60.482042ms)
+✔ voice stop and close await child shutdown and prevent replacement transcription (3.049292ms)
+✔ profile import rejects a symlinked Network directory and URL authority injection in cookies (22.386375ms)
+✔ vault rejects non-HTTP origins and remains unchanged after disk persistence failure (1.380416ms)
+✔ browser snapshot accepts only an optional string target in resolved thread scope (0.355833ms)
+✔ voice keeps multibyte transcripts intact across process stdout chunk boundaries (82.636042ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1064.543083

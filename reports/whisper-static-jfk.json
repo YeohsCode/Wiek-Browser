@@ -1,0 +1,58 @@
+{
+  "startedAt": "2026-10-30T07:00:45.119Z",
+  "finishedAt": "2026-10-30T07:00:45.920Z",
+  "elapsedMs": 799.823792,
+  "exitCode": 0,
+  "signal": null,
+  "command": [
+    "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/bin/whisper-cli",
+    "-m",
+    "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/models/ggml-tiny.bin",
+    "-f",
+    "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/downloads/voice/jfk.wav",
+    "-l",
+    "en",
+    "-nt",
+    "-np"
+  ],
+  "binary": {
+    "path": "app/bin/whisper-cli",
+    "bytes": 2537232,
+    "sha256": "507deaba45dea03ea06abe61c4e5536e77c9ac7f6f17f0b4cf662b5d3b84c740"
+  },
+  "model": {
+    "path": "models/ggml-tiny.bin",
+    "bytes": 77691713,
+    "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21"
+  },
+  "audio": {
+    "path": "downloads/voice/jfk.wav",
+    "bytes": 352078,
+    "sha256": "59dfb9a4acb36fe2a2affc14bacbee2920ff435cb13cc314a08c13f66ba7860e",
+    "sampleRate": 16000,
+    "channels": 1,
+    "sampleWidthBytes": 2,
+    "durationSeconds": 11.0
+  },
+  "stdoutPath": "reports/whisper-static-jfk.stdout.txt",
+  "stderrPath": "reports/whisper-static-jfk.stderr.txt",
+  "transcript": "And so my fellow Americans ask not what your country can do for you, ask what you can do for your country.",
+  "error": null,
+  "realtimeFactor": 0.07271125381818182,
+  "source": {
+    "repository": "https://github.com/ggml-org/whisper.cpp",
+    "tag": "v1.9.4",
+    "commit": "927cfce34f31707e17f2bff35c349632fb9e2c3a",
+    "license": "MIT"
+  },
+  "architecture": "arm64",
+  "macosDeploymentTarget": "12.0",
+  "cpuOnly": true,
+  "nonSystemLibrariesStatic": true,
+  "dynamicDependencies": [
+    "/usr/lib/libSystem.B.dylib",
+    "/usr/lib/libc++.1.dylib"
+  ],
+  "compiler": "Apple clang version 16.0.0 (clang-1600.0.26.6)\nTarget: arm64-apple-darwin24.5.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin",
+  "cmake": "cmake version 4.2.1"
+}

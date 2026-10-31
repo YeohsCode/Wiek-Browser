@@ -1,0 +1,44 @@
+#!/usr/bin/env node
+import { spawn } from 'node:child_process';
+import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { createRequire } from 'node:module';
+const require = createRequire(import.meta.url), electron = require('electron');
+const root = resolve(import.meta.dirname, '..'), dir = await mkdtemp(join(tmpdir(), 'vek-mcp-panel-'));
+const html = join(dir, 'panel.html'), script = join(dir, 'smoke.cjs');
+await writeFile(html, `<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="${pathToFileURL(join(root, 'app/mcp-panel.css'))}"><style>body{margin:0;background:#fafbff;font-family:system-ui}</style></head><body><main id="panel"></main><script src="${pathToFileURL(join(root, 'app/mcp-panel.js'))}"></script></body></html>`);
+await writeFile(script, `
+const {app,BrowserWindow}=require('electron'), assert=require('node:assert/strict'), fs=require('node:fs');
+app.setPath('userData',${JSON.stringify(join(dir,'profile'))});
+app.whenReady().then(async()=>{
+ const w=new BrowserWindow({show:false,width:1080,height:820,webPreferences:{sandbox:true,contextIsolation:true,nodeIntegration:false,backgroundThrottling:false}});await w.loadFile(${JSON.stringify(html)});const e=code=>w.webContents.executeJavaScript(code);let assertions=0;
+ await e(\`window.calls=[];window.fixture={integrations:[{id:'i1',name:'Local fixture',command:'node',args:['server.cjs'],scope:{projectId:'p1'},credentialRefs:{},enabled:true}],tasks:[],grants:[],connections:[],gateway:null};
+ window.dispatch=async(name,p)=>{calls.push({name,p});if(name==='mcp:tools:list')return {tools:[{name:'echo',description:'Echo locally',inputSchema:{type:'object'}}]};if(name==='mcp:integrations:save'){fixture.integrations.push({...p,id:'i2'});return fixture}if(name==='mcp:tasks:create'){const task={id:'task1',name:p.name,scope:p.scope,status:'running',createdAt:new Date().toISOString()};fixture.tasks.push(task);return task}if(name==='mcp:tasks:cancel'){fixture.tasks[0].status='cancelled';return fixture}if(name==='mcp:pairing:create')return {code:'one-time-pairing',exchangeUrl:'http://127.0.0.1:9000/pair',expiresAt:new Date(Date.now()+300000).toISOString()};return fixture};
+ window.ui=window.createVekMcpPanel(document.getElementById('panel'),dispatch,{projects:[{id:'p1',name:'Sample project'}],threads:[{id:'t1',projectId:'p1',title:'Sample thread'}]});ui.update(fixture);
+ window.clickText=text=>[...document.querySelectorAll('button')].find(b=>b.textContent===text)?.click();undefined;\`);
+ assert.equal(await e("document.querySelector('.vm-card h3').textContent"),'Local fixture');assertions++;
+ await e("var t=document.querySelector('select[aria-label=\\\"Thread scope\\\"]');t.value='t1';t.dispatchEvent(new Event('change'));clickText('List tools');new Promise(r=>setTimeout(r,20))");
+ assert.equal(await e("[...document.querySelectorAll('button')].some(b=>b.textContent==='Run tool')"),true);assertions++;
+ await e("clickText('Add MCP server');var f=document.querySelector('.vm-dialog');f.elements.name.value='Another server';f.elements.name.dispatchEvent(new Event('input'));f.elements.command.value='node';f.elements.command.dispatchEvent(new Event('input'));f.elements.args.value='not json';f.elements.args.dispatchEvent(new Event('input'));f.requestSubmit();new Promise(r=>setTimeout(r,20))");
+ assert.match(await e("document.querySelector('.vm-dialog .vm-error').textContent"),/valid JSON/);assertions++;
+ await e("var f=document.querySelector('.vm-dialog');f.elements.args.value='[\\\"server.cjs\\\"]';f.elements.args.dispatchEvent(new Event('input'));f.elements.credentialRefs.value='{\\\"API_KEY\\\":\\\"env:MY_API_KEY\\\"}';f.elements.credentialRefs.dispatchEvent(new Event('input'));f.requestSubmit();new Promise(r=>setTimeout(r,20))");
+ assert.equal(await e("fixture.integrations.length"),2);assertions++;assert.equal(await e("fixture.integrations[1].scope.threadId"),'t1');assertions++;
+ await e("clickText('Run tool');document.querySelector('.vm-dialog').requestSubmit();new Promise(r=>setTimeout(r,20))");
+ assert.equal(await e("document.querySelector('.vm-status').textContent"),'running');assertions++;
+ await e("clickText('Cancel');new Promise(r=>setTimeout(r,20))");assert.equal(await e("fixture.tasks[0].status"),'cancelled');assertions++;assert.equal(await e("document.querySelector('.vm-status').textContent"),'cancelled');assertions++;
+ await e("fixture.tasks[0].result={content:[{type:'text',text:'<img id=bad src=x>'}]};ui.update(fixture)");assert.equal(await e("document.getElementById('bad')===null"),true);assertions++;
+ await e("clickText('Paired clients');clickText('Pair a local client');document.querySelector('.vm-dialog').requestSubmit();new Promise(r=>setTimeout(r,20))");
+ assert.equal(await e("document.querySelector('input[name=code]').value"),'one-time-pairing');assertions++;
+ await e("clickText('Done')");assert.equal(await e("document.querySelector('.vm-dialog')===null"),true);assertions++;
+ await e("clickText('Integrations')");assert.equal(await e("document.querySelector('.vm-tabs .is-active').textContent"),'Integrations');assertions++;await new Promise(r=>setTimeout(r,150));fs.writeFileSync(${JSON.stringify(join(root,'reports/mcp-panel-smoke.png'))},(await w.webContents.capturePage()).toPNG());
+ console.log(JSON.stringify({ok:true,assertions,screenshot:'reports/mcp-panel-smoke.png'}));app.quit();
+}).catch(error=>{console.error(error);app.exit(1)});
+`);
+const env = { ...process.env }; delete env.ELECTRON_RUN_AS_NODE;
+const child = spawn(electron, [script], { env, stdio: ['ignore', 'pipe', 'pipe'] });
+let output = ''; child.stdout.on('data', chunk => { output += chunk; process.stdout.write(chunk); }); child.stderr.on('data', chunk => { output += chunk; process.stderr.write(chunk); });
+const timeout = setTimeout(() => child.kill('SIGKILL'), 20000);
+const code = await new Promise(resolve => child.once('close', resolve)); clearTimeout(timeout);
+await writeFile(join(root, 'reports/mcp-panel-smoke.log'), output); await rm(dir, { recursive: true, force: true }); process.exitCode = code || 0;

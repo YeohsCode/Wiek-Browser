@@ -1,0 +1,126 @@
+✖ catalog never supplies stale project file after symlink replacement or other-project selection (7.790125ms)
+✖ catalog bounds complete UTF-8 context including source headers (2.777833ms)
+✖ voice close is terminal and snapshot applies history retention without a special list call (52.559125ms)
+✖ voice stop and close await child shutdown and prevent replacement transcription (4.116541ms)
+✖ profile import rejects a symlinked Network directory and URL authority injection in cookies (7.611875ms)
+✖ vault rejects non-HTTP origins and remains unchanged after disk persistence failure (1.050959ms)
+✖ browser snapshot accepts only an optional string target in resolved thread scope (0.259583ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 0
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 153.900708
+
+✖ failing tests:
+
+test at tests/service-review-regression.test.mjs:14:1
+✖ catalog never supplies stale project file after symlink replacement or other-project selection (7.790125ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/service-review-regression.test.mjs:17:2)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /scope|available|enabled/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/service-review-regression.test.mjs:23:1
+✖ catalog bounds complete UTF-8 context including source headers (2.777833ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/service-review-regression.test.mjs:25:180)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /12000.*byte|12.*KiB/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests/service-review-regression.test.mjs:27:1
+✖ voice close is terminal and snapshot applies history retention without a special list call (52.559125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/service-review-regression.test.mjs:30:62)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/service-review-regression.test.mjs:33:1
+✖ voice stop and close await child shutdown and prevent replacement transcription (4.116541ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /closed/. Input:
+  
+  'Error: A transcription is already running'
+  
+      at async TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/service-review-regression.test.mjs:34:444)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: A transcription is already running
+        at Object.dispatch (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/voice-service.cjs:63:24)
+        at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/service-review-regression.test.mjs:34:473)
+        at async Test.run (node:internal/test_runner/test:1113:7)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:788:7),
+    expected: /closed/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at tests/service-review-regression.test.mjs:36:1
+✖ profile import rejects a symlinked Network directory and URL authority injection in cookies (7.611875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  true !== false
+  
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/service-review-regression.test.mjs:39:64)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: true,
+    expected: false,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/service-review-regression.test.mjs:42:1
+✖ vault rejects non-HTTP origins and remains unchanged after disk persistence failure (1.050959ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/service-review-regression.test.mjs:43:147)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /HTTP|origin/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at tests/service-review-regression.test.mjs:46:1
+✖ browser snapshot accepts only an optional string target in resolved thread scope (0.259583ms)
+  TypeError: Cannot read properties of undefined (reading 'type')
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/service-review-regression.test.mjs:47:237)
+      at Test.runInAsyncScope (node:async_hooks:213:14)
+      at Test.run (node:internal/test_runner/test:1106:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:788:18)
+      at Test.postRun (node:internal/test_runner/test:1235:19)
+      at Test.run (node:internal/test_runner/test:1163:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)

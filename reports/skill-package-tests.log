@@ -1,0 +1,12 @@
+✔ the bundled usage guide is the source guide between version and end markers (3.441333ms)
+✔ the bundled entry Skill matches the published entry Skill (0.935541ms)
+✔ the entry Skill defers usage to ego-browser skill (0.444ms)
+✔ project Agent and Codex entries share the canonical Skill (0.307792ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 69.843375

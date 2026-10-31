@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "protocolMethods": [
+    "initialize",
+    "thread/start"
+  ],
+  "ephemeral": true,
+  "sandbox": "read-only",
+  "paidTurnStarted": false,
+  "diagnosticBytes": 3475
+}

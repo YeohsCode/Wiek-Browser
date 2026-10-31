@@ -1,0 +1,294 @@
+[
+  {
+    "task_id": "rwb-x-openai-7d-01",
+    "website": "https://x.com/OpenAI",
+    "local_site": null,
+    "requires_login": true,
+    "login_platforms": [
+      "X"
+    ],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-openai-careers-apply-01",
+    "website": "https://openai.com/careers/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [
+      "resume-cloud-infra.pdf"
+    ],
+    "rubric_count": 5
+  },
+  {
+    "task_id": "rwb-redfin-mortgage-01",
+    "website": "https://www.redfin.com",
+    "local_site": null,
+    "requires_login": true,
+    "login_platforms": [
+      "Redfin"
+    ],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-expedia-flight-01",
+    "website": "https://www.expedia.com",
+    "local_site": null,
+    "requires_login": true,
+    "login_platforms": [
+      "Expedia"
+    ],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-hn-top10-01",
+    "website": "https://news.ycombinator.com",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-imdb-scifi-01",
+    "website": "https://www.imdb.com/search/title/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-calcnet-mortgage-01",
+    "website": "https://www.calculator.net/mortgage-calculator.html",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 3
+  },
+  {
+    "task_id": "rwb-cars-payment-01",
+    "website": "https://www.cars.com",
+    "local_site": null,
+    "requires_login": true,
+    "login_platforms": [
+      "Cars.com"
+    ],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-yahoo-stocks-01",
+    "website": "https://finance.yahoo.com",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-yelp-opentable-01",
+    "website": "https://www.yelp.com",
+    "local_site": null,
+    "requires_login": true,
+    "login_platforms": [
+      "Yelp",
+      "OpenTable"
+    ],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-reddit-greenhouse-01",
+    "website": "https://job-boards.greenhouse.io/reddit",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-reddit-pf-indexfund-01",
+    "website": "https://old.reddit.com/r/personalfinance",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-github-trending-py-01",
+    "website": "https://github.com/trending",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-bankrate-compound-01",
+    "website": "https://www.bankrate.com/banking/savings/compound-savings-calculator/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 5
+  },
+  {
+    "task_id": "rwb-metacritic-actionrpg-01",
+    "website": "https://www.metacritic.com/browse/game/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-stockanalysis-tech-01",
+    "website": "https://stockanalysis.com/stocks/screener/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-zillow-greatschools-austin-01",
+    "website": "https://www.zillow.com/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 5
+  },
+  {
+    "task_id": "rwb-xe-irs-reimbursement-01",
+    "website": "https://www.xe.com/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-youtube-finance-channel-01",
+    "website": "https://www.youtube.com/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-amazon-bottle-leaks-01",
+    "website": "https://www.amazon.com/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 5
+  },
+  {
+    "task_id": "rwb-houzz-homedepot-backsplash-01",
+    "website": "https://www.houzz.com/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 5
+  },
+  {
+    "task_id": "rwb-google-flights-booking-miami-01",
+    "website": "https://www.google.com/travel/flights",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-courtlistener-sec-helix-01",
+    "website": "https://www.courtlistener.com/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-scratch-apple-dash-01",
+    "website": "https://scratch.mit.edu/projects/editor/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-2048-reach-256-01",
+    "website": "https://classic.play2048.co/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 4
+  },
+  {
+    "task_id": "rwb-song-maker-mirror-loop-01",
+    "website": "https://musiclab.chromeexperiments.com/Song-Maker/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-census-sba-qcew-naics541511-01",
+    "website": "https://www.census.gov/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-webflow-squarespace-wix-01",
+    "website": "https://webflow.com/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-nist-cisa-nvd-readiness-01",
+    "website": "https://www.nist.gov/cyberframework",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-bls-census-retail-metros-01",
+    "website": "https://www.bls.gov/oes/",
+    "local_site": null,
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  },
+  {
+    "task_id": "rwb-lumen-ticket-rush-01",
+    "website": null,
+    "local_site": "ticket-rush",
+    "requires_login": false,
+    "login_platforms": [],
+    "attachments": [],
+    "rubric_count": 6
+  }
+]

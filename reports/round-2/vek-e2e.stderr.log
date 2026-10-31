@@ -1,0 +1,190 @@
+
+  dist/src/page-model.js                         86.5kb
+  dist/src/element-resolver.js                   69.6kb
+  dist/src/driver/page-actions.js                46.4kb
+  dist/src/browser-runtime.js                    41.5kb
+  dist/src/public-api-schema.js                  23.9kb
+  dist/src/driver/page-waits.js                  20.6kb
+  dist/src/driver/page-keyboard.js               18.5kb
+  dist/src/driver/pointer.js                     18.3kb
+  dist/src/helpers.js                            18.2kb
+  dist/src/clipboard.js                          17.0kb
+  dist/src/page-ledger.js                        16.3kb
+  dist/src/driver/keyboard.js                    14.9kb
+  dist/src/driver/action-target.js               14.2kb
+  dist/src/snapshot-result.js                    10.3kb
+  dist/src/learning/validate-learning-format.js   8.9kb
+  dist/src/help-runtime.js                        8.4kb
+  dist/src/driver/downloads.js                    8.2kb
+  dist/src/ego-errors.js                          6.5kb
+  dist/src/learning/index.js                      6.2kb
+  dist/src/index.js                               6.0kb
+  ...and 25 more output files...
+
+⚡ Done in 22ms
+[ego-browser] js() received a function and auto-wrapped it (() => document.title).
+  js() is a thin wrapper over CDP Runtime.evaluate; it takes a string expression,
+  not a Puppeteer/Playwright-style callable. Auto-wrap does NOT capture closure
+  variables and has NO args channel.
+  Prefer:
+    js(`<expression>`)  // pure expression or explicit IIFE
+[ego-browser] js() received a function and auto-wrapped it (function () {\n      return typeof outer;\n    }).
+  js() is a thin wrapper over CDP Runtime.evaluate; it takes a string expression,
+  not a Puppeteer/Playwright-style callable. Auto-wrap does NOT capture closure
+  variables and has NO args channel.
+  Prefer:
+    js(`<expression>`)  // pure expression or explicit IIFE
+Error: real browser e2e: page.waitForEvent("popup") timed out after 3000ms
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18663:37
+    at finish (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18649:17)
+    at Timeout.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18663:17)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[FAIL] Page popup waiter and URL diagnostic (3.3s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+Error: real browser e2e: the real browser requests the declared favicon
+    at assert (eval at execute (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:20818:14), <anonymous>:29:29)
+    at eval (eval at execute (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:20818:14), <anonymous>:416:5)
+    at async execute (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:20825:9)
+    at async Module.runMain (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:20802:5)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs:52:26
+[FAIL] Page load states (7.9s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] Page dedicated Worker startup (98ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] Page API alignment (97ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] Page actionability (95ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] Page evaluate timeout recovery (97ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] Page delayed popup: schedule (96ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+Error: real browser e2e: ENOENT: no such file or directory, open '/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/ego-browser-real-e2e-rpXrHx/delayed-popup-state.json'
+    at async open (node:internal/fs/promises:641:25)
+    at async readFile (node:internal/fs/promises:1279:14)
+    at async eval (eval at execute (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:20818:14), <anonymous>:250:7)
+    at async execute (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:20825:9)
+    at async Module.runMain (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:20802:5)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs:52:26
+[FAIL] Page delayed popup: resume (94ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] v1 and v2 action parity (96ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] portable keyboard workflow (98ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] Page keyboard interface (101ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] pure CDP workflow (98ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] snapshot workflow (92ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+PageBudgetError: real browser e2e: Page budget reached (3/3) in space "ego-lite real browser e2e 1793324532214-4af1b19fe461a8".
+
+  p48    "ego-lite secondary"
+  p56    "DOMContentLoaded fixture"
+  p57    "Favicon redirect fixture" active
+
+Close: await task.page('p48').close()
+Reuse: await task.page('p48').goto(url)
+    at pageBudgetError (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:19851:12)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:18263:23
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js:16940:28
+[FAIL] visual workflow (95ms): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1

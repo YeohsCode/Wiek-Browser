@@ -1,0 +1,29 @@
+✔ named checkpoint preserves real staged, unstaged, untracked bytes without changing index or stash (816.293084ms)
+✔ explicit restore reproduces exact index, staged blob, worktree, untracked binary and deletion (2000.748666ms)
+✔ restore requires explicit confirmation and fresh preview; conflicting work stays intact (1287.341542ms)
+✔ external symlink, index lock, submodule mode and merge states are refused without writes (360.361875ms)
+✔ HEAD changes and ignored destination collisions refuse restore without losing files (909.27925ms)
+✔ checkpoints survive service restart and git gc without changing branches or user stashes (883.283334ms)
+✔ index flags remain byte-identical and split-index layouts are refused (1072.720167ms)
+✔ late filesystem collision rolls back real file replacements and preserves concurrent bytes (5359.863916ms)
+✔ preview authorization is bound to the selected checkpoint and unsafe restore symlinks are refused (1158.654584ms)
+✔ a new Git lock acquired after index replacement is never removed by checkpoint cleanup (1026.553375ms)
+✔ project scope rejects traversal, outside symlinks and protected Git metadata (7.691333ms)
+✔ atomic text writes preserve contents, require hashes and detect external edits (10.904125ms)
+✔ concurrent same-hash saves serialize so only the first succeeds (4.612083ms)
+✔ tree/search are bounded, skip heavy folders and do not follow symlink directories (10.547208ms)
+✔ UTF-8 editor rejects binary/oversize files while artifacts support image metadata (3.735542ms)
+✔ Git supports real staging, committing, diff, history and branch switching (572.702458ms)
+✔ Git stash lifecycle preserves real local modifications (246.223084ms)
+✔ Git rejects parent repository scope and option/pathspec injection (152.013291ms)
+✔ project watchers report changes and close without leaking handles (169.893084ms)
+✔ new files cannot enter Git internals through a directory alias (94.849541ms)
+✔ Git filenames are literal argv and inherited Git-directory overrides are removed (128.12425ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14964.303666

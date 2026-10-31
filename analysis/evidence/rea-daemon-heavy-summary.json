@@ -1,0 +1,50 @@
+{
+  "evidence_id": "ev_0a7bdc68255ac1adb7db5fd967eaa355b6bbd1830efb7f12c750d8540dcbbee3",
+  "subject": {
+    "name": "local-ego-daemon",
+    "digest": {
+      "sha256": "faefbb871ce738640629c2cd38085e6261f7030d0b11c2ecaee24b269175cae7"
+    },
+    "local_path": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/downloads/ego/ego lite.app/Contents/Frameworks/ego Framework.framework/Versions/0.6.1.13/Resources/local-ego-daemon",
+    "format": "directory",
+    "architecture": null
+  },
+  "parameters": {
+    "format": "auto",
+    "integrity_policy": "fail",
+    "max_semantic_nodes": 4500,
+    "max_semantic_nodes_per_file": 1500,
+    "source_paths": [
+      "runtime/run-DeGOi3G8.mjs",
+      "runtime/acp-CMydSrPv.mjs",
+      "runtime/sdk-BNTzx9JU.mjs"
+    ],
+    "max_heap_mb": 768,
+    "analysis_timeout_ms": 90000
+  },
+  "coverage": null,
+  "limitations": [
+    "Caller-selected source analysis leaves 466 inventoried files outside analysis scope. Inventory identity covers the complete artifact; relationships through unselected sources remain unknown.",
+    "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+    "Graph coverage is incomplete; unavailable facts remain explicit and must not be read as absence.",
+    "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.",
+    "Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.",
+    "Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.",
+    "Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code."
+  ],
+  "unknowns": null,
+  "result_keys": [
+    "format",
+    "graph",
+    "input_path",
+    "integrity_contradictions",
+    "inventory_graph_sha256",
+    "inventory_manifest_id",
+    "limitations",
+    "root_artifact_sha256",
+    "semantic_graph",
+    "source_selection",
+    "statistics",
+    "summary"
+  ]
+}

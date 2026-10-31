@@ -1,0 +1,7 @@
+{
+  "electron": "42.11.18",
+  "chromium": "148.0.7778.280",
+  "node": "24.19.0",
+  "arch": "arm64",
+  "platform": "darwin"
+}

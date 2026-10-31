@@ -1,0 +1,45 @@
+node_modules/
+packages/sdk/node_modules/
+packages/sdk/dist/
+packages/sdk/artifacts/
+data/
+downloads/
+references/
+dist/
+*.log
+.DS_Store
+
+# Local reverse-engineering payloads and build intermediates, never source inputs.
+/analysis/extracted-ego-resources/
+/analysis/ego-client-static-index.json
+/analysis/evidence/*
+!/analysis/evidence/rea-daemon-heavy-summary.json
+!/analysis/evidence/rea-daemon-heavy-coverage.json
+!/analysis/evidence/rea-client-pak-summary.json
+!/analysis/evidence/shipped-daemon-source-identities.json
+!/analysis/evidence/download.sha256
+!/analysis/evidence/whisper-model-manifest.json
+/tools/whisper-static-build/
+
+# The public model has a pinned download and checksum in models/MODEL-NOTICE.md.
+/models/*.bin
+/models/*.tmp
+
+# Copied upstream repository automation targets a different layout; not Vek CI.
+/.github/
+/lefthook.yml
+
+# Keep relative skill links, but never local agent configuration or credentials.
+/.codex/*
+!/.codex/skills/
+/.claude/*
+!/.claude/skills/
+/.agents/*
+!/.agents/skills/
+.env
+.env.*
+!.env.example
+
+# Test evidence is intentionally versioned, including failures and baseline logs.
+!/reports/*.log
+!/reports/**/*.log

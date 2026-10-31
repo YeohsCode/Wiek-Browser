@@ -1,0 +1,26 @@
+{
+  "dataDir": "/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/vek-snapshot-e2e-7wgwM8",
+  "cases": [
+    "environment initialization",
+    "observation helpers",
+    "Page snapshot locator quality",
+    "Page snapshot iframe viewport",
+    "Page snapshot subtree",
+    "Page ref identity across partial snapshots",
+    "Page refs across rounds: prepare",
+    "Page refs across rounds: resume",
+    "Page refs in dialog workflows",
+    "Page refs after failed actions: prepare",
+    "Page refs after failed actions: resume",
+    "Page refs after upload: prepare",
+    "Page refs after upload: resume",
+    "Page snapshot lazy iframe",
+    "Page snapshot sibling iframes",
+    "Page snapshot nested iframes",
+    "Page snapshot replaced iframe",
+    "Page open Shadow DOM locators",
+    "Page OOPIF actions",
+    "Page OOPIF restore and close",
+    "snapshot workflow"
+  ]
+}

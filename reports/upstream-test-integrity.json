@@ -1,0 +1,413 @@
+{
+  "commit": "aecc5831fc5a9ea01a078b632185992a3a7ac448",
+  "files": 81,
+  "allUnchanged": true,
+  "records": [
+    {
+      "file": "src/browser-runtime.test.mjs",
+      "sha256": "e6a1636ed0913e3bab9b4a6897f340aaf66c5622159de3527d8a089f7191d049",
+      "unchanged": true
+    },
+    {
+      "file": "src/cdp-eval.test.mjs",
+      "sha256": "b486cb05786f2fd966a7bbfbe3e644920d7d98ac456c9f0ae0e1ede7922e3695",
+      "unchanged": true
+    },
+    {
+      "file": "src/clipboard.test.mjs",
+      "sha256": "4198f5f6d6dd02ba181e512ecd250dc5b973a9ee1f98a2c390f820b85ac10838",
+      "unchanged": true
+    },
+    {
+      "file": "src/driver/action-target.test.mjs",
+      "sha256": "85e51623ff7109a9d36e915e88d2f913011677358089bfafd900088c0427f3a3",
+      "unchanged": true
+    },
+    {
+      "file": "src/driver/downloads.test.mjs",
+      "sha256": "424f04234bb2a8514ff4598849d7b13316fe620a9f7d42cf2723e8f571f2cd88",
+      "unchanged": true
+    },
+    {
+      "file": "src/driver/keyboard.test.mjs",
+      "sha256": "a374980b1221a7a4d4646b1d55ba535e4c617e553ef1ca7838bfaa4b496302a3",
+      "unchanged": true
+    },
+    {
+      "file": "src/driver/nav.test.mjs",
+      "sha256": "e0bb762cc49e13474c4420b534360cfbfc2bb40b267e4062c23e1c17f287cc89",
+      "unchanged": true
+    },
+    {
+      "file": "src/driver/observe.test.mjs",
+      "sha256": "c21563afe565ca6661e8be2178fee7d62d8668321ef413bd05695aac368c515d",
+      "unchanged": true
+    },
+    {
+      "file": "src/driver/page-waits.test.mjs",
+      "sha256": "7890a44d94bb52b89984ee1cc35bf531e50e18f5bf4e80e58df3d59ba880fd6e",
+      "unchanged": true
+    },
+    {
+      "file": "src/driver/pointer.test.mjs",
+      "sha256": "4a00a10e675869eedcd684ee3c36913b6c442839d18a7c6315ae8640e817c11d",
+      "unchanged": true
+    },
+    {
+      "file": "src/driver/scroll-motion.test.mjs",
+      "sha256": "65a91dd1a5d544ffc3a3a2a17ac970f2429b0c4a8bc3daf3e0bf4a1657d8efa9",
+      "unchanged": true
+    },
+    {
+      "file": "src/driver/waits.test.mjs",
+      "sha256": "62198ecbaccef5c835bfd144c778ab246ac67b48f5bf215bbfbe224cef4b0983",
+      "unchanged": true
+    },
+    {
+      "file": "src/ego-errors.test.mjs",
+      "sha256": "f29a74d510ef7ba7c34c143bee3c9998cc5e33beca16411341cddbf672bc0aae",
+      "unchanged": true
+    },
+    {
+      "file": "src/element-resolver.test.mjs",
+      "sha256": "4630fe7bbf999603f223854af1de9ee51711db85ff1382db92db023c1894af35",
+      "unchanged": true
+    },
+    {
+      "file": "src/format.test.mjs",
+      "sha256": "baceaaeb5281089ef156eaf66ebec2af7c41759d4914d9b755474e4d849f3f8d",
+      "unchanged": true
+    },
+    {
+      "file": "src/help-runtime.test.mjs",
+      "sha256": "c020c6b53d71e45fbfd011796f1e9398d0c26b0f0e0719e9cc3d949ffb383060",
+      "unchanged": true
+    },
+    {
+      "file": "src/helpers.test.mjs",
+      "sha256": "470c2914f5918402fa0b1c6686b68e50d10fff611a0a2ea4923bd3ca1bb63300",
+      "unchanged": true
+    },
+    {
+      "file": "src/native-gate.test.mjs",
+      "sha256": "4d7e8b2d44e20a018a212c1a5d3603cb276f7e5505203a6850a2eb43b17df949",
+      "unchanged": true
+    },
+    {
+      "file": "src/output-sink.test.mjs",
+      "sha256": "912d7a14d4d54d2fae71bd260ec4b88df17c65c3e502c03de62b1347f77866f0",
+      "unchanged": true
+    },
+    {
+      "file": "src/page-actions.test.mjs",
+      "sha256": "e7584d7af95c1aedd44cae05c4f5a38d610f37e6b5a005ca4ee9ef160fe2ba7e",
+      "unchanged": true
+    },
+    {
+      "file": "src/page-discovery.test.mjs",
+      "sha256": "b9909608eb7b8021bfd406bd8f27ae6e9cad7668d4d54ec6dea1905ad5034ef3",
+      "unchanged": true
+    },
+    {
+      "file": "src/page-ledger.test.mjs",
+      "sha256": "1ef47b4e9f073247aee7de83c3e36286761400fee36faff651a9bbadb7dd27d9",
+      "unchanged": true
+    },
+    {
+      "file": "src/page-model.test.mjs",
+      "sha256": "b4f338e0f9c9d085b276435f01f49365411cd519bbf3ae2f63d47111fe8f596b",
+      "unchanged": true
+    },
+    {
+      "file": "src/page-ref-registry.test.mjs",
+      "sha256": "5bab5e46f56a75742835661456d0b4d390cd36335f445f5e834cc8635d688072",
+      "unchanged": true
+    },
+    {
+      "file": "src/public-api-schema.test.mjs",
+      "sha256": "dfb2b7898859ea5fcb760a44ef4800a2acafdaf23b5b9e4b1fd6a058c8639fd6",
+      "unchanged": true
+    },
+    {
+      "file": "src/real-browser-fixture.test.mjs",
+      "sha256": "f9664614451edb28f35af9dcb3d95fab062ff5d088927b5eda642d0e859df8d7",
+      "unchanged": true
+    },
+    {
+      "file": "src/real-browser-runner.test.mjs",
+      "sha256": "96ad694ed7d395958a45f9fbffc02d710d8b61eab54e44b9859a727157f73841",
+      "unchanged": true
+    },
+    {
+      "file": "src/ref-map.test.mjs",
+      "sha256": "46945ff84ee23c05b122a9b88fa26e338a517603be1a00790a68f40e9cdb9ff6",
+      "unchanged": true
+    },
+    {
+      "file": "src/run-output-sink.test.mjs",
+      "sha256": "6d8dbbc7e10a081a822718975af8c33488170577a3e6d9137e7f0c03898b089e",
+      "unchanged": true
+    },
+    {
+      "file": "src/sdk-lifecycle.test.mjs",
+      "sha256": "4a773f951b56a9c0f5de3d315279c822a6bfc72f8b04f5c72287d27b258056ae",
+      "unchanged": true
+    },
+    {
+      "file": "src/skill-migration.test.mjs",
+      "sha256": "3b3ca4064554f8153d6d670dc786f22a18d1b6d847d2bf2d003ce8316eb9cd75",
+      "unchanged": true
+    },
+    {
+      "file": "src/skill-package.test.mjs",
+      "sha256": "08bcd93667194283ad2eb985e3742aecfe8d93498409d9f71d6d9232320c9708",
+      "unchanged": true
+    },
+    {
+      "file": "src/snapshot-result.test.mjs",
+      "sha256": "5cd8f390649d0985bcec7c2cc4edde8354434eb2d02ec8b601d77dbce4cd05cf",
+      "unchanged": true
+    },
+    {
+      "file": "src/taskspace-e2e.test.mjs",
+      "sha256": "403cb80bf6d8d53c4344ed850c7a67c0d10c3a208350849b0228655b5a35a052",
+      "unchanged": true
+    },
+    {
+      "file": "src/update-notice.test.mjs",
+      "sha256": "582762e21af095aaac765d4876d448d19cea22ee9273cb9d788ff6673c5808b2",
+      "unchanged": true
+    },
+    {
+      "file": "src/workflows.test.mjs",
+      "sha256": "b87a455af48ea912f4b6022a247f78586ada896767e455103ab25ec7ee930843",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/environment.mjs",
+      "sha256": "8bfe5d7f56827579f52aaee46e9a1c38385b3c7b52156846c25071882b8c8878",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/event-isolation.mjs",
+      "sha256": "e15e182406ecf11946d13b15f816409b2419005d7163abcdbf2650cd821b0acf",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/helper-surface.mjs",
+      "sha256": "ed07ef09e6ffb60bb14ff726f7fac8e772e8939daee49ba3b7a459f52d6ebe0e",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/index.mjs",
+      "sha256": "965bb9790a6e880523117031d64e144c38a4d4fd0258ca816c7f0e0c4ceb4f69",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/keyboard-regression.mjs",
+      "sha256": "d8057764a2a45b9a8794a584a44f4491da2e3309ad37967f51c069ea4ad26b3e",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/keyboard.mjs",
+      "sha256": "08561f41f19fbd78ae1f52b66497fc1ac4b9e3dc88bcbe312228746c6a3022a2",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/navigation.mjs",
+      "sha256": "fcc33424b0b70cdcc525cac7c24810d87d9ce2832a715e65db140e27bf6faa25",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/observation.mjs",
+      "sha256": "94df5498c4e80efd5dfb5d3fb2e61a0401e75fbd13a827bee7c260c1e542191b",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-action-motion.mjs",
+      "sha256": "6ad8a83fdf0e3bfd2e00a833f680fed4dd06c641a0fd4bebec6719b4493822ef",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-actionability.mjs",
+      "sha256": "e51b3deb26ec2bf5ac0b4ba70369fb624261b92fb5ca21c349eb583f16b96054",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-api-alignment.mjs",
+      "sha256": "662bd870b8289a5530875c0cca1b45750a6863f5c857a612ed6d79364087dff4",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-click-hit-target.mjs",
+      "sha256": "ea024dda2e75d6cc8ef6992dab714442fa225615965638b7fd21eb28beda401e",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-delayed-popup.mjs",
+      "sha256": "7af5010efcda982ab12610a77cf86f55161e9a49155fca61f9bbf0de3752d235",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-dialogs.mjs",
+      "sha256": "f5c03701a4972f504962f8fa88b7406e274811ae31ac9d266fb83c9f5f6e926e",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-download.mjs",
+      "sha256": "c8e9cda79d6d10df54f9f6e3e559e39aac6596bf312506673cf2604bd89ec7b7",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-drag-and-draw.mjs",
+      "sha256": "744698dd5616da04e084e090ae8f386403b095704828b0751ad6c8bcfe2cacd2",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-evaluate-timeout.mjs",
+      "sha256": "460f8c25811414b9d94899e13b4f6945ffbdd2af6685271859ce0d555341e29a",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-keyboard.mjs",
+      "sha256": "acf58bdd70f2ce42f2293ae18abbf0e57de20fce618f2502c3e446567f53971f",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-labels.mjs",
+      "sha256": "306622d005e23df73121cb7493d56dbb477ae9fb12947febe9d3eaa967df02e5",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-load-states.mjs",
+      "sha256": "81505660da2de37926d623e752fe6c9a3f6ffb14ac56e8f133da768f39c224eb",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-media-playback.mjs",
+      "sha256": "4878028e520cbd84d5da9aa2774ddf644eddabfacfd4c8a999e29d23e2646f9f",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-oopif.mjs",
+      "sha256": "ff93b9edd6918c0ae87b6ef6e70e84f0c8f6ad556ac4b11d1b5b751444900df0",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-popup-waiter.mjs",
+      "sha256": "109ae17dcf5a9782c2442ced03b7111a4e25ea69e741dd4b1ffa3bebe33c509a",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-ref-identity.mjs",
+      "sha256": "be3280050cec47451057e64dc9d866e014ca7a4db2e6b8d6abcd3b319a720a1b",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-ref-workflows.mjs",
+      "sha256": "52cbb42afd9dd7b71930db5ea3fa8ac470f5cf9feaaaf355245faf41de23f455",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-screenshot.mjs",
+      "sha256": "c898a954e888c80815d7722c8e6b1b9f36f6e9feab7a989486e903989bb552a8",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-selector-compatibility.mjs",
+      "sha256": "a26b78efd13f3df4f8eace08751b363ea8a36ee5609646c1cf74a1b2d8b7e76a",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-shadow-dom.mjs",
+      "sha256": "d532ebbee6d64117a3ada345d853ad1354f81006e0714e0cff39ba3941262554",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-snapshot-locators.mjs",
+      "sha256": "1274e45178aeaa722b3c2a74409be47f88c1605ade9e84740062a86e4a154987",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-snapshot-subtree.mjs",
+      "sha256": "10ae93c6a9001033f878e7ca1945561544622f9917d4989c32c9247333192a08",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-text-locators.mjs",
+      "sha256": "740d36f90c50fde126e798c03e554e4de9510296b16672779d4d32b4ef15bfe1",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/page-workers.mjs",
+      "sha256": "7a352650e0a8af7e4662b2ca8c49729874cbe59813fe33e59e04e66248edc5e2",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/pointer.mjs",
+      "sha256": "17211808d0104d527cab94184528d2b66ea1bca6e6324b45ff70fd332612a71a",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/profile-selection.mjs",
+      "sha256": "8056b8f6a6602e753538dfaf3000fc6de7d9c1ad302d2499bd1eae938223009e",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/runtime-regression.mjs",
+      "sha256": "81bc85b6f5f601fbeb64e01be8d488abfceedf2dc08293ebbaa2e12ad443e7a1",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/runtime.mjs",
+      "sha256": "4880ba86a205dddde143063567cd283591c5d9c52e0e6f747370d272da56bc31",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/task-space.mjs",
+      "sha256": "eddb32aed9d8bd1ebf1383fa7608116ea2c44d6b2228dd5632696d6ede499562",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/cases/workflow-chains.mjs",
+      "sha256": "66f3e54b5d4aaf6b756d84869d2a38404e90302e987465928fb933763d9562d8",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/ego-browser-cli.mjs",
+      "sha256": "e4b7eb3ea585f8c9133764dd0e4489aeb95f9b58d84d0115edefd5b26b095af1",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/ego-source.mjs",
+      "sha256": "d01e2e3f4b7fd5bcc278c09757447afe729a977dd07127f4439db50d02206d1a",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/fixture.mjs",
+      "sha256": "2ae49ba77bacbfc3db369fbab14fa0d4e132238ffcbac6bd90124d0ceaa52706",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/fixtures/openai-gpt-4-system-card.pdf",
+      "sha256": "ca3677e1b83e255aa1296d432d374378154f230f3c296b32ee67540d571b7004",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/run-command.mjs",
+      "sha256": "fccda3911b145033fbca9a82b99fc1fc2f4ac7a3b6e46b518498f7aa2b249431",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/real-browser-e2e/runner.mjs",
+      "sha256": "2cab566e1c07a94e1d3c96a1c8d11f123c8458d00b15a5de411fa6312cf7c25a",
+      "unchanged": true
+    },
+    {
+      "file": "scripts/run-real-browser-e2e.mjs",
+      "sha256": "609bb8a8cd554b445a06048f0e299b48c74c5df479e5e007b1bdc2bc9942c767",
+      "unchanged": true
+    }
+  ],
+  "verifiedAt": "2026-10-30T16:36:55.590Z"
+}

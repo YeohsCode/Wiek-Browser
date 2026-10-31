@@ -1,0 +1,3 @@
+#!/bin/sh
+VEK_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+exec "$VEK_ROOT/downloads/ego/ego lite.app/Contents/Frameworks/ego Framework.framework/Versions/0.6.1.13/Helpers/ego-browser" --ego-server-name=vek-reference "$@"

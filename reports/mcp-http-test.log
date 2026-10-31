@@ -1,0 +1,33 @@
+✔ HTTP lifecycle sends real negotiated session/protocol headers, JSON calls and DELETE cleanup (14.733542ms)
+✔ SSE response parses UTF-8 split writes, CRLF, notifications and answers server requests (36.347041ms)
+✔ SSE reconnect uses GET and Last-Event-ID without replaying a tool POST (9.646791ms)
+✔ HTTP cancellation and timeout send cancelled notifications and abort actual response streams (86.37ms)
+✔ session expiry reinitializes but never replays a possibly side-effecting tool request (3.674875ms)
+✔ malformed/oversized HTTP responses, auth and redirect responses fail deterministically (11.411791ms)
+✔ MCP service persists only HTTP credential references and isolates real sessions by thread (13.029208ms)
+✔ independent GET notification stream invalidates tools and refuses remote project roots (45.5305ms)
+✔ concurrent tool responses stay correlated and explicit disconnect reconnect creates a fresh session (7.618625ms)
+✔ stopping during active HTTP calls releases requests and prevents late successful results (22.417625ms)
+✔ remote HTTPS rejects an untrusted certificate and never honors a TLS-disable config field (45.859041ms)
+✔ explicit localhost HTTP uses the pinned loopback resolver with modern Node address selection (1.920833ms)
+✔ 2026 HTTP uses server discovery, per-request metadata and required mirrored headers without legacy traffic (15.732291ms)
+✔ modern header encoding prevents whitespace/control/sentinel injection and validates integer values (4.551084ms)
+✔ modern stream cancellation closes the response without a legacy cancelled notification (64.888ms)
+✔ unsupported versions and unconfigured MRTR inputs fail explicitly without replay or model call (2.685167ms)
+✔ HTTP MCP configuration works through actual Electron IPC with reference-only credentials (671.120333ms)
+✔ MCP stdio initializes, paginates tools, isolates thread processes and answers roots/list (118.732083ms)
+✔ known credential values are transient, redacted in results/keys and never forwarded implicitly (76.792834ms)
+✔ MCP tool tasks time out, cancel, reject foreign reads and ignore late replies (128.661042ms)
+✔ malformed and oversized MCP stdout fail pending tasks; unknown tools are rejected (211.109125ms)
+✔ invalid initialize versions and initialization timeouts disconnect cleanly (154.612041ms)
+✔ closing MCP records interrupted tasks and releases the persistent store lock (54.24525ms)
+✔ loopback gateway pairs once, binds scopes, forwards real tools and revokes tokens (97.748125ms)
+✔ HTTP cancellation owns its request and disconnected stdio servers reconnect (147.056084ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1066.301875

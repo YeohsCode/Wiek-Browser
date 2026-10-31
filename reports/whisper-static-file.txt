@@ -1,0 +1,1 @@
+app/bin/whisper-cli: Mach-O 64-bit executable arm64

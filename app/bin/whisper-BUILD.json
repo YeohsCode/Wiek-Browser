@@ -1,0 +1,24 @@
+{
+  "source": {
+    "repository": "https://github.com/ggml-org/whisper.cpp",
+    "tag": "v1.9.4",
+    "commit": "927cfce34f31707e17f2bff35c349632fb9e2c3a",
+    "license": "MIT"
+  },
+  "architecture": "arm64",
+  "macosDeploymentTarget": "12.0",
+  "cpuOnly": true,
+  "nonSystemLibrariesStatic": true,
+  "dynamicDependencies": [
+    "/usr/lib/libSystem.B.dylib",
+    "/usr/lib/libc++.1.dylib"
+  ],
+  "compiler": "Apple clang version 16.0.0 (clang-1600.0.26.6)\nTarget: arm64-apple-darwin24.5.0\nThread model: posix\nInstalledDir: /Library/Developer/CommandLineTools/usr/bin",
+  "cmake": "cmake version 4.2.1",
+  "binary": {
+    "path": "app/bin/whisper-cli",
+    "bytes": 2537232,
+    "sha256": "507deaba45dea03ea06abe61c4e5536e77c9ac7f6f17f0b4cf662b5d3b84c740"
+  },
+  "signature": "ad-hoc; codesign --verify --strict passed"
+}

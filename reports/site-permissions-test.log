@@ -1,0 +1,19 @@
+✔ origins and capabilities do not widen opaque frames or media requests (1.243625ms)
+✔ persistent decisions isolate profile, embedding origin, requester and device (0.789375ms)
+✔ allow once expires on real document invalidation; callbacks deduplicate (4.258875ms)
+✔ stale prompts after navigation/close/timeout do not grant or persist (27.475916ms)
+✔ persistent block overrides active once grants and pending prompt answers (0.591958ms)
+✔ legacy migration is conservative and saved snapshots survive restart (0.247666ms)
+✔ opaque, unknown, absent and destroyed requesting documents are denied without prompting (0.111125ms)
+✔ prompt failures deny once and invalid rules cannot mutate the store (0.266917ms)
+✔ an expired prompt cannot grant, erase or strand a newer request with the same key (46.946083ms)
+✔ ask/reset explicitly cancel pending dialogs and cannot be undone by their stale answers (0.490792ms)
+✔ an explicit opaque requesting origin wins over a historical frame URL (0.149291ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 151.231708

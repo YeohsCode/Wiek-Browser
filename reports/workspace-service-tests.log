@@ -1,0 +1,19 @@
+✔ project scope rejects traversal, outside symlinks and protected Git metadata (6.549167ms)
+✔ atomic text writes preserve contents, require hashes and detect external edits (6.959125ms)
+✔ concurrent same-hash saves serialize so only the first succeeds (2.110834ms)
+✔ tree/search are bounded, skip heavy folders and do not follow symlink directories (9.101208ms)
+✔ UTF-8 editor rejects binary/oversize files while artifacts support image metadata (4.274583ms)
+✔ Git supports real staging, committing, diff, history and branch switching (481.79725ms)
+✔ Git stash lifecycle preserves real local modifications (213.333625ms)
+✔ Git rejects parent repository scope and option/pathspec injection (142.021458ms)
+✔ project watchers report changes and close without leaking handles (170.209542ms)
+✔ new files cannot enter Git internals through a directory alias (80.531166ms)
+✔ Git filenames are literal argv and inherited Git-directory overrides are removed (107.117084ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1298.811625

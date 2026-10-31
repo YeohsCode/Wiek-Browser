@@ -1,0 +1,95 @@
+{
+  "generatedAt": "2026-10-30T16:10:22.857180+00:00",
+  "version": "0.2.0",
+  "localBrowserComparison": {
+    "comparable": true,
+    "runs": [
+      {
+        "browser": "ego",
+        "counts": {
+          "total": 69,
+          "selected": 69,
+          "pass": 68,
+          "fail": 1,
+          "skip": 0,
+          "notRun": 0,
+          "assertions": 1235
+        },
+        "wallTimeMs": 297598,
+        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli",
+        "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
+      },
+      {
+        "browser": "vek",
+        "counts": {
+          "total": 69,
+          "selected": 69,
+          "pass": 69,
+          "fail": 0,
+          "skip": 0,
+          "notRun": 0,
+          "assertions": 1248
+        },
+        "wallTimeMs": 153787,
+        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
+        "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
+      }
+    ]
+  },
+  "sdkUnitTests": {
+    "pass": 532,
+    "fail": 0,
+    "log": "sdk-unit-tests.log",
+    "note": "Retained unchanged SDK version; source and bundle identities still match."
+  },
+  "localServiceAndParser": {
+    "pass": 96,
+    "fail": 0,
+    "log": "round-3-service-tests.log"
+  },
+  "packagedWorkbenchIntegration": {
+    "pass": 31,
+    "fail": 0,
+    "log": "package-workbench-integration.log"
+  },
+  "cdpValueProbe": {
+    "pass": 22,
+    "mismatch": 0,
+    "log": "cdp-transport-probe.log"
+  },
+  "upstreamIntegrity": {
+    "files": 81,
+    "unchanged": true
+  },
+  "package": {
+    "path": "dist/mac-arm64/Vek Browser.app",
+    "sourceFilesMatch": true,
+    "sourceFilesChecked": 43,
+    "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+    "sdkMatchesTested": true,
+    "versions": {
+      "electron": "42.11.18",
+      "chromium": "148.0.7778.280",
+      "node": "24.19.0",
+      "arch": "arm64",
+      "platform": "darwin"
+    },
+    "finalUiOnlyChange": "Advanced voice provider settings are collapsed; native QA verified real file transcription afterwards."
+  },
+  "uiQa": {
+    "log": "package-v020-ui-qa.md",
+    "encryptedProfileRoundTrip": true,
+    "darkVerticalRestartPersistence": true,
+    "realPublicAudioTranscription": true
+  },
+  "rea": {
+    "daemon": "ev_0a7bdc68255ac1adb7db5fd967eaa355b6bbd1830efb7f12c750d8540dcbbee3",
+    "clientResources": "ev_c746b1b63234454354fe180d624d455e35d018a7b6219d016262de3385d93883",
+    "boundedCoverage": true
+  },
+  "online31TaskBenchmark": {
+    "status": "not_run",
+    "reason": "No task-specific model credentials or required third-party test logins were supplied; local E2E is distinct."
+  },
+  "completeProductParity": false
+}

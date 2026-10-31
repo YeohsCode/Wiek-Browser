@@ -1,0 +1,9 @@
+{
+  "dataDir": "/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/vek-snapshot-oopif-e2e-fncxl4",
+  "cases": [
+    "environment initialization",
+    "Page snapshot iframe viewport",
+    "Page OOPIF actions",
+    "Page OOPIF restore and close"
+  ]
+}

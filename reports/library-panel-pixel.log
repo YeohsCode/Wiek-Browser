@@ -1,0 +1,18 @@
+mount
+invoke library:snapshot
+result library:snapshot undefined undefined
+capture start
+invoke library:capture
+result library:capture image-draft 320
+capture done
+rect
+arrow
+text
+crop
+invoke library:export-image
+result library:export-image undefined undefined
+invoke library:export-image
+result library:export-image undefined undefined
+invoke library:items:create
+result library:items:create undefined undefined
+Canvas pixel probe PASS: host PNG draft is unsaved; rectangle, arrow, text alter actual pixels; crop is 240x140; guides excluded; undo/redo restore dimensions; trusted export and persistent Library PNG save succeed.

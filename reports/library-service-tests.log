@@ -1,0 +1,18 @@
+✔ private storage preserves metadata and real image bytes through restart (10.158375ms)
+✔ collection/group/tag CRUD and combined item filters use actual metadata (10.734959ms)
+✔ soft delete and restore retain full text and image assets (2.494875ms)
+✔ capture returns a real unsaved draft and save-active uses the host page callback (2.271708ms)
+✔ PNG export validates bytes and delegates path selection to the trusted host (2.544791ms)
+✔ invalid images, unsafe URLs and mismatched folders roll back without phantom items (1.499042ms)
+✔ moving a group maintains item collection consistency and deleted metadata can restore (2.4745ms)
+✔ item updates persist real content and snapshot only sends bounded snippets (1.283208ms)
+✔ duplicate hosts and metadata-directory aliases are rejected (1.553292ms)
+✔ asset tampering is detected and service close prevents later writes (2.145125ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 114.604125

@@ -1,0 +1,27 @@
+#!/usr/bin/env node
+import{spawn}from'node:child_process';import{mkdtemp,writeFile,rm}from'node:fs/promises';import{tmpdir}from'node:os';import{join,resolve}from'node:path';import{pathToFileURL}from'node:url';import{createRequire}from'node:module';
+const require=createRequire(import.meta.url),electron=require('electron'),root=resolve(import.meta.dirname,'..'),dir=await mkdtemp(join(tmpdir(),'vek-preferences-panel-'));
+const html=join(dir,'panel.html'),preload=join(dir,'preload.cjs'),script=join(dir,'smoke.cjs');
+await writeFile(preload,"const{contextBridge,ipcRenderer}=require('electron');contextBridge.exposeInMainWorld('preferencesTest',{dispatch:(name,payload)=>ipcRenderer.invoke('preferences-test',name,payload)});");
+await writeFile(html,`<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="${pathToFileURL(join(root,'app/preferences-panel.css'))}"><style>body{margin:0;background:#191d28}</style></head><body><main id="panel"></main><script src="${pathToFileURL(join(root,'app/preferences-panel.js'))}"></script></body></html>`);
+await writeFile(script,`
+const{app,BrowserWindow,ipcMain,nativeTheme}=require('electron'),assert=require('node:assert/strict'),fs=require('node:fs');
+const{createPreferencesService}=require(${JSON.stringify(join(root,'app/preferences-service.cjs'))});app.setPath('userData',${JSON.stringify(join(dir,'profile'))});
+app.whenReady().then(async()=>{nativeTheme.themeSource='dark';const service=createPreferencesService({dataDir:${JSON.stringify(dir)},platform:'darwin'});ipcMain.handle('preferences-test',(_,name,payload)=>service.dispatch(name,payload));
+ const w=new BrowserWindow({show:false,width:1080,height:850,webPreferences:{preload:${JSON.stringify(preload)},sandbox:true,contextIsolation:true,nodeIntegration:false,backgroundThrottling:false}});await w.loadFile(${JSON.stringify(html)});const e=code=>w.webContents.executeJavaScript(code);let assertions=0;
+ await e(\`window.panel=window.createVekPreferencesPanel(document.getElementById('panel'),preferencesTest.dispatch);panel.update(\`+JSON.stringify(service.snapshot())+\`);window.clickText=text=>[...document.querySelectorAll('button')].find(b=>b.textContent===text)?.click();undefined;\`);
+ assert.equal(await e("document.getElementById('panel').dataset.theme"),'dark');assertions++;
+ assert.equal(await e("getComputedStyle(document.getElementById('panel')).backgroundColor"),'rgb(25, 29, 40)');assertions++;
+ await e("var input=document.querySelector('select[aria-label=\\\"Theme\\\"]');input.value='light';input.dispatchEvent(new Event('change'));new Promise(r=>setTimeout(r,30))");assert.equal(service.snapshot().theme,'light');assertions++;assert.equal(await e("document.getElementById('panel').dataset.theme"),'light');assertions++;
+ await e("var input=document.querySelector('select[aria-label=\\\"Tab bar\\\"]');input.value='vertical';input.dispatchEvent(new Event('change'));new Promise(r=>setTimeout(r,30))");assert.equal(service.snapshot().tabLayout,'vertical');assertions++;
+ assert.equal(await e("document.querySelector('input[aria-label=\\\"Translate\\\"]').disabled"),true);assertions++;
+ await e("var input=document.querySelector('[data-focus=instructions]');input.value='Use concise answers.';input.dispatchEvent(new Event('input'));clickText('Save instructions');new Promise(r=>setTimeout(r,30))");assert.equal(service.snapshot().instructions,'Use concise answers.');assertions++;
+ await e("clickText('Change');var input=document.querySelector('[data-focus=shortcut]');input.value='Cmd+Q';input.dispatchEvent(new Event('input'));clickText('Check conflicts');new Promise(r=>setTimeout(r,30))");assert.match(await e("document.querySelector('.vp-editor .vp-error').textContent"),/Quit application/);assertions++;
+ await e("var input=document.querySelector('[data-focus=shortcut]');input.value='Cmd+Shift+N';input.dispatchEvent(new Event('input'));document.querySelector('.vp-editor').requestSubmit();new Promise(r=>setTimeout(r,30))");assert.equal(service.snapshot().shortcuts.newTab,'Command+Shift+N');assertions++;assert.equal(await e("document.querySelector('.vp-editor')===null"),true);assertions++;
+ await e("var input=document.querySelector('select[aria-label=\\\"Theme\\\"]');input.value='dark';input.dispatchEvent(new Event('change'));new Promise(r=>setTimeout(r,250))");
+ assert.equal(service.snapshot().theme,'dark');assertions++;assert.equal(await e("document.getElementById('panel').dataset.theme"),'dark');assertions++;assert.equal(await e("getComputedStyle(document.getElementById('panel')).backgroundColor"),'rgb(25, 29, 40)');assertions++;
+ await new Promise(r=>setTimeout(r,250));
+ fs.writeFileSync(${JSON.stringify(join(root,'reports/preferences-panel-dark.png'))},(await w.webContents.capturePage()).toPNG());service.close();console.log(JSON.stringify({ok:true,assertions,screenshot:'reports/preferences-panel-dark.png'}));app.quit();
+}).catch(error=>{console.error(error);app.exit(1)});
+`);
+const env={...process.env};delete env.ELECTRON_RUN_AS_NODE;const child=spawn(electron,[script],{env,stdio:['ignore','pipe','pipe']});let output='';child.stdout.on('data',d=>{output+=d;process.stdout.write(d)});child.stderr.on('data',d=>{output+=d;process.stderr.write(d)});const timeout=setTimeout(()=>child.kill('SIGKILL'),20000);const code=await new Promise(r=>child.once('close',r));clearTimeout(timeout);await writeFile(join(root,'reports/preferences-panel-smoke.log'),output);await rm(dir,{recursive:true,force:true});process.exitCode=code||0;

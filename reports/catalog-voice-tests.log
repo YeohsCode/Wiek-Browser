@@ -1,0 +1,12 @@
+✔ catalog reads bounded instruction roots, deduplicates symlinks, persists enable/selection and excludes unrelated files (10.705417ms)
+✔ voice executes real fake transcriber with literal argv, cleans recordings and persists config (98.695625ms)
+✔ voice enforces overlap, cancellation and timeout without a fake successful transcript (107.897333ms)
+✔ voice dictionary, language, retained audio, soft deletion and retention apply to actual subprocess output (98.225375ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 386.819875

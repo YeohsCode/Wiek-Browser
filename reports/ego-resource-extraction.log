@@ -1,0 +1,4 @@
+{"pack":"resources.pak","resources":5875,"aliases":377,"types":{"bin":108,"json":37,"txt":1540,"png":98,"svg":719,"html":231,"css":135,"js":2972,"woff2":19,"webp":16},"vendorCandidates":74}
+{"pack":"chrome_100_percent.pak","resources":315,"aliases":71,"types":{"png":292,"html":4,"js":6,"txt":2,"css":4,"svg":3,"json":4},"vendorCandidates":0}
+{"pack":"chrome_200_percent.pak","resources":315,"aliases":71,"types":{"png":292,"html":4,"js":6,"txt":2,"css":4,"svg":3,"json":4},"vendorCandidates":0}
+{"pack":"en.lproj/locale.pak","resources":12566,"aliases":2258,"types":{"txt":12513,"json":15,"js":37,"html":1},"vendorCandidates":1012}

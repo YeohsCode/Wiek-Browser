@@ -1,0 +1,88 @@
+[61968:145855489:1030/002032.171451:VERBOSE1:chrome/updater/updater.cc:364] Version: 0.6.1.13, opt, ARM_64, command line: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/downloads/ego/ego lite.app/Contents/Frameworks/ego Framework.framework/Versions/0.6.1.13/Helpers/EgoUpdater.app/Contents/MacOS/EgoUpdater --install --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[61968:145855489:1030/002032.171847:VERBOSE1:chrome/updater/updater.cc:367] OS version: 15.5.0, arch: arm64, System uptime (seconds): 1700263, parent pid: 60350
+[61968:145855489:1030/002032.176206:VERBOSE1:chrome/updater/updater.cc:372] Available disk space in install directory (/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater): 236106838016B (219.892GiB) / 994662584320B (926.352GiB)
+[61968:145855489:1030/002032.176542:VERBOSE1:chrome/updater/updater.cc:376] Available disk space in temporary directory (/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/): 236106838016B (219.892GiB) / 994662584320B (926.352GiB)
+[61968:145855489:1030/002032.177399:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[61970:145855496:1030/002032.186030:VERBOSE1:chrome/updater/updater.cc:364] Version: 0.6.1.13, opt, ARM_64, command line: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/downloads/ego/ego lite.app/Contents/Frameworks/ego Framework.framework/Versions/0.6.1.13/Helpers/EgoUpdater.app/Contents/MacOS/EgoUpdater --crash-handler --database=/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater/0.6.1.13/Crashpad --url=https://o4511212523159552.ingest.us.sentry.io/api/4511212845727744/minidump/?sentry_key=f6c9392e85292d35cb5c09a03bc79351 --annotation=prod=EgoUpdater --annotation=ver=0.6.1.13 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[61970:145855496:1030/002032.186349:VERBOSE1:chrome/updater/updater.cc:367] OS version: 15.5.0, arch: arm64, System uptime (seconds): 1700263, parent pid: 1
+[61970:145855496:1030/002032.187576:VERBOSE1:chrome/updater/updater.cc:372] Available disk space in install directory (/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater): 236106825728B (219.892GiB) / 994662584320B (926.352GiB)
+[61970:145855496:1030/002032.187595:VERBOSE1:chrome/updater/updater.cc:376] Available disk space in temporary directory (/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/): 236106825728B (219.892GiB) / 994662584320B (926.352GiB)
+[61970:145855496:1030/002032.187641:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[61968:145855489:1030/002032.188100:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[61968:145855489:1030/002032.188538:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[61968:145855489:1030/002032.188583:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[61968:145855489:1030/002032.188826:VERBOSE1:chrome/updater/updater.cc:105] Crash reporting initialized.
+[61968:145855489:1030/002032.190066:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:196] GetVersion
+[61968:145855489:1030/002032.190092:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:494] EnsureConnecting
+[61968:145855504:1030/002032.191266:VERBOSE1:chrome/updater/ipc/update_service_dialer_posix.cc:56] Failed to connect to remote mojo service, is_internal_service: 0, scope: User, no updater exists.
+[61968:145855489:1030/002032.191326:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:397] OnConnected
+[61968:145855489:1030/002032.191359:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:196] GetVersion
+[61968:145855489:1030/002032.191367:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:494] EnsureConnecting
+[61968:145855504:1030/002032.191434:VERBOSE1:chrome/updater/ipc/update_service_dialer_posix.cc:56] Failed to connect to remote mojo service, is_internal_service: 0, scope: User, no updater exists.
+[61968:145855489:1030/002032.191456:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:397] OnConnected
+[61968:145855489:1030/002032.191464:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:196] GetVersion
+[61968:145855489:1030/002032.191468:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:494] EnsureConnecting
+[61968:145855504:1030/002032.191517:VERBOSE1:chrome/updater/ipc/update_service_dialer_posix.cc:56] Failed to connect to remote mojo service, is_internal_service: 0, scope: User, no updater exists.
+[61968:145855489:1030/002032.191527:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:397] OnConnected
+Boot-out failed: 5: Input/output error
+Try re-running the command as root for richer errors.
+[61968:145855504:1030/002032.354908:VERBOSE2:chrome/updater/mac/setup/mac_setup.mm:187] launchctl bootout exited: 5, stdout: 
+[61968:145855504:1030/002032.385092:VERBOSE2:chrome/updater/prefs.cc:113] CreateGlobalPrefsInternal
+[61968:145855504:1030/002032.385427:VERBOSE1:chrome/updater/prefs.cc:159] UpdaterPrefsImpl (global): /Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater
+[61968:145855509:1030/002032.385482:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a ACTIVATE START event to the history log
+[61968:145855562:1030/002032.388333:VERBOSE1:chrome/updater/prefs.cc:251] Prefs committed.
+[61968:145855504:1030/002032.388349:VERBOSE1:chrome/updater/prefs.cc:164] ~UpdaterPrefsImpl: /Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater
+[61968:145855509:1030/002032.388361:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a ACTIVATE END event to the history log
+[61968:145855489:1030/002032.388365:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_mojo.cc:73] Hello
+[61968:145855489:1030/002037.251755:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:489] ~UpdateServiceProxyMojoImpl
+[61968:145855489:1030/002037.251776:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:237] RegisterApp
+[61968:145855489:1030/002037.251782:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:494] EnsureConnecting
+[61968:145855489:1030/002037.460766:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:397] OnConnected
+[61968:145855489:1030/002039.089189:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[61968:145855489:1030/002039.089215:VERBOSE1:chrome/updater/ipc/update_service_proxy_mojo.cc:489] ~UpdateServiceProxyMojoImpl
+[61968:145855489:1030/002039.089719:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[61968:145855489:1030/002039.089731:VERBOSE1:chrome/updater/updater.cc:409] UpdaterMain (--install) returned 0.
+[62689:145857800:1030/002042.536735:VERBOSE1:chrome/updater/updater.cc:364] Version: 0.6.1.13, opt, ARM_64, command line: /Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater/0.6.1.13/EgoUpdater.app/Contents/MacOS/EgoUpdater --wake-all --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[62689:145857800:1030/002042.537217:VERBOSE1:chrome/updater/updater.cc:367] OS version: 15.5.0, arch: arm64, System uptime (seconds): 1700274, parent pid: 60350
+[62689:145857800:1030/002042.538961:VERBOSE1:chrome/updater/updater.cc:372] Available disk space in install directory (/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater): 236080852992B (219.867GiB) / 994662584320B (926.352GiB)
+[62689:145857800:1030/002042.538985:VERBOSE1:chrome/updater/updater.cc:376] Available disk space in temporary directory (/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/): 236080852992B (219.867GiB) / 994662584320B (926.352GiB)
+[62689:145857800:1030/002042.539038:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[62691:145857821:1030/002042.545525:VERBOSE1:chrome/updater/updater.cc:364] Version: 0.6.1.13, opt, ARM_64, command line: /Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater/0.6.1.13/EgoUpdater.app/Contents/MacOS/EgoUpdater --crash-handler --database=/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater/0.6.1.13/Crashpad --url=https://o4511212523159552.ingest.us.sentry.io/api/4511212845727744/minidump/?sentry_key=f6c9392e85292d35cb5c09a03bc79351 --annotation=prod=EgoUpdater --annotation=ver=0.6.1.13 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[62691:145857821:1030/002042.545829:VERBOSE1:chrome/updater/updater.cc:367] OS version: 15.5.0, arch: arm64, System uptime (seconds): 1700274, parent pid: 1
+[62691:145857821:1030/002042.547501:VERBOSE1:chrome/updater/updater.cc:372] Available disk space in install directory (/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater): 236080852992B (219.867GiB) / 994662584320B (926.352GiB)
+[62691:145857821:1030/002042.547532:VERBOSE1:chrome/updater/updater.cc:376] Available disk space in temporary directory (/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/): 236080852992B (219.867GiB) / 994662584320B (926.352GiB)
+[62691:145857821:1030/002042.547598:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[62689:145857800:1030/002042.548643:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[62689:145857800:1030/002042.549332:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[62689:145857800:1030/002042.549398:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[62689:145857800:1030/002042.549492:VERBOSE1:chrome/updater/updater.cc:105] Crash reporting initialized.
+[62689:145857830:1030/002042.549800:VERBOSE1:chrome/updater/app/app_wakeall.cc:58] Launching `/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater/0.6.1.13/EgoUpdater.app/Contents/MacOS/EgoUpdater --wake`
+[62692:145857836:1030/002042.557474:VERBOSE1:chrome/updater/updater.cc:364] Version: 0.6.1.13, opt, ARM_64, command line: /Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater/0.6.1.13/EgoUpdater.app/Contents/MacOS/EgoUpdater --wake --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[62692:145857836:1030/002042.557805:VERBOSE1:chrome/updater/updater.cc:367] OS version: 15.5.0, arch: arm64, System uptime (seconds): 1700274, parent pid: 62689
+[62692:145857836:1030/002042.559181:VERBOSE1:chrome/updater/updater.cc:372] Available disk space in install directory (/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater): 236080852992B (219.867GiB) / 994662584320B (926.352GiB)
+[62692:145857836:1030/002042.559200:VERBOSE1:chrome/updater/updater.cc:376] Available disk space in temporary directory (/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/): 236080852992B (219.867GiB) / 994662584320B (926.352GiB)
+[62692:145857836:1030/002042.559252:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[62694:145857840:1030/002042.566432:VERBOSE1:chrome/updater/updater.cc:364] Version: 0.6.1.13, opt, ARM_64, command line: /Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater/0.6.1.13/EgoUpdater.app/Contents/MacOS/EgoUpdater --crash-handler --database=/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater/0.6.1.13/Crashpad --url=https://o4511212523159552.ingest.us.sentry.io/api/4511212845727744/minidump/?sentry_key=f6c9392e85292d35cb5c09a03bc79351 --annotation=prod=EgoUpdater --annotation=ver=0.6.1.13 --handshake-fd=6 --enable-logging --vmodule=*/components/update_client/*=2,*/chrome/enterprise_companion/*=2,*/chrome/updater/*=2
+[62694:145857840:1030/002042.566977:VERBOSE1:chrome/updater/updater.cc:367] OS version: 15.5.0, arch: arm64, System uptime (seconds): 1700274, parent pid: 1
+[62694:145857840:1030/002042.568904:VERBOSE1:chrome/updater/updater.cc:372] Available disk space in install directory (/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater): 236080852992B (219.867GiB) / 994662584320B (926.352GiB)
+[62694:145857840:1030/002042.568929:VERBOSE1:chrome/updater/updater.cc:376] Available disk space in temporary directory (/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/): 236080852992B (219.867GiB) / 994662584320B (926.352GiB)
+[62694:145857840:1030/002042.569001:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS START event to the history log
+[62692:145857836:1030/002042.569636:VERBOSE1:chrome/updater/crash_reporter.cc:123] Crash handler launched and ready.
+[62692:145857836:1030/002042.570360:VERBOSE1:chrome/updater/crash_client.cc:109] Found 0 completed crash reports
+[62692:145857836:1030/002042.570415:VERBOSE1:chrome/updater/crash_client.cc:132] Found 0 pending crash reports
+[62692:145857836:1030/002042.570486:VERBOSE1:chrome/updater/updater.cc:105] Crash reporting initialized.
+[62692:145857836:1030/002042.570662:VERBOSE1:chrome/updater/ipc/update_service_internal_proxy_mojo.cc:61] Run
+[62692:145857836:1030/002048.844828:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[62692:145857836:1030/002048.845839:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[62692:145857836:1030/002048.845855:VERBOSE1:chrome/updater/updater.cc:409] UpdaterMain (--wake) returned 0.
+[62694:145857840:1030/002048.846760:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[62694:145857840:1030/002048.846779:VERBOSE1:chrome/updater/updater.cc:409] UpdaterMain (--crash-handler) returned 0.
+[62689:145857830:1030/002048.992965:VERBOSE1:chrome/updater/app/app_wakeall.cc:68] `/Users/andrewyeoh/Library/Application Support/Citro Labs/EgoUpdater/0.6.1.13/EgoUpdater.app/Contents/MacOS/EgoUpdater --wake` exited 0
+[62689:145857800:1030/002048.993081:VERBOSE1:chrome/updater/app/app.cc:52] Shutdown: 0
+[62689:145857800:1030/002048.993435:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[62689:145857800:1030/002048.993453:VERBOSE1:chrome/updater/updater.cc:409] UpdaterMain (--wake-all) returned 0.
+[62691:145857821:1030/002048.994407:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[62691:145857821:1030/002048.994426:VERBOSE1:chrome/updater/updater.cc:409] UpdaterMain (--crash-handler) returned 0.
+[61970:145855496:1030/002058.853949:VERBOSE2:chrome/updater/event_history.cc:266] Emitted a UPDATER_PROCESS END event to the history log
+[61970:145855496:1030/002058.854123:VERBOSE1:chrome/updater/updater.cc:409] UpdaterMain (--crash-handler) returned 0.
+[60577:145850770:1030/002134.460684:ERROR:gpu/command_buffer/service/shared_image/shared_image_manager.cc:260] SharedImageManager::ProduceSkia: Trying to Produce a Skia representation from a non-existent mailbox.

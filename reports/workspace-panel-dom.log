@@ -1,0 +1,1 @@
+Workspace DOM smoke passed: scoped tree/read, literal source rendering, optimistic-hash save, Git stage dispatch, explicit local-only limit.

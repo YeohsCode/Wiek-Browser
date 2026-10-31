@@ -1,0 +1,16 @@
+✔ MCP stdio initializes, paginates tools, isolates thread processes and answers roots/list (117.672916ms)
+✔ known credential values are transient, redacted in results/keys and never forwarded implicitly (73.93175ms)
+✔ MCP tool tasks time out, cancel, reject foreign reads and ignore late replies (130.435208ms)
+✔ malformed and oversized MCP stdout fail pending tasks; unknown tools are rejected (204.188125ms)
+✔ invalid initialize versions and initialization timeouts disconnect cleanly (154.489375ms)
+✔ closing MCP records interrupted tasks and releases the persistent store lock (56.799125ms)
+✔ loopback gateway pairs once, binds scopes, forwards real tools and revokes tokens (99.504125ms)
+✔ HTTP cancellation owns its request and disconnected stdio servers reconnect (138.787625ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1058.973584

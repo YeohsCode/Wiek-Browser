@@ -1,0 +1,19 @@
+✔ real child stdout/stderr, literal input, conversation and private atomic persistence (323.619125ms)
+✔ argv template passes one literal argument and never invokes a shell (230.277292ms)
+✔ stop, concurrency and overlap checks operate on actual provider processes (209.866083ms)
+✔ bounded output and failure status retain real diagnostics without invented replies (262.9485ms)
+✔ at schedule survives restart and executes exactly once while service is active (710.718583ms)
+✔ interval pause/resume/update/stop and overlap skipping do not queue duplicate work (2429.088125ms)
+✔ uncleanly persisted running state becomes interrupted and is never silently resumed (232.582416ms)
+✔ upstream summary parsing preserves pass, fail, skip and absent selected cases (0.888458ms)
+✔ startup failure creates no invented passing result (0.11775ms)
+✔ exact case names containing commas survive CLI selection (0.8815ms)
+✔ single-browser Markdown leaves the counterpart unrun and documents evidence limitations (0.30475ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4475.716792

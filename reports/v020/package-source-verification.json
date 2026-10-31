@@ -1,0 +1,220 @@
+{
+  "checkedFiles": 43,
+  "files": [
+    {
+      "file": "app/recorder-panel.css",
+      "sha256": "2bf2f0896a4ccb3d71b19940d7c52a03a9fc716ea5b7d6717157966a0b92dd87",
+      "matches": true
+    },
+    {
+      "file": "app/catalog-service.cjs",
+      "sha256": "91ddfee29a85f269644e1866563c01704f3da47d11ac0e3cb184515c58bb05f6",
+      "matches": true
+    },
+    {
+      "file": "app/library-service.cjs",
+      "sha256": "af9917173fc139f37073c4c20b39cfdcde8bee5edb57ae539d4ca2ea3ee01a25",
+      "matches": true
+    },
+    {
+      "file": "app/renderer.js",
+      "sha256": "53a9ed270b146d6533ce378fe76c24653b789bdb7f9adcbf7dd2707ffbbdcee2",
+      "matches": true
+    },
+    {
+      "file": "app/workspace-service.cjs",
+      "sha256": "bdc2234bc235cb9d77176704e4e66075f0ec3ad033f57dc96020706a90f9b0ec",
+      "matches": true
+    },
+    {
+      "file": "app/index.html",
+      "sha256": "032fb18cb731f12af96c59419e05698e28a54f3b25dee5ac99bb3903f2cbce4e",
+      "matches": true
+    },
+    {
+      "file": "app/preload.cjs",
+      "sha256": "cb0214f1f29c7a9ebfe354b3ae2b05a7eb81a7da2f96ecce48f9557f4bcfd24b",
+      "matches": true
+    },
+    {
+      "file": "app/mcp-panel.css",
+      "sha256": "4b70c8ea4d53e7da8dd60be449ec626e4488a9f15ad712896913bb7ec233d9db",
+      "matches": true
+    },
+    {
+      "file": "app/recorder-panel.js",
+      "sha256": "00b91d490b061636968ecd6e54a6bcd9fcfb26d036d2674ea87bdbf10a48e0e7",
+      "matches": true
+    },
+    {
+      "file": "app/tools-panel.css",
+      "sha256": "dbfd36541bd16fd09d35e55bd9d4c22a02d4561f8ac85bbbaa14f5fd22e3e169",
+      "matches": true
+    },
+    {
+      "file": "app/preferences-panel.css",
+      "sha256": "3a3579aae8b1d77d503b0d69b9a56fea05426c31ac595c9884c4bb643e0641c4",
+      "matches": true
+    },
+    {
+      "file": "app/preferences-service.cjs",
+      "sha256": "e2f9650f955ea47c58a1499bfe6197c2631afc87dad1cc44ee17623e18dfdffa",
+      "matches": true
+    },
+    {
+      "file": "app/profile-import.cjs",
+      "sha256": "650a5bae3a57bb4ccc50f9262cf47b1fa453fd950940fbd735de54eb6472afd6",
+      "matches": true
+    },
+    {
+      "file": "app/mcp-service.cjs",
+      "sha256": "5a6b187f64e7c1cb4c74bb7731095be3978f9fee80b0ff9cbccad0e61cdd5ed3",
+      "matches": true
+    },
+    {
+      "file": "app/agent-service.cjs",
+      "sha256": "5f3e1cd8d2223869a33aa8011dda261138db9c299a22f86d51f1182e1324017b",
+      "matches": true
+    },
+    {
+      "file": "app/page-preload.cjs",
+      "sha256": "9dfe9b2ca626de1c33a7948cfa4cd79453301df79caa402b4f3b29d3de63e17e",
+      "matches": true
+    },
+    {
+      "file": "app/agent-panel.css",
+      "sha256": "07ddca0f17033b02d201139bef2769666f5a929b4154b60681baf23742bc0d82",
+      "matches": true
+    },
+    {
+      "file": "app/space-window.html",
+      "sha256": "65da19c7f9facceaa4cd4c5f43804c57c8eb8e939233cfb6ea8007cc94011367",
+      "matches": true
+    },
+    {
+      "file": "app/voice-service.cjs",
+      "sha256": "cdf36a1f97fdf14434207e57f31e295ebcf4d31df8b381c5965f68555a855569",
+      "matches": true
+    },
+    {
+      "file": "app/space-window.css",
+      "sha256": "dcc738981b90dd54828d45944ec82c7344652e8caa3e0618deb68f0b573f7e8a",
+      "matches": true
+    },
+    {
+      "file": "app/library-panel.js",
+      "sha256": "abb39a80a1664a4c15b7cde8788bb64d2d705745d3575e6ad0f40c592fd67386",
+      "matches": true
+    },
+    {
+      "file": "app/space-window.js",
+      "sha256": "bfc0579f4ca25fdc562a02b3bb1489b432f39ef945013505cbe86197db4c5e8d",
+      "matches": true
+    },
+    {
+      "file": "app/workspace-panel.css",
+      "sha256": "60585fa379f0ba05374758cb865904779e9b18b69a53cfbe9e722aceb2d4ff01",
+      "matches": true
+    },
+    {
+      "file": "app/mcp-panel.js",
+      "sha256": "45c7fcee548447b29ecc0873f1f6a424baff890eebbc64dbfe0fac67616f3204",
+      "matches": true
+    },
+    {
+      "file": "app/style.css",
+      "sha256": "a3e504fbea57c5eb884758e9d4ac9140a12c0be1ee67d8659bc7b6d345b71973",
+      "matches": true
+    },
+    {
+      "file": "app/agent-panel.js",
+      "sha256": "b9bac7b9402df9ba5ae2045f84cddbef6ea13e1190c19783353278f5c5d45960",
+      "matches": true
+    },
+    {
+      "file": "app/main.cjs",
+      "sha256": "e00e9740fb3fcaa8377a7da0369c4ef25a70ca4394b7e5db8c869fef9213e46e",
+      "matches": true
+    },
+    {
+      "file": "app/library-panel.css",
+      "sha256": "b239d103065e1b320d91a12e7ba9d435810dbf083204a5101c84f34181a2ac2a",
+      "matches": true
+    },
+    {
+      "file": "app/snapshot.cjs",
+      "sha256": "4d363687ee3f69426f6526979c3e34f52b0fd86ea29b8770c51d08561f4273f9",
+      "matches": true
+    },
+    {
+      "file": "app/profile-archive.cjs",
+      "sha256": "a227041c47f3b5846847e45a014ab31efb1f98667ace7b9199338452856c7c2a",
+      "matches": true
+    },
+    {
+      "file": "app/workspace-panel.js",
+      "sha256": "4e27c8209ff8e1483ad0d776052fb507bccc20f81a68d0c36a3299c6dcf69e2a",
+      "matches": true
+    },
+    {
+      "file": "app/preferences-panel.js",
+      "sha256": "54f3abadf1512dff39035bfa19979a06e6953d51a2b1a861daa5493f8ab36b88",
+      "matches": true
+    },
+    {
+      "file": "app/tools-panel.js",
+      "sha256": "2ef9c61c242520ff75ab094db5d810c99b0c5bde2438c321518b33d0f2d9ab71",
+      "matches": true
+    },
+    {
+      "file": "app/action-recorder.cjs",
+      "sha256": "3d3fcd60b2e6f6abc5d654a8f5eada25491647ccb635fee9bd8a1c88c71c1eaf",
+      "matches": true
+    },
+    {
+      "file": "app/cdp-transport.cjs",
+      "sha256": "9c1953a41655f3f5cee9c89b7a23256d8d67804b87ce8e9a111f45fb69f947fb",
+      "matches": true
+    },
+    {
+      "file": "app/bin/whisper-cli",
+      "sha256": "507deaba45dea03ea06abe61c4e5536e77c9ac7f6f17f0b4cf662b5d3b84c740",
+      "matches": true
+    },
+    {
+      "file": "app/bin/whisper-BUILD.json",
+      "sha256": "46e2d82ef11aa74f6816b5911b99972751932afc50250d685f7ea1ccc715820a",
+      "matches": true
+    },
+    {
+      "file": "app/bin/whisper-THIRD-PARTY-NOTICES.txt",
+      "sha256": "f4d3971285e0d7856403e7aa375566eb3b6bdd25fc36bb3c538af1ea6d1b877c",
+      "matches": true
+    },
+    {
+      "file": "app/bin/whisper-LICENSE",
+      "sha256": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d",
+      "matches": true
+    },
+    {
+      "file": "cli/vek-browser.mjs",
+      "sha256": "f120d0bc01664c997fcaf65ffee53297e05294f533d0727b6fd4287843397db8",
+      "matches": true
+    },
+    {
+      "file": "skills/vek-browser/API.md",
+      "sha256": "658b911ce2ad884ddbabf322bb36971400664917632b142dbd61d12ca04d89c4",
+      "matches": true
+    },
+    {
+      "file": "models/ggml-tiny.bin",
+      "sha256": "be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21",
+      "matches": true
+    },
+    {
+      "file": "NOTICE.md",
+      "sha256": "57318d9dde819e9799428fdbe84e2253b9634396a0d80881e2dcca48c5252f78",
+      "matches": true
+    }
+  ]
+}

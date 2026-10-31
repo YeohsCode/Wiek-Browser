@@ -1,0 +1,31 @@
+✔ opt-in native provider performs initialize/start/delta/usage and resumes the actual returned thread id (292.598833ms)
+✔ native steering uses turn/steer within the same run and interrupt stops a real protocol process (318.889792ms)
+✔ native approval requests wait for an explicit limited decision and never auto-approve (352.859458ms)
+✔ a native disconnect without turn/completed is a failure rather than a fake successful reply (210.4785ms)
+✔ real Electron panel renders literal messages and dispatches advanced controls without model calls (424.675458ms)
+✔ real child stdout/stderr, literal input, conversation and private atomic persistence (367.258417ms)
+✔ argv template passes one literal argument and never invokes a shell (234.482583ms)
+✔ stop, concurrency and overlap checks operate on actual provider processes (250.830083ms)
+✔ bounded output and failure status retain real diagnostics without invented replies (298.159875ms)
+✔ at schedule survives restart and executes exactly once while service is active (727.264208ms)
+✔ interval pause/resume/update/stop and overlap skipping do not queue duplicate work (2424.755625ms)
+✔ uncleanly persisted running state becomes interrupted and is never silently resumed (234.016458ms)
+✔ archive/pin/notes/markers/goals persist and branches have independent honest transcripts (380.177583ms)
+✔ edit/resend/rollback preserve revisions and never claim to undo project files (268.795958ms)
+✔ native JSON import is transactional, remaps ids, and cannot activate imported commands or schedules (223.775959ms)
+✔ UTC cron validates real calendar dates, weekday ranges and day/weekday OR semantics (35.335958ms)
+✔ heartbeat memory, run/stop limits, and proposals require explicit real-process execution (347.486875ms)
+✔ root-owned runContext injects only VEK namespace and a transient prompt prefix (455.717375ms)
+✔ model catalogue is user configured and usage comes only from actual structured output (203.861ms)
+✔ multi-agent create/read/list/wait expose real parent/child process state with bounded waiting (177.211709ms)
+✔ plain CLI steering queues a next turn and stop cancels queued work honestly (536.254334ms)
+✔ handoff creates a destination with copied real context and does not pretend to transfer a native session (239.695541ms)
+✔ closing the service releases outstanding waiters and interrupts owned running children (152.990333ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7634.105208

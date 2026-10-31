@@ -1,0 +1,9 @@
+file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/workbench-integration.mjs:99
+  async function waitDownload(predicate){const deadline=Date.now()+10000;while(Date.now()<deadline){const row=(await rpc('getState')).downloads.find(d=>d.name==='pause-resume-fixture.bin');if(row&&predicate(row))return row;await new Promise(resolve=>setTimeout(resolve,30));}throw new Error('Download fixture did not reach expected state');}
+                                                                                                                                                                                                                                                                                         ^
+
+Error: Download fixture did not reach expected state
+    at waitDownload (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/workbench-integration.mjs:99:282)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/workbench-integration.mjs:104:64
+
+Node.js v25.2.1

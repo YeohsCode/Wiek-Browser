@@ -1,0 +1,191 @@
+== build ==
+
+> ego-browser-v2@0.1.0 build
+> node scripts/build.mjs
+
+
+  dist/src/page-model.js                         86.5kb
+  dist/src/element-resolver.js                   69.6kb
+  dist/src/driver/page-actions.js                46.4kb
+  dist/src/browser-runtime.js                    41.5kb
+  dist/src/public-api-schema.js                  23.9kb
+  dist/src/driver/page-waits.js                  20.6kb
+  dist/src/driver/page-keyboard.js               18.5kb
+  dist/src/driver/pointer.js                     18.3kb
+  dist/src/helpers.js                            18.2kb
+  dist/src/clipboard.js                          17.0kb
+  dist/src/page-ledger.js                        16.3kb
+  dist/src/driver/keyboard.js                    14.9kb
+  dist/src/driver/action-target.js               14.2kb
+  dist/src/snapshot-result.js                    10.3kb
+  dist/src/learning/validate-learning-format.js   8.9kb
+  dist/src/help-runtime.js                        8.4kb
+  dist/src/driver/downloads.js                    8.2kb
+  dist/src/ego-errors.js                          6.5kb
+  dist/src/learning/index.js                      6.2kb
+  dist/src/index.js                               6.0kb
+  ...and 25 more output files...
+
+⚡ Done in 17ms
+== E2E (real browser helpers) ==
+fixture: http://127.0.0.1:52814
+task: ego-lite real browser e2e 1793324947538-4dc1cbaefb618
+cli: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/vek-browser.mjs
+sdk: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js
+-- environment initialization
+{"ok":true,"assertions":24}
+-- environment initialization passed (1.7s, 24 assertions)
+-- helper surface (skipped)
+-- task spaces and control (skipped)
+-- TaskSpace profile selection (skipped)
+-- v2 cross-space routing (skipped)
+-- navigation helpers (skipped)
+-- observation helpers (skipped)
+-- pointer and scroll helpers (skipped)
+-- keyboard and file helpers (skipped)
+-- keyboard regression (skipped)
+-- wait, fetch, cdp, js, help (skipped)
+-- runtime regression (skipped)
+-- target-scoped event isolation (skipped)
+-- page labels: create (skipped)
+-- page labels: restore and reuse (skipped)
+-- page labels: close and do not reuse (skipped)
+-- page labels: persist before hard stop (skipped)
+-- page labels: restore after hard stop (skipped)
+-- page inventory and budget (skipped)
+-- page adoption and release (skipped)
+-- page basic operations (skipped)
+-- page complex evaluate (skipped)
+-- page fetch (skipped)
+-- page actions and popup adoption (skipped)
+-- Page click hit target (skipped)
+-- Page action motion tolerance (skipped)
+-- Page drag and canvas drawing (skipped)
+-- Page JavaScript dialog handling (skipped)
+-- Page media playback (skipped)
+-- Page scrolled screenshot (skipped)
+-- Page snapshot locator quality (skipped)
+-- Page snapshot iframe viewport (skipped)
+-- Page snapshot subtree (skipped)
+-- Page ref identity across partial snapshots (skipped)
+-- Page refs across rounds: prepare (skipped)
+-- Page refs across rounds: resume (skipped)
+-- Page refs in dialog workflows (skipped)
+-- Page refs after failed actions: prepare (skipped)
+-- Page refs after failed actions: resume (skipped)
+-- Page refs after upload: prepare (skipped)
+-- Page refs after upload: resume (skipped)
+-- Page snapshot lazy iframe (skipped)
+-- Page snapshot sibling iframes (skipped)
+-- Page snapshot nested iframes (skipped)
+-- Page snapshot replaced iframe (skipped)
+-- Page open Shadow DOM locators (skipped)
+-- Page text locators (skipped)
+-- Page Playwright selector compatibility (skipped)
+-- Page popup waiter and URL diagnostic
+{"ok":true,"assertions":11}
+-- Page popup waiter and URL diagnostic passed (1.2s, 11 assertions)
+-- Page download lifecycle (skipped)
+-- Concurrent TaskSpace downloads (skipped)
+-- Page Chromium PDF viewer download (skipped)
+-- Page download across rounds: prepare (skipped)
+-- Page download across rounds: resume (skipped)
+-- Page OOPIF actions (skipped)
+-- Page OOPIF restore and close (skipped)
+-- Page load states
+{"ok":true,"assertions":50}
+-- Page load states passed (11.5s, 50 assertions)
+-- Page dedicated Worker startup (skipped)
+-- Page API alignment (skipped)
+-- Page actionability (skipped)
+-- Page evaluate timeout recovery (skipped)
+-- Page delayed popup: schedule (skipped)
+-- Page delayed popup: resume (skipped)
+-- v1 and v2 action parity (skipped)
+-- portable keyboard workflow (skipped)
+-- Page keyboard interface (skipped)
+-- pure CDP workflow (skipped)
+-- snapshot workflow (skipped)
+-- visual workflow (skipped)
+
+== E2E Summary ==
+  Passed:   3/69  (4%)
+  Skipped:  66/69
+  Total time: 16.0s
+  Assertions: 85
+
+  Cases:
+    environment initialization                     1.7s    24 assertions  PASS
+    helper surface                                         -  SKIP
+    task spaces and control                                -  SKIP
+    TaskSpace profile selection                            -  SKIP
+    v2 cross-space routing                                 -  SKIP
+    navigation helpers                                     -  SKIP
+    observation helpers                                    -  SKIP
+    pointer and scroll helpers                             -  SKIP
+    keyboard and file helpers                              -  SKIP
+    keyboard regression                                    -  SKIP
+    wait, fetch, cdp, js, help                             -  SKIP
+    runtime regression                                     -  SKIP
+    target-scoped event isolation                          -  SKIP
+    page labels: create                                    -  SKIP
+    page labels: restore and reuse                         -  SKIP
+    page labels: close and do not reuse                    -  SKIP
+    page labels: persist before hard stop                  -  SKIP
+    page labels: restore after hard stop                   -  SKIP
+    page inventory and budget                              -  SKIP
+    page adoption and release                              -  SKIP
+    page basic operations                                  -  SKIP
+    page complex evaluate                                  -  SKIP
+    page fetch                                             -  SKIP
+    page actions and popup adoption                        -  SKIP
+    Page click hit target                                  -  SKIP
+    Page action motion tolerance                           -  SKIP
+    Page drag and canvas drawing                           -  SKIP
+    Page JavaScript dialog handling                        -  SKIP
+    Page media playback                                    -  SKIP
+    Page scrolled screenshot                               -  SKIP
+    Page snapshot locator quality                          -  SKIP
+    Page snapshot iframe viewport                          -  SKIP
+    Page snapshot subtree                                  -  SKIP
+    Page ref identity across partial snapshots             -  SKIP
+    Page refs across rounds: prepare                       -  SKIP
+    Page refs across rounds: resume                        -  SKIP
+    Page refs in dialog workflows                          -  SKIP
+    Page refs after failed actions: prepare                -  SKIP
+    Page refs after failed actions: resume                 -  SKIP
+    Page refs after upload: prepare                        -  SKIP
+    Page refs after upload: resume                         -  SKIP
+    Page snapshot lazy iframe                              -  SKIP
+    Page snapshot sibling iframes                          -  SKIP
+    Page snapshot nested iframes                           -  SKIP
+    Page snapshot replaced iframe                          -  SKIP
+    Page open Shadow DOM locators                          -  SKIP
+    Page text locators                                     -  SKIP
+    Page Playwright selector compatibility                 -  SKIP
+    Page popup waiter and URL diagnostic           1.2s    11 assertions  PASS
+    Page download lifecycle                                -  SKIP
+    Concurrent TaskSpace downloads                         -  SKIP
+    Page Chromium PDF viewer download                      -  SKIP
+    Page download across rounds: prepare                   -  SKIP
+    Page download across rounds: resume                    -  SKIP
+    Page OOPIF actions                                     -  SKIP
+    Page OOPIF restore and close                           -  SKIP
+    Page load states                              11.5s    50 assertions  PASS
+    Page dedicated Worker startup                          -  SKIP
+    Page API alignment                                     -  SKIP
+    Page actionability                                     -  SKIP
+    Page evaluate timeout recovery                         -  SKIP
+    Page delayed popup: schedule                           -  SKIP
+    Page delayed popup: resume                             -  SKIP
+    v1 and v2 action parity                                -  SKIP
+    portable keyboard workflow                             -  SKIP
+    Page keyboard interface                                -  SKIP
+    pure CDP workflow                                      -  SKIP
+    snapshot workflow                                      -  SKIP
+    visual workflow                                        -  SKIP
+
+-- cleanup
+{"cleanup":{"done":true}}
+{"ok":true,"assertions":0}
+-- cleanup passed (101ms, 0 assertions)

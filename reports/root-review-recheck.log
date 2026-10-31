@@ -1,0 +1,20 @@
+✔ catalog reads bounded instruction roots, deduplicates symlinks, persists enable/selection and excludes unrelated files (12.81125ms)
+✔ voice executes real fake transcriber with literal argv, cleans recordings and persists config (96.988ms)
+✔ voice enforces overlap, cancellation and timeout without a fake successful transcript (107.557292ms)
+✔ voice dictionary, language, retained audio, soft deletion and retention apply to actual subprocess output (96.174541ms)
+✔ catalog never supplies stale project file after symlink replacement or other-project selection (9.886417ms)
+✔ catalog bounds complete UTF-8 context including source headers (3.275625ms)
+✔ voice close is terminal and snapshot applies history retention without a special list call (50.6085ms)
+✔ voice stop and close await child shutdown and prevent replacement transcription (2.980875ms)
+✔ profile import rejects a symlinked Network directory and URL authority injection in cookies (23.911667ms)
+✔ vault rejects non-HTTP origins and remains unchanged after disk persistence failure (1.28725ms)
+✔ browser snapshot accepts only an optional string target in resolved thread scope (0.361917ms)
+✔ voice keeps multibyte transcripts intact across process stdout chunk boundaries (82.177791ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 386.493083

@@ -1,0 +1,16 @@
+✔ recording is off by default and can capture only the explicitly selected current target (26.780833ms)
+✔ typed values, clipboard text, password/payment events and secret URL components never persist (46.896625ms)
+✔ concurrent event feeds serialize capture, reserve event slots, and enforce automatic event stop (87.528166ms)
+✔ capture rate, per-image limit, total image limit and invalid image responses are enforced (145.344875ms)
+✔ soft deletion and restoration survive restart with the same screenshot and native export (68.013583ms)
+✔ close drains accepted geometry without starting queued screenshots and times out a hung capture (189.816792ms)
+✔ a persisted interrupted recording reopens off and observer failures never corrupt capture (40.563666ms)
+✔ real Electron recorder panel previews one requested image and wires explicit record/export/soft-delete controls (393.532125ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 679.404583

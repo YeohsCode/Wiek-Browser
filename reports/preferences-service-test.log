@@ -1,0 +1,13 @@
+✔ preferences defaults do not collect content and patches persist with owner permissions (19.115334ms)
+✔ shortcut aliases normalize and actual platform chords detect app/system conflicts (16.031959ms)
+✔ invalid shortcut syntax, unknown fields and oversized UTF-8 instructions never mutate state (10.419041ms)
+✔ shortcut reset checks collisions and global reset restores privacy defaults (27.823167ms)
+✔ state symlinks and invalid stored shortcuts are rejected instead of silently replaced (6.008125ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 155.05175

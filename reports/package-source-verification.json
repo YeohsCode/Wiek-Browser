@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-30T16:36:55.632Z",
-  "version": "0.3.0",
+  "generatedAt": "2026-10-31T02:07:16.089Z",
+  "version": "0.4.0",
   "versionMatches": true,
-  "checkedFiles": 141,
+  "checkedFiles": 142,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -19,17 +19,17 @@
     },
     {
       "file": "app/agent-panel.css",
-      "sha256": "07ddca0f17033b02d201139bef2769666f5a929b4154b60681baf23742bc0d82",
+      "sha256": "99e060411a7c6d0d1a9e96406edbc773ca722cdc87b5e135e76ba53e32605625",
       "matches": true
     },
     {
       "file": "app/agent-panel.js",
-      "sha256": "8a8f94815b556a4e6f91161c27c7911823dffa6f3701ad2011f36a5ed616be15",
+      "sha256": "9d4cf169e0e5eea8c144b864106b3bc9d6de333d6cdadcece0f4570c6cbdc82e",
       "matches": true
     },
     {
       "file": "app/agent-service.cjs",
-      "sha256": "1b383c17345921b976df3fc3414a1d846f0004fe0f4a02a51180b3c1d61ece19",
+      "sha256": "07c5191cd78123cd085ce830faa29e230a64321e24673ba832e24a9a02161ae9",
       "matches": true
     },
     {
@@ -84,7 +84,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "94a62f33d3acfc7cbd9860b69d91c1d51145a925bfa1f69d0c98236299645241",
+      "sha256": "ab08b1e8d2505e259bb9e61dc2d874609ffbc63ed2ac7d8871a7f18d4e3e6219",
       "matches": true
     },
     {
@@ -198,6 +198,11 @@
       "matches": true
     },
     {
+      "file": "app/turn-checkpoints.cjs",
+      "sha256": "385ee1b4bbf6afd3e49aebe17ccec0fe87a0bffeacb89956dff03c9ad313ff46",
+      "matches": true
+    },
+    {
       "file": "app/voice-service.cjs",
       "sha256": "cdf36a1f97fdf14434207e57f31e295ebcf4d31df8b381c5965f68555a855569",
       "matches": true
@@ -214,7 +219,7 @@
     },
     {
       "file": "app/workspace-service.cjs",
-      "sha256": "11886a2ec1d71b7eaa60694d144040bfbf0c770e35df02137a02e688207de4b7",
+      "sha256": "5c9b35d470884b227d83b19eb6e6677f6e5e49bc8790e4a51733895efd5664b2",
       "matches": true
     },
     {
@@ -704,7 +709,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "1646cabb4233043694d7ae6932eeca774b42f4eebe779bfa07704ed8b96156c9",
+      "sha256": "bdcd53f0d3a0783a576e4e15bbd4713fd8eaeb23daecf4f4f390d18c1e67fa97",
       "matches": true
     },
     {

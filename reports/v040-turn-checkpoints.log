@@ -1,0 +1,19 @@
+✔ real provider turn records before/after, staged and worktree diff, explicit restore and protection (2327.193166ms)
+✔ failed provider changes are captured, and stale or cross-turn restore previews are refused (1888.923709ms)
+✔ stop and graceful shutdown wait for actual provider termination and snapshot finalization (1442.418ms)
+✔ unsupported before capture prevents provider launch; disabled project preserves ordinary CLI behavior (254.384708ms)
+✔ after capture failure retains known before snapshot without claiming a complete diff (633.243333ms)
+✔ project concurrency, configuration and restore leases cannot overlap a protected turn (520.076208ms)
+✔ interrupted associations recover conservatively; import and fork do not acquire snapshot authority (1101.406916ms)
+✔ HEAD changes keep immutable diff available but prevent history-changing restoration (1076.206166ms)
+✔ stopping during before-capture never launches a provider and retains the known snapshot (519.997167ms)
+✔ native thread and turn IDs bind real wire events to immutable file snapshots once (1189.167125ms)
+✔ actual host-process hard stop recovers the known before snapshot without inventing after state (974.899417ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 11
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12007.243375

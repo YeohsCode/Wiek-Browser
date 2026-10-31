@@ -18,6 +18,7 @@ const { createLibraryService } = require('./library-service.cjs');
 const { createActionRecorder } = require('./action-recorder.cjs');
 const { createProfileArchive } = require('./profile-archive.cjs');
 const { createSitePermissions } = require('./site-permissions.cjs');
+const { createTurnCheckpoints } = require('./turn-checkpoints.cjs');
 const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 const execFileAsync = promisify(execFile);
@@ -33,7 +34,7 @@ let window, server, wss, runtimeFile, saving, closing = false, agentService, wor
 const vaults = new Map();
 const voiceMutedTabs = new Map();
 const spaceWindows = new Map();
-let pendingCaptureTarget;
+let pendingCaptureTarget,turnCheckpointService;
 let browserStoreReady=false;
 const secretRequests=new Map();
 let profileArchiveResult;
@@ -495,6 +496,7 @@ async function uiAction(action, value, selectedSpaceId) {
     const pick=await dialog.showSaveDialog(window,{defaultPath:`Vek recording.${extension}`});if(!pick.canceled&&pick.filePath)fs.writeFileSync(pick.filePath,Buffer.from(audio.base64,'base64'),{mode:0o600});
     return voiceService.snapshot();
   }
+  if (action==='workspace:git:checkpoint:restore')return turnCheckpointService.withRestoreLease(value.projectId,()=>workspaceService.dispatch(action,value));
   if (action.startsWith('workspace:')) return workspaceService.dispatch(action, value);
   if (action.startsWith('mcp:')) return mcpService.dispatch(action, value);
   if (action.startsWith('voice:')) { if(action==='voice:transcribe'&&preferencesService.snapshot().onDeviceModels===false&&voiceService.snapshot().config?.command===path.join(__dirname,'bin/whisper-cli'))throw new Error('Enable on-device models in Preferences to use the bundled transcriber');return voiceService.dispatch(action, value); }
@@ -661,11 +663,13 @@ app.whenReady().then(async () => {
   const reservedShortcuts=[['CommandOrControl+C','Copy'],['CommandOrControl+X','Cut'],['CommandOrControl+V','Paste'],['CommandOrControl+A','Select all'],['CommandOrControl+Z','Undo'],['CommandOrControl+Shift+Z','Redo'],['CommandOrControl+P','Print'],['CommandOrControl+G','Find next'],['CommandOrControl+Shift+G','Find previous'],['Alt+CommandOrControl+I','Developer tools']].map(([accelerator,label])=>({accelerator,label}));
   preferencesService=createPreferencesService({dataDir:DATA,reservedShortcuts,onChange:applyPreferences});nativeTheme.themeSource=preferencesService.snapshot().theme;
   nativeTheme.on('updated',()=>publish());
-  agentService = createAgentService({ dataDir: DATA, onChange: () => publish(), runContext: ({thread,project}) => ({
+  agentService = createAgentService({ dataDir: DATA, onChange: () => publish(), turnCheckpoints:{before:args=>turnCheckpointService.before(args),after:args=>turnCheckpointService.after(args),locked:id=>turnCheckpointService?.locked(id)||false,dispatch:(...args)=>turnCheckpointService.dispatch(...args)}, runContext: ({thread,project}) => ({
     env: { VEK_BROWSER_CLI: path.join(ROOT, 'cli/vek-browser.mjs'), VEK_DATA_DIR: DATA, VEK_THREAD_ID: thread.id, VEK_PROJECT_ID: thread.projectId, VEK_BROWSER_INSTANCE_ID: INSTANCE },
     promptPrefix: agentPromptPrefix(thread,project),
   }) });
   workspaceService = createWorkspaceService({ projects: () => agentService.snapshot().projects, onChange: publish });
+  turnCheckpointService=createTurnCheckpoints({dataDir:DATA,workspace:workspaceService,projects:()=>agentService.snapshot().projects,isRunning:project=>{const state=agentService.snapshot(),ids=new Set(state.projects.filter(p=>p.path===project.path).map(p=>p.id));return state.threads.some(t=>ids.has(t.projectId)&&t.status==='running');},onChange:publish});
+  agentService.recoverFileChanges(turnCheckpointService.records());
   catalogService = createCatalogService({ dataDir: DATA, projects: () => agentService.snapshot().projects });
   const whisperCommand = path.join(__dirname, 'bin/whisper-cli'), whisperModel = path.join(ROOT, 'models/ggml-tiny.bin');
   voiceService = createVoiceService({ dataDir: DATA, defaultConfig: fs.existsSync(whisperCommand) && fs.existsSync(whisperModel) ? { command:whisperCommand, args:['-m',whisperModel,'-f','{audio}','-l','{language}','-nt','-np','-ng'], output:'stdout' } : null });
@@ -728,5 +732,5 @@ app.on('before-quit', event => {
   if (runtimeFile) { try { const r = JSON.parse(fs.readFileSync(runtimeFile)); if (r.pid === process.pid) fs.unlinkSync(runtimeFile); } catch {} }
   for (const c of connections) c.ws.close(); server?.close();
   tray?.destroy();
-  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([agentService?.close(), mcpService?.close(), voiceService?.close(), workspaceService?.close(), libraryService?.close(), preferencesService?.close(),recorderService?.close()]).finally(() => app.quit()); }
+  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
 });

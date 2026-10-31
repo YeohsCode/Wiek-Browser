@@ -7,6 +7,8 @@ All state is local. Provider prompts run actual installed executables and may co
 | Area | Actions and payload |
 | --- | --- |
 | Projects | `agents:projects:list`, `agents:projects:create {name,path}`; path is an existing absolute directory |
+| Automatic turn snapshots | `agents:projects:checkpoints {id:projectId,enabled}` opts a project in. Before-capture failure prevents provider launch. Protected turns in the same directory serialize; file restore cannot overlap an Agent turn |
+| Turn file changes | `agents:changes:list {id:threadId}`, `diff {id,runId}` or `{id,scope:'thread'}`, `preview {id,runId,target?:'before'|'after'}`, `restore {id,runId,target?,expectedState,confirm:true}` using `agents:changes:` prefix. File restore changes actual files/index, requires explicit user intent and a fresh preview, and creates a protection snapshot. Transcript rollback remains separate. Imported transcripts do not grant authority over local checkpoints |
 | Providers | `agents:providers:discover`, `agents:providers:configure {name,command,args:[],inputMode:'stdin'|'argv',enabled,models?:[],modelArgs?:[],protocol?:'cli'|'codex-app-server'}` |
 | Threads | `agents:threads:create {projectId,providerId,title?,model?}`, `agents:threads:read {id}`, `agents:threads:prompt {id,prompt}`, `agents:threads:stop {id}` |
 | Organization | `agents:threads:rename {id,title}`, `archive/unarchive/pin/unpin {id}`, `notes {id,notes}`, `goal {id,goal,status?}` using the `agents:threads:` prefix |

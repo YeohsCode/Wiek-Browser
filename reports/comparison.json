@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-30T16:33:36.667Z",
+  "generatedAt": "2026-10-31T02:04:16.471Z",
   "suite": "ego-lite real-browser-e2e",
   "selectedNames": [
     "environment initialization",
@@ -597,9 +597,9 @@
     {
       "browser": "vek",
       "status": "pass",
-      "startedAt": "2026-10-30T16:30:57.572Z",
-      "endedAt": "2026-10-30T16:33:31.148Z",
-      "wallTimeMs": 153575,
+      "startedAt": "2026-10-31T02:01:22.463Z",
+      "endedAt": "2026-10-31T02:03:56.076Z",
+      "wallTimeMs": 153612,
       "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
       "cliSha256": "7009fb5aeb3c9e66436b07f8ddae20f2289a9639e2a5ab5ec8f0e13025dba2a8",
       "command": [
@@ -621,21 +621,21 @@
         {
           "name": "environment initialization",
           "status": "pass",
-          "durationMs": 2500,
+          "durationMs": 2700,
           "assertionCount": 24,
           "source": "upstream-summary"
         },
         {
           "name": "helper surface",
           "status": "pass",
-          "durationMs": 188,
+          "durationMs": 189,
           "assertionCount": 67,
           "source": "upstream-summary"
         },
         {
           "name": "task spaces and control",
           "status": "pass",
-          "durationMs": 814,
+          "durationMs": 815,
           "assertionCount": 58,
           "source": "upstream-summary"
         },
@@ -677,7 +677,7 @@
         {
           "name": "keyboard and file helpers",
           "status": "pass",
-          "durationMs": 1500,
+          "durationMs": 1400,
           "assertionCount": 22,
           "source": "upstream-summary"
         },
@@ -712,7 +712,7 @@
         {
           "name": "page labels: create",
           "status": "pass",
-          "durationMs": 393,
+          "durationMs": 411,
           "assertionCount": 13,
           "source": "upstream-summary"
         },
@@ -733,42 +733,42 @@
         {
           "name": "page labels: persist before hard stop",
           "status": "pass",
-          "durationMs": 309,
+          "durationMs": 314,
           "assertionCount": 1,
           "source": "upstream-summary"
         },
         {
           "name": "page labels: restore after hard stop",
           "status": "pass",
-          "durationMs": 306,
+          "durationMs": 302,
           "assertionCount": 3,
           "source": "upstream-summary"
         },
         {
           "name": "page inventory and budget",
           "status": "pass",
-          "durationMs": 766,
+          "durationMs": 754,
           "assertionCount": 9,
           "source": "upstream-summary"
         },
         {
           "name": "page adoption and release",
           "status": "pass",
-          "durationMs": 513,
+          "durationMs": 521,
           "assertionCount": 19,
           "source": "upstream-summary"
         },
         {
           "name": "page basic operations",
           "status": "pass",
-          "durationMs": 1600,
+          "durationMs": 1500,
           "assertionCount": 53,
           "source": "upstream-summary"
         },
         {
           "name": "page complex evaluate",
           "status": "pass",
-          "durationMs": 549,
+          "durationMs": 547,
           "assertionCount": 23,
           "source": "upstream-summary"
         },
@@ -782,28 +782,28 @@
         {
           "name": "page actions and popup adoption",
           "status": "pass",
-          "durationMs": 4000,
+          "durationMs": 3900,
           "assertionCount": 57,
           "source": "upstream-summary"
         },
         {
           "name": "Page click hit target",
           "status": "pass",
-          "durationMs": 3300,
+          "durationMs": 3400,
           "assertionCount": 17,
           "source": "upstream-summary"
         },
         {
           "name": "Page action motion tolerance",
           "status": "pass",
-          "durationMs": 1100,
+          "durationMs": 1000,
           "assertionCount": 6,
           "source": "upstream-summary"
         },
         {
           "name": "Page drag and canvas drawing",
           "status": "pass",
-          "durationMs": 996,
+          "durationMs": 1000,
           "assertionCount": 15,
           "source": "upstream-summary"
         },
@@ -817,28 +817,28 @@
         {
           "name": "Page media playback",
           "status": "pass",
-          "durationMs": 4600,
+          "durationMs": 4700,
           "assertionCount": 17,
           "source": "upstream-summary"
         },
         {
           "name": "Page scrolled screenshot",
           "status": "pass",
-          "durationMs": 468,
+          "durationMs": 467,
           "assertionCount": 13,
           "source": "upstream-summary"
         },
         {
           "name": "Page snapshot locator quality",
           "status": "pass",
-          "durationMs": 347,
+          "durationMs": 344,
           "assertionCount": 4,
           "source": "upstream-summary"
         },
         {
           "name": "Page snapshot iframe viewport",
           "status": "pass",
-          "durationMs": 797,
+          "durationMs": 784,
           "assertionCount": 13,
           "source": "upstream-summary"
         },
@@ -859,7 +859,7 @@
         {
           "name": "Page refs across rounds: prepare",
           "status": "pass",
-          "durationMs": 347,
+          "durationMs": 334,
           "assertionCount": 5,
           "source": "upstream-summary"
         },
@@ -873,84 +873,84 @@
         {
           "name": "Page refs in dialog workflows",
           "status": "pass",
-          "durationMs": 777,
+          "durationMs": 775,
           "assertionCount": 10,
           "source": "upstream-summary"
         },
         {
           "name": "Page refs after failed actions: prepare",
           "status": "pass",
-          "durationMs": 744,
+          "durationMs": 746,
           "assertionCount": 8,
           "source": "upstream-summary"
         },
         {
           "name": "Page refs after failed actions: resume",
           "status": "pass",
-          "durationMs": 287,
+          "durationMs": 285,
           "assertionCount": 3,
           "source": "upstream-summary"
         },
         {
           "name": "Page refs after upload: prepare",
           "status": "pass",
-          "durationMs": 437,
+          "durationMs": 440,
           "assertionCount": 2,
           "source": "upstream-summary"
         },
         {
           "name": "Page refs after upload: resume",
           "status": "pass",
-          "durationMs": 284,
+          "durationMs": 283,
           "assertionCount": 3,
           "source": "upstream-summary"
         },
         {
           "name": "Page snapshot lazy iframe",
           "status": "pass",
-          "durationMs": 405,
+          "durationMs": 293,
           "assertionCount": 14,
           "source": "upstream-summary"
         },
         {
           "name": "Page snapshot sibling iframes",
           "status": "pass",
-          "durationMs": 519,
+          "durationMs": 512,
           "assertionCount": 14,
           "source": "upstream-summary"
         },
         {
           "name": "Page snapshot nested iframes",
           "status": "pass",
-          "durationMs": 488,
+          "durationMs": 486,
           "assertionCount": 18,
           "source": "upstream-summary"
         },
         {
           "name": "Page snapshot replaced iframe",
           "status": "pass",
-          "durationMs": 426,
+          "durationMs": 420,
           "assertionCount": 11,
           "source": "upstream-summary"
         },
         {
           "name": "Page open Shadow DOM locators",
           "status": "pass",
-          "durationMs": 782,
+          "durationMs": 807,
           "assertionCount": 4,
           "source": "upstream-summary"
         },
         {
           "name": "Page text locators",
           "status": "pass",
-          "durationMs": 923,
+          "durationMs": 889,
           "assertionCount": 6,
           "source": "upstream-summary"
         },
         {
           "name": "Page Playwright selector compatibility",
           "status": "pass",
-          "durationMs": 3000,
+          "durationMs": 2900,
           "assertionCount": 16,
           "source": "upstream-summary"
         },
@@ -964,7 +964,7 @@
         {
           "name": "Page download lifecycle",
           "status": "pass",
-          "durationMs": 666,
+          "durationMs": 665,
           "assertionCount": 8,
           "source": "upstream-summary"
         },
@@ -978,35 +978,35 @@
         {
           "name": "Page Chromium PDF viewer download",
           "status": "pass",
-          "durationMs": 1100,
+          "durationMs": 1000,
           "assertionCount": 13,
           "source": "upstream-summary"
         },
         {
           "name": "Page download across rounds: prepare",
           "status": "pass",
-          "durationMs": 657,
+          "durationMs": 659,
           "assertionCount": 1,
           "source": "upstream-summary"
         },
         {
           "name": "Page download across rounds: resume",
           "status": "pass",
-          "durationMs": 208,
+          "durationMs": 207,
           "assertionCount": 4,
           "source": "upstream-summary"
         },
         {
           "name": "Page OOPIF actions",
           "status": "pass",
-          "durationMs": 2100,
+          "durationMs": 2000,
           "assertionCount": 15,
           "source": "upstream-summary"
         },
         {
           "name": "Page OOPIF restore and close",
           "status": "pass",
-          "durationMs": 216,
+          "durationMs": 221,
           "assertionCount": 7,
           "source": "upstream-summary"
         },
@@ -1020,14 +1020,14 @@
         {
           "name": "Page dedicated Worker startup",
           "status": "pass",
-          "durationMs": 323,
+          "durationMs": 329,
           "assertionCount": 1,
           "source": "upstream-summary"
         },
         {
           "name": "Page API alignment",
           "status": "pass",
-          "durationMs": 5100,
+          "durationMs": 5200,
           "assertionCount": 40,
           "source": "upstream-summary"
         },
@@ -1041,14 +1041,14 @@
         {
           "name": "Page evaluate timeout recovery",
           "status": "pass",
-          "durationMs": 48300,
+          "durationMs": 48400,
           "assertionCount": 24,
           "source": "upstream-summary"
         },
         {
           "name": "Page delayed popup: schedule",
           "status": "pass",
-          "durationMs": 655,
+          "durationMs": 661,
           "assertionCount": 1,
           "source": "upstream-summary"
         },
@@ -1069,7 +1069,7 @@
         {
           "name": "portable keyboard workflow",
           "status": "pass",
-          "durationMs": 785,
+          "durationMs": 783,
           "assertionCount": 4,
           "source": "upstream-summary"
         },
@@ -1083,7 +1083,7 @@
         {
           "name": "pure CDP workflow",
           "status": "pass",
-          "durationMs": 387,
+          "durationMs": 398,
           "assertionCount": 9,
           "source": "upstream-summary"
         },
@@ -1097,7 +1097,7 @@
         {
           "name": "visual workflow",
           "status": "pass",
-          "durationMs": 493,
+          "durationMs": 492,
           "assertionCount": 5,
           "source": "upstream-summary"
         }

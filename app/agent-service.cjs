@@ -113,7 +113,7 @@ function discoverCodex() {
   return null;
 }
 
-function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcurrentRuns = 2, maxOutputBytes = 1024 * 1024 } = {}) {
+function createAgentService({ dataDir, onChange = () => {}, runContext, turnCheckpoints, maxConcurrentRuns = 2, maxOutputBytes = 1024 * 1024 } = {}) {
   if (!dataDir) throw fail('dataDir is required');
   maxConcurrentRuns = Math.max(1, Math.min(16, Number(maxConcurrentRuns) || 2));
   maxOutputBytes = Math.max(128, Math.min(16 * 1024 * 1024, Number(maxOutputBytes) || 1024 * 1024));
@@ -182,7 +182,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
   const message = (role, content, runId) => ({ id: randomUUID(), role, content, createdAt: now(), ...(runId ? { runId } : {}) });
   for (const thread of state.threads) {
     let recovered = false;
-    for (const run of thread.runs || []) if (run.status === 'running') { run.status = 'interrupted'; run.completedAt = now(); for (const approval of run.approvals || []) if (approval.status === 'pending') approval.status = 'expired'; recovered = true; }
+    for (const run of thread.runs || []) if (run.status === 'running') { run.status = 'interrupted'; run.phase = 'settled'; run.completedAt = now(); if (run.fileChanges) { run.fileChanges.status = 'interrupted'; run.fileChanges.error = 'Browser stopped before snapshot finalization. No after state was inferred.'; } for (const approval of run.approvals || []) if (approval.status === 'pending') approval.status = 'expired'; recovered = true; }
     if (thread.status === 'running' || recovered) {
       thread.status = 'interrupted'; delete thread.activeRunId;
       thread.messages.push(message('system', 'The previous run was interrupted when the browser stopped. It has not been resumed automatically.'));
@@ -262,6 +262,10 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
     if (running.size >= maxConcurrentRuns) throw fail('Agent concurrency limit reached', 'VEK_AGENT_CAPACITY');
     prompt = nonempty(prompt, 'prompt');
     const project = locate('projects', thread.projectId);
+    const checkpointed = project.checkpointsEnabled === true;
+    if (turnCheckpoints?.locked?.(project.id)) throw fail('File restore is active in this project', 'VEK_AGENT_PROJECT_BUSY');
+    if (checkpointed && !turnCheckpoints) throw fail('Automatic checkpoint support is unavailable');
+    if ([...running.values()].some(active => active.projectPath === project.path && (checkpointed || active.checkpointed))) throw fail('A protected turn is already running in this project', 'VEK_AGENT_PROJECT_BUSY');
     const provider = locate('providers', thread.providerId);
     const command = executable(provider.command);
     if (!provider.enabled || !command) throw fail('The selected provider CLI is unavailable or disabled; configure an installed executable', 'VEK_AGENT_PROVIDER_UNAVAILABLE');
@@ -286,10 +290,25 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
     let resolveDone;
     const done = new Promise((resolve) => { resolveDone = resolve; });
     let child;
+    const active = { child:null, projectPath:project.path, checkpointed, run, thread, done, stopReason:null, bytes:0, resolveDone };
+    running.set(thread.id,active);
+    run.phase = checkpointed ? 'preparing' : 'executing';
+    async function finalize(code,signal,launchError) {
+      if(active.finalizing)return;active.finalizing=true;active.child=null;
+      clearTimeout(active.killTimer);
+      if(launchError)run.error=launchError.message;
+      if (active.native && !active.native.completed && !active.stopReason && !run.error) run.error = 'Native provider disconnected before turn completed';
+      const outcome = active.stopReason || (run.error || (code !== 0 && !active.native?.completed) ? 'failed' : 'completed');
+      run.providerOutcome=outcome;run.phase='finalizing';
+      if(checkpointed){publish();try{run.fileChanges=await turnCheckpoints.after({thread:clone(thread),project:clone(project),run:{...clone(run),status:outcome}});}catch(error){run.fileChanges={...run.fileChanges,status:'partial',error:error.message};}}
+      run.status=outcome;run.phase='settled';run.completedAt=now();run.exitCode=code;run.signal=signal;
+      completeRun(code);
+    }
+    function launch() {
+    if(active.stopReason||closed){void finalize(null,null);return;}
     try { child = spawn(command, args, { cwd: project.path, env: { ...process.env, ...contextEnv }, shell: false, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] }); }
-    catch (error) { run.status = 'failed'; run.error = error.message; run.completedAt = now(); thread.status = 'failed'; delete thread.activeRunId; publish(); throw error; }
-    const active = { child, run, thread, done, stopReason: null, bytes: 0, resolveDone };
-    running.set(thread.id, active);
+    catch (error) { void finalize(null,null,error); return; }
+    active.child=child;run.executedAt=now();run.phase='executing';
     const consume = (key, chunk) => {
       const remaining = Math.max(0, maxOutputBytes - active.bytes);
       if (chunk.length > remaining) run.truncated = true;
@@ -312,7 +331,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
         timeout.unref?.(); requests.set(id, { resolve, reject, timeout }); write({ id, method, params });
       });
       active.native = { request, approvalIds, write, turnId: null, threadId: null };
-      const nativeFailure = (error) => { run.error = error.message || String(error); killTree(child, 'SIGTERM'); };
+      const nativeFailure = (error) => { if(active.finalizing)return;run.error = error.message || String(error); killTree(child, 'SIGTERM'); };
       child.stdout.on('data', (chunk) => {
         buffer += chunk.toString('utf8');
         if (buffer.length > 4 * 1024 * 1024) return nativeFailure(fail('Native provider frame exceeds 4 MiB'));
@@ -334,7 +353,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
             } else write({ id: event.id, error: { code: -32601, message: 'This native client does not support that server request' } });
             continue;
           }
-          if (event.method === 'turn/started') active.native.turnId = params.turn?.id || active.native.turnId;
+          if (event.method === 'turn/started') { active.native.turnId = params.turn?.id || active.native.turnId; run.nativeTurnId=active.native.turnId; }
           if (event.method === 'item/agentMessage/delta' && typeof params.delta === 'string') { streamedItems.add(params.itemId); consume('stdout', Buffer.from(params.delta)); }
           if (event.method === 'item/completed' && params.item?.type === 'agentMessage' && !streamedItems.has(params.item.id) && typeof params.item.text === 'string') consume('stdout', Buffer.from(params.item.text));
           if (event.method === 'thread/tokenUsage/updated') {
@@ -353,28 +372,28 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
       });
       child.on('close', () => { clearTimeout(active.native.exitTimer); for (const pending of requests.values()) { clearTimeout(pending.timeout); pending.reject(fail('Native provider disconnected')); } requests.clear(); });
       active.native.ready = (async () => {
-        await request('initialize', { clientInfo: { name: 'vek_browser', title: 'Vek Browser', version: '0.1.0' }, capabilities: { experimentalApi: false } });
+        await request('initialize', { clientInfo: { name: 'vek_browser', title: 'Vek Browser', version: require('../package.json').version }, capabilities: { experimentalApi: false } });
         write({ method: 'initialized', params: {} });
         const resumed = !!thread.nativeThreadId;
         const response = await request(resumed ? 'thread/resume' : 'thread/start', resumed ? { threadId: thread.nativeThreadId } : { cwd: project.path, sandbox: 'read-only', approvalPolicy: 'on-request', ...(thread.model ? { model: thread.model } : {}) });
         const nativeThreadId = response?.thread?.id;
         if (typeof nativeThreadId !== 'string') throw fail('Native provider did not return a thread id');
-        thread.nativeThreadId = nativeThreadId; active.native.threadId = nativeThreadId;
+        thread.nativeThreadId = nativeThreadId; active.native.threadId = nativeThreadId; run.nativeThreadId=nativeThreadId;
         const text = resumed ? `${context.promptPrefix ? context.promptPrefix + '\n\n' : ''}${prompt}${attachmentContext}` : transcript;
         const input = [{ type: 'text', text }, ...attachments.filter((item) => item.mimeType.startsWith('image/')).map((item) => ({ type: 'localImage', path: item.storedPath }))];
         const turn = await request('turn/start', { threadId: nativeThreadId, input, ...(thread.model ? { model: thread.model } : {}) });
-        active.native.turnId = turn?.turn?.id || active.native.turnId; publishSoon();
+        active.native.turnId = turn?.turn?.id || active.native.turnId; run.nativeTurnId=active.native.turnId; publishSoon();
       })();
       active.native.ready.catch(nativeFailure);
     } else child.stdout.on('data', (chunk) => consume('stdout', chunk));
     child.stderr.on('data', (chunk) => consume('stderr', chunk));
     child.stdin.on('error', () => {});
     child.on('error', (error) => { run.error = error.message; });
-    child.on('close', (code, signal) => {
-      clearTimeout(active.killTimer);
-      if (active.native && !active.native.completed && !active.stopReason && !run.error) run.error = 'Native provider disconnected before turn completed';
-      run.status = active.stopReason || (run.error || (code !== 0 && !active.native?.completed) ? 'failed' : 'completed');
-      run.completedAt = now(); run.exitCode = code; run.signal = signal;
+    child.on('close',(code,signal)=>{void finalize(code,signal);});
+    if (!active.native) child.stdin.end(provider.inputMode === 'stdin' ? transcript : undefined);
+    publish();
+    }
+    function completeRun(code) {
       for (const approval of run.approvals || []) if (approval.status === 'pending') approval.status = 'expired';
       if (provider.usageFormat === 'codex-jsonl') {
         for (const line of run.stdout.split('\n')) {
@@ -395,9 +414,14 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
         const followUp = thread.pendingFollowUps.shift();
         try { startRun(thread, followUp.prompt); } catch (error) { thread.pendingFollowUps.unshift(followUp); thread.messages.push(message('system', `Queued follow-up did not start: ${error.message}`)); publish(); }
       }
-    });
-    if (!active.native) child.stdin.end(provider.inputMode === 'stdin' ? transcript : undefined);
-    publish();
+    }
+    if(checkpointed){
+      run.fileChanges={status:'capturing-before'};publish();
+      void Promise.resolve().then(async()=>{
+        if(active.stopReason||closed)return;
+        run.fileChanges=await turnCheckpoints.before({thread:clone(thread),project:clone(project),run:clone(run)});publish();
+      }).then(()=>launch()).catch(error=>{run.fileChanges={...run.fileChanges,status:'failed',error:error.message};void finalize(null,null,error);});
+    }else launch();
     return run;
   }
   async function stopThread(threadId, reason = 'stopped') {
@@ -405,7 +429,9 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
     if (thread?.pendingFollowUps?.length) { thread.pendingFollowUps = []; thread.updatedAt = now(); }
     const active = running.get(threadId);
     if (!active) return;
+    if(active.finalizing){await active.done;return;}
     active.stopReason = reason;
+    if(!active.child){await active.done;return;}
     if (active.native?.turnId && active.native.threadId) active.native.request('turn/interrupt', { threadId: active.native.threadId, turnId: active.native.turnId }).catch(() => killTree(active.child, 'SIGTERM'));
     else killTree(active.child, 'SIGTERM');
     active.killTimer = setTimeout(() => killTree(active.child, 'SIGKILL'), 1000); active.killTimer.unref?.();
@@ -472,7 +498,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
     }
     const prompt = automation.kind === 'heartbeat' && automation.memory ? `${automation.prompt}\n\nHeartbeat memory (local notes):\n${automation.memory}` : automation.prompt;
     try { const run = startRun(locate('threads', automation.threadId), prompt, automation.id, reservationId); automation.runCount = (automation.runCount || 0) + 1; automation.lastOutcome = 'started'; automation.lastRunId = run.id; delete automation.lastError; }
-    catch (error) { automation.lastOutcome = error.error_code === 'VEK_AGENT_OVERLAP' ? 'skipped-overlap' : error.error_code === 'VEK_AGENT_CAPACITY' ? 'skipped-capacity' : 'failed'; automation.lastError = error.message; if (automation.lastOutcome === 'failed' && automation.stopOnFailure) { automation.status = 'paused'; automation.stopReason = 'Provider run failed'; } }
+    catch (error) { automation.lastOutcome = ['VEK_AGENT_OVERLAP','VEK_AGENT_PROJECT_BUSY'].includes(error.error_code) ? 'skipped-overlap' : error.error_code === 'VEK_AGENT_CAPACITY' ? 'skipped-capacity' : 'failed'; automation.lastError = error.message; if (automation.lastOutcome === 'failed' && automation.stopOnFailure) { automation.status = 'paused'; automation.stopReason = 'Provider run failed'; } }
     automation.updatedAt = now();
   }
   function armScheduler() {
@@ -657,6 +683,14 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
         if (!existing) state.projects.push({ id: randomUUID(), name: nonempty(payload.name || path.basename(projectPath), 'name', 256), path: canonicalPath, createdAt: now() });
         break;
       }
+      case 'agents:projects:checkpoints': {
+        const project=locate('projects',id);if(typeof payload.enabled!=='boolean')throw fail('enabled must be boolean');
+        if([...running.values()].some(active=>active.projectPath===project.path)||turnCheckpoints?.locked?.(project.id))throw fail('Finish project runs and file restores before changing checkpoint capture','VEK_AGENT_PROJECT_BUSY');
+        project.checkpointsEnabled=payload.enabled;break;
+      }
+      case 'agents:changes:list': case 'agents:changes:diff': case 'agents:changes:preview': case 'agents:changes:restore': {
+        if(!turnCheckpoints?.dispatch)throw fail('Turn checkpoint support is unavailable');return turnCheckpoints.dispatch(action,payload,clone(locate('threads',id)));
+      }
       case 'agents:projects:delete': locate('projects', id); if (state.threads.some((thread) => thread.projectId === id)) throw fail('Delete the project threads first'); state.projects = state.projects.filter((project) => project.id !== id); break;
       case 'agents:providers:discover': { const discovered = discoverCodex(); if (discovered && !state.providers.some((provider) => provider.id === discovered.id)) state.providers.push(discovered); break; }
       case 'agents:providers:configure': {
@@ -759,7 +793,12 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, maxConcu
     if (automation.nextRunAt && !Number.isFinite(Date.parse(automation.nextRunAt))) { automation.status = 'paused'; automation.nextRunAt = null; automation.lastError = 'Invalid saved nextRunAt'; automation.stopReason = 'Invalid saved schedule timestamp'; }
   }
   persist(); armScheduler();
-  return { dispatch, snapshot, close };
+  function recoverFileChanges(records){
+    if(running.size)throw fail('Recover checkpoint metadata before starting Agent runs');
+    for(const record of records){const thread=state.threads.find(t=>t.id===record.threadId&&t.projectId===record.projectId),run=thread?.runs.find(r=>r.id===record.runId);if(run)run.fileChanges=clone(record);}
+    persist();
+  }
+  return { dispatch, snapshot, close, recoverFileChanges };
 }
 
 module.exports = { createAgentService, nextCronAt };

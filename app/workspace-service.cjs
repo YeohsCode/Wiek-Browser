@@ -295,6 +295,17 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
   }
   const checkpointMeta=record=>({id:record.id,name:record.name,createdAt:record.createdAt,head:record.head,files:record.files.length,bytes:record.bytes});
   async function checkpointAction(ctx,payload,operation) {
+    if(operation==='compare'){
+      const from=await checkpointRead(ctx,payload.fromId),to=await checkpointRead(ctx,payload.toId);
+      const args=['diff','--no-ext-diff','--no-textconv','--no-renames'];
+      const worktreeDiff=(await git(ctx,[...args,from.worktreeTree,to.worktreeTree,'--'])).stdout;
+      const stagedDiff=(await git(ctx,[...args,from.indexTree,to.indexTree,'--'])).stdout;
+      const changes=new Map(),before=new Map(from.files.map(row=>[row.path,row])),after=new Map(to.files.map(row=>[row.path,row]));
+      for(const file of [...new Set([...before.keys(),...after.keys()])].sort())if(before.get(file)?.sha256!==after.get(file)?.sha256||before.get(file)?.mode!==after.get(file)?.mode)changes.set(file,{path:file,kind:!before.has(file)?'add':!after.has(file)?'remove':'modify',worktree:true,staged:false});
+      const staged=(await git(ctx,[...args,'--name-status','-z',from.indexTree,to.indexTree,'--'])).stdout.split('\0');
+      for(let i=0;i+1<staged.length;i+=2){const kind=staged[i],file=staged[i+1];if(!file)continue;relative(file);const row=changes.get(file)||{path:file,kind:kind==='A'?'add':kind==='D'?'remove':'modify',worktree:false};row.staged=true;changes.set(file,row);}
+      return{projectId:payload.projectId,from:checkpointMeta(from),to:checkpointMeta(to),headChanged:from.head!==to.head,changes:[...changes.values()].sort((a,b)=>a.path.localeCompare(b.path)),stagedDiff,worktreeDiff};
+    }
     if(operation==='list'){const refs=(await git(ctx,['for-each-ref','--format=%(refname)',checkpointPrefix])).stdout.trim().split('\n').filter(Boolean);if(refs.length>1000)throw fail('Too many checkpoints to list');const checkpoints=[];for(const ref of refs)checkpoints.push(checkpointMeta(await checkpointRead(ctx,ref.slice(checkpointPrefix.length))));return{projectId:payload.projectId,checkpoints:checkpoints.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))};}
     return checkpointLock(ctx,async info=>{
       const current=await checkpointState(ctx,info);

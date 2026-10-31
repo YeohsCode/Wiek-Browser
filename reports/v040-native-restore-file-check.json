@@ -1,0 +1,11 @@
+{
+  "beforeConfirmation": "After this turn.\n",
+  "index": "Staged by provider.\n",
+  "createdFilePresent": true,
+  "afterConfirmation": {
+    "file": "Before this turn.\n",
+    "index": "Before this turn.\n",
+    "createdFilePresent": false
+  },
+  "pass": true
+}

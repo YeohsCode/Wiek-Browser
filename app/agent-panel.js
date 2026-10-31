@@ -2,6 +2,7 @@
 (() => {
   let root, invoke, snapshot = { providers: [], projects: [], threads: [], automations: [] };
   let selectedId = null, view = 'threads', error = '', pending = false, editor = null, showArchived = false;
+  let fileChanges=null;
   const drafts = new Map();
   const make = (tag, content, cls) => {
     const node = document.createElement(tag);
@@ -185,13 +186,40 @@
     if (t.status === 'running') list.append(make('div', 'Agent is running…', 'va-running-note'));
     return list;
   }
+  function configureCheckpoints(item){openEditor('Project turn snapshots',[
+    {key:'notice',type:'notice',label:'Save project files and the Git index before and after each Agent turn. Requires a supported Git repository (2 MiB per file, 32 MiB total). Capture failure prevents the provider from starting. File restore always has a separate preview and confirmation.'},
+    {key:'enabled',label:'Automatic turn snapshots',type:'select',options:[['false','Off'],['true','On for this project']],value:String(item.checkpointsEnabled===true)}
+  ],values=>action('agents:projects:checkpoints',{id:item.id,enabled:values.enabled==='true'},true));}
+  async function showFileChanges(t,run,previewTarget){
+    const payload={id:t.id,...(run?{runId:run.id}:{scope:'thread'}),...(previewTarget?{target:previewTarget}:{})};
+    const data=await action(previewTarget?'agents:changes:preview':'agents:changes:diff',payload);
+    if(data){fileChanges={mode:previewTarget?'preview':'diff',threadId:t.id,runId:run?.id,target:previewTarget,data,confirmation:''};render();}
+  }
+  function renderFileChanges(){
+    const overlay=make('div','','va-modal'),form=make('form','','va-dialog va-file-changes');form.setAttribute('role','dialog');form.setAttribute('aria-modal','true');form.setAttribute('aria-label','Project file changes');
+    const current=fileChanges,data=current.data;form.append(make('h2',current.mode==='preview'?'Preview file restore':current.mode==='restored'?'Files restored':'Project file changes'));
+    if(error)form.append(make('p',error,'va-error'));
+    if(current.mode==='restored')form.append(make('p',`Files and index were restored. Protection checkpoint: ${data.backupCheckpoint.name} (${data.backupCheckpoint.id}).`));
+    else{
+      form.append(make('p',current.mode==='preview'?`Restore saved project state: ${data.checkpoint.name}. This changes real files and the staged index. A protection checkpoint preserves the current state.`:data.notice,'va-hint'));
+      if(data.headChanged)form.append(make('p','HEAD changed during this span. Snapshot diff is available; restoring an earlier HEAD is refused.','va-hint'));
+      const list=make('div','','va-file-change-list');for(const row of data.changes||[])list.append(make('div',`${row.kind} · ${row.path}${row.staged?' · index':''}${row.worktree?' · files':''}`));if(!data.changes?.length)list.append(make('p','No file content changes.'));form.append(list);
+      for(const [key,label]of [['worktreeDiff',current.mode==='preview'?'Saved working state':'Working-file diff'],['stagedDiff',current.mode==='preview'?'Saved staged state':'Staged-index diff']]){const details=make('details');details.append(make('summary',label),make('pre',data[key]||'No diff.'));form.append(details);}
+    }
+    const actions=make('div','','va-dialog-actions');actions.append(button('Close',()=>{fileChanges=null;error='';render();}));
+    if(current.mode==='preview'){
+      const label=make('label',`Type “${data.checkpoint.name}” to confirm`),input=make('input');input.setAttribute('aria-label','Confirm snapshot name');input.dataset.focus='restore-snapshot';input.value=current.confirmation;label.append(input);form.append(label);
+      const restore=button('Restore files and index',async()=>{if(current.confirmation!==data.checkpoint.name)return;const result=await action('agents:changes:restore',{id:current.threadId,runId:current.runId,target:current.target,expectedState:data.expectedState,confirm:true});if(result){fileChanges={mode:'restored',data:result};render();}},'va-danger');restore.disabled=pending||current.confirmation!==data.checkpoint.name;input.oninput=()=>{current.confirmation=input.value;restore.disabled=pending||input.value!==data.checkpoint.name;};actions.append(restore);
+    }
+    form.onsubmit=event=>event.preventDefault();form.onkeydown=event=>{if(event.key==='Escape'&&!pending){event.preventDefault();fileChanges=null;render();}};form.append(actions);overlay.append(form);root.append(overlay);
+  }
   function threadsView(body) {
     const rail = make('section', '', 'va-thread-rail');
     const projects = make('div', '', 'va-projects');
     const projectHead = make('div', '', 'va-section-label'); projectHead.append(make('span', 'PROJECTS'), button('+', newProject, 'va-icon-button')); projects.append(projectHead);
     for (const item of snapshot.projects) {
       const row = make('div', '', 'va-project-row'); row.append(make('span', item.name)); row.title = item.path;
-      row.append(button('×', () => askDelete('Remove project', `Remove “${item.name}” from Vek? Files on disk are not deleted.`, () => action('agents:projects:delete', { id: item.id }, true)), 'va-icon-button')); projects.append(row);
+      row.append(button(item.checkpointsEnabled?'Snapshots on':'Snapshots off',()=>configureCheckpoints(item),'va-snapshot-setting'),button('×', () => askDelete('Remove project', `Remove “${item.name}” from Vek? Files on disk are not deleted.`, () => action('agents:projects:delete', { id: item.id }, true)), 'va-icon-button')); projects.append(row);
     }
     if (!snapshot.projects.length) projects.append(make('p', 'Add a folder to give your agent a working directory.', 'va-hint'));
     rail.append(projects);
@@ -211,12 +239,16 @@
     const actions = make('div', '', 'va-actions'); actions.append(make('span', t.status, `va-status va-status-${t.status}`), button('Rename', () => openEditor('Rename conversation', [{ key: 'title', label: 'Title', required: true }], values => action('agents:threads:rename', { id: t.id, title: values.title }, true), { title: t.title })), button('Delete', () => askDelete('Delete conversation', `Delete “${t.title}”, its stored messages, and linked automations?`, () => action('agents:threads:delete', { id: t.id }, true)), 'va-danger'));
     const more = make('details', '', 'va-thread-more'); more.append(make('summary', 'Conversation tools'));
     const extras = make('div', '', 'va-actions'); extras.append(button(t.pinned ? 'Unpin' : 'Pin', () => action(t.pinned ? 'agents:threads:unpin' : 'agents:threads:pin', { id: t.id })), button(t.archived ? 'Unarchive' : 'Archive', () => action(t.archived ? 'agents:threads:unarchive' : 'agents:threads:archive', { id: t.id })), button('Notes & goal', () => notesEditor(t)), button('Fork', () => branch(t, 'fork')), button('Sidechat', () => branch(t, 'sidechat')), button('Model', () => openEditor('Conversation model', [{ key: 'model', label: `Model name · configured catalogue: ${(provider(t.providerId)?.models || []).join(', ') || 'none (CLI default available)'}`, value: t.model || '' }], values => action('agents:threads:model', { id: t.id, model: values.model }, true))));
-    extras.append(button('Child agent', () => childAgentEditor(t)), button('Hand off', () => childAgentEditor(t, true))); more.append(extras); toolbar.append(title, actions); main.append(toolbar, more);
+    extras.append(button('Child agent', () => childAgentEditor(t)), button('Hand off', () => childAgentEditor(t, true)),button('Conversation file diff',()=>showFileChanges(t))); more.append(extras); toolbar.append(title, actions); main.append(toolbar, more);
     if (t.goal) main.append(make('p', `Goal · ${t.goal.status}: ${t.goal.text}`, 'va-goal'));
     if (t.markers?.length) { const markers = make('div', '', 'va-markers'); for (const marker of t.markers) markers.append(button(`★ ${marker.label} ×`, () => action('agents:threads:marker:remove', { id: t.id, markerId: marker.id }))); main.append(markers); }
     main.append(messageList(t));
     if (t.revisions?.length) { const history = make('details', '', 'va-run-details'); history.append(make('summary', `${t.revisions.length} transcript revisions`)); for (const revision of [...t.revisions].reverse()) { const entry = make('details'); entry.append(make('summary', `${revision.kind} · ${date(revision.createdAt)}`), make('pre', revision.messages.map(message => `${message.role}: ${message.content}`).join('\n\n'))); history.append(entry); } main.append(history); }
     const runs = t.runs || []; const latest = runs[runs.length - 1];
+    if(runs.some(run=>run.fileChanges)){
+      const history=make('details','','va-run-details');history.append(make('summary','Turn file snapshots'));
+      for(const [index,run]of runs.entries())if(run.fileChanges){const changes=run.fileChanges,row=make('section','','va-turn-snapshot');row.append(make('strong',`Turn ${index+1} · ${run.status} · ${changes.status}`));if(changes.error)row.append(make('p',changes.error,'va-hint'));const actions=make('div','','va-actions');if(changes.before&&changes.after)actions.append(button('View file changes',()=>showFileChanges(t,run)));if(t.status!=='running'){if(changes.before)actions.append(button('Restore before…',()=>showFileChanges(t,run,'before')));if(changes.after)actions.append(button('Restore after…',()=>showFileChanges(t,run,'after')));}row.append(actions);history.append(row);}main.append(history);
+    }
     for (const approval of latest?.approvals || []) if (approval.status === 'pending') {
       const card = make('section', '', 'va-approval'); card.append(make('strong', 'Local agent needs approval'), make('p', approval.title), make('pre', `${approval.cwd}\n${approval.command || approval.kind}`));
       const actions = make('div', '', 'va-actions'); for (const [decision, label] of [['accept', 'Approve this request'], ['decline', 'Decline'], ['cancel', 'Cancel turn']]) actions.append(button(label, () => action('agents:control:approval', { id: t.id, approvalId: approval.id, decision }), decision === 'accept' ? 'va-primary' : ''));
@@ -324,6 +356,7 @@
     const body = make('div', '', `va-body ${view === 'threads' ? 'va-thread-layout' : ''}`);
     if (view === 'threads') threadsView(body); else if (view === 'automations') schedulesView(body); else providersView(body); root.append(body);
     if (editor) root.append(renderEditor());
+    if(fileChanges)renderFileChanges();
     const messages = root.querySelector('[data-scroll="messages"]'); if (messages) messages.scrollTop = atEnd ? messages.scrollHeight : oldScroll;
     if (focus) { const input = [...root.querySelectorAll('[data-focus]')].find(item => item.dataset.focus === focus); input?.focus({ preventScroll: true }); if (input && selection && typeof input.setSelectionRange === 'function') { try { input.setSelectionRange(...selection); } catch {} } }
   }

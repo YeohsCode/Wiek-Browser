@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.3.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾 0.3 增量和当前报告为准。
+当前版本 **0.4.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾 0.3 增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -267,3 +267,10 @@ V1 兼容 helper、CDP/fetch、site tools 与 migration guard 的入口见 `pack
 | 页面右键菜单 | 原生links/images/edit/selection/Library/agent draft/navigation/inspect，打开菜单交还Agent控制 | 独立功能实现，非Ego所有菜单逐像素等价；第三方网页/OS功能仍受其规则 |
 
 本轮完整结果以 ../reports/RESULTS.md 为准。0.3的本地能力增量不能消除完整Chromium替换、其他provider原生协议、Chrome/Safari全资料迁移、OS跨应用功能、翻译、远程PR、Ego专有服务和31项线上benchmark的剩余工作。**全量功能复刻仍未完成。**
+
+
+## Vek 0.4.0 Agent turn 文件快照
+
+已完成项目显式启用、真实provider运行前后快照、thread/run/native turn关联、逐turn和会话span的真实worktree/index差异、预览/精确名称确认恢复及保护快照。失败/停止/准备期取消/after超限/HEAD变更/并发/导入/fork和实际host SIGKILL后的恢复均有真实临时Git验证。原生UI实际运行本地fixture并完成文件/index恢复，非模拟成功。
+
+完整行为与限制见 [turn-checkpoints-design.md](turn-checkpoints-design.md)。快照仍局限普通小仓库，linked worktree/自动保留/远程PR未完成；本地快照不是外部编辑器隔离，也不回滚浏览器/账号等外部效果。对话回滚仍为单独动作。其余全量复刻缺口继续保留，当前测试入口为 [RESULTS.md](../reports/RESULTS.md)。

@@ -1,11 +1,13 @@
 # Vek Browser
+> **0.4.0 更新**：项目可显式开启 Agent turn 前后文件/Git index 快照，查看逐轮/会话差异，并在预览和明确确认后恢复文件；保留恢复前保护快照，覆盖失败、中断和进程强停恢复。
+>
 > **0.3.0 更新**：新增远程 MCP（旧版会话与新版工具协议）、本地 Git 检查点及恢复前保护快照、IANA 时区/DST 调度、细分网站权限、下载暂停/继续和原生页面右键菜单，修复书签/历史/下载的 Profile 归属。
 >
 > **既有 0.2 功能**：已加入原生 Codex app-server（需自行启用/认证）、多 Agent 控制、对话分支/编辑/归档/附件、UTC cron 与 heartbeat、工作区/Git、MCP、Library/截图标注、操作录制、主题/竖向标签/快捷键、独立 Space 窗口/托盘、离线 Whisper、语音历史/词典，以及选择 Chromium 资料导入和加密 Vek Profile archive。
 >
 > 最新测试以 [reports/RESULTS.md](reports/RESULTS.md) 为准；[analysis/feature-parity.md](analysis/feature-parity.md) 明确列出剩余差距。不能把 69 项 SDK 用例通过理解成整款 Ego 已全量复刻。
 
-进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.3.0；下一阶段优先把 Git checkpoint 接入实际 Agent turn。
+进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.4.0；下一阶段优先补原生 provider 协议与会话完整性。
 
 本地 Chromium 浏览器与 Agent 工作区。项目在 `vek-browser/` 中独立创建，使用 Electron 实现浏览器宿主、Space、多标签与原生连接层，复用 `citrolabs/ego-lite` 的 MIT SDK。Ego 安装包只用于分析和测试，不进入 Vek 发行包。
 
@@ -84,11 +86,11 @@ await task.finish({ keep: [] }); // 关闭受管理页面并结束
 
 本地 Agent 会话只运行你配置的已安装 CLI；没有 provider 或认证时明确报错，不生成模拟回复。Codex preset 根据本机实际 `exec --help` 发现，默认使用只读 sandbox。通用 CLI 支持 stdin 或 argv 中的 `{prompt}` 模板。测试只使用本地 fake provider；未进行付费模型调用。
 
-尚未完成完整 Chrome/Safari 会话/web storage/扩展迁移、全部 Chrome 扩展 API、其余七种 provider 原生协议、turn 自动 checkpoint/远程 PR、MCP OAuth/MRTR/订阅、OS 跨应用采集/翻译、应用退出后的调度、完整 memory index、Ego 专有服务和自动更新。已实现能力也有范围限制，见 [功能对照](analysis/feature-parity.md) 和 [计划](PLAN.md)。
+尚未完成完整 Chrome/Safari 会话/web storage/扩展迁移、全部 Chrome 扩展 API、其余七种 provider 原生协议、linked worktree/远程 PR、MCP OAuth/MRTR/订阅、OS 跨应用采集/翻译、应用退出后的调度、完整 memory index、Ego 专有服务和自动更新。已实现能力也有范围限制，见 [功能对照](analysis/feature-parity.md) 和 [计划](PLAN.md)。
 
 ## 当前验证结果
 
-0.3.0 最终打包版：**69/69** 同源真实浏览器用例通过；Ego 基准：**68/69**（HTML 粘贴用例失败），两侧无跳过/未运行。另有 **145/145** 本地测试、**48/48** 打包宿主集成、141 个打包文件身份匹配；81 个上游测试/fixture 保持原样。SDK 单测 532/532、CDP 探针 22/22 沿用未变更版本记录，没有冒充本轮重跑。详细结果以 [RESULTS.md](reports/RESULTS.md)、[comparison.md](reports/comparison.md) 与原始日志为准。
+0.4.0 最终打包版：**69/69** 同源真实浏览器用例通过；Ego 基准：**68/69**（HTML 粘贴用例失败），两侧无跳过/未运行。另有 **156/156** 本地测试、**53/53** 打包宿主集成、142 个打包文件身份匹配；81 个上游测试/fixture 保持原样。SDK 单测 532/532、CDP 探针 22/22 沿用未变更版本记录，没有冒充本轮重跑。详细结果以 [RESULTS.md](reports/RESULTS.md)、[comparison.md](reports/comparison.md) 与原始日志为准。
 
 Vek引擎为Chromium148.0.7778.280，Ego为156.0.8078.48；现有自动化用例兼容不代表所有Web平台能力等价。
 

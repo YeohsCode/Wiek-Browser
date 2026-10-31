@@ -1,0 +1,18 @@
+
+> vek-browser@0.4.0 dist
+> electron-builder --mac dir
+
+  • electron-builder  version=26.18.0 os=24.5.0
+  • loaded configuration  file=package.json ("build" field)
+  • author is missed in the package.json  appPackageFile=/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/package.json
+  • executing @electron/rebuild  electronVersion=42.11.18 arch=arm64 buildFromSource=false workspaceRoot=/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser projectDir=./ appDir=./
+  • installing native dependencies  arch=arm64
+  • completed installing native dependencies
+  • packaging       platform=darwin arch=arm64 electron=42.11.18 appOutDir=dist/mac-arm64
+  • using custom unpacked Electron distribution  electronDist=node_modules/electron/dist
+  • copying unpacked Electron  source=/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/node_modules/electron/dist/Electron.app destination=/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Electron.app
+  • asar usage is disabled — this is strongly not recommended  solution=enable asar and use asarUnpack to unpack files that must be externally available
+  • searching for node modules  pm=npm searchDir=/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser
+  • default Electron icon is used  reason=application icon is not set
+  • asar usage is disabled — this is strongly not recommended  solution=enable asar and use asarUnpack to unpack files that must be externally available
+  • skipped macOS application code signing  reason=, see https://electron.build/code-signing CSC_IDENTITY_AUTO_DISCOVERY=false

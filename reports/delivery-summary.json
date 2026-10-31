@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-31T15:38:11.215464+00:00",
-  "version": "0.9.0",
+  "generatedAt": "2026-10-31T15:46:58.158817+00:00",
+  "version": "0.9.1",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -30,7 +30,7 @@
           "notRun": 0,
           "assertions": 1248
         },
-        "wallTimeMs": 152625,
+        "wallTimeMs": 153060,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
       }
@@ -43,14 +43,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 244,
+    "pass": 248,
     "fail": 0,
-    "log": "v090-service-tests.log"
+    "log": "v091-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
     "pass": 99,
     "fail": 0,
-    "log": "v090-package-workbench.log"
+    "log": "v091-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -64,7 +64,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 150,
+    "sourceFilesChecked": 151,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -87,12 +87,11 @@
   },
   "completeProductParity": false,
   "newCapabilities": [
-    "Codex effective visible context after replacement/legacy compaction and instruction-boundary rollback",
-    "Replay counts and bounded safe provenance in preview/UI/archive; no source session or filesystem authority",
-    "Live authoritative command/patch/MCP/dynamic results and observed child lifecycle/messages",
-    "Root and child thread/turn scope, bounded pre-turn event buffer, no child message mixing",
-    "Active child single-use permissions, stale turn and server-resolved approval expiration",
-    "Late tool deltas cannot overwrite authoritative final results; unresolved/interrupted and truncation remain explicit"
+    "CLI stop verifies live browser PID/instance identity before shutdown",
+    "Successful stop waits for actual host termination and provider/checkpoint finalization",
+    "Explicit bounded timeout without force-kill or metadata removal",
+    "Actual Electron same-profile immediate stop/start repeated three times with persistent run and final diff",
+    "0.9 Codex replay/tool/child capabilities retained and rechecked in full local and browser suites"
   ],
   "remainingGaps": [
     "Five other native provider protocols, Claude model catalogue, source native session/history migration and paid generation validation",
@@ -107,7 +106,7 @@
     "OS scheduling while application is closed",
     "Complete memory index and Ego proprietary services",
     "31 live-site model benchmark not run",
-    "CLI stop requests shutdown; immediate same-profile restart must wait for actual exit"
+    "Concurrent independent CLI starts do not yet have leader election"
   ],
   "turnCheckpointTests": {
     "pass": 11,
@@ -252,7 +251,7 @@
     }
   ],
   "observedFailures": [],
-  "validationOrderNote": "Full 69-case SDK run passed before an API-document-only rebuild. Runtime source stayed unchanged; final 150 packaged source identities match. New panel replay count assertions passed the 47-case focused run.",
+  "validationOrderNote": "Final 0.9.1 runtime and API docs were packaged before the packaged lifecycle/workbench and full 69-case SDK runs. Final package has 151 matching source files and 81 unchanged upstream inputs. 0.9 native Agent UI evidence is retained, not claimed as re-performed.",
   "codexReplayActivityTests": {
     "newTests": 21,
     "fixtureOnly": true,
@@ -277,5 +276,18 @@
     "modelCalls": 0,
     "copiedEffectiveTextContinued": true,
     "normalAppVersion": "0.9.0"
+  },
+  "cliLifecycleTests": {
+    "sourcePass": 4,
+    "packagedPass": 4,
+    "fail": 0,
+    "fullSuiteIncluded": true,
+    "actualElectron": true,
+    "restarts": 3,
+    "delayedProviderTerminationAndFinalCheckpoint": true,
+    "noForceKillOnTimeout": true,
+    "sourceLog": "v091-service-tests.log",
+    "packagedLog": "v091-package-lifecycle-tests.log",
+    "normalAppStatus": "v091-normal-app-status.json"
   }
 }

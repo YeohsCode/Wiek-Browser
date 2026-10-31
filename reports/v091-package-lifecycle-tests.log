@@ -1,0 +1,12 @@
+✔ actual Electron CLI stop waits for provider termination and checkpoints, then immediately restarts the same profile repeatedly (8544.358875ms)
+✔ CLI shutdown timeout is explicit, leaves a live host and its metadata intact, and never force-kills (250.583125ms)
+✔ CLI shutdown refuses mismatched live host identity before sending shutdown (145.711042ms)
+✔ CLI invalid shutdown options fail before connecting or creating a browser profile (410.557417ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9417.304

@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.9.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
+当前版本 **0.9.1**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -314,3 +314,7 @@ Codex原生模型发现只initialize/initialized/model/list，不创建thread/tu
 支持replacement/有界legacy压缩、按指令边界回滚，剔除被替换和删除的消息/工具；UI与archive显示计数，继续创建新owned session。加密且无明文replacement、未知编辑或超限旧tail仍拒绝。实时原生命令/patch/MCP/dynamic结果、耗时、实际子生命周期/独立消息及子turn单次权限已接入；最终结果不被晚到delta覆盖，过时子审批不能发送。200工具/100子Agent/200子消息/256KiB共享文字限制明确显示。
 
 新增21项回归，本地244/244；官方CLI0.142.0无模型探针仅证明实际rollback marker和合成decoder接受，源码语义与fixture验证另行记录。未完成源CLI原生迁移/隐藏context/window/token等价、后台子任务或完整产品parity。打包/SDK/原生UI结果见 [RESULTS](../reports/RESULTS.md)，设计见 [codex-replay-activity](codex-replay-activity.md)。下一步CLI关闭等待、Claude目录与其余五种原生provider。
+
+## 0.9.1 当前增量：CLI关闭完成
+
+stop先核对已连接host的PID/instance，再请求shutdown，成功返回前等待实际PID退出；超时明确失败，不强杀或移除metadata。默认30s，可选100..120000ms。真实Electron + 延迟终止provider + 临时Git仓库验证最终文件/快照落盘和同目录三次立即重启；独立Node host验证超时与身份拒绝。多CLI并发start选主仍未实现，不把顺序重启修复称为完整生命周期等价。[设计](cli-lifecycle.md)。

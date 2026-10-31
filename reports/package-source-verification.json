@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-31T15:34:53.191Z",
-  "version": "0.9.0",
+  "generatedAt": "2026-10-31T15:46:16.161Z",
+  "version": "0.9.1",
   "versionMatches": true,
-  "checkedFiles": 150,
+  "checkedFiles": 151,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -263,8 +263,13 @@
       "matches": true
     },
     {
+      "file": "cli/host-lifecycle.mjs",
+      "sha256": "3632df5d663ae2b9235da60fc302b8c5732529014fef060d0fb1a2a889669605",
+      "matches": true
+    },
+    {
       "file": "cli/vek-browser.mjs",
-      "sha256": "7009fb5aeb3c9e66436b07f8ddae20f2289a9639e2a5ab5ec8f0e13025dba2a8",
+      "sha256": "d45d9234fc2a74cef9ac68afff6c420fc08370c0137664a7b7eae0fff0c568ba",
       "matches": true
     },
     {
@@ -749,7 +754,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "91fdf9dff64468d3e59ed0263e592a60b11f3c340c1f871c93273ade4bc81a71",
+      "sha256": "5c7666c9cba1349dc308c328c6319ff62b4b3df61f9e3577464b606144e884bd",
       "matches": true
     },
     {

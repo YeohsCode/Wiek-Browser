@@ -1,6 +1,6 @@
 # 文档索引
 
-当前版本 **0.9.0**；下一项为 CLI 关闭等待，再推进 Claude 模型目录及其余5种原生provider。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
+当前版本 **0.9.1**；下一项为 Claude 模型目录及其余5种原生provider。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
 
 | 用途 | 文档 |
 |---|---|
@@ -14,6 +14,7 @@
 | Agent/Codex/附件 | [扩展设计](../analysis/agent-service-extensions.md)、[附件](../analysis/agent-attachments.md) |
 | Claude历史/工具结果/子Agent | [claude-history-design.md](../analysis/claude-history-design.md) |
 | Codex目录与所选历史 | [codex-capabilities-history.md](../analysis/codex-capabilities-history.md) |
+| CLI 停止与重启 | [cli-lifecycle.md](../analysis/cli-lifecycle.md) |
 | Codex 历史编辑与实时活动 | [codex-replay-activity.md](../analysis/codex-replay-activity.md) |
 | OpenCode ACP与模型目录 | [opencode-acp-design.md](../analysis/opencode-acp-design.md) |
 | Claude原生协议 | [claude-native-design.md](../analysis/claude-native-design.md) |

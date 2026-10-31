@@ -1,4 +1,6 @@
 # Vek Browser
+> **0.9.1 更新**：CLI `stop` 现在等待宿主实际退出，包含 provider 终止和快照收尾；顺序立即 `start` 可获得新实例。等待超时明确失败，可用 `--timeout-ms` 调整。
+>
 > **0.9.0 更新**：支持 Codex replacement/legacy 压缩和回滚后的有效可见历史；记录原生 command/diff/MCP 结果与子 Agent 活动、独立消息和单次审批。停止、过时事件和超限状态均有回归；完整源会话迁移仍未完成。
 >
 > **0.8.0 更新**：新增Codex分页原生模型目录、推理强度/输入能力选择与执行前刷新；支持选择单个rollout文件预览/导入可见对话及工具证据，继续时建立新会话。压缩/回滚文件明确拒绝，未调用真实模型。
@@ -17,7 +19,7 @@
 >
 > 最新测试以 [reports/RESULTS.md](reports/RESULTS.md) 为准；[analysis/feature-parity.md](analysis/feature-parity.md) 明确列出剩余差距。不能把 69 项 SDK 用例通过理解成整款 Ego 已全量复刻。
 
-进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.9.0；下一步补 CLI 关闭等待，再推进 Claude 模型目录及其余5种原生provider。Claude源CLI会话迁移、后台任务与其他provider仍有缺口。
+进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.9.1；下一步推进 Claude 模型目录及其余5种原生provider。Claude源CLI会话迁移、后台任务与其他provider仍有缺口。
 
 本地 Chromium 浏览器与 Agent 工作区。项目在 `vek-browser/` 中独立创建，使用 Electron 实现浏览器宿主、Space、多标签与原生连接层，复用 `citrolabs/ego-lite` 的 MIT SDK。Ego 安装包只用于分析和测试，不进入 Vek 发行包。
 
@@ -100,7 +102,7 @@ await task.finish({ keep: [] }); // 关闭受管理页面并结束
 
 ## 当前验证结果
 
-0.9.0 最终打包版：**69/69** 同源真实浏览器用例通过；Ego 基准：**68/69**（HTML 粘贴用例失败），两侧无跳过/未运行。另有 **244/244** 本地测试、**99/99** 打包宿主集成、150 个打包文件身份匹配；81 个上游测试/fixture 保持原样。SDK 单测 532/532、CDP 探针 22/22 沿用未变更版本记录，没有冒充本轮重跑。详细结果以 [RESULTS.md](reports/RESULTS.md)、[comparison.md](reports/comparison.md) 与原始日志为准。
+0.9.1 最终打包版：**69/69** 同源真实浏览器用例通过；Ego 基准：**68/69**（HTML 粘贴用例失败），两侧无跳过/未运行。另有 **248/248** 本地测试、**99/99** 打包宿主集成、151 个打包文件身份匹配；81 个上游测试/fixture 保持原样。SDK 单测 532/532、CDP 探针 22/22 沿用未变更版本记录，没有冒充本轮重跑。详细结果以 [RESULTS.md](reports/RESULTS.md)、[comparison.md](reports/comparison.md) 与原始日志为准。
 
 Vek引擎为Chromium148.0.7778.280，Ego为156.0.8078.48；现有自动化用例兼容不代表所有Web平台能力等价。
 

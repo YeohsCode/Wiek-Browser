@@ -7,6 +7,7 @@ import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 import { homedir } from 'node:os';
 import WebSocket from 'ws';
+import {waitForHostExit, shutdownTimeout} from './host-lifecycle.mjs';
 
 const require = createRequire(import.meta.url);
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -18,7 +19,7 @@ const defaultData = packaged
 const dataDir = resolve(process.env.VEK_DATA_DIR || defaultData);
 const runtimePath = join(dataDir, 'runtime.json');
 const args = process.argv.slice(2);
-const usage = `Vek Browser — local browser and agent workspace\n\n  vek-browser start                  Open the browser\n  vek-browser status                 Show host status\n  vek-browser api ACTION --json JSON Call the local workbench API\n  vek-browser skill                  Print the agent API guide\n  vek-browser nodejs [-e JavaScript]  Run a script (or read stdin)\n  vek-browser nodejs --sdk-path PATH  Use an explicit compatible SDK\n  vek-browser stop                   Stop this browser instance\n\nExample:\n  const task = await taskSpace('research');\n  const page = task.page('p1');\n  await page.goto('https://example.com');\n  console.log(await page.snapshot());\n\nVEK_DATA_DIR selects an independent persistent browser data directory.\n`;
+const usage = `Vek Browser — local browser and agent workspace\n\n  vek-browser start                  Open the browser\n  vek-browser status                 Show host status\n  vek-browser api ACTION --json JSON Call the local workbench API\n  vek-browser skill                  Print the agent API guide\n  vek-browser nodejs [-e JavaScript]  Run a script (or read stdin)\n  vek-browser nodejs --sdk-path PATH  Use an explicit compatible SDK\n  vek-browser stop [--timeout-ms N]  Wait for this browser to exit (default 30000 ms)\n\nExample:\n  const task = await taskSpace('research');\n  const page = task.page('p1');\n  await page.goto('https://example.com');\n  console.log(await page.snapshot());\n\nVEK_DATA_DIR selects an independent persistent browser data directory.\n`;
 let rpc;
 try {
   if (args.includes('--help') || args[0] === '-h') {
@@ -30,8 +31,14 @@ try {
     rpc = await connect(false);
     process.stdout.write(JSON.stringify(await rpc.call('browserInfo'), null, 2) + '\n');
   } else if (args[0] === 'stop') {
+    const timeoutMs = shutdownTimeout(args.slice(1));
     rpc = await connect(false);
+    const host = await rpc.call('browserInfo');
+    if (!Number.isSafeInteger(host.pid) || host.pid <= 0 || host.pid !== rpc.runtime.pid || !host.browserInstanceId || host.browserInstanceId !== rpc.runtime.browserInstanceId) throw new Error('Host identity changed; no shutdown request was sent');
     await rpc.call('shutdown');
+    rpc.close();
+    await waitForHostExit(host.pid, {timeoutMs});
+    process.stdout.write('Vek Browser stopped.\n');
   } else if (args[0] === 'start') {
     rpc = await connect(true);
     process.stdout.write('Vek Browser is running.\n');

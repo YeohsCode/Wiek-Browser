@@ -673,7 +673,7 @@ app.whenReady().then(async () => {
     promptPrefix: agentPromptPrefix(thread,project),
   }) });
   workspaceService = createWorkspaceService({ projects: () => agentService.snapshot().projects, onChange: publish });
-  turnCheckpointService=createTurnCheckpoints({dataDir:DATA,workspace:workspaceService,projects:()=>agentService.snapshot().projects,isRunning:project=>{const state=agentService.snapshot(),ids=new Set(state.projects.filter(p=>p.path===project.path).map(p=>p.id));return state.threads.some(t=>ids.has(t.projectId)&&t.status==='running');},onChange:publish});
+  turnCheckpointService=createTurnCheckpoints({dataDir:DATA,workspace:workspaceService,projects:()=>agentService.snapshot().projects,isRunning:project=>{const state=agentService.snapshot(),ids=new Set(state.projects.filter(p=>p.path===project.path).map(p=>p.id));return state.threads.some(t=>ids.has(t.projectId)&&['running','discovering'].includes(t.status));},onChange:publish});
   agentService.recoverFileChanges(turnCheckpointService.records());
   catalogService = createCatalogService({ dataDir: DATA, projects: () => agentService.snapshot().projects });
   const whisperCommand = path.join(__dirname, 'bin/whisper-cli'), whisperModel = path.join(ROOT, 'models/ggml-tiny.bin');

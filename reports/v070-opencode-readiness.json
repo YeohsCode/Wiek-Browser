@@ -1,0 +1,18 @@
+{
+  "generatedAt": "2026-10-31T08:28:13.526Z",
+  "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/references/opencode/v1.19.5/package/bin/opencode",
+  "sha256": "feaafead8cd563af0c2dcb386b0757e4355e327ebb6bd1aaad5440fe2f83596c",
+  "version": "1.19.5",
+  "versionExit": 0,
+  "isolatedHome": true,
+  "inheritedAuthentication": false,
+  "userMessagesSent": 0,
+  "modelCalls": 0,
+  "sessionNew": true,
+  "notes": "No prompt, authentication or inference tested. Discovered models do not prove authentication or availability.",
+  "exitCode": 0,
+  "signal": null,
+  "discoveryCompleted": true,
+  "modelCount": 9,
+  "modelSelector": "model"
+}

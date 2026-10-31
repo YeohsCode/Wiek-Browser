@@ -7,6 +7,7 @@ const { randomUUID, createHash } = require('node:crypto');
 const { claudeLaunch, connectClaude } = require('./claude-session.cjs');
 const { readHistory, parseHistory, selectBranch } = require('./claude-history.cjs');
 const { copyClaudeActivity } = require('./claude-events.cjs');
+const { connectAcp, acpAttachments } = require('./acp-session.cjs');
 
 const now = () => new Date().toISOString();
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -124,6 +125,13 @@ function discoverClaude() {
   return { id: 'claude-native', name: 'Claude native session (opt-in)', command, args: [], modelArgs: [], models: [], inputMode: 'stdin', protocol: 'claude-stream-json', enabled: false, verifiedBy: 'local --help; authentication and model execution not checked' };
 }
 
+function discoverOpenCode() {
+  const command = executable('opencode'); if (!command) return null;
+  const probe = spawnSync(command, ['acp', '--help'], { encoding: 'utf8', timeout: 4000, maxBuffer: 128 * 1024, windowsHide: true });
+  if (probe.status !== 0 || !/acp|Agent Client Protocol/i.test(probe.stdout || '')) return null;
+  return { id: 'opencode-native', name: 'OpenCode ACP session (opt-in)', command, args: ['acp'], inputMode: 'stdin', modelArgs: [], models: [], protocol: 'opencode-acp', enabled: false, verifiedBy: 'local acp --help; no authentication or inference checked' };
+}
+
 function createAgentService({ dataDir, onChange = () => {}, runContext, turnCheckpoints, maxConcurrentRuns = 2, maxOutputBytes = 1024 * 1024 } = {}) {
   if (!dataDir) throw fail('dataDir is required');
   maxConcurrentRuns = Math.max(1, Math.min(16, Number(maxConcurrentRuns) || 2));
@@ -194,6 +202,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   for (const thread of state.threads) {
     let recovered = false;
     for (const run of thread.runs || []) if (run.status === 'running') { for (const item of [...(run.toolEvents || []), ...(run.subagents || [])]) if (['running','observed'].includes(item.status)) { item.status='interrupted'; item.endReason='Browser stopped before activity finalization'; } run.status = 'interrupted'; run.phase = 'settled'; run.completedAt = now(); if (run.fileChanges) { run.fileChanges.status = 'interrupted'; run.fileChanges.error = 'Browser stopped before snapshot finalization. No after state was inferred.'; } for (const approval of run.approvals || []) if (approval.status === 'pending') approval.status = 'expired'; recovered = true; }
+    if (thread.status === 'discovering') { thread.status = ['idle','completed','failed','stopped','interrupted'].includes(thread.modelDiscovery?.previousStatus) ? thread.modelDiscovery.previousStatus : 'idle'; thread.modelDiscovery = { ...thread.modelDiscovery, status: 'interrupted', error: 'Browser stopped during model discovery; no prompt was sent' }; }
     if (thread.status === 'running' || recovered) {
       thread.status = 'interrupted'; delete thread.activeRunId;
       thread.messages.push(message('system', 'The previous run was interrupted when the browser stopped. It has not been resumed automatically.'));
@@ -205,6 +214,9 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   if (discovered && !state.providers.some((provider) => provider.id === 'codex-native')) state.providers.push({ ...discovered, id: 'codex-native', name: 'Codex native session (opt-in)', args: ['app-server', '--stdio'], modelArgs: [], protocol: 'codex-app-server', enabled: false });
   const claudeDiscovered = discoverClaude();
   if (claudeDiscovered && !state.providers.some(provider => provider.id === claudeDiscovered.id)) state.providers.push(claudeDiscovered);
+
+  const openCodeDiscovered = discoverOpenCode();
+  if (openCodeDiscovered && !state.providers.some(provider => provider.id === openCodeDiscovered.id)) state.providers.push(openCodeDiscovered);
 
   function killTree(child, signal) {
     if (!child) return;
@@ -271,6 +283,41 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     target.attachments = copied;
     for (const message of target.messages) if (message.attachments) message.attachments = message.attachments.map((item) => mapping.get(item.id) || { id: item.id, name: item.name, mimeType: item.mimeType, bytes: item.bytes, available: false });
   }
+  function providerContext(thread, project, provider) {
+    const context = runContext?.({ thread: clone(thread), project: clone(project), provider: clone(provider) }) || {};
+    if (context?.then) throw fail('runContext must be synchronous');
+    const contextEnv = context.env || (context.promptPrefix !== undefined ? {} : context);
+    if (contextEnv && (typeof contextEnv !== 'object' || Object.entries(contextEnv).some(([key, value]) => !/^VEK_[A-Z0-9_]+$/.test(key) || typeof value !== 'string' || value.includes('\0')))) throw fail('runContext must return only VEK_* environment strings');
+    if (context.promptPrefix !== undefined && (typeof context.promptPrefix !== 'string' || context.promptPrefix.length > 32768)) throw fail('runContext promptPrefix must be text up to 32768 characters');
+    return { context, contextEnv };
+  }
+  function startModelDiscovery(thread) {
+    if (closed || running.has(thread.id)) throw fail('Stop active work before discovering models');
+    if (running.size >= maxConcurrentRuns) throw fail('Agent concurrency limit reached');
+    const project = locate('projects', thread.projectId), provider = locate('providers', thread.providerId), command = executable(provider.command);
+    if (provider.protocol !== 'opencode-acp' || !provider.enabled || !command) throw fail('Choose an enabled OpenCode ACP executable for model discovery');
+    if (turnCheckpoints?.locked?.(project.id) || [...running.values()].some(active => active.projectPath === project.path)) throw fail('Project is busy; finish active work before discovering models');
+    const { contextEnv } = providerContext(thread, project, provider);
+    const binding = createHash('sha256').update(JSON.stringify([provider.protocol, command, provider.args, project.path])).digest('hex');
+    if (thread.nativeSessionBinding !== binding) { delete thread.nativeThreadId; delete thread.nativeContextSent; delete thread.nativeCatalog; delete thread.nativeSessionBinding; }
+    const previousStatus = thread.status, run = { id: randomUUID(), stdout: '', stderr: '', status: 'discovering' };
+    let resolveDone; const done = new Promise(resolve => { resolveDone = resolve; });
+    const active = { child: null, thread, run, projectPath: project.path, checkpointed: true, done, stopReason: null, discovery: true };
+    thread.modelDiscovery = { status: 'running', startedAt: now(), previousStatus }; thread.status = 'discovering'; running.set(thread.id, active);
+    const finish = error => {
+      if (active.finalizing) return; active.finalizing = true; active.child = null; clearTimeout(active.killTimer);
+      if (!active.stopReason && !error && !run.error && !active.native?.completed) run.error = 'ACP provider disconnected during model discovery';
+      thread.status = previousStatus; thread.modelDiscovery = { ...thread.modelDiscovery, status: active.stopReason ? 'cancelled' : error || run.error || !active.native?.completed ? 'failed' : 'completed', completedAt: now(), ...(error || run.error ? { error: String(error?.message || run.error).slice(0, 8192) } : {}) };
+      running.delete(thread.id); publish(); resolveDone(); armScheduler();
+    };
+    try {
+      const child = spawn(command, provider.args, { cwd: project.path, env: { ...process.env, ...contextEnv }, shell: false, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe','pipe','pipe'] }); active.child = child;
+      connectAcp({ child, active, run, thread, project, discoverOnly: true, consume: () => {}, publish: publishSoon, killTree, onSession: () => { thread.nativeSessionBinding = binding; } });
+      child.stderr.on('data', chunk => { if (run.stderr.length < 8192) run.stderr += chunk.toString('utf8').slice(0, 8192 - run.stderr.length); });
+      child.stdin.on('error', () => {}); child.on('error', error => { run.error = error.message; }); child.on('close', () => finish());
+    } catch (error) { finish(error); }
+    publish();
+  }
   function startRun(thread, prompt, automationId, automationReservationId) {
     if (closed) throw fail('Agent service is closed');
     if (running.has(thread.id)) throw fail('This thread is already running', 'VEK_AGENT_OVERLAP');
@@ -284,16 +331,13 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     const provider = locate('providers', thread.providerId);
     const command = executable(provider.command);
     if (!provider.enabled || !command) throw fail('The selected provider CLI is unavailable or disabled; configure an installed executable', 'VEK_AGENT_PROVIDER_UNAVAILABLE');
-    if (!['codex-app-server', 'claude-stream-json'].includes(provider.protocol) && thread.model && !(provider.modelArgs?.length || provider.args.some((arg) => /\{\{?model\}?\}/.test(arg)))) throw fail('Configure the provider modelArgs template before choosing a model');
+    if (!['codex-app-server', 'claude-stream-json', 'opencode-acp'].includes(provider.protocol) && thread.model && !(provider.modelArgs?.length || provider.args.some((arg) => /\{\{?model\}?\}/.test(arg)))) throw fail('Configure the provider modelArgs template before choosing a model');
     if (!fs.statSync(project.path).isDirectory()) throw fail('Project path is not a directory');
-    const context = runContext?.({ thread: clone(thread), project: clone(project), provider: clone(provider) }) || {};
-    if (context?.then) throw fail('runContext must be synchronous');
-    const contextEnv = context.env || (context.promptPrefix !== undefined ? {} : context);
-    if (contextEnv && (typeof contextEnv !== 'object' || Object.entries(contextEnv).some(([key, value]) => !/^VEK_[A-Z0-9_]+$/.test(key) || typeof value !== 'string' || value.includes('\0')))) throw fail('runContext must return only VEK_* environment strings');
-    if (context.promptPrefix !== undefined && (typeof context.promptPrefix !== 'string' || context.promptPrefix.length > 32768)) throw fail('runContext promptPrefix must be text up to 32768 characters');
+    const { context, contextEnv } = providerContext(thread, project, provider);
     const attachments = selectedAttachments(thread);
     const nativeBinding = createHash('sha256').update(JSON.stringify([provider.protocol || 'cli', command, provider.args, project.path])).digest('hex');
-    if (thread.nativeSessionBinding !== nativeBinding) { delete thread.nativeThreadId; delete thread.nativeSessionBinding; }
+    if (thread.nativeSessionBinding !== nativeBinding) { delete thread.nativeThreadId; delete thread.nativeContextSent; delete thread.nativeCatalog; delete thread.nativeSessionBinding; }
+    const acp = provider.protocol === 'opencode-acp' ? acpAttachments(attachments) : null;
     const claude = provider.protocol === 'claude-stream-json' ? claudeLaunch({ args: provider.args, model: thread.model, resumeId: thread.nativeThreadId, attachments }) : null;
     const run = { id: randomUUID(), status: 'running', startedAt: now(), stdout: '', stderr: '', truncated: false, ...(automationId ? { automationId } : {}), ...(automationReservationId ? { automationReservationId } : {}) };
     const userMessage = message('user', prompt, run.id);
@@ -317,7 +361,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       if(launchError)run.error=launchError.message;
       if (active.native && !active.native.completed && !active.stopReason && !run.error) run.error = 'Native provider disconnected before turn completed';
       const outcome = active.stopReason || (run.error || (code !== 0 && !active.native?.completed) ? 'failed' : 'completed');
-      active.finishClaudeActivity?.(outcome);
+      active.finishClaudeActivity?.(outcome); active.finishNativeActivity?.(outcome);
       run.providerOutcome=outcome;run.phase='finalizing';
       if(checkpointed){publish();try{run.fileChanges=await turnCheckpoints.after({thread:clone(thread),project:clone(project),run:{...clone(run),status:outcome}});}catch(error){run.fileChanges={...run.fileChanges,status:'partial',error:error.message};}}
       run.status=outcome;run.phase='settled';run.completedAt=now();run.exitCode=code;run.signal=signal;
@@ -340,7 +384,9 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       }
       publishSoon();
     };
-    if (claude) {
+    if (acp) {
+      connectAcp({ child, active, run, thread, project, text: { full: (context.promptPrefix ? context.promptPrefix + '\n\n' : '') + history, current: (context.promptPrefix ? context.promptPrefix + '\n\n' : '') + prompt }, attachments: acp, consume, publish: publishSoon, killTree, onSession: () => { thread.nativeSessionBinding = nativeBinding; } });
+    } else if (claude) {
       const text = thread.nativeThreadId ? `${context.promptPrefix ? context.promptPrefix + '\n\n' : ''}${prompt}` : (context.promptPrefix ? context.promptPrefix + '\n\n' : '') + history;
       connectClaude({ child, launch: claude, active, run, thread, project, text, consume, publish: publishSoon, killTree, onSession: () => { thread.nativeSessionBinding = nativeBinding; } });
     } else if (provider.protocol === 'codex-app-server') {
@@ -454,7 +500,8 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     if(active.finalizing){await active.done;return;}
     active.stopReason = reason;
     if(!active.child){await active.done;return;}
-    if (active.claude) active.claude.interrupt().catch(() => killTree(active.child, 'SIGTERM'));
+    if (active.acp) { try { active.acp.cancel(); } catch { killTree(active.child, 'SIGTERM'); } }
+    else if (active.claude) active.claude.interrupt().catch(() => killTree(active.child, 'SIGTERM'));
     else if (active.native?.turnId && active.native.threadId) active.native.request('turn/interrupt', { threadId: active.native.threadId, turnId: active.native.turnId }).catch(() => killTree(active.child, 'SIGTERM'));
     else killTree(active.child, 'SIGTERM');
     active.killTimer = setTimeout(() => killTree(active.child, 'SIGKILL'), 1000); active.killTimer.unref?.();
@@ -546,7 +593,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   function revise(thread, kind, messages) {
     thread.revisions ||= [];
     thread.revisions.push({ id: randomUUID(), kind, createdAt: now(), messages: clone(thread.messages) });
-    thread.messages = messages; thread.status = 'idle'; thread.updatedAt = now(); delete thread.nativeThreadId; delete thread.nativeSessionBinding;
+    thread.messages = messages; thread.status = 'idle'; thread.updatedAt = now(); delete thread.nativeThreadId; delete thread.nativeContextSent; delete thread.nativeCatalog; delete thread.nativeSessionBinding;
   }
   function importBundle(data) {
     if (running.size) throw fail('Stop Agent runs before importing a transcript archive');
@@ -569,7 +616,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         if (!item || !Array.isArray(item.args) || item.args.some((arg) => typeof arg !== 'string' || arg.includes('\0')) || !['stdin', 'argv'].includes(item.inputMode)) throw fail('Invalid imported provider');
         if (item.models && (!Array.isArray(item.models) || item.models.some((model) => typeof model !== 'string' || model.length > 256))) throw fail('Invalid imported model catalogue');
         if (item.modelArgs && (!Array.isArray(item.modelArgs) || item.modelArgs.some((arg) => typeof arg !== 'string' || arg.includes('\0')))) throw fail('Invalid imported model arguments');
-        const provider = { id: randomUUID(), name: nonempty(item.name, 'provider name', 256), command: nonempty(item.command, 'provider command', 4096), args: [...item.args], inputMode: item.inputMode, enabled: false, models: [...(item.models || [])], modelArgs: [...(item.modelArgs || [])], ...(item.usageFormat === 'codex-jsonl' ? { usageFormat: item.usageFormat } : {}), ...(['codex-app-server', 'claude-stream-json'].includes(item.protocol) ? { protocol: item.protocol } : {}) };
+        const provider = { id: randomUUID(), name: nonempty(item.name, 'provider name', 256), command: nonempty(item.command, 'provider command', 4096), args: [...item.args], inputMode: item.inputMode, enabled: false, models: [...(item.models || [])], modelArgs: [...(item.modelArgs || [])], ...(item.usageFormat === 'codex-jsonl' ? { usageFormat: item.usageFormat } : {}), ...(['codex-app-server', 'claude-stream-json', 'opencode-acp'].includes(item.protocol) ? { protocol: item.protocol } : {}) };
         // Imported executable configurations are inert until a user reviews and
         // enables them; no imported environment or extra provider fields apply.
         providerIds.set(item.id, provider.id); state.providers.push(provider);
@@ -658,7 +705,8 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       case 'agents:control:steer': {
         const thread = locate('threads', id), prompt = nonempty(payload.prompt, 'follow-up prompt');
         const active = running.get(thread.id);
-        if (active?.claude) { thread.pendingFollowUps ||= []; thread.pendingFollowUps.push({ id: randomUUID(), prompt, createdAt: now() }); thread.updatedAt = now(); }
+        if (active?.discovery) throw fail('Wait for model discovery to finish before sending a prompt');
+        if (active?.claude || active?.acp) { thread.pendingFollowUps ||= []; thread.pendingFollowUps.push({ id: randomUUID(), prompt, createdAt: now() }); thread.updatedAt = now(); }
         else if (active?.native) { await active.native.ready; await active.native.request('turn/steer', { threadId: active.native.threadId, expectedTurnId: active.native.turnId, input: [{ type: 'text', text: prompt }] }); thread.messages.push(message('user', prompt, active.run.id)); thread.updatedAt = now(); }
         else if (active) { thread.pendingFollowUps ||= []; thread.pendingFollowUps.push({ id: randomUUID(), prompt, createdAt: now() }); thread.updatedAt = now(); }
         else startRun(thread, prompt);
@@ -681,6 +729,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         const active = running.get(id), approval = active?.run.approvals?.find((item) => item.id === payload.approvalId && item.status === 'pending');
         if (!active?.native || !approval) throw fail('No verified native approval request is pending; no approval was sent', 'VEK_AGENT_UNSUPPORTED');
         if (!['accept', 'decline', 'cancel'].includes(payload.decision)) throw fail('Approval decision must be accept, decline, or cancel');
+        if (active.acp) { active.acp.approve(approval.id, payload.decision); if (payload.decision === 'cancel') await stopThread(id); break; }
         if (active.claude) { active.claude.approve(approval.id, payload.decision); if (payload.decision === 'cancel') await stopThread(id); break; }
         active.native.write({ id: active.native.approvalIds.get(approval.id), result: { decision: payload.decision } }); active.native.approvalIds.delete(approval.id);
         approval.status = payload.decision === 'accept' ? 'accepted' : payload.decision === 'decline' ? 'declined' : 'cancelled'; approval.decidedAt = now(); break;
@@ -715,7 +764,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       case 'agents:export': {
         let estimatedBytes = 0;
         const threads = state.threads.map((source) => {
-          const thread = clone(source); delete thread.nativeThreadId; delete thread.nativeSessionBinding;
+          const thread = clone(source); delete thread.nativeThreadId; delete thread.nativeContextSent; delete thread.nativeCatalog; delete thread.nativeSessionBinding;
           thread.attachments = (source.attachments || []).map((attachment) => {
             const { id, name, mimeType, bytes, createdAt, detachedAt } = attachment;
             const metadata = { id, name, mimeType, bytes, createdAt, ...(detachedAt ? { detachedAt } : {}) };
@@ -749,7 +798,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         if(!turnCheckpoints?.dispatch)throw fail('Turn checkpoint support is unavailable');return turnCheckpoints.dispatch(action,payload,clone(locate('threads',id)));
       }
       case 'agents:projects:delete': locate('projects', id); if (state.threads.some((thread) => thread.projectId === id)) throw fail('Delete the project threads first'); state.projects = state.projects.filter((project) => project.id !== id); break;
-      case 'agents:providers:discover': { for (const discovered of [discoverCodex(), discoverClaude()].filter(Boolean)) if (!state.providers.some(provider => provider.id === discovered.id)) state.providers.push(discovered); break; }
+      case 'agents:providers:discover': { for (const discovered of [discoverCodex(), discoverClaude(), discoverOpenCode()].filter(Boolean)) if (!state.providers.some(provider => provider.id === discovered.id)) state.providers.push(discovered); break; }
       case 'agents:providers:configure': {
         if (payload.env !== undefined) throw fail('Provider environment overrides are not supported');
         const command = nonempty(payload.command, 'command', 4096);
@@ -761,11 +810,12 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         if (payload.models !== undefined && (!Array.isArray(payload.models) || payload.models.length > 256 || payload.models.some((model) => typeof model !== 'string' || !model.trim() || model.length > 256))) throw fail('models must be a list of user-configured model names');
         if (payload.modelArgs !== undefined && (!Array.isArray(payload.modelArgs) || payload.modelArgs.some((arg) => typeof arg !== 'string' || arg.includes('\0')))) throw fail('modelArgs must be an argv string array');
         if (payload.usageFormat && payload.usageFormat !== 'codex-jsonl') throw fail('Only verified codex-jsonl usage events are supported');
-        if (payload.protocol && !['cli', 'codex-app-server', 'claude-stream-json'].includes(payload.protocol)) throw fail('Provider protocol must be cli, codex-app-server, or claude-stream-json');
-        if (payload.protocol === 'claude-stream-json' && ((payload.inputMode && payload.inputMode !== 'stdin') || payload.modelArgs?.length)) throw fail('Claude native sessions require stdin mode and empty modelArgs');
-        const provider = { id: providerId, name: nonempty(payload.name || command, 'name', 256), command, args: [...payload.args], inputMode: payload.inputMode || 'stdin', enabled: payload.enabled !== false, models: [...(payload.models || [])], modelArgs: [...(payload.modelArgs || [])], ...(payload.usageFormat ? { usageFormat: payload.usageFormat } : {}), ...(['codex-app-server', 'claude-stream-json'].includes(payload.protocol) ? { protocol: payload.protocol } : {}) };
+        if (payload.protocol && !['cli', 'codex-app-server', 'claude-stream-json', 'opencode-acp'].includes(payload.protocol)) throw fail('Provider protocol must be cli, codex-app-server, claude-stream-json or opencode-acp');
+        if (['claude-stream-json', 'opencode-acp'].includes(payload.protocol) && ((payload.inputMode && payload.inputMode !== 'stdin') || payload.modelArgs?.length)) throw fail('Streaming native sessions require stdin mode and empty modelArgs');
+        const provider = { id: providerId, name: nonempty(payload.name || command, 'name', 256), command, args: [...payload.args], inputMode: payload.inputMode || 'stdin', enabled: payload.enabled !== false, models: [...(payload.models || [])], modelArgs: [...(payload.modelArgs || [])], ...(payload.usageFormat ? { usageFormat: payload.usageFormat } : {}), ...(['codex-app-server', 'claude-stream-json', 'opencode-acp'].includes(payload.protocol) ? { protocol: payload.protocol } : {}) };
         const index = state.providers.findIndex((item) => item.id === providerId);
         if (index < 0) state.providers.push(provider); else state.providers[index] = provider;
+        for (const thread of state.threads) if (thread.providerId === providerId) delete thread.nativeCatalog;
         break;
       }
       case 'agents:providers:remove': locate('providers', id); if (state.threads.some((thread) => thread.providerId === id)) throw fail('Delete provider threads first'); state.providers = state.providers.filter((provider) => provider.id !== id); break;
@@ -779,7 +829,8 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       case 'agents:threads:goal': { const thread = locate('threads', id); const text = typeof payload.goal === 'string' ? payload.goal : payload.goal?.text; if (text === '' || payload.goal === null) delete thread.goal; else thread.goal = { text: nonempty(text, 'goal'), status: (payload.status || payload.goal?.status) === 'complete' ? 'complete' : 'active' }; thread.updatedAt = now(); break; }
       case 'agents:threads:marker:add': { const thread = locate('threads', id); if (payload.messageId && !thread.messages.some((item) => item.id === payload.messageId)) throw fail('Marker message not found'); thread.markers.push({ id: randomUUID(), label: nonempty(payload.label, 'marker label', 256), ...(payload.messageId ? { messageId: payload.messageId } : {}), createdAt: now() }); thread.updatedAt = now(); break; }
       case 'agents:threads:marker:remove': { const thread = locate('threads', id); thread.markers = thread.markers.filter((item) => item.id !== payload.markerId); thread.updatedAt = now(); break; }
-      case 'agents:threads:model': { const thread = locate('threads', id); editable(thread); thread.model = payload.model ? nonempty(payload.model, 'model', 256) : ''; thread.updatedAt = now(); break; }
+      case 'agents:threads:discover-models': startModelDiscovery(locate('threads', id)); break;
+      case 'agents:threads:model': { const thread = locate('threads', id); editable(thread); if (payload.model && locate('providers', thread.providerId).protocol === 'opencode-acp' && thread.nativeCatalog && !thread.nativeCatalog.models.some(item => item.id === payload.model)) throw fail('Choose an observed ACP model'); thread.model = payload.model ? nonempty(payload.model, 'model', 256) : ''; thread.updatedAt = now(); break; }
       case 'agents:attachments:add': { const thread = locate('threads', id); editable(thread); addAttachmentPaths(thread, payload.paths || [payload.path]); break; }
       case 'agents:attachments:read': { const thread = locate('threads', id), attachment = thread.attachments.find((item) => item.id === payload.attachmentId); if (!attachment || attachment.available === false) throw fail('Attachment file is unavailable'); return { ...snapshot(), attachmentData: { ...clone(attachment), storedPath: safeAttachmentPath(thread, attachment) } }; }
       case 'agents:attachments:remove': { const thread = locate('threads', id); editable(thread); const attachment = thread.attachments.find((item) => item.id === payload.attachmentId); if (!attachment) throw fail('Attachment not found'); attachment.detachedAt = now(); thread.updatedAt = now(); break; }

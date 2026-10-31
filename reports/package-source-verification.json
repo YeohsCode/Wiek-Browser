@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-31T08:03:00.732Z",
-  "version": "0.6.0",
+  "generatedAt": "2026-10-31T08:35:28.869Z",
+  "version": "0.7.0",
   "versionMatches": true,
-  "checkedFiles": 145,
+  "checkedFiles": 146,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -10,6 +10,11 @@
     {
       "file": "NOTICE.md",
       "sha256": "57318d9dde819e9799428fdbe84e2253b9634396a0d80881e2dcca48c5252f78",
+      "matches": true
+    },
+    {
+      "file": "app/acp-session.cjs",
+      "sha256": "cf766d940afda7cd09fa4ec64dd93745348af7148c32296668324a02c734e16f",
       "matches": true
     },
     {
@@ -24,12 +29,12 @@
     },
     {
       "file": "app/agent-panel.js",
-      "sha256": "96be8c47001ff62f4151f9e1d96dc54e087e28be6e013811d39016f2f924aa7b",
+      "sha256": "1591808a2ebbd7d2886a7c644b592feef4e0d58d73edecbc0d5aafef808476ca",
       "matches": true
     },
     {
       "file": "app/agent-service.cjs",
-      "sha256": "3beeacbf169f49ba552188aef7d931af373f6e017ecca94f642bb00444d0ec5a",
+      "sha256": "19f658c7ef64a74b51d83cf1a6e76bcd56ea81255b2a72fcccb0203b615aebf5",
       "matches": true
     },
     {
@@ -99,7 +104,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "1ffd849bad3cdca4abc3ba5ebc1cf4b7de708b674a152ff4984269e367a9b1cb",
+      "sha256": "0b617d3eb5a08cff1bf5875b981489fd7c5a2d5a09671bc80db1d5e14448e78b",
       "matches": true
     },
     {
@@ -724,7 +729,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "c2d079465b831866b588eaf0101b2541f9cd3f47d30eaf3ff3bbb079063454ff",
+      "sha256": "aab7664aab14659a4f20bd22bc8d0e499d2f40d1ffab21792c946ad2d1c955de",
       "matches": true
     },
     {

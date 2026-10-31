@@ -1,0 +1,38 @@
+✔ opt-in native provider performs initialize/start/delta/usage and resumes the actual returned thread id (414.243667ms)
+✔ native steering uses turn/steer within the same run and interrupt stops a real protocol process (322.002333ms)
+✔ native approval requests wait for an explicit limited decision and never auto-approve (318.638375ms)
+✔ a native disconnect without turn/completed is a failure rather than a fake successful reply (189.560792ms)
+✔ Claude native streams UTF-8 once, records tools/usage, attaches actual image/PDF/text, resumes after restart (568.595833ms)
+✔ Claude approvals are request-scoped explicit accept/decline and preserve the exact original input (329.612542ms)
+✔ Claude cancelled permissions expire without a response and duplicate request identities fail closed (664.814041ms)
+✔ Claude steering is an honest queued follow-up, stop interrupts, and approval cancel stops the turn (294.953042ms)
+✔ Claude disconnect cannot become successful completion (194.684791ms)
+✔ Claude malformed cannot become successful completion (195.204791ms)
+✔ Claude oversize cannot become successful completion (224.627583ms)
+✔ Claude wrong-session cannot become successful completion (197.906208ms)
+✔ Claude failure cannot become successful completion (200.858042ms)
+✔ Claude edit/fork/import and changed executable arguments cannot reuse native session authority (379.999584ms)
+✔ Claude launch preflights combined attachments and rejects conflicting protocol flags (0.274375ms)
+✔ Claude oversized combined attachments fail before spawn and leave no fabricated run (196.3785ms)
+✔ Claude output shares the actual byte budget and immediate cancellation sends no user prompt (264.252834ms)
+✔ real Claude wire retains parallel block tools/results and child lifecycle without polluting main answer (305.468334ms)
+✔ real Claude stop settles pending subagent activity as interrupted (222.479ms)
+✔ real provider turn records before/after, staged and worktree diff, explicit restore and protection (2708.79025ms)
+✔ failed provider changes are captured, and stale or cross-turn restore previews are refused (2082.893875ms)
+✔ stop and graceful shutdown wait for actual provider termination and snapshot finalization (1480.71575ms)
+✔ unsupported before capture prevents provider launch; disabled project preserves ordinary CLI behavior (260.324917ms)
+✔ after capture failure retains known before snapshot without claiming a complete diff (654.725292ms)
+✔ project concurrency, configuration and restore leases cannot overlap a protected turn (551.241375ms)
+✔ interrupted associations recover conservatively; import and fork do not acquire snapshot authority (1145.17ms)
+✔ HEAD changes keep immutable diff available but prevent history-changing restoration (1129.150917ms)
+✔ stopping during before-capture never launches a provider and retains the known snapshot (547.374833ms)
+✔ native thread and turn IDs bind real wire events to immutable file snapshots once (1247.731958ms)
+✔ actual host-process hard stop recovers the known before snapshot without inventing after state (999.066ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12888.499375

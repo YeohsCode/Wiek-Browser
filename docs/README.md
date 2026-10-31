@@ -1,6 +1,6 @@
 # 文档索引
 
-当前版本 **0.6.0**；下一项为OpenCode原生会话和模型能力目录。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
+当前版本 **0.7.0**；下一项为Codex原生模型目录和所选历史导入，再推进其余5种原生provider。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
 
 | 用途 | 文档 |
 |---|---|
@@ -13,6 +13,7 @@
 | REA 来源、证据与覆盖限制 | [rea-investigation.md](../analysis/rea-investigation.md)、[daemon](../analysis/shipped-daemon-features.md)、[client](../analysis/client-resource-feature-ledger.md) |
 | Agent/Codex/附件 | [扩展设计](../analysis/agent-service-extensions.md)、[附件](../analysis/agent-attachments.md) |
 | Claude历史/工具结果/子Agent | [claude-history-design.md](../analysis/claude-history-design.md) |
+| OpenCode ACP与模型目录 | [opencode-acp-design.md](../analysis/opencode-acp-design.md) |
 | Claude原生协议 | [claude-native-design.md](../analysis/claude-native-design.md) |
 | Agent turn 文件快照 | [turn-checkpoints-design.md](../analysis/turn-checkpoints-design.md) |
 | Git checkpoint | [git-checkpoints.md](../analysis/git-checkpoints.md) |

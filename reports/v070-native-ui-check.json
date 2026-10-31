@@ -1,0 +1,42 @@
+{
+  "version": "0.7.0",
+  "generatedAt": "2026-10-31T08:33:58.202772+00:00",
+  "fixtureOnly": true,
+  "paidModelCalls": 0,
+  "selectedModel": "fixture/b",
+  "modelConfigValues": [
+    "fixture/b",
+    "fixture/b",
+    "fixture/b"
+  ],
+  "loadRequests": 3,
+  "permissionDecisions": [
+    {
+      "outcome": "selected",
+      "optionId": "reject"
+    },
+    {
+      "outcome": "cancelled"
+    },
+    {
+      "outcome": "selected",
+      "optionId": "once"
+    }
+  ],
+  "persistentGrantSent": false,
+  "runStatuses": [
+    "completed",
+    "stopped",
+    "completed"
+  ],
+  "rootReplayOrChildLeak": false,
+  "toolResult": "Actual tool output\nDiff note.txt\n---\nold\n+++\nnew",
+  "childStatus": "unresolved",
+  "childText": "Child-only answer",
+  "discoveryBeforeFirstPrompt": {
+    "messages": 0,
+    "runs": 0,
+    "promptsSent": 0,
+    "observedInSeparateRead": true
+  }
+}

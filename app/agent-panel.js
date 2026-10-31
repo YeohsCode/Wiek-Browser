@@ -117,18 +117,28 @@
       if (result) { selectedId = snapshot.threads.find(item => !previous.has(item.id))?.id || selectedId; view = 'threads'; render(); }
     });
   }
+  function modelEditor(t) {
+    if (provider(t.providerId)?.protocol === 'opencode-acp') {
+      if (!t.nativeCatalog) return action('agents:threads:discover-models', { id: t.id });
+      return openEditor('Native session model', [
+        { key: 'notice', type: 'notice', label: `Observed from the ACP session on ${date(t.nativeCatalog.observedAt)}${t.nativeCatalog.truncated ? ' · catalogue display limited to 256 models' : ''}. An empty selection keeps the agent’s current session model.` },
+        { key: 'model', label: 'Model', type: 'select', options: [['', 'Keep current agent model'], ...t.nativeCatalog.models.map(item => [item.id, item.name])], value: t.model || '' },
+      ], values => action('agents:threads:model', { id: t.id, model: values.model }, true));
+    }
+    openEditor('Conversation model', [{ key: 'model', label: `Model name · configured catalogue: ${(provider(t.providerId)?.models || []).join(', ') || 'none (CLI default available)'}`, value: t.model || '' }], values => action('agents:threads:model', { id: t.id, model: values.model }, true));
+  }
   function configureProvider(item) {
     openEditor(item ? 'Configure agent' : 'Add a local agent', [
       { key: 'name', label: 'Name', required: true, placeholder: 'Local agent' },
       { key: 'command', label: 'Executable name or absolute path', required: true, placeholder: 'my-agent' },
       { key: 'args', label: 'Arguments as a JSON array', required: true, placeholder: '["exec"]' },
       { key: 'inputMode', label: 'How the CLI receives your prompt', type: 'select', options: [['stdin', 'Standard input'], ['argv', 'Replace {prompt} in an argument']], value: 'stdin' },
-      { key: 'protocol', label: 'Provider protocol', type: 'select', options: [['cli', 'Plain CLI process'], ['codex-app-server', 'Codex native JSON-RPC session (opt-in)'], ['claude-stream-json', 'Claude native streaming session (opt-in)']], value: 'cli' },
+      { key: 'protocol', label: 'Provider protocol', type: 'select', options: [['cli', 'Plain CLI process'], ['codex-app-server', 'Codex native JSON-RPC session (opt-in)'], ['claude-stream-json', 'Claude native streaming session (opt-in)'], ['opencode-acp', 'OpenCode native ACP v1 session (opt-in)']], value: 'cli' },
       { key: 'enabled', label: 'Enabled', type: 'select', options: [['true', 'Enabled'], ['false', 'Disabled']], value: 'true' },
       { key: 'models', label: 'Your model catalogue (comma separated)', placeholder: 'Optional model names verified by you' },
       { key: 'modelArgs', label: 'Model arguments as a JSON array', placeholder: '["--model","{model}"]', value: '[]' },
       { key: 'usageFormat', label: 'Usage reporting', type: 'select', options: [['', 'Unavailable / plain CLI output'], ['codex-jsonl', 'Actual Codex JSONL turn.completed usage events']], value: '' },
-      { key: 'notice', type: 'notice', label: 'This runs your installed CLI in the project folder. Use non-interactive arguments supported by that CLI. Authentication stays with the local agent. Claude native mode adds its protocol flags: use an empty arguments array for the claude executable and empty model arguments. Claude follow-ups queue until the active turn finishes.' },
+      { key: 'notice', type: 'notice', label: 'This runs your installed CLI in the project folder. Use non-interactive arguments supported by that CLI. Authentication stays with the local agent. Claude native mode adds its protocol flags: use an empty arguments array for the claude executable and empty model arguments. For OpenCode ACP use arguments ["acp"], stdin and empty model arguments. Its own project config, plugins and MCP servers still apply. Claude and OpenCode follow-ups queue until the active turn finishes.' },
     ], values => {
       let args; try { args = JSON.parse(values.args); } catch { throw new Error('Arguments must be a JSON array of strings.'); }
       if (!Array.isArray(args) || args.some(value => typeof value !== 'string')) throw new Error('Arguments must be a JSON array of strings.');
@@ -217,7 +227,7 @@
       if (message.attachments?.length) { const files = make('div', '', 'va-attachments'); for (const file of message.attachments) { const link = button(`📎 ${file.name}`, () => action('agents:files:open', { id: t.id, attachmentId: file.id })); link.disabled = pending || file.available === false; files.append(link); } row.append(files); }
       row.append(tools); list.append(row);
     }
-    if (t.status === 'running') list.append(make('div', 'Agent is running…', 'va-running-note'));
+    if (['running', 'discovering'].includes(t.status)) list.append(make('div', 'Agent is running…', 'va-running-note'));
     return list;
   }
   function configureCheckpoints(item){openEditor('Project turn snapshots',[
@@ -272,16 +282,19 @@
     const title = make('div'); title.append(make('h2', t.title), make('p', `${provider(t.providerId)?.name || t.providerId} · ${project(t.projectId)?.path || 'Project unavailable'}`));
     const actions = make('div', '', 'va-actions'); actions.append(make('span', t.status, `va-status va-status-${t.status}`), button('Rename', () => openEditor('Rename conversation', [{ key: 'title', label: 'Title', required: true }], values => action('agents:threads:rename', { id: t.id, title: values.title }, true), { title: t.title })), button('Delete', () => askDelete('Delete conversation', `Delete “${t.title}”, its stored messages, and linked automations?`, () => action('agents:threads:delete', { id: t.id }, true)), 'va-danger'));
     const more = make('details', '', 'va-thread-more'); more.append(make('summary', 'Conversation tools'));
-    const extras = make('div', '', 'va-actions'); extras.append(button(t.pinned ? 'Unpin' : 'Pin', () => action(t.pinned ? 'agents:threads:unpin' : 'agents:threads:pin', { id: t.id })), button(t.archived ? 'Unarchive' : 'Archive', () => action(t.archived ? 'agents:threads:unarchive' : 'agents:threads:archive', { id: t.id })), button('Notes & goal', () => notesEditor(t)), button('Fork', () => branch(t, 'fork')), button('Sidechat', () => branch(t, 'sidechat')), button('Model', () => openEditor('Conversation model', [{ key: 'model', label: `Model name · configured catalogue: ${(provider(t.providerId)?.models || []).join(', ') || 'none (CLI default available)'}`, value: t.model || '' }], values => action('agents:threads:model', { id: t.id, model: values.model }, true))));
+    const extras = make('div', '', 'va-actions'); extras.append(button(t.pinned ? 'Unpin' : 'Pin', () => action(t.pinned ? 'agents:threads:unpin' : 'agents:threads:pin', { id: t.id })), button(t.archived ? 'Unarchive' : 'Archive', () => action(t.archived ? 'agents:threads:unarchive' : 'agents:threads:archive', { id: t.id })), button('Notes & goal', () => notesEditor(t)), button('Fork', () => branch(t, 'fork')), button('Sidechat', () => branch(t, 'sidechat')), button('Model', () => modelEditor(t)));
+    if (provider(t.providerId)?.protocol === 'opencode-acp') { const refresh = button('Discover models', () => action('agents:threads:discover-models', { id: t.id })); refresh.disabled = pending || ['running', 'discovering'].includes(t.status); extras.append(refresh); }
     extras.append(button('Child agent', () => childAgentEditor(t)), button('Hand off', () => childAgentEditor(t, true)),button('Conversation file diff',()=>showFileChanges(t))); more.append(extras); toolbar.append(title, actions); main.append(toolbar, more);
     if (t.goal) main.append(make('p', `Goal · ${t.goal.status}: ${t.goal.text}`, 'va-goal'));
     if (t.markers?.length) { const markers = make('div', '', 'va-markers'); for (const marker of t.markers) markers.append(button(`★ ${marker.label} ×`, () => action('agents:threads:marker:remove', { id: t.id, markerId: marker.id }))); main.append(markers); }
     main.append(messageList(t));
+    if (t.status === 'discovering') main.append(make('p', 'Discovering native model catalogue. No prompt is sent.', 'va-hint'));
+    if (t.modelDiscovery?.error) main.append(make('p', `Model discovery: ${t.modelDiscovery.error}`, 'va-hint'));
     if (t.revisions?.length) { const history = make('details', '', 'va-run-details'); history.append(make('summary', `${t.revisions.length} transcript revisions`)); for (const revision of [...t.revisions].reverse()) { const entry = make('details'); entry.append(make('summary', `${revision.kind} · ${date(revision.createdAt)}`), make('pre', revision.messages.map(message => `${message.role}: ${message.content}`).join('\n\n'))); history.append(entry); } main.append(history); }
     const runs = t.runs || []; const latest = runs[runs.length - 1];
     if(runs.some(run=>run.fileChanges)){
       const history=make('details','','va-run-details');history.append(make('summary','Turn file snapshots'));
-      for(const [index,run]of runs.entries())if(run.fileChanges){const changes=run.fileChanges,row=make('section','','va-turn-snapshot');row.append(make('strong',`Turn ${index+1} · ${run.status} · ${changes.status}`));if(changes.error)row.append(make('p',changes.error,'va-hint'));const actions=make('div','','va-actions');if(changes.before&&changes.after)actions.append(button('View file changes',()=>showFileChanges(t,run)));if(t.status!=='running'){if(changes.before)actions.append(button('Restore before…',()=>showFileChanges(t,run,'before')));if(changes.after)actions.append(button('Restore after…',()=>showFileChanges(t,run,'after')));}row.append(actions);history.append(row);}main.append(history);
+      for(const [index,run]of runs.entries())if(run.fileChanges){const changes=run.fileChanges,row=make('section','','va-turn-snapshot');row.append(make('strong',`Turn ${index+1} · ${run.status} · ${changes.status}`));if(changes.error)row.append(make('p',changes.error,'va-hint'));const actions=make('div','','va-actions');if(changes.before&&changes.after)actions.append(button('View file changes',()=>showFileChanges(t,run)));if(!['running','discovering'].includes(t.status)){if(changes.before)actions.append(button('Restore before…',()=>showFileChanges(t,run,'before')));if(changes.after)actions.append(button('Restore after…',()=>showFileChanges(t,run,'after')));}row.append(actions);history.append(row);}main.append(history);
     }
     if (t.claudeHistory || runs.some(run => run.toolEvents?.length || run.subagents?.length)) {
       const activity = make('details', '', 'va-run-details va-native-history'); activity.append(make('summary', 'Native activity history'));
@@ -291,14 +304,16 @@
     }
     for (const approval of latest?.approvals || []) if (approval.status === 'pending') {
       const card = make('section', '', 'va-approval'); card.append(make('strong', 'Local agent needs approval'), make('p', approval.title), make('pre', `${approval.cwd}\n${approval.command || approval.kind}`));
-      const actions = make('div', '', 'va-actions'); for (const [decision, label] of [['accept', 'Approve this request'], ['decline', 'Decline'], ['cancel', 'Cancel turn']]) actions.append(button(label, () => action('agents:control:approval', { id: t.id, approvalId: approval.id, decision }), decision === 'accept' ? 'va-primary' : ''));
+      const actions = make('div', '', 'va-actions'); for (const [decision, label] of [['accept', 'Approve this request'], ['decline', 'Decline'], ['cancel', 'Cancel turn']]) { const control = button(label, () => action('agents:control:approval', { id: t.id, approvalId: approval.id, decision }), decision === 'accept' ? 'va-primary' : ''); if (decision === 'accept' && approval.canAccept === false) control.disabled = true; actions.append(control); }
       card.append(actions); main.append(card);
     }
     if (latest) {
       const details = make('details', '', 'va-run-details'); details.append(make('summary', `Latest run: ${latest.status}${latest.exitCode !== undefined ? ` · exit ${latest.exitCode}` : ''}${latest.truncated ? ' · output truncated' : ''}`));
       if (latest.stdout) details.append(make('strong', 'Standard output'), make('pre', latest.stdout));
       if (latest.stderr) details.append(make('strong', 'Standard error'), make('pre', latest.stderr));
-      if (latest.usage) details.append(make('p', `Reported tokens: ${latest.usage.inputTokens} input · ${latest.usage.outputTokens} output${latest.usage.cachedInputTokens !== undefined ? ` · ${latest.usage.cachedInputTokens} cached input` : ''}`));
+      if (Number.isSafeInteger(latest.usage?.inputTokens) && Number.isSafeInteger(latest.usage?.outputTokens)) details.append(make('p', `Reported tokens: ${latest.usage.inputTokens} input · ${latest.usage.outputTokens} output${latest.usage.cachedInputTokens !== undefined ? ` · ${latest.usage.cachedInputTokens} cached input` : ''}`));
+      if (latest.nativeStopReason) details.append(make('p', `Provider stop reason: ${latest.nativeStopReason}`));
+      if (latest.contextUsage) details.append(make('p', `Context: ${latest.contextUsage.used} / ${latest.contextUsage.size} tokens`));
       if (latest.usage?.sessionCostUsd !== undefined) details.append(make('p', `Provider session cost estimate: $${latest.usage.sessionCostUsd.toFixed(6)} · cumulative, not a per-turn bill`));
       if (!latest.stdout && !latest.stderr) details.append(make('pre', 'No process output recorded.')); main.append(details);
     }
@@ -307,22 +322,23 @@
     for (const file of t.attachments || []) {
       const row = make('div', '', 'va-attachment-row');
       const link = button(`${file.name}${file.available === false ? ' · unavailable' : ''}`, () => action('agents:files:open', { id: t.id, attachmentId: file.id })); link.disabled = pending || file.available === false;
-      const toggle = button(file.detachedAt ? 'Restore' : 'Detach', () => action(file.detachedAt ? 'agents:attachments:restore' : 'agents:attachments:remove', { id: t.id, attachmentId: file.id })); toggle.disabled = pending || t.status === 'running' || (file.detachedAt && file.available === false);
+      const toggle = button(file.detachedAt ? 'Restore' : 'Detach', () => action(file.detachedAt ? 'agents:attachments:restore' : 'agents:attachments:remove', { id: t.id, attachmentId: file.id })); toggle.disabled = pending || ['running', 'discovering'].includes(t.status) || (file.detachedAt && file.available === false);
       row.append(link, make('span', `${file.mimeType} · ${(Number(file.bytes || 0) / 1024).toFixed(1)} KiB${file.detachedAt ? ' · detached' : ''}`, 'va-hint'), toggle); attachments.append(row);
     }
     attachments.append(make('p', 'Up to 10 active files, 20 MiB each. Detaching keeps the local copy recoverable; original files are unchanged.', 'va-hint')); composer.append(attachments);
     const prompt = make('textarea'); prompt.placeholder = `Ask ${provider(t.providerId)?.name || 'your agent'}…`; prompt.setAttribute('aria-label', 'Message your agent'); prompt.dataset.focus = 'prompt'; prompt.value = drafts.get(t.id) || ''; prompt.rows = 3;
-    prompt.oninput = () => drafts.set(t.id, prompt.value); prompt.disabled = !usable(provider(t.providerId) || {});
+    prompt.oninput = () => drafts.set(t.id, prompt.value); prompt.disabled = t.status === 'discovering' || !usable(provider(t.providerId) || {});
     const footer = make('div', '', 'va-composer-footer'); footer.append(make('span', `${snapshot.runningCount || 0} running${snapshot.maxConcurrentRuns ? ` / ${snapshot.maxConcurrentRuns} allowed` : ''}`, 'va-hint'));
-    const attach = button('Attach files', () => action('agents:files:attach', { id: t.id })); attach.disabled = pending || t.status === 'running'; footer.append(attach);
-    const send = make('button', t.status === 'running' ? 'Queue follow-up' : 'Send prompt', 'va-button va-primary'); send.disabled = pending || !usable(provider(t.providerId) || {});
-    if (t.status === 'running') footer.append(button('Stop agent', () => action('agents:control:stop', { id: t.id }), 'va-danger'));
+    const attach = button('Attach files', () => action('agents:files:attach', { id: t.id })); attach.disabled = pending || ['running', 'discovering'].includes(t.status); footer.append(attach);
+    const send = make('button', t.status === 'discovering' ? 'Discovering models…' : t.status === 'running' ? 'Queue follow-up' : 'Send prompt', 'va-button va-primary'); send.disabled = pending || t.status === 'discovering' || !usable(provider(t.providerId) || {});
+    if (['running', 'discovering'].includes(t.status)) footer.append(button('Stop agent', () => action('agents:control:stop', { id: t.id }), 'va-danger'));
     if (t.pendingFollowUps?.length) footer.append(make('span', `${t.pendingFollowUps.length} queued for the next CLI turn`, 'va-hint'));
     footer.append(send); composer.append(prompt, footer);
     composer.onsubmit = async event => {
       event.preventDefault();
+      if (t.status === 'discovering') return;
       const value = (drafts.get(t.id) || '').trim(); if (!value) { prompt.focus(); return; }
-      const result = await action(t.status === 'running' ? 'agents:control:steer' : 'agents:threads:prompt', { id: t.id, prompt: value });
+      const result = await action(['running', 'discovering'].includes(t.status) ? 'agents:control:steer' : 'agents:threads:prompt', { id: t.id, prompt: value });
       if (result) { drafts.delete(t.id); render(); }
     };
     prompt.onkeydown = event => { if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') { event.preventDefault(); composer.requestSubmit(); } };

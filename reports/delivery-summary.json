@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-31T08:07:51.584817+00:00",
-  "version": "0.6.0",
+  "generatedAt": "2026-10-31T08:35:28.653214+00:00",
+  "version": "0.7.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -30,7 +30,7 @@
           "notRun": 0,
           "assertions": 1248
         },
-        "wallTimeMs": 155258,
+        "wallTimeMs": 153201,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
       }
@@ -43,14 +43,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 184,
+    "pass": 202,
     "fail": 0,
-    "log": "v060-service-tests.log"
+    "log": "v070-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 67,
+    "pass": 79,
     "fail": 0,
-    "log": "v060-package-workbench.log"
+    "log": "v070-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -64,7 +64,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 145,
+    "sourceFilesChecked": 146,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -87,16 +87,17 @@
   },
   "completeProductParity": false,
   "newCapabilities": [
-    "Explicit single-file Claude JSONL branch preview/import with hash/inode recheck",
-    "Inert imported transcript with new owned session on continuation",
-    "Bounded native tool results, progress and nested task/message evidence",
-    "Conservative unresolved/interrupted activity and stale task-run protection",
-    "Whitelisted activity retention across native archive import/export",
-    "Scrollable activity history and reachable composer"
+    "Opt-in OpenCode ACP v1 native sessions and owned load without replay duplication",
+    "Session-derived grouped model catalogue discovery without prompts or execution history",
+    "Fresh model revalidation and native model selection confirmation",
+    "Single-use permissions, pending cancellation and unsupported client delegation rejection",
+    "Actual attachments, tool result/diff and scoped child-session messages with conservative status",
+    "ACP file editing integrated with turn snapshots, immutable diff and confirmed restoration"
   ],
   "remainingGaps": [
-    "Six other native provider protocols, model capability catalogues, source native session/history migration and paid generation validation",
+    "Five other native provider protocols, Codex/Claude session model catalogues, source native session/history migration and paid generation validation",
     "Claude multi-file child history and post-result background task lifecycle",
+    "OpenCode external history/native fork/background children and Vek MCP injection",
     "Complete Chrome/Safari profile/web storage/extensions migration",
     "Custom Chromium engine equivalence",
     "Linked worktrees, checkpoint retention and remote PR workflow",
@@ -151,6 +152,23 @@
     "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
   },
   "uiQa": {
+    "log": "v070-native-ui-qa.md",
+    "modelDiscoveryWithoutPrompt": true,
+    "nativeObservedModelPicker": true,
+    "realSingleUseApprovalAndDecline": true,
+    "noPersistentGrantAndUnsupportedAcceptDisabled": true,
+    "realNativeCancel": true,
+    "toolsChildMessagesAndComposerReachable": true,
+    "defaultUserDataAppVersion": "0.7.0",
+    "wireCheck": "v070-native-ui-check.json"
+  },
+  "claudeFocusedTests": {
+    "pass": 29,
+    "fail": 0,
+    "log": "v060-claude-tests.log",
+    "includedInCurrentFullSuite": true
+  },
+  "previousClaudeHistoryUiQa": {
     "log": "v060-native-ui-qa.md",
     "realNativeFilePicker": true,
     "selectedBranchPreviewUpdates": true,
@@ -160,10 +178,36 @@
     "composerReachableWithActivityExpanded": true,
     "defaultUserDataAppVersion": "0.6.0"
   },
-  "claudeFocusedTests": {
-    "pass": 29,
+  "acpProtocolTests": {
+    "pass": 18,
     "fail": 0,
-    "log": "v060-claude-tests.log",
-    "includedInCurrentFullSuite": true
-  }
+    "log": "v070-service-tests.log",
+    "fixtureOnly": true,
+    "modelCalls": 0
+  },
+  "acpAndPanelFocusedTests": {
+    "pass": 19,
+    "fail": 0,
+    "log": "v070-acp-panel-tests.log"
+  },
+  "opencodeReadiness": {
+    "version": "1.19.5",
+    "sha256": "feaafead8cd563af0c2dcb386b0757e4355e327ebb6bd1aaad5440fe2f83596c",
+    "isolatedHome": true,
+    "inheritedAuthentication": false,
+    "userMessagesSent": 0,
+    "modelCalls": 0,
+    "sessionNew": true,
+    "discoveryCompleted": true,
+    "modelCount": 9,
+    "modelSelector": "model",
+    "report": "v070-opencode-readiness.json"
+  },
+  "observedFailures": [
+    {
+      "log": "v070-service-concurrent-watch-failure.log",
+      "test": "project watchers report changes and close without leaking handles",
+      "result": "One timeout while full SDK suite was also running; cause not proven. Isolated check and final full 202-test run passed without changing assertions or watcher implementation."
+    }
+  ]
 }

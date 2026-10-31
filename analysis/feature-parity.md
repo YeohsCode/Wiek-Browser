@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.6.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6增量和当前报告为准。
+当前版本 **0.7.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -292,3 +292,11 @@ V1 兼容 helper、CDP/fetch、site tools 与 migration guard 的入口见 `pack
 实时记录tool_result/progress、parent_tool_use_id子消息、task生命周期/usage；旧run迟到事件不覆盖新run。未收到终态明确为unresolved/interrupted。展示有字节/条数上限，不自动读output_file，不在父result后守护后台子任务。所有历史run可查看，native JSON archive保留白名单显示证据。
 
 新增15项专项回归，全套184/184、最终宿主67/67；UI/SDK/官方CLI initialize层级见当前结果。模型推理未执行。其他6种原生provider、模型能力目录、原生源会话迁移、多文件子历史和后台守护仍partial/missing。[设计](claude-history-design.md)。
+
+## 0.7.0 当前增量：OpenCode ACP与模型目录
+
+新增独立ACP v1客户端、opt-in discovery、owned session new/load、旧消息重放隔离、真实session configOptions/legacy model目录和模型选择确认。只发现模型不发送prompt、不创建执行run；占project/concurrency lease并阻止restore，可取消/中断恢复。空原生会话首次实际prompt带复制的本地历史，其后仅本轮文字。
+
+单次allow/reject权限、全部pending取消、原生cancel通知、工具partial result/diff、child-session消息隔离和有界活动、context/usage、实际附件capability检查，均通过真实合成进程；Electron panel也验证目录选择和不可批准状态。打包宿主验证模型发现→选择→任务编辑→真实diff/恢复→审批→停止。官方OpenCode 1.19.5隔离HOME/XDG+净化env发现9模型选项，无prompt/无模型调用；不证明认证或推理成功。
+
+新增18项ACP专项，全套202/202、宿主79/79；最终SDK/原生UI结果以当前报告为准。仍缺其余5种原生provider、Codex/Claude同类目录、OpenCode外部历史/原生fork/后台任务、MCP自动注入。Agent自身配置/插件/MCP不被空client mcpServers禁用；无OS沙箱等价声明。详见 [设计](opencode-acp-design.md)。全产品parity仍为false。

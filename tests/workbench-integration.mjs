@@ -21,7 +21,7 @@ const rpc=(method,args=[],spaceId)=>new Promise((resolve,reject)=>{ const id=++s
 const action=async(name,payload={})=>{try{return await rpc('workbenchAction',[name,payload]);}catch(failure){failure.message=`${name}: ${failure.message}`;throw failure;}};
 const cdp=(spaceId,method,params={})=>new Promise((resolve,reject)=>{const id=++cdpId,timer=setTimeout(()=>{cdpPending.delete(id);reject(new Error(`CDP timeout ${method}`));},10000);cdpPending.set(id,{resolve,reject,timer});void rpc('sendCDPMessage',[JSON.stringify({id,method,params})],spaceId).catch(reject);});
 const check=(condition,message)=>{ assert.ok(condition,message); checks++; };
-async function waitThread(id) { const limit=Date.now()+20000; while(Date.now()<limit) { const t=await action('agents:threads:read',{id});if(!['running','queued'].includes(t.status))return t;await new Promise(r=>setTimeout(r,40)); } throw new Error('Thread did not complete'); }
+async function waitThread(id) { const limit=Date.now()+20000; while(Date.now()<limit) { const t=await action('agents:threads:read',{id});if(!['running','queued','discovering'].includes(t.status))return t;await new Promise(r=>setTimeout(r,40)); } throw new Error('Thread did not complete'); }
 const directory=await fs.mkdtemp(path.join(os.tmpdir(),'vek-workbench-e2e-'));
 const downloadBytes=Buffer.alloc(2*1024*1024,77);
 const web=http.createServer((req,res)=>{
@@ -70,6 +70,23 @@ try {
   const nativeDiff=await action('agents:changes:diff',{id:claudeId,runId:nativeRun.id});check(nativeDiff.worktreeDiff.includes('Claude protocol fixture edit'),'Claude turn file diff contains real provider edits');
   const nativePreview=await action('agents:changes:preview',{id:claudeId,runId:nativeRun.id});await action('agents:changes:restore',{id:claudeId,runId:nativeRun.id,expectedState:nativePreview.expectedState,confirm:true});check(await fs.readFile(path.join(directory,'note.txt'),'utf8')==='after\n','Claude turn file restore recovers the real pre-turn bytes');
   await action('agents:threads:prompt',{id:claudeId,prompt:'Resume this test session'});const resumed=await waitThread(claudeId);check(resumed.status==='completed'&&resumed.nativeThreadId===native.nativeThreadId&&resumed.runs.length===2,'packaged Claude second turn resumes its persisted session');
+  snapshot=await action('agents:providers:configure',{name:'OpenCode ACP fixture',command:process.execPath,args:[path.resolve('tests/fixtures/acp-peer.cjs'),'--vek-audit='+path.join(directory,'acp-audit.jsonl')],inputMode:'stdin',protocol:'opencode-acp'});
+  const acpProviderId=snapshot.providers.at(-1).id;
+  snapshot=await action('agents:threads:create',{projectId,providerId:acpProviderId,title:'OpenCode ACP host fixture'});const acpId=snapshot.threads.at(-1).id;
+  await action('agents:threads:discover-models',{id:acpId});let acpThread=await waitThread(acpId);
+  check(acpThread.status==='idle'&&acpThread.modelDiscovery.status==='completed'&&acpThread.runs.length===0&&acpThread.messages.length===0,'packaged ACP discovery creates no execution history');
+  check(acpThread.nativeCatalog.models.some(x=>x.id==='fixture/b'),'packaged ACP catalogue comes from actual session response');
+  let acpWire=(await fs.readFile(path.join(directory,'acp-audit.jsonl'),'utf8')).trim().split('\n').map(JSON.parse);check(!acpWire.some(x=>x.method==='session/prompt'),'model discovery sends no prompt');
+  await action('agents:threads:model',{id:acpId,model:'fixture/b'});await action('agents:threads:prompt',{id:acpId,prompt:'[edit-file] Local ACP protocol test'});acpThread=await waitThread(acpId);const acpRun=acpThread.runs.at(-1);
+  check(acpThread.status==='completed'&&!acpRun.stdout.includes('REPLAY'),'packaged ACP loads owned session without duplicating replay');
+  acpWire=(await fs.readFile(path.join(directory,'acp-audit.jsonl'),'utf8')).trim().split('\n').map(JSON.parse);check(acpWire.some(x=>x.method==='session/set_config_option'&&x.params.value==='fixture/b'),'packaged ACP selects actual advertised model');
+  check(acpRun.toolEvents.some(x=>x.result?.includes('Actual tool output'))&&acpRun.subagents[0].messages[0].content==='Child-only answer'&&!acpRun.stdout.includes('Child-only'),'packaged ACP keeps tools and child output scoped');
+  check(acpRun.fileChanges?.status==='complete'&&await fs.readFile(path.join(directory,'note.txt'),'utf8')==='ACP protocol fixture edit\n','ACP participates in actual turn snapshots');
+  const acpDiff=await action('agents:changes:diff',{id:acpId,runId:acpRun.id});check(acpDiff.worktreeDiff.includes('ACP protocol fixture edit'),'ACP turn diff captures actual process edit');
+  const acpPreview=await action('agents:changes:preview',{id:acpId,runId:acpRun.id});await action('agents:changes:restore',{id:acpId,runId:acpRun.id,expectedState:acpPreview.expectedState,confirm:true});check(await fs.readFile(path.join(directory,'note.txt'),'utf8')==='after\n','ACP restore recovers real pre-turn bytes');
+  await action('agents:threads:prompt',{id:acpId,prompt:'[approval]'});let permission;for(let i=0;i<100;i++){acpThread=await action('agents:threads:read',{id:acpId});permission=acpThread.runs.at(-1).approvals?.[0];if(permission?.status==='pending')break;await new Promise(r=>setTimeout(r,40));}
+  check(permission?.status==='pending'&&permission.canAccept,'packaged ACP waits for a real single-use permission decision');await action('agents:control:approval',{id:acpId,approvalId:permission.id,decision:'decline'});acpThread=await waitThread(acpId);check(acpThread.status==='completed'&&acpThread.runs.at(-1).stdout.includes('reject'),'packaged ACP sends exact single-use rejection');
+  await action('agents:threads:prompt',{id:acpId,prompt:'[slow]'});await action('agents:control:stop',{id:acpId});check((await action('agents:threads:read',{id:acpId})).status==='stopped','packaged ACP cancellation settles the actual turn');
   const historySession=randomUUID(),historyIds=Array.from({length:4},()=>randomUUID()),historyFile=path.join(directory,'selected-claude-history.jsonl');
   const historyRows=[
     {type:'user',uuid:historyIds[0],parentUuid:null,sessionId:historySession,message:{role:'user',content:'Imported request'}},

@@ -1,0 +1,27 @@
+✔ ACP model discovery sends no prompt or run, persists actual models, then loads without replaying history (387.060208ms)
+✔ ACP first prompt after discovery retains copied local history and later prompts send only new text (417.956375ms)
+✔ ACP actual chunks/attachments/tools/child evidence/usage survive restart with a scoped resume prompt (398.376167ms)
+✔ ACP approvals select once options only, never persistent grants, and reject unavailable accept (365.178542ms)
+✔ ACP stop cancels pending permissions and emits native cancellation without an automatic grant (206.561875ms)
+✔ ACP discovery occupies the project lease, is cancellable before initialize, and creates no history (201.562916ms)
+✔ ACP grouped model catalogue explicitly marks truncation across groups (0.282125ms)
+✔ ACP legacy model setter is used only when advertised (206.016291ms)
+✔ ACP rejects stale and unconfirmed model selection before prompt (283.690708ms)
+✔ ACP disconnect fails without fabricated completion (200.916375ms)
+✔ ACP malformed fails without fabricated completion (202.290208ms)
+✔ ACP oversize fails without fabricated completion (224.755416ms)
+✔ ACP wrong-session fails without fabricated completion (197.913042ms)
+✔ ACP unknown-stop fails without fabricated completion (193.735625ms)
+✔ ACP rejects a wrong protocol version and unsupported attachment capabilities before prompt (286.299667ms)
+✔ ACP declines filesystem delegation and bounds actual display output (260.88825ms)
+✔ ACP changed provider/import/export cannot transfer native session or model catalogue authority (286.860709ms)
+✔ ACP preflights combined actual attachment bytes before creating a run or spawning (205.4645ms)
+✔ real Electron panel renders literal messages and dispatches advanced controls without model calls (638.606666ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4602.458084

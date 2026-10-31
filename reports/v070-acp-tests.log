@@ -1,0 +1,24 @@
+✔ ACP model discovery sends no prompt or run, persists actual models, then loads without replaying history (382.732792ms)
+✔ ACP actual chunks/attachments/tools/child evidence/usage survive restart with a scoped resume prompt (387.507333ms)
+✔ ACP approvals select once options only, never persistent grants, and reject unavailable accept (399.751375ms)
+✔ ACP stop cancels pending permissions and emits native cancellation without an automatic grant (195.954458ms)
+✔ ACP discovery occupies the project lease, is cancellable before initialize, and creates no history (194.846542ms)
+✔ ACP legacy model setter is used only when advertised (200.416917ms)
+✔ ACP rejects stale and unconfirmed model selection before prompt (274.111666ms)
+✔ ACP disconnect fails without fabricated completion (192.008334ms)
+✔ ACP malformed fails without fabricated completion (192.802209ms)
+✔ ACP oversize fails without fabricated completion (220.832416ms)
+✔ ACP wrong-session fails without fabricated completion (185.858625ms)
+✔ ACP unknown-stop fails without fabricated completion (191.717333ms)
+✔ ACP rejects a wrong protocol version and unsupported attachment capabilities before prompt (272.297ms)
+✔ ACP declines filesystem delegation and bounds actual display output (260.009334ms)
+✔ ACP changed provider/import/export cannot transfer native session or model catalogue authority (278.718917ms)
+✔ ACP preflights combined actual attachment bytes before creating a run or spawning (195.140834ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4104.042792

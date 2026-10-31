@@ -1,4 +1,6 @@
 # Vek Browser
+> **0.7.0 更新**：新增OpenCode ACP v1原生会话、无prompt模型发现/选择、会话续接与重放隔离、单次权限/取消、工具结果/子消息和实际附件；接入turn快照及文件恢复。官方CLI无推理发现成功，模型推理未验证。
+>
 > **0.6.0 更新**：新增Claude JSONL选择文件、预览分支并导入为新对话；保留工具结果/耗时、子Agent消息与已观察状态。导入后以可见文本建立新会话，不冒充源CLI会话迁移；来源变化会拒绝提交。
 >
 > **0.5.0 更新**：新增显式启用的 Claude 原生流式会话、重启续接、逐次权限审批/取消、原生工具事件、实际图片/PDF/文本附件和用量；接入现有 turn 文件快照。会话累计费用不计作单轮账单。
@@ -11,7 +13,7 @@
 >
 > 最新测试以 [reports/RESULTS.md](reports/RESULTS.md) 为准；[analysis/feature-parity.md](analysis/feature-parity.md) 明确列出剩余差距。不能把 69 项 SDK 用例通过理解成整款 Ego 已全量复刻。
 
-进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.6.0；下一步优先OpenCode原生会话和模型能力目录。Claude源CLI会话迁移、后台任务与其他provider仍有缺口。
+进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.7.0；下一步补Codex原生模型目录和所选历史导入，再推进其余5种原生provider。Claude源CLI会话迁移、后台任务与其他provider仍有缺口。
 
 本地 Chromium 浏览器与 Agent 工作区。项目在 `vek-browser/` 中独立创建，使用 Electron 实现浏览器宿主、Space、多标签与原生连接层，复用 `citrolabs/ego-lite` 的 MIT SDK。Ego 安装包只用于分析和测试，不进入 Vek 发行包。
 
@@ -94,7 +96,7 @@ await task.finish({ keep: [] }); // 关闭受管理页面并结束
 
 ## 当前验证结果
 
-0.6.0 最终打包版：**69/69** 同源真实浏览器用例通过；Ego 基准：**68/69**（HTML 粘贴用例失败），两侧无跳过/未运行。另有 **184/184** 本地测试、**67/67** 打包宿主集成、145 个打包文件身份匹配；81 个上游测试/fixture 保持原样。SDK 单测 532/532、CDP 探针 22/22 沿用未变更版本记录，没有冒充本轮重跑。详细结果以 [RESULTS.md](reports/RESULTS.md)、[comparison.md](reports/comparison.md) 与原始日志为准。
+0.7.0 最终打包版：**69/69** 同源真实浏览器用例通过；Ego 基准：**68/69**（HTML 粘贴用例失败），两侧无跳过/未运行。另有 **202/202** 本地测试、**79/79** 打包宿主集成、146 个打包文件身份匹配；81 个上游测试/fixture 保持原样。SDK 单测 532/532、CDP 探针 22/22 沿用未变更版本记录，没有冒充本轮重跑。详细结果以 [RESULTS.md](reports/RESULTS.md)、[comparison.md](reports/comparison.md) 与原始日志为准。
 
 Vek引擎为Chromium148.0.7778.280，Ego为156.0.8078.48；现有自动化用例兼容不代表所有Web平台能力等价。
 

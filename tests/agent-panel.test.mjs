@@ -53,9 +53,15 @@ test('real Electron panel renders literal messages and dispatches advanced contr
           const changedBranchPreview=document.body.textContent.includes('Second selected branch preview');
           await document.querySelector('.va-dialog').onsubmit({preventDefault(){}});
           const importedActivity=document.body.textContent.includes('Nested child result')&&document.body.textContent.includes('<img src=x onerror=window.toolXss=true>')&&!window.toolXss&&!document.querySelector('img');
-          return { literal, draft, draftValue, noAutoSend, memoryVisible, changedBranchPreview, importedActivity, calls };
+          seed.providers[0].protocol='opencode-acp'; VekAgentPanel.update(seed); await click('Model');
+          const discoveryOnly=calls.at(-1).name==='agents:threads:discover-models';
+          seed.threads.at(-1).nativeCatalog={observedAt:new Date().toISOString(),models:[{id:'fixture/b',name:'Observed model B'}]}; VekAgentPanel.update(seed);await click('Model');
+          const model=document.querySelector('[data-focus="editor-model"]'); const observedModels=[...model.options].map(x=>x.textContent);model.value='fixture/b';model.oninput();await document.querySelector('.va-dialog').onsubmit({preventDefault(){}});
+          seed.threads.at(-1).runs=[{status:'running',approvals:[{id:'permission',status:'pending',title:'No once option',canAccept:false}]}];VekAgentPanel.update(seed);const cannotAccept=button('Approve this request').disabled;
+          seed.threads.at(-1).status='discovering';VekAgentPanel.update(seed);const discoveryBusy=button('Discovering models…').disabled&&document.querySelector('.va-composer textarea').disabled&&document.body.textContent.includes('No prompt is sent.');
+          return { literal, draft, draftValue, noAutoSend, memoryVisible, changedBranchPreview, importedActivity, discoveryOnly,observedModels,cannotAccept,discoveryBusy,calls };
         }.toString())}+')()');
-        assert.equal(result.literal,true);assert.equal(result.draft,true);assert.equal(result.draftValue,'Voice transcription draft');assert.equal(result.noAutoSend,true);assert.equal(result.memoryVisible,true);assert.equal(result.changedBranchPreview,true);assert.equal(result.importedActivity,true);
+        assert.equal(result.literal,true);assert.equal(result.draft,true);assert.equal(result.draftValue,'Voice transcription draft');assert.equal(result.noAutoSend,true);assert.equal(result.memoryVisible,true);assert.equal(result.changedBranchPreview,true);assert.equal(result.importedActivity,true);assert.equal(result.discoveryOnly,true);assert.deepEqual(result.observedModels,['Keep current agent model','Observed model B']);assert.equal(result.cannotAccept,true);assert.equal(result.discoveryBusy,true);assert(result.calls.some(x=>x.name==='agents:threads:model'&&x.payload.model==='fixture/b'));
         for(const action of ['agents:file:claude:preview','agents:claude:branch','agents:claude:import','agents:threads:pin','agents:file:export','agents:file:import','agents:files:attach','agents:files:open','agents:attachments:remove','agents:attachments:restore','agents:threads:resend','agents:proposals:accept','agents:automations:create'])assert(result.calls.some(call=>call.name===action),action);
         assert(result.calls.some(call=>call.name==='agents:file:export'&&call.payload.metadataOnly===true));
         const cron=result.calls.find(call=>call.name==='agents:automations:create');assert.equal(cron.payload.kind,'cron');assert.equal(cron.payload.timeZone,'UTC');

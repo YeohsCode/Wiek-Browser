@@ -1,0 +1,19 @@
+Cloning into 'references/codex/source-0.142.0'...
+Note: switching to '3a76f3ac68c8949d1cac6ea769b6ec7b8953a415'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+Updating files:   6% (2/32)Updating files:   9% (3/32)Updating files:  12% (4/32)Updating files:  15% (5/32)Updating files:  18% (6/32)Updating files:  21% (7/32)Updating files:  25% (8/32)Updating files:  28% (9/32)Updating files:  31% (10/32)Updating files:  34% (11/32)Updating files:  37% (12/32)Updating files:  40% (13/32)Updating files:  43% (14/32)Updating files:  46% (15/32)Updating files:  50% (16/32)Updating files:  53% (17/32)Updating files:  56% (18/32)Updating files:  59% (19/32)Updating files:  62% (20/32)Updating files:  65% (21/32)Updating files:  68% (22/32)Updating files:  71% (23/32)Updating files:  75% (24/32)Updating files:  78% (25/32)Updating files:  81% (26/32)Updating files:  84% (27/32)Updating files:  87% (28/32)Updating files:  90% (29/32)Updating files:  93% (30/32)Updating files:  96% (31/32)Updating files: 100% (32/32)Updating files: 100% (32/32), done.

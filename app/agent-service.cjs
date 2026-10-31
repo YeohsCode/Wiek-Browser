@@ -4,13 +4,13 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
 const { randomUUID, createHash } = require('node:crypto');
-const {StringDecoder}=require('node:string_decoder');
 const { claudeLaunch, connectClaude } = require('./claude-session.cjs');
 const { readHistory, parseHistory, selectBranch } = require('./claude-history.cjs');
 const { copyClaudeActivity } = require('./claude-events.cjs');
 const { connectAcp, acpAttachments } = require('./acp-session.cjs');
-const {connectCodexDiscovery,readCodexCatalogue,validateCodexModel} = require('./codex-protocol.cjs');
-const {parseCodexHistory} = require('./codex-history.cjs');
+const {connectCodexDiscovery,validateCodexModel} = require('./codex-protocol.cjs');
+const {parseCodexHistory,copyCodexReplay} = require('./codex-history.cjs');
+const {connectCodexSession}=require('./codex-session.cjs');
 
 const now = () => new Date().toISOString();
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -395,82 +395,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       const text = thread.nativeThreadId ? `${context.promptPrefix ? context.promptPrefix + '\n\n' : ''}${prompt}` : (context.promptPrefix ? context.promptPrefix + '\n\n' : '') + history;
       connectClaude({ child, launch: claude, active, run, thread, project, text, consume, publish: publishSoon, killTree, onSession: () => { thread.nativeSessionBinding = nativeBinding; } });
     } else if (provider.protocol === 'codex-app-server') {
-      let buffer = '', sequence = 0, acceptEvents = false, selectedNativeModel; const decoder = new StringDecoder('utf8');
-      const requests = new Map(), approvalIds = new Map(), streamedItems = new Set(), serverRequestIds = new Set();
-      const write = (data) => { if (!child.stdin.destroyed) child.stdin.write(JSON.stringify(data) + '\n'); };
-      const request = (method, params = {}) => new Promise((resolve, reject) => {
-        const id = ++sequence;
-        const timeout = setTimeout(() => { requests.delete(id); reject(fail(`Native provider request timed out: ${method}`, 'VEK_AGENT_PROTOCOL_TIMEOUT')); }, 15000);
-        timeout.unref?.(); requests.set(id, { resolve, reject, timeout }); write({ id, method, params });
-      });
-      active.native = { request, approvalIds, write, turnId: null, threadId: null };
-      const nativeFailure = (error) => { if(active.finalizing)return;run.error = error.message || String(error); killTree(child, 'SIGTERM'); };
-      child.stdout.on('data', (chunk) => {
-        buffer += decoder.write(chunk);
-        let newline;
-        while ((newline = buffer.indexOf('\n')) >= 0) {
-          const line = buffer.slice(0, newline); buffer = buffer.slice(newline + 1); if(Buffer.byteLength(line)>4*1024*1024)return nativeFailure(fail('Native provider frame exceeds 4 MiB')); if (!line.trim()) continue;
-          let event; try { event = JSON.parse(line); } catch { nativeFailure(fail('Native provider emitted invalid JSON')); continue; }
-          if(!event||typeof event!=='object'||Array.isArray(event)){nativeFailure(fail('Native provider emitted an invalid object'));continue;}
-          if (event.id !== undefined && !event.method) {
-            const pending = requests.get(event.id); if (!pending) continue;
-            clearTimeout(pending.timeout); requests.delete(event.id);
-            if (event.error) pending.reject(fail(event.error.message || 'Native provider request failed', 'VEK_AGENT_PROTOCOL_ERROR')); else pending.resolve(event.result);
-            continue;
-          }
-          const params = event.params || {};
-          if(params.threadId !== undefined && active.native.threadId && params.threadId !== active.native.threadId) { nativeFailure(fail('Native provider event belongs to a different thread')); continue; }
-          if(!acceptEvents) { if(event.id!==undefined&&event.method)write({id:event.id,error:{code:-32601,message:'No native turn is active'}});continue; }
-          if (event.id !== undefined && event.method) {
-            if(serverRequestIds.has(event.id)||serverRequestIds.size>=10000){nativeFailure(fail('Native provider repeated or exceeded server request identities'));continue;}serverRequestIds.add(event.id);
-            if((run.approvals?.length||0)>=64){nativeFailure(fail('Native provider exceeded permission request limit'));continue;}
-            if (['item/commandExecution/requestApproval', 'item/fileChange/requestApproval'].includes(event.method)) {
-              const approvalId = randomUUID(); approvalIds.set(approvalId, event.id); run.approvals ||= [];
-              run.approvals.push({ id: approvalId, kind: event.method.includes('commandExecution') ? 'command' : 'file-change', title: String(params.reason || event.method).slice(0, 2048), command: typeof params.command === 'string' ? params.command.slice(0, 8192) : Array.isArray(params.command) ? params.command.join(' ').slice(0, 8192) : '', cwd: String(params.cwd || project.path).slice(0, 4096), status: 'pending', createdAt: now() }); publishSoon();
-            } else write({ id: event.id, error: { code: -32601, message: 'This native client does not support that server request' } });
-            continue;
-          }
-          if (event.method === 'turn/started') { active.native.turnId = params.turn?.id || active.native.turnId; run.nativeTurnId=active.native.turnId; }
-          if (event.method === 'item/agentMessage/delta' && typeof params.delta === 'string') { streamedItems.add(params.itemId); consume('stdout', Buffer.from(params.delta)); }
-          if (event.method === 'item/completed' && params.item?.type === 'agentMessage' && !streamedItems.has(params.item.id) && typeof params.item.text === 'string') { streamedItems.add(params.item.id); consume('stdout', Buffer.from(params.item.text)); }
-          if (event.method === 'thread/tokenUsage/updated') {
-            const usage = params.tokenUsage?.last;
-            if (usage && ['inputTokens', 'outputTokens'].every((key) => Number.isSafeInteger(usage[key]) && usage[key] >= 0)) { run.usage = { inputTokens: usage.inputTokens, outputTokens: usage.outputTokens, ...(Number.isSafeInteger(usage.cachedInputTokens) ? { cachedInputTokens: usage.cachedInputTokens } : {}), source: 'native-provider-event' }; publishSoon(); }
-          }
-          if (event.method === 'turn/completed') {
-            const status = params.turn?.status;
-            if (!['completed','failed','interrupted'].includes(status)) { nativeFailure(fail('Native provider turn ended without a recognized status')); continue; }
-            if (status === 'failed') run.error = params.turn?.error?.message || 'Native provider turn failed';
-            if (status === 'interrupted') active.stopReason ||= 'stopped';
-            for (const approval of run.approvals || []) if (approval.status === 'pending') approval.status = 'expired';
-            child.stdin.end(); active.native.completed = true;
-            active.native.exitTimer = setTimeout(() => killTree(child, 'SIGTERM'), 1000); active.native.exitTimer.unref?.();
-          }
-        }
-        if(Buffer.byteLength(buffer)>4*1024*1024)nativeFailure(fail('Native provider frame exceeds 4 MiB'));
-      });
-      child.on('close', () => { clearTimeout(active.native.exitTimer); for (const pending of requests.values()) { clearTimeout(pending.timeout); pending.reject(fail('Native provider disconnected')); } requests.clear(); });
-      active.native.ready = (async () => {
-        await request('initialize', { clientInfo: { name: 'vek_browser', title: 'Vek Browser', version: require('../package.json').version }, capabilities: { experimentalApi: false } });
-        write({ method: 'initialized', params: {} });
-        if (active.stopReason) return;
-        if (thread.nativeCatalog?.source === 'codex-model-list' || thread.reasoningEffort) { thread.nativeCatalog = await readCodexCatalogue(request); selectedNativeModel = validateCodexModel(thread, thread.nativeCatalog, attachments); publishSoon(); }
-        if (active.stopReason) return;
-        const resumed = !!thread.nativeThreadId;
-        const selectedModel = thread.model || selectedNativeModel?.id;
-        const response = await request(resumed ? 'thread/resume' : 'thread/start', resumed ? { threadId: thread.nativeThreadId } : { cwd: project.path, sandbox: 'read-only', approvalPolicy: 'on-request', ...(selectedModel ? { model: selectedModel } : {}) });
-        if (active.stopReason) return;
-        const nativeThreadId = response?.thread?.id;
-        if (typeof nativeThreadId !== 'string' || !nativeThreadId || nativeThreadId.length > 256) throw fail('Native provider did not return a thread id');
-        if (resumed && nativeThreadId !== thread.nativeThreadId) throw fail('Native provider resumed a different thread');
-        thread.nativeThreadId = nativeThreadId; thread.nativeSessionBinding = nativeBinding; active.native.threadId = nativeThreadId; run.nativeThreadId=nativeThreadId;
-        const text = resumed ? `${context.promptPrefix ? context.promptPrefix + '\n\n' : ''}${prompt}${attachmentContext}` : transcript;
-        const input = [{ type: 'text', text }, ...attachments.filter((item) => item.mimeType.startsWith('image/')).map((item) => ({ type: 'localImage', path: item.storedPath }))];
-        acceptEvents = true;
-        const turn = await request('turn/start', { threadId: nativeThreadId, input, ...(selectedModel ? { model: selectedModel } : {}), ...(thread.reasoningEffort ? { effort: thread.reasoningEffort } : {}) });
-        active.native.turnId = turn?.turn?.id || active.native.turnId; run.nativeTurnId=active.native.turnId; publishSoon();
-      })();
-      active.native.ready.catch(nativeFailure);
+      connectCodexSession({child,active,run,thread,project,attachments,text:{full:transcript,current:(context.promptPrefix?context.promptPrefix+'\n\n':'')+prompt+attachmentContext},consume,publish:publishSoon,killTree,onSession:()=>{thread.nativeSessionBinding=nativeBinding;}});
     } else child.stdout.on('data', (chunk) => consume('stdout', chunk));
     child.stderr.on('data', (chunk) => consume('stderr', chunk));
     child.stdin.on('error', () => {});
@@ -656,7 +581,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         if (item.codexHistory) {
           const origin=item.codexHistory;
           if(typeof origin.sourceName!=='string'||!/^[a-f0-9]{64}$/.test(origin.sha256)||typeof origin.sessionId!=='string'||origin.sessionId.length>256)throw fail('Invalid imported Codex history provenance');
-          thread.codexHistory={sourceName:origin.sourceName.slice(0,256),sha256:origin.sha256,sessionId:origin.sessionId,importedAt:now(),activity:copyClaudeActivity(origin.activity)};
+          thread.codexHistory={sourceName:origin.sourceName.slice(0,256),sha256:origin.sha256,sessionId:origin.sessionId,importedAt:now(),...(origin.replay?{replay:copyCodexReplay(origin.replay)}:{}),activity:copyClaudeActivity(origin.activity)};
         }
         if (item.claudeHistory) {
           const origin = item.claudeHistory;
@@ -754,6 +679,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         if (!['accept', 'decline', 'cancel'].includes(payload.decision)) throw fail('Approval decision must be accept, decline, or cancel');
         if (active.acp) { active.acp.approve(approval.id, payload.decision); if (payload.decision === 'cancel') await stopThread(id); break; }
         if (active.claude) { active.claude.approve(approval.id, payload.decision); if (payload.decision === 'cancel') await stopThread(id); break; }
+        if(active.native.approve){active.native.approve(approval.id,payload.decision);if(payload.decision==='cancel')await stopThread(id);break;}
         active.native.write({ id: active.native.approvalIds.get(approval.id), result: { decision: payload.decision } }); active.native.approvalIds.delete(approval.id);
         approval.status = payload.decision === 'accept' ? 'accepted' : payload.decision === 'decline' ? 'declined' : 'cancelled'; approval.decidedAt = now(); break;
       }
@@ -778,7 +704,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         if(codexPreviews.size>=4)throw fail('Close an existing Codex import preview first (maximum four)');
         const source=readHistory(payload.path,'Codex'),parsed=parseCodexHistory(source.data),token=randomUUID(),expiresAt=Date.now()+15*60*1000;
         codexPreviews.set(token,{path:payload.path,...source,data:undefined,parsed,expiresAt});
-        return {...snapshot(),codexImportPreview:{token,sourceName:source.sourceName,sha256:source.fingerprint,sessionId:parsed.sessionId,messageCount:parsed.messages.length,skippedEntries:parsed.skipped,contextEntries:parsed.contextEntries,attachmentsOmitted:parsed.attachmentsOmitted,previewText:parsed.messages.map(e=>`${e.role}: ${e.content}`).join('\n\n').slice(0,12000),expiresAt:new Date(expiresAt).toISOString()}};
+        return {...snapshot(),codexImportPreview:{token,sourceName:source.sourceName,sha256:source.fingerprint,sessionId:parsed.sessionId,messageCount:parsed.messages.length,replay:parsed.replay,skippedEntries:parsed.skipped,contextEntries:parsed.contextEntries,attachmentsOmitted:parsed.attachmentsOmitted,previewText:parsed.messages.map(e=>`${e.role}: ${e.content}`).join('\n\n').slice(0,12000),expiresAt:new Date(expiresAt).toISOString()}};
       }
       case 'agents:codex:discard': codexPreviews.delete(payload.token); break;
       case 'agents:codex:import': {
@@ -787,7 +713,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         const source=readHistory(preview.path,'Codex');if(source.identity!==preview.identity||source.fingerprint!==preview.fingerprint)throw fail('Codex history changed since preview; select the file again');
         const chosen=preview.parsed;
         const imported=newThread(payload.projectId,payload.providerId,payload.title||`Codex: ${preview.sourceName}`,{messages:[message('system','Imported Codex visible transcript. Continuing creates a new provider session with copied text; source session IDs, instructions, tools and paths do not grant execution or file recovery authority.'),...chosen.messages.map(e=>({...message(e.role,e.content),...(e.createdAt?{createdAt:e.createdAt}:{})}))]});
-        imported.codexHistory={sourceName:preview.sourceName,sha256:preview.fingerprint,sessionId:chosen.sessionId,sourceSessionId:chosen.sourceSessionId,importedAt:now(),skippedEntries:chosen.skipped,contextEntries:chosen.contextEntries,attachmentsOmitted:chosen.attachmentsOmitted,activity:chosen.activity};
+        imported.codexHistory={sourceName:preview.sourceName,sha256:preview.fingerprint,sessionId:chosen.sessionId,sourceSessionId:chosen.sourceSessionId,importedAt:now(),skippedEntries:chosen.skipped,contextEntries:chosen.contextEntries,attachmentsOmitted:chosen.attachmentsOmitted,replay:chosen.replay,activity:chosen.activity};
         state.threads.push(imported);codexPreviews.delete(payload.token);publish();return {...snapshot(),importedThreadId:imported.id};
       }
       case 'agents:claude:import': {

@@ -1,0 +1,95 @@
+{
+  "generatedAt": "2026-10-31T15:30:40.095Z",
+  "cli": "codex-cli 0.142.0",
+  "cliSha256": "b60ad82e66720a84830460b77e00b207536c38e536f64fb5a6af86bcae3a3bff",
+  "isolatedHome": true,
+  "inheritedAuthentication": false,
+  "turnStartRequests": 0,
+  "modelCalls": 0,
+  "limitations": "Injected raw history does not create display turns. Empty thread/read results are not a semantic replay oracle; this probe establishes an actual rollback marker and decoder acceptance only. Source-matched semantics and Vek fixture tests are separate evidence.",
+  "before": [],
+  "afterRollback": [],
+  "rollbackRecords": [
+    {
+      "timestamp": "2026-10-31T15:30:40.254Z",
+      "type": "event_msg",
+      "payload": {
+        "type": "token_count",
+        "info": {
+          "total_token_usage": {
+            "input_tokens": 0,
+            "cached_input_tokens": 0,
+            "output_tokens": 0,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 0
+          },
+          "last_token_usage": {
+            "input_tokens": 0,
+            "cached_input_tokens": 0,
+            "output_tokens": 0,
+            "reasoning_output_tokens": 0,
+            "total_tokens": 8188
+          },
+          "model_context_window": 258400
+        },
+        "rate_limits": null
+      }
+    },
+    {
+      "timestamp": "2026-10-31T15:30:40.255Z",
+      "type": "event_msg",
+      "payload": {
+        "type": "thread_rolled_back",
+        "num_turns": 1
+      }
+    }
+  ],
+  "compactions": [
+    {
+      "name": "replacement",
+      "payload": {
+        "message": "Summary text",
+        "replacement_history": [
+          {
+            "type": "message",
+            "role": "user",
+            "content": [
+              {
+                "type": "input_text",
+                "text": "Retained question"
+              }
+            ]
+          },
+          {
+            "type": "message",
+            "role": "assistant",
+            "content": [
+              {
+                "type": "output_text",
+                "text": "Retained summary"
+              }
+            ]
+          }
+        ]
+      },
+      "read": [
+        {
+          "id": "rollout-8",
+          "items": []
+        }
+      ]
+    },
+    {
+      "name": "legacy",
+      "payload": {
+        "message": "Legacy summary"
+      },
+      "read": [
+        {
+          "id": "rollout-8",
+          "items": []
+        }
+      ]
+    }
+  ]
+}

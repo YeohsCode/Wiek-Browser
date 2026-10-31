@@ -1,0 +1,28 @@
+{
+  "version": "codex-cli 0.142.0",
+  "tag": "rust-v0.142.0",
+  "sourceCommit": "3a76f3ac68c8949d1cac6ea769b6ec7b8953a415",
+  "origin": "Official open-source Codex, only format/semantic inspection; independent JS implementation. Full checkout remains ignored.",
+  "files": [
+    {
+      "file": "codex-rs/protocol/src/protocol.rs",
+      "sha256": "c29ad8bc80b3c924606bed2e329baa5897901c493f0c239b1d1ed9e348a62224"
+    },
+    {
+      "file": "codex-rs/core/src/session/rollout_reconstruction.rs",
+      "sha256": "fe215813e0eff9e4b4ed9370fe2b18f34f0d43192d9b4e3b3f616c7e2d5429d9"
+    },
+    {
+      "file": "codex-rs/core/src/context_manager/history.rs",
+      "sha256": "b2dacfe7f3ab5732526a1218702ea77081186714c8d5d6dd02a7c6752d63eafe"
+    },
+    {
+      "file": "codex-rs/core/src/compact.rs",
+      "sha256": "9d4517c14e4536d92849fbe71efa437a4090ccf7f9a2e2c3c7390b0359102201"
+    },
+    {
+      "file": "codex-rs/core/src/context/contextual_user_message.rs",
+      "sha256": "e836617bfd3efe060e2b7556360c7491aa0ff655fb807d1f2d46289a47ac98fe"
+    }
+  ]
+}

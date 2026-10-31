@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-31T13:13:53.105721+00:00",
-  "version": "0.8.0",
+  "generatedAt": "2026-10-31T15:38:11.215464+00:00",
+  "version": "0.9.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -30,7 +30,7 @@
           "notRun": 0,
           "assertions": 1248
         },
-        "wallTimeMs": 153394,
+        "wallTimeMs": 152625,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
       }
@@ -43,14 +43,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 223,
+    "pass": 244,
     "fail": 0,
-    "log": "v080-service-tests.log"
+    "log": "v090-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 92,
+    "pass": 99,
     "fail": 0,
-    "log": "v080-package-workbench.log"
+    "log": "v090-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -64,7 +64,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 148,
+    "sourceFilesChecked": 150,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -87,17 +87,16 @@
   },
   "completeProductParity": false,
   "newCapabilities": [
-    "Codex paginated native model/reasoning-effort/input capability catalogue discovery without threads or turns",
-    "Fresh capability validation and selected reasoning effort on turn/start",
-    "Explicit selected Codex rollout visible transcript preview/import with inode/hash recheck",
-    "No source session, executable configuration, path or checkpoint authority on import",
-    "Bounded imported function-call/result evidence and generated context/reasoning exclusion",
-    "Codex native UTF-8 streaming, replay isolation and invalid status/thread protection",
-    "Codex empty model selection explicitly sends the observed default used by capability validation"
+    "Codex effective visible context after replacement/legacy compaction and instruction-boundary rollback",
+    "Replay counts and bounded safe provenance in preview/UI/archive; no source session or filesystem authority",
+    "Live authoritative command/patch/MCP/dynamic results and observed child lifecycle/messages",
+    "Root and child thread/turn scope, bounded pre-turn event buffer, no child message mixing",
+    "Active child single-use permissions, stale turn and server-resolved approval expiration",
+    "Late tool deltas cannot overwrite authoritative final results; unresolved/interrupted and truncation remain explicit"
   ],
   "remainingGaps": [
     "Five other native provider protocols, Claude model catalogue, source native session/history migration and paid generation validation",
-    "Codex compacted/rolled-back rollout import and unified real-time tool/subagent activity",
+    "Codex encrypted-only/unknown history edits, exact native token/window context replay, cross-file child history and native source resume/fork remain unsupported",
     "Claude multi-file child history and post-result background task lifecycle",
     "OpenCode external history/native fork/background children and Vek MCP injection",
     "Complete Chrome/Safari profile/web storage/extensions migration",
@@ -223,9 +222,9 @@
     "log": "v080-service-tests.log"
   },
   "codexFocusedTests": {
-    "pass": 26,
+    "pass": 47,
     "fail": 0,
-    "log": "v080-codex-tests.log"
+    "log": "v090-codex-tests.log"
   },
   "codexReadiness": {
     "version": "codex-cli 0.142.0",
@@ -253,5 +252,30 @@
     }
   ],
   "observedFailures": [],
-  "validationOrderNote": "Full 69-case SDK run preceded the final provider-only default model fix. That fix was revalidated with the full local and packaged workbench suites. Browser bridge and SDK stayed unchanged; final package identities are verified."
+  "validationOrderNote": "Full 69-case SDK run passed before an API-document-only rebuild. Runtime source stayed unchanged; final 150 packaged source identities match. New panel replay count assertions passed the 47-case focused run.",
+  "codexReplayActivityTests": {
+    "newTests": 21,
+    "fixtureOnly": true,
+    "modelCalls": 0,
+    "log": "v090-service-tests.log"
+  },
+  "codexReplayReadiness": {
+    "version": "codex-cli 0.142.0",
+    "modelCalls": 0,
+    "turnStartRequests": 0,
+    "inheritedAuthentication": false,
+    "report": "v090-history-oracle.json",
+    "sourceIdentities": "v090-codex-source-identities.json",
+    "semanticOracle": false,
+    "note": "Actual rollback marker and synthetic decoder acceptance only; source-matched semantics and fixture tests are separate evidence."
+  },
+  "codexReplayNativeUi": {
+    "report": "v090-native-ui-qa.md",
+    "wireCheck": "v090-native-ui-check.json",
+    "realFilePicker": true,
+    "fixtureOnly": true,
+    "modelCalls": 0,
+    "copiedEffectiveTextContinued": true,
+    "normalAppVersion": "0.9.0"
+  }
 }

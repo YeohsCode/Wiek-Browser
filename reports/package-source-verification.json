@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-31T13:13:53.332Z",
-  "version": "0.8.0",
+  "generatedAt": "2026-10-31T15:34:53.191Z",
+  "version": "0.9.0",
   "versionMatches": true,
-  "checkedFiles": 148,
+  "checkedFiles": 150,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -29,12 +29,12 @@
     },
     {
       "file": "app/agent-panel.js",
-      "sha256": "1e25a9892b023bf7da2f5625da8093a64ed500f94c315bdba105c334a69beb8d",
+      "sha256": "362c91c4e9d70a7b4ca0204fa903cd775d06c1e6ceda9b91e6e8160be489b0d5",
       "matches": true
     },
     {
       "file": "app/agent-service.cjs",
-      "sha256": "0b421da168f4cc47b0209486ed25b1d7621d4dfa35992a12ad2020cbe3af65ee",
+      "sha256": "5bb949964130118df5ef31cde1a28305e6dd482bca74621c2a069faad1bd897a",
       "matches": true
     },
     {
@@ -83,13 +83,23 @@
       "matches": true
     },
     {
+      "file": "app/codex-events.cjs",
+      "sha256": "7d855de1c432623612e04bd35a20256b471b188164c1135e1f45c7caf45d4820",
+      "matches": true
+    },
+    {
       "file": "app/codex-history.cjs",
-      "sha256": "d04d1ab1ca25a8af68b062445eb870e0b6f24505dabd16c56ceea763ccd6d606",
+      "sha256": "ed78cebfedab6c069fb7c453c49ee7cededb4f448c868a69884b4b010acb00e2",
       "matches": true
     },
     {
       "file": "app/codex-protocol.cjs",
       "sha256": "fffe57f4be67f3d05fab57ad9d5cc6dcca31a32505078a3eeb120d75f67e3308",
+      "matches": true
+    },
+    {
+      "file": "app/codex-session.cjs",
+      "sha256": "9e71d21f382c207be53329d0a4bfa462ee82e62cfb4c9b5945e504902fdf7a2d",
       "matches": true
     },
     {
@@ -739,7 +749,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "e9fe03c46b3fc5bbef3c6920b4247f957444d86316b3f5abf839e085676c7170",
+      "sha256": "91fdf9dff64468d3e59ed0263e592a60b11f3c340c1f871c93273ade4bc81a71",
       "matches": true
     },
     {

@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.8.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8增量和当前报告为准。
+当前版本 **0.9.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -308,3 +308,9 @@ Codex原生模型发现只initialize/initialized/model/list，不创建thread/tu
 所选单个Codex rollout经过有界fd/UTF-8/JSON/session与duplicate id检查、预览token、inode/hash复核，复制受支持可见user/assistant文字及function-call结果证据。排除生成context、system/developer/reasoning、event重复文本；图片留不可用占位。导入0runs/无native权，继续才建立新owned session；压缩/回滚/未知record布局显式拒绝，不能称完整CLI原生迁移。
 
 新增21项目录/历史测试，本地223/223、宿主92/92。官方CLI0.142.0隔离HOME/CODEX_HOME发现5项目录、生成两条合成raw历史并成功解析，未发送turn/start、0模型调用。打包链路验证真实edit/diff/restore。当前原生UI/SDK完整结果以 [RESULTS](../reports/RESULTS.md) 为准。仍缺Codex复杂历史与实时活动、Claude模型目录、5种其他原生provider及既有OS/MCP/迁移/benchmark范围；全产品parity仍false。[设计](codex-capabilities-history.md)。
+
+## 0.9.0 当前增量：Codex有效历史与实时活动
+
+支持replacement/有界legacy压缩、按指令边界回滚，剔除被替换和删除的消息/工具；UI与archive显示计数，继续创建新owned session。加密且无明文replacement、未知编辑或超限旧tail仍拒绝。实时原生命令/patch/MCP/dynamic结果、耗时、实际子生命周期/独立消息及子turn单次权限已接入；最终结果不被晚到delta覆盖，过时子审批不能发送。200工具/100子Agent/200子消息/256KiB共享文字限制明确显示。
+
+新增21项回归，本地244/244；官方CLI0.142.0无模型探针仅证明实际rollback marker和合成decoder接受，源码语义与fixture验证另行记录。未完成源CLI原生迁移/隐藏context/window/token等价、后台子任务或完整产品parity。打包/SDK/原生UI结果见 [RESULTS](../reports/RESULTS.md)，设计见 [codex-replay-activity](codex-replay-activity.md)。下一步CLI关闭等待、Claude目录与其余五种原生provider。

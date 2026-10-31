@@ -82,7 +82,7 @@
     if (!snapshot.providers.length) { view='providers';render();return; }
     const result=await action('agents:file:codex:preview',{}),preview=result?.codexImportPreview;if(!preview)return;
     openEditor('Import Codex conversation',[
-      {key:'notice',type:'notice',label:`${preview.sourceName} · ${preview.messageCount} messages · ${preview.contextEntries} generated context entries excluded · ${preview.attachmentsOmitted} attachments omitted. Copy visible text into a new session; source tools and paths are display evidence only. Compacted or rolled-back files are unsupported.`},
+      {key:'notice',type:'notice',label:`${preview.sourceName} · ${preview.messageCount} messages · ${preview.contextEntries} generated context entries excluded · ${preview.attachmentsOmitted} attachments omitted. Copy visible text into a new session; source tools and paths are display evidence only. ${preview.replay?.compactions||0} compactions and ${preview.replay?.rollbackEvents||0} rollback markers applied to the effective visible context. Encrypted-only or unknown edit layouts remain unsupported.`},
       {key:'projectId',label:'Import into project',type:'select',options:snapshot.projects.map(p=>[p.id,p.name]),value:snapshot.projects[0].id},
       {key:'providerId',label:'Agent for future prompts',type:'select',options:snapshot.providers.map(p=>[p.id,p.name]),value:snapshot.providers.find(p=>p.protocol==='codex-app-server')?.id||snapshot.providers[0].id},
       {key:'title',label:'Conversation title',value:`Codex: ${preview.sourceName}`},
@@ -317,6 +317,7 @@
     if (t.claudeHistory || t.codexHistory || runs.some(run => run.toolEvents?.length || run.subagents?.length)) {
       const activity = make('details', '', 'va-run-details va-native-history'); activity.append(make('summary', 'Native activity history'));
       if (t.codexHistory) activity.append(make('p',`Imported Codex history · ${t.codexHistory.sourceName} · copied transcript, new session on continuation`,'va-hint'),nativeActivity(t.codexHistory.activity||{},'Imported Codex activity'));
+      if(t.codexHistory?.replay)activity.append(make('p',`${t.codexHistory.replay.compactions} compactions · ${t.codexHistory.replay.rollbackEvents} rollbacks · effective visible context`,'va-hint'));
       if (t.claudeHistory) { const source = t.claudeHistory; activity.append(make('p', `Imported Claude history · ${source.sourceName} · copied transcript, new session on continuation`, 'va-hint'), nativeActivity(source.activity || {}, 'Imported Claude activity')); }
       for (const [index, run] of runs.entries()) if (run.toolEvents?.length || run.subagents?.length) activity.append(nativeActivity(run, `Turn ${index + 1} native activity`));
       main.append(activity);

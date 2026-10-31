@@ -1,0 +1,2 @@
+
+Installer intentionally stopped after public SDK type declarations were extracted; optional 0.3.316 native runtime remained incomplete and was never used as readiness evidence. Complete official CLI 2.1.31 was downloaded separately and initialize-only probe succeeded.

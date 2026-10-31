@@ -57,6 +57,18 @@ try {
   const turn=thread.runs.at(-1);check(turn.fileChanges?.status==='complete'&&turn.fileChanges.before&&turn.fileChanges.after,'host binds actual provider run to both snapshots');
   const turnDiff=await action('agents:changes:diff',{id:threadId,runId:turn.id});check(turnDiff.changes.some(row=>row.path==='note.txt')&&turnDiff.worktreeDiff.includes('provider turn edit'),'host exposes immutable turn file diff');
   const turnPreview=await action('agents:changes:preview',{id:threadId,runId:turn.id});const restoredTurn=await action('agents:changes:restore',{id:threadId,runId:turn.id,expectedState:turnPreview.expectedState,confirm:true});check(await fs.readFile(path.join(directory,'note.txt'),'utf8')==='after\n','host turn restore actually restores pre-provider files');check(Boolean(restoredTurn.backupCheckpoint.id),'host turn restore returns a protection checkpoint');
+  // A real stream-json peer exercises the packaged Claude transport, file
+  // snapshots and resume path without authentication or a model request.
+  snapshot=await action('agents:providers:configure',{name:'Claude protocol fixture',command:process.execPath,args:[path.resolve('tests/fixtures/claude-peer.cjs'),'--vek-audit='+path.join(directory,'claude-audit.jsonl')],inputMode:'stdin',protocol:'claude-stream-json'});
+  const claudeProviderId=snapshot.providers.at(-1).id;
+  snapshot=await action('agents:threads:create',{projectId,providerId:claudeProviderId,title:'Claude host fixture',model:'fixture-only'});const claudeId=snapshot.threads.at(-1).id;
+  await action('agents:threads:prompt',{id:claudeId,prompt:'[edit-file] Local protocol test'});const native=await waitThread(claudeId),nativeRun=native.runs.at(-1);
+  check(native.status==='completed'&&native.nativeThreadId===nativeRun.nativeThreadId,'packaged Claude stream initializes and completes the actual owned session');
+  check(nativeRun.usage?.inputTokens===20&&nativeRun.toolEvents?.[0]?.name==='Read','packaged Claude transport records actual usage and tools');
+  check(nativeRun.fileChanges?.status==='complete'&&await fs.readFile(path.join(directory,'note.txt'),'utf8')==='Claude protocol fixture edit\n','Claude execution participates in before/after snapshots');
+  const nativeDiff=await action('agents:changes:diff',{id:claudeId,runId:nativeRun.id});check(nativeDiff.worktreeDiff.includes('Claude protocol fixture edit'),'Claude turn file diff contains real provider edits');
+  const nativePreview=await action('agents:changes:preview',{id:claudeId,runId:nativeRun.id});await action('agents:changes:restore',{id:claudeId,runId:nativeRun.id,expectedState:nativePreview.expectedState,confirm:true});check(await fs.readFile(path.join(directory,'note.txt'),'utf8')==='after\n','Claude turn file restore recovers the real pre-turn bytes');
+  await action('agents:threads:prompt',{id:claudeId,prompt:'Resume this test session'});const resumed=await waitThread(claudeId);check(resumed.status==='completed'&&resumed.nativeThreadId===native.nativeThreadId&&resumed.runs.length===2,'packaged Claude second turn resumes its persisted session');
   await action('agents:threads:pin',{id:threadId});await action('agents:threads:archive',{id:threadId});thread=await action('agents:threads:read',{id:threadId});check(thread.pinned&&thread.archived,'thread organization persists');
   await action('agents:threads:unarchive',{id:threadId});
   const catalog=await action('catalog:list',{projectId});check(Array.isArray(catalog.entries),'installed instruction catalog available');

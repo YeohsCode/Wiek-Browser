@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-31T02:07:15.826690+00:00",
-  "version": "0.4.0",
+  "generatedAt": "2026-10-31T07:39:36.146551+00:00",
+  "version": "0.5.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -30,7 +30,7 @@
           "notRun": 0,
           "assertions": 1248
         },
-        "wallTimeMs": 153612,
+        "wallTimeMs": 154784,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
       }
@@ -43,14 +43,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 156,
+    "pass": 169,
     "fail": 0,
-    "log": "v040-service-tests.log"
+    "log": "v050-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 53,
+    "pass": 59,
     "fail": 0,
-    "log": "v040-package-workbench.log"
+    "log": "v050-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -64,7 +64,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 142,
+    "sourceFilesChecked": 143,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -75,14 +75,6 @@
       "platform": "darwin"
     },
     "sourceFilesCheckedIncludesAllSdkAndSkills": true
-  },
-  "uiQa": {
-    "log": "v040-native-ui-qa.md",
-    "realProviderFileAndIndexDiff": true,
-    "wrongNameBlocked": true,
-    "realConfirmedRestore": true,
-    "protectionCheckpoint": true,
-    "defaultUserDataAppVersion": "0.4.0"
   },
   "rea": {
     "daemon": "ev_0a7bdc68255ac1adb7db5fd967eaa355b6bbd1830efb7f12c750d8540dcbbee3",
@@ -95,14 +87,15 @@
   },
   "completeProductParity": false,
   "newCapabilities": [
-    "Project opt-in automatic before/after Agent turn snapshots",
-    "Generic/native thread-run-turn association with conservative crash recovery",
-    "Immutable per-turn and conversation-span worktree/index diffs",
-    "Explicit name-confirmed file restore with protection checkpoint",
-    "Project execution exclusion and restore leases"
+    "Opt-in Claude stream-json/control native sessions",
+    "Bound native session resume after restart with configuration/project identity",
+    "Request-scoped permissions, cancellation and conservative failure handling",
+    "Real image/PDF/text attachments and bounded native tool events",
+    "Main-loop usage and explicitly cumulative session cost estimates",
+    "Claude execution integrated with turn file snapshots, diffs and restore"
   ],
   "remainingGaps": [
-    "Other native provider protocols and paid generation validation",
+    "Claude native history import, complete tool/subagent results, six other native provider protocols and paid generation validation",
     "Complete Chrome/Safari profile/web storage/extensions migration",
     "Custom Chromium engine equivalence",
     "Linked worktrees, checkpoint retention and remote PR workflow",
@@ -116,6 +109,41 @@
     "pass": 11,
     "fail": 0,
     "log": "v040-turn-checkpoints.log",
-    "actualHostHardStop": true
+    "actualHostHardStop": true,
+    "includedInCurrentFullSuite": true
+  },
+  "previousTurnUiQa": {
+    "log": "v040-native-ui-qa.md",
+    "realProviderFileAndIndexDiff": true,
+    "wrongNameBlocked": true,
+    "realConfirmedRestore": true,
+    "protectionCheckpoint": true,
+    "defaultUserDataAppVersion": "0.4.0",
+    "note": "Historical 0.4 native restore UI; current full suite still exercises turn snapshots."
+  },
+  "uiQa": {
+    "log": "v050-native-ui-qa.md",
+    "realNativeApprovalUi": true,
+    "noAutomaticApproval": true,
+    "exactlyOneDeclineResponse": true,
+    "realToolsAndUsage": true,
+    "defaultUserDataAppVersion": "0.5.0"
+  },
+  "claudeProtocolTests": {
+    "pass": 13,
+    "fail": 0,
+    "log": "v050-claude-tests.log",
+    "modelCalls": 0,
+    "fixtureOnly": true
+  },
+  "claudeReadiness": {
+    "cliVersion": "2.1.31",
+    "initialize": true,
+    "isolatedHome": true,
+    "inheritedAuthentication": false,
+    "userMessages": 0,
+    "modelCalls": 0,
+    "report": "v050-claude-readiness.json",
+    "latestNativeRuntimeTested": false
   }
 }

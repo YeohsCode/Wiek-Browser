@@ -1,0 +1,45 @@
+✔ opt-in native provider performs initialize/start/delta/usage and resumes the actual returned thread id (455.263833ms)
+✔ native steering uses turn/steer within the same run and interrupt stops a real protocol process (326.38225ms)
+✔ native approval requests wait for an explicit limited decision and never auto-approve (355.552625ms)
+✔ a native disconnect without turn/completed is a failure rather than a fake successful reply (244.375375ms)
+✔ real child stdout/stderr, literal input, conversation and private atomic persistence (464.400542ms)
+✔ argv template passes one literal argument and never invokes a shell (257.918583ms)
+✔ stop, concurrency and overlap checks operate on actual provider processes (240.966583ms)
+✔ bounded output and failure status retain real diagnostics without invented replies (339.441917ms)
+✔ at schedule survives restart and executes exactly once while service is active (750.129042ms)
+✔ interval pause/resume/update/stop and overlap skipping do not queue duplicate work (2454.190792ms)
+✔ uncleanly persisted running state becomes interrupted and is never silently resumed (249.319333ms)
+✔ archive/pin/notes/markers/goals persist and branches have independent honest transcripts (393.667542ms)
+✔ edit/resend/rollback preserve revisions and never claim to undo project files (290.937875ms)
+✔ native JSON import is transactional, remaps ids, and cannot activate imported commands or schedules (256.871458ms)
+✔ UTC cron validates real calendar dates, weekday ranges and day/weekday OR semantics (28.859625ms)
+✔ heartbeat memory, run/stop limits, and proposals require explicit real-process execution (365.049125ms)
+✔ root-owned runContext injects only VEK namespace and a transient prompt prefix (494.100625ms)
+✔ model catalogue is user configured and usage comes only from actual structured output (228.729792ms)
+✔ multi-agent create/read/list/wait expose real parent/child process state with bounded waiting (209.583875ms)
+✔ plain CLI steering queues a next turn and stop cancels queued work honestly (625.45275ms)
+✔ handoff creates a destination with copied real context and does not pretend to transfer a native session (271.483959ms)
+✔ closing the service releases outstanding waiters and interrupts owned running children (184.332ms)
+✔ selected text/image files are copied privately, attached to actual prompts, detached recoverably and restored after restart (409.960583ms)
+✔ attachment type, 20 MiB size, ten-active count and transactional batch limits are real (233.070291ms)
+✔ native archives carry real attachment bytes, remap owned paths, and reject forged external attachment imports (209.22525ms)
+✔ archive total limits fail explicitly and metadata-only fallback never pretends omitted files exist (245.328875ms)
+✔ real provider turn records before/after, staged and worktree diff, explicit restore and protection (2971.092583ms)
+✔ failed provider changes are captured, and stale or cross-turn restore previews are refused (2289.863375ms)
+✔ stop and graceful shutdown wait for actual provider termination and snapshot finalization (1829.534875ms)
+✔ unsupported before capture prevents provider launch; disabled project preserves ordinary CLI behavior (321.671625ms)
+✔ after capture failure retains known before snapshot without claiming a complete diff (811.598917ms)
+✔ project concurrency, configuration and restore leases cannot overlap a protected turn (732.624292ms)
+✔ interrupted associations recover conservatively; import and fork do not acquire snapshot authority (1314.044958ms)
+✔ HEAD changes keep immutable diff available but prevent history-changing restoration (1282.862583ms)
+✔ stopping during before-capture never launches a provider and retains the known snapshot (579.453125ms)
+✔ native thread and turn IDs bind real wire events to immutable file snapshots once (1408.439917ms)
+✔ actual host-process hard stop recovers the known before snapshot without inventing after state (1116.927ms)
+ℹ tests 37
+ℹ suites 0
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14742.330916

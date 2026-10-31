@@ -89,12 +89,12 @@
       { key: 'command', label: 'Executable name or absolute path', required: true, placeholder: 'my-agent' },
       { key: 'args', label: 'Arguments as a JSON array', required: true, placeholder: '["exec"]' },
       { key: 'inputMode', label: 'How the CLI receives your prompt', type: 'select', options: [['stdin', 'Standard input'], ['argv', 'Replace {prompt} in an argument']], value: 'stdin' },
-      { key: 'protocol', label: 'Provider protocol', type: 'select', options: [['cli', 'Plain CLI process'], ['codex-app-server', 'Codex native JSON-RPC session (opt-in)']], value: 'cli' },
+      { key: 'protocol', label: 'Provider protocol', type: 'select', options: [['cli', 'Plain CLI process'], ['codex-app-server', 'Codex native JSON-RPC session (opt-in)'], ['claude-stream-json', 'Claude native streaming session (opt-in)']], value: 'cli' },
       { key: 'enabled', label: 'Enabled', type: 'select', options: [['true', 'Enabled'], ['false', 'Disabled']], value: 'true' },
       { key: 'models', label: 'Your model catalogue (comma separated)', placeholder: 'Optional model names verified by you' },
       { key: 'modelArgs', label: 'Model arguments as a JSON array', placeholder: '["--model","{model}"]', value: '[]' },
       { key: 'usageFormat', label: 'Usage reporting', type: 'select', options: [['', 'Unavailable / plain CLI output'], ['codex-jsonl', 'Actual Codex JSONL turn.completed usage events']], value: '' },
-      { key: 'notice', type: 'notice', label: 'This runs your installed CLI in the project folder. Use non-interactive arguments supported by that CLI. Authentication stays with the local agent.' },
+      { key: 'notice', type: 'notice', label: 'This runs your installed CLI in the project folder. Use non-interactive arguments supported by that CLI. Authentication stays with the local agent. Claude native mode adds its protocol flags: use an empty arguments array for the claude executable and empty model arguments. Claude follow-ups queue until the active turn finishes.' },
     ], values => {
       let args; try { args = JSON.parse(values.args); } catch { throw new Error('Arguments must be a JSON array of strings.'); }
       if (!Array.isArray(args) || args.some(value => typeof value !== 'string')) throw new Error('Arguments must be a JSON array of strings.');
@@ -249,6 +249,7 @@
       const history=make('details','','va-run-details');history.append(make('summary','Turn file snapshots'));
       for(const [index,run]of runs.entries())if(run.fileChanges){const changes=run.fileChanges,row=make('section','','va-turn-snapshot');row.append(make('strong',`Turn ${index+1} · ${run.status} · ${changes.status}`));if(changes.error)row.append(make('p',changes.error,'va-hint'));const actions=make('div','','va-actions');if(changes.before&&changes.after)actions.append(button('View file changes',()=>showFileChanges(t,run)));if(t.status!=='running'){if(changes.before)actions.append(button('Restore before…',()=>showFileChanges(t,run,'before')));if(changes.after)actions.append(button('Restore after…',()=>showFileChanges(t,run,'after')));}row.append(actions);history.append(row);}main.append(history);
     }
+    if (latest?.toolEvents?.length) { const tools = make('details', '', 'va-turn-tools'); tools.append(make('summary', `Native tools · ${latest.toolEvents.length}${latest.toolEventsTruncated ? '+' : ''}`)); for (const event of latest.toolEvents) { const row = make('details'); row.append(make('summary', event.name), make('pre', event.input)); tools.append(row); } main.append(tools); }
     for (const approval of latest?.approvals || []) if (approval.status === 'pending') {
       const card = make('section', '', 'va-approval'); card.append(make('strong', 'Local agent needs approval'), make('p', approval.title), make('pre', `${approval.cwd}\n${approval.command || approval.kind}`));
       const actions = make('div', '', 'va-actions'); for (const [decision, label] of [['accept', 'Approve this request'], ['decline', 'Decline'], ['cancel', 'Cancel turn']]) actions.append(button(label, () => action('agents:control:approval', { id: t.id, approvalId: approval.id, decision }), decision === 'accept' ? 'va-primary' : ''));
@@ -259,6 +260,7 @@
       if (latest.stdout) details.append(make('strong', 'Standard output'), make('pre', latest.stdout));
       if (latest.stderr) details.append(make('strong', 'Standard error'), make('pre', latest.stderr));
       if (latest.usage) details.append(make('p', `Reported tokens: ${latest.usage.inputTokens} input · ${latest.usage.outputTokens} output${latest.usage.cachedInputTokens !== undefined ? ` · ${latest.usage.cachedInputTokens} cached input` : ''}`));
+      if (latest.usage?.sessionCostUsd !== undefined) details.append(make('p', `Provider session cost estimate: $${latest.usage.sessionCostUsd.toFixed(6)} · cumulative, not a per-turn bill`));
       if (!latest.stdout && !latest.stderr) details.append(make('pre', 'No process output recorded.')); main.append(details);
     }
     const composer = make('form', '', 'va-composer');

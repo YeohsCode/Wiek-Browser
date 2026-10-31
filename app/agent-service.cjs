@@ -3,7 +3,8 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { spawn, spawnSync } = require('node:child_process');
-const { randomUUID } = require('node:crypto');
+const { randomUUID, createHash } = require('node:crypto');
+const { claudeLaunch, connectClaude } = require('./claude-session.cjs');
 
 const now = () => new Date().toISOString();
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -113,6 +114,14 @@ function discoverCodex() {
   return null;
 }
 
+function discoverClaude() {
+  const command = executable('claude');
+  if (!command) return null;
+  const probe = spawnSync(command, ['--help'], { encoding: 'utf8', timeout: 4000, maxBuffer: 128 * 1024, windowsHide: true });
+  if (probe.status !== 0 || !['--input-format', '--output-format', '--resume'].every(flag => (probe.stdout || '').includes(flag))) return null;
+  return { id: 'claude-native', name: 'Claude native session (opt-in)', command, args: [], modelArgs: [], models: [], inputMode: 'stdin', protocol: 'claude-stream-json', enabled: false, verifiedBy: 'local --help; authentication and model execution not checked' };
+}
+
 function createAgentService({ dataDir, onChange = () => {}, runContext, turnCheckpoints, maxConcurrentRuns = 2, maxOutputBytes = 1024 * 1024 } = {}) {
   if (!dataDir) throw fail('dataDir is required');
   maxConcurrentRuns = Math.max(1, Math.min(16, Number(maxConcurrentRuns) || 2));
@@ -192,8 +201,11 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   const discovered = discoverCodex();
   if (discovered && !state.providers.some((provider) => provider.id === discovered.id)) state.providers.push(discovered);
   if (discovered && !state.providers.some((provider) => provider.id === 'codex-native')) state.providers.push({ ...discovered, id: 'codex-native', name: 'Codex native session (opt-in)', args: ['app-server', '--stdio'], modelArgs: [], protocol: 'codex-app-server', enabled: false });
+  const claudeDiscovered = discoverClaude();
+  if (claudeDiscovered && !state.providers.some(provider => provider.id === claudeDiscovered.id)) state.providers.push(claudeDiscovered);
 
   function killTree(child, signal) {
+    if (!child) return;
     try { if (process.platform !== 'win32' && child.pid) process.kill(-child.pid, signal); else child.kill(signal); } catch (error) { if (error.code !== 'ESRCH') child.kill(signal); }
   }
   const maxAttachmentBytes = 20 * 1024 * 1024, maxAttachments = 10, maxArchiveBytes = 32 * 1024 * 1024;
@@ -269,7 +281,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     const provider = locate('providers', thread.providerId);
     const command = executable(provider.command);
     if (!provider.enabled || !command) throw fail('The selected provider CLI is unavailable or disabled; configure an installed executable', 'VEK_AGENT_PROVIDER_UNAVAILABLE');
-    if (provider.protocol !== 'codex-app-server' && thread.model && !(provider.modelArgs?.length || provider.args.some((arg) => /\{\{?model\}?\}/.test(arg)))) throw fail('Configure the provider modelArgs template before choosing a model');
+    if (!['codex-app-server', 'claude-stream-json'].includes(provider.protocol) && thread.model && !(provider.modelArgs?.length || provider.args.some((arg) => /\{\{?model\}?\}/.test(arg)))) throw fail('Configure the provider modelArgs template before choosing a model');
     if (!fs.statSync(project.path).isDirectory()) throw fail('Project path is not a directory');
     const context = runContext?.({ thread: clone(thread), project: clone(project), provider: clone(provider) }) || {};
     if (context?.then) throw fail('runContext must be synchronous');
@@ -277,6 +289,9 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     if (contextEnv && (typeof contextEnv !== 'object' || Object.entries(contextEnv).some(([key, value]) => !/^VEK_[A-Z0-9_]+$/.test(key) || typeof value !== 'string' || value.includes('\0')))) throw fail('runContext must return only VEK_* environment strings');
     if (context.promptPrefix !== undefined && (typeof context.promptPrefix !== 'string' || context.promptPrefix.length > 32768)) throw fail('runContext promptPrefix must be text up to 32768 characters');
     const attachments = selectedAttachments(thread);
+    const nativeBinding = createHash('sha256').update(JSON.stringify([provider.protocol || 'cli', command, provider.args, project.path])).digest('hex');
+    if (thread.nativeSessionBinding !== nativeBinding) { delete thread.nativeThreadId; delete thread.nativeSessionBinding; }
+    const claude = provider.protocol === 'claude-stream-json' ? claudeLaunch({ args: provider.args, model: thread.model, resumeId: thread.nativeThreadId, attachments }) : null;
     const run = { id: randomUUID(), status: 'running', startedAt: now(), stdout: '', stderr: '', truncated: false, ...(automationId ? { automationId } : {}), ...(automationReservationId ? { automationReservationId } : {}) };
     const userMessage = message('user', prompt, run.id);
     if (attachments.length) userMessage.attachments = attachments.map(({ id, name, mimeType, bytes, storedPath }) => ({ id, name, mimeType, bytes, storedPath }));
@@ -285,7 +300,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     const attachmentContext = attachments.length ? '\n\nUser-selected local attachments (paths are real; their contents have not been assumed read):\n' + attachments.map((item) => `- ${JSON.stringify(item.name)} | ${item.mimeType} | ${item.bytes} bytes | ${JSON.stringify(item.storedPath)}`).join('\n') : '';
     const transcript = (context.promptPrefix ? `${context.promptPrefix}\n\n${history}` : history) + attachmentContext;
     const values = { prompt: transcript, projectPath: project.path, threadId: thread.id, model: thread.model || '' };
-    const args = [...provider.args, ...(thread.model ? provider.modelArgs || [] : [])].map((arg) => arg.replace(/\{\{?(prompt|projectPath|threadId|model)\}?\}/g, (_, key) => values[key]));
+    const args = claude ? claude.args : [...provider.args, ...(thread.model ? provider.modelArgs || [] : [])].map((arg) => arg.replace(/\{\{?(prompt|projectPath|threadId|model)\}?\}/g, (_, key) => values[key]));
     thread.runs.push(run); thread.status = 'running'; thread.activeRunId = run.id; thread.updatedAt = now();
     let resolveDone;
     const done = new Promise((resolve) => { resolveDone = resolve; });
@@ -321,7 +336,10 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       }
       publishSoon();
     };
-    if (provider.protocol === 'codex-app-server') {
+    if (claude) {
+      const text = thread.nativeThreadId ? `${context.promptPrefix ? context.promptPrefix + '\n\n' : ''}${prompt}` : (context.promptPrefix ? context.promptPrefix + '\n\n' : '') + history;
+      connectClaude({ child, launch: claude, active, run, thread, project, text, consume, publish: publishSoon, killTree, onSession: () => { thread.nativeSessionBinding = nativeBinding; } });
+    } else if (provider.protocol === 'codex-app-server') {
       let buffer = '', sequence = 0;
       const requests = new Map(), approvalIds = new Map(), streamedItems = new Set();
       const write = (data) => { if (!child.stdin.destroyed) child.stdin.write(JSON.stringify(data) + '\n'); };
@@ -378,7 +396,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         const response = await request(resumed ? 'thread/resume' : 'thread/start', resumed ? { threadId: thread.nativeThreadId } : { cwd: project.path, sandbox: 'read-only', approvalPolicy: 'on-request', ...(thread.model ? { model: thread.model } : {}) });
         const nativeThreadId = response?.thread?.id;
         if (typeof nativeThreadId !== 'string') throw fail('Native provider did not return a thread id');
-        thread.nativeThreadId = nativeThreadId; active.native.threadId = nativeThreadId; run.nativeThreadId=nativeThreadId;
+        thread.nativeThreadId = nativeThreadId; thread.nativeSessionBinding = nativeBinding; active.native.threadId = nativeThreadId; run.nativeThreadId=nativeThreadId;
         const text = resumed ? `${context.promptPrefix ? context.promptPrefix + '\n\n' : ''}${prompt}${attachmentContext}` : transcript;
         const input = [{ type: 'text', text }, ...attachments.filter((item) => item.mimeType.startsWith('image/')).map((item) => ({ type: 'localImage', path: item.storedPath }))];
         const turn = await request('turn/start', { threadId: nativeThreadId, input, ...(thread.model ? { model: thread.model } : {}) });
@@ -432,7 +450,8 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     if(active.finalizing){await active.done;return;}
     active.stopReason = reason;
     if(!active.child){await active.done;return;}
-    if (active.native?.turnId && active.native.threadId) active.native.request('turn/interrupt', { threadId: active.native.threadId, turnId: active.native.turnId }).catch(() => killTree(active.child, 'SIGTERM'));
+    if (active.claude) active.claude.interrupt().catch(() => killTree(active.child, 'SIGTERM'));
+    else if (active.native?.turnId && active.native.threadId) active.native.request('turn/interrupt', { threadId: active.native.threadId, turnId: active.native.turnId }).catch(() => killTree(active.child, 'SIGTERM'));
     else killTree(active.child, 'SIGTERM');
     active.killTimer = setTimeout(() => killTree(active.child, 'SIGKILL'), 1000); active.killTimer.unref?.();
     await active.done;
@@ -523,7 +542,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   function revise(thread, kind, messages) {
     thread.revisions ||= [];
     thread.revisions.push({ id: randomUUID(), kind, createdAt: now(), messages: clone(thread.messages) });
-    thread.messages = messages; thread.status = 'idle'; thread.updatedAt = now(); delete thread.nativeThreadId;
+    thread.messages = messages; thread.status = 'idle'; thread.updatedAt = now(); delete thread.nativeThreadId; delete thread.nativeSessionBinding;
   }
   function importBundle(data) {
     if (running.size) throw fail('Stop Agent runs before importing a transcript archive');
@@ -546,7 +565,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         if (!item || !Array.isArray(item.args) || item.args.some((arg) => typeof arg !== 'string' || arg.includes('\0')) || !['stdin', 'argv'].includes(item.inputMode)) throw fail('Invalid imported provider');
         if (item.models && (!Array.isArray(item.models) || item.models.some((model) => typeof model !== 'string' || model.length > 256))) throw fail('Invalid imported model catalogue');
         if (item.modelArgs && (!Array.isArray(item.modelArgs) || item.modelArgs.some((arg) => typeof arg !== 'string' || arg.includes('\0')))) throw fail('Invalid imported model arguments');
-        const provider = { id: randomUUID(), name: nonempty(item.name, 'provider name', 256), command: nonempty(item.command, 'provider command', 4096), args: [...item.args], inputMode: item.inputMode, enabled: false, models: [...(item.models || [])], modelArgs: [...(item.modelArgs || [])], ...(item.usageFormat === 'codex-jsonl' ? { usageFormat: item.usageFormat } : {}), ...(item.protocol === 'codex-app-server' ? { protocol: item.protocol } : {}) };
+        const provider = { id: randomUUID(), name: nonempty(item.name, 'provider name', 256), command: nonempty(item.command, 'provider command', 4096), args: [...item.args], inputMode: item.inputMode, enabled: false, models: [...(item.models || [])], modelArgs: [...(item.modelArgs || [])], ...(item.usageFormat === 'codex-jsonl' ? { usageFormat: item.usageFormat } : {}), ...(['codex-app-server', 'claude-stream-json'].includes(item.protocol) ? { protocol: item.protocol } : {}) };
         // Imported executable configurations are inert until a user reviews and
         // enables them; no imported environment or extra provider fields apply.
         providerIds.set(item.id, provider.id); state.providers.push(provider);
@@ -630,7 +649,8 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       case 'agents:control:steer': {
         const thread = locate('threads', id), prompt = nonempty(payload.prompt, 'follow-up prompt');
         const active = running.get(thread.id);
-        if (active?.native) { await active.native.ready; await active.native.request('turn/steer', { threadId: active.native.threadId, expectedTurnId: active.native.turnId, input: [{ type: 'text', text: prompt }] }); thread.messages.push(message('user', prompt, active.run.id)); thread.updatedAt = now(); }
+        if (active?.claude) { thread.pendingFollowUps ||= []; thread.pendingFollowUps.push({ id: randomUUID(), prompt, createdAt: now() }); thread.updatedAt = now(); }
+        else if (active?.native) { await active.native.ready; await active.native.request('turn/steer', { threadId: active.native.threadId, expectedTurnId: active.native.turnId, input: [{ type: 'text', text: prompt }] }); thread.messages.push(message('user', prompt, active.run.id)); thread.updatedAt = now(); }
         else if (active) { thread.pendingFollowUps ||= []; thread.pendingFollowUps.push({ id: randomUUID(), prompt, createdAt: now() }); thread.updatedAt = now(); }
         else startRun(thread, prompt);
         break;
@@ -652,13 +672,14 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         const active = running.get(id), approval = active?.run.approvals?.find((item) => item.id === payload.approvalId && item.status === 'pending');
         if (!active?.native || !approval) throw fail('No verified native approval request is pending; no approval was sent', 'VEK_AGENT_UNSUPPORTED');
         if (!['accept', 'decline', 'cancel'].includes(payload.decision)) throw fail('Approval decision must be accept, decline, or cancel');
+        if (active.claude) { active.claude.approve(approval.id, payload.decision); if (payload.decision === 'cancel') await stopThread(id); break; }
         active.native.write({ id: active.native.approvalIds.get(approval.id), result: { decision: payload.decision } }); active.native.approvalIds.delete(approval.id);
         approval.status = payload.decision === 'accept' ? 'accepted' : payload.decision === 'decline' ? 'declined' : 'cancelled'; approval.decidedAt = now(); break;
       }
       case 'agents:export': {
         let estimatedBytes = 0;
         const threads = state.threads.map((source) => {
-          const thread = clone(source); delete thread.nativeThreadId;
+          const thread = clone(source); delete thread.nativeThreadId; delete thread.nativeSessionBinding;
           thread.attachments = (source.attachments || []).map((attachment) => {
             const { id, name, mimeType, bytes, createdAt, detachedAt } = attachment;
             const metadata = { id, name, mimeType, bytes, createdAt, ...(detachedAt ? { detachedAt } : {}) };
@@ -692,7 +713,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         if(!turnCheckpoints?.dispatch)throw fail('Turn checkpoint support is unavailable');return turnCheckpoints.dispatch(action,payload,clone(locate('threads',id)));
       }
       case 'agents:projects:delete': locate('projects', id); if (state.threads.some((thread) => thread.projectId === id)) throw fail('Delete the project threads first'); state.projects = state.projects.filter((project) => project.id !== id); break;
-      case 'agents:providers:discover': { const discovered = discoverCodex(); if (discovered && !state.providers.some((provider) => provider.id === discovered.id)) state.providers.push(discovered); break; }
+      case 'agents:providers:discover': { for (const discovered of [discoverCodex(), discoverClaude()].filter(Boolean)) if (!state.providers.some(provider => provider.id === discovered.id)) state.providers.push(discovered); break; }
       case 'agents:providers:configure': {
         if (payload.env !== undefined) throw fail('Provider environment overrides are not supported');
         const command = nonempty(payload.command, 'command', 4096);
@@ -704,8 +725,9 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         if (payload.models !== undefined && (!Array.isArray(payload.models) || payload.models.length > 256 || payload.models.some((model) => typeof model !== 'string' || !model.trim() || model.length > 256))) throw fail('models must be a list of user-configured model names');
         if (payload.modelArgs !== undefined && (!Array.isArray(payload.modelArgs) || payload.modelArgs.some((arg) => typeof arg !== 'string' || arg.includes('\0')))) throw fail('modelArgs must be an argv string array');
         if (payload.usageFormat && payload.usageFormat !== 'codex-jsonl') throw fail('Only verified codex-jsonl usage events are supported');
-        if (payload.protocol && !['cli', 'codex-app-server'].includes(payload.protocol)) throw fail('Provider protocol must be cli or codex-app-server');
-        const provider = { id: providerId, name: nonempty(payload.name || command, 'name', 256), command, args: [...payload.args], inputMode: payload.inputMode || 'stdin', enabled: payload.enabled !== false, models: [...(payload.models || [])], modelArgs: [...(payload.modelArgs || [])], ...(payload.usageFormat ? { usageFormat: payload.usageFormat } : {}), ...(payload.protocol === 'codex-app-server' ? { protocol: payload.protocol } : {}) };
+        if (payload.protocol && !['cli', 'codex-app-server', 'claude-stream-json'].includes(payload.protocol)) throw fail('Provider protocol must be cli, codex-app-server, or claude-stream-json');
+        if (payload.protocol === 'claude-stream-json' && ((payload.inputMode && payload.inputMode !== 'stdin') || payload.modelArgs?.length)) throw fail('Claude native sessions require stdin mode and empty modelArgs');
+        const provider = { id: providerId, name: nonempty(payload.name || command, 'name', 256), command, args: [...payload.args], inputMode: payload.inputMode || 'stdin', enabled: payload.enabled !== false, models: [...(payload.models || [])], modelArgs: [...(payload.modelArgs || [])], ...(payload.usageFormat ? { usageFormat: payload.usageFormat } : {}), ...(['codex-app-server', 'claude-stream-json'].includes(payload.protocol) ? { protocol: payload.protocol } : {}) };
         const index = state.providers.findIndex((item) => item.id === providerId);
         if (index < 0) state.providers.push(provider); else state.providers[index] = provider;
         break;

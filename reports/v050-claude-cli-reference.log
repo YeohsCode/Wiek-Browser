@@ -1,0 +1,34 @@
+npm notice
+npm notice 📦  @anthropic-ai/claude-code@2.1.31
+npm notice Tarball Contents
+npm notice 147B LICENSE.md
+npm notice 2.0kB README.md
+npm notice 551B bun.lock
+npm notice 11.3MB cli.js
+npm notice 1.2kB package.json
+npm notice 2.5MB resvg.wasm
+npm notice 67.6kB sdk-tools.d.ts
+npm notice 1.4MB tree-sitter-bash.wasm
+npm notice 205.5kB tree-sitter.wasm
+npm notice 4.4MB vendor/ripgrep/arm64-darwin/rg
+npm notice 6.2MB vendor/ripgrep/arm64-darwin/ripgrep.node
+npm notice 5.2MB vendor/ripgrep/arm64-linux/rg
+npm notice 4.7MB vendor/ripgrep/arm64-linux/ripgrep.node
+npm notice 126B vendor/ripgrep/COPYING
+npm notice 5.2MB vendor/ripgrep/x64-darwin/rg
+npm notice 6.1MB vendor/ripgrep/x64-darwin/ripgrep.node
+npm notice 6.6MB vendor/ripgrep/x64-linux/rg
+npm notice 5.0MB vendor/ripgrep/x64-linux/ripgrep.node
+npm notice 5.4MB vendor/ripgrep/x64-win32/rg.exe
+npm notice 7.0MB vendor/ripgrep/x64-win32/ripgrep.node
+npm notice Tarball Details
+npm notice name: @anthropic-ai/claude-code
+npm notice version: 2.1.31
+npm notice filename: anthropic-ai-claude-code-2.1.31.tgz
+npm notice package size: 26.5 MB
+npm notice unpacked size: 71.2 MB
+npm notice shasum: 854a8f4fa2c4261c7c72a2f1d5e1ca6607a1bd08
+npm notice integrity: sha512-FlQYgH8p2VRmq[...]WT3cwbzTHcoMg==
+npm notice total files: 20
+npm notice
+anthropic-ai-claude-code-2.1.31.tgz

@@ -1,0 +1,33 @@
+{
+  "version": "0.5.0",
+  "threadStatus": "completed",
+  "runStatus": "completed",
+  "approvalStatus": "declined",
+  "replyCount": 1,
+  "reply": {
+    "behavior": "deny",
+    "message": "Declined by the Vek user"
+  },
+  "nativeSessionMatches": true,
+  "fileChangesStatus": "complete",
+  "tools": [
+    {
+      "id": "tool-1",
+      "name": "Read",
+      "input": "{\"file_path\":\"test-only.txt\"}",
+      "createdAt": "2026-10-31T07:37:15.508Z"
+    }
+  ],
+  "usage": {
+    "inputTokens": 20,
+    "outputTokens": 6,
+    "source": "native-provider-event",
+    "scope": "main-loop-turn",
+    "cachedInputTokens": 3,
+    "cacheCreationInputTokens": 2,
+    "sessionCostUsd": 0.004
+  },
+  "paidModelCalls": 0,
+  "externalAccountActions": 0,
+  "passed": true
+}

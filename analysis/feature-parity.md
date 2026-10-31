@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.4.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾 0.3 增量和当前报告为准。
+当前版本 **0.5.0**，更新于 2026-10-31；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -274,3 +274,12 @@ V1 兼容 helper、CDP/fetch、site tools 与 migration guard 的入口见 `pack
 已完成项目显式启用、真实provider运行前后快照、thread/run/native turn关联、逐turn和会话span的真实worktree/index差异、预览/精确名称确认恢复及保护快照。失败/停止/准备期取消/after超限/HEAD变更/并发/导入/fork和实际host SIGKILL后的恢复均有真实临时Git验证。原生UI实际运行本地fixture并完成文件/index恢复，非模拟成功。
 
 完整行为与限制见 [turn-checkpoints-design.md](turn-checkpoints-design.md)。快照仍局限普通小仓库，linked worktree/自动保留/远程PR未完成；本地快照不是外部编辑器隔离，也不回滚浏览器/账号等外部效果。对话回滚仍为单独动作。其余全量复刻缺口继续保留，当前测试入口为 [RESULTS.md](../reports/RESULTS.md)。
+
+
+## 0.5.0 当前增量：Claude原生协议
+
+本段覆盖此前“只有Codex原生协议”的记录。`claude-stream-json`现有实际NDJSON/control客户端、重启续接、配置/项目会话绑定、逐request批准/拒绝/取消、过期审批、partial去重/UTF-8、工具事件、实际image/PDF/text附件、main-loop token和会话累计费用。修改文件/快照/diff/恢复沿用真实turn生命周期。
+
+新增13个协议测试、本地全套169/169，打包宿主59/59；官方Claude CLI 2.1.31在隔离HOME/无继承认证下initialize成功，0user messages/0model calls。它只证明握手，不能替代模型执行和当前最新CLI验证。最新0.3.316类型声明用于接口参考；该版本可选native下载未完成，其部分文件没有被当成可运行CLI。
+
+仍partial：Claude历史手动选择导入、完整工具结果/subagent展示、原生fork/完整模型能力、MCP gateway自动注入、其他6种nativeprovider和真实付费turn。已有通用CLI或13fixture通过不等于八种原生协议均可用。细节见 [Claude设计](claude-native-design.md) 与 [当前验收](../reports/RESULTS.md)。

@@ -1,0 +1,21 @@
+✔ Claude native streams UTF-8 once, records tools/usage, attaches actual image/PDF/text, resumes after restart (467.655708ms)
+✔ Claude approvals are request-scoped explicit accept/decline and preserve the exact original input (311.672667ms)
+✔ Claude cancelled permissions expire without a response and duplicate request identities fail closed (670.874833ms)
+✔ Claude steering is an honest queued follow-up, stop interrupts, and approval cancel stops the turn (296.469208ms)
+✔ Claude disconnect cannot become successful completion (194.453333ms)
+✔ Claude malformed cannot become successful completion (212.113042ms)
+✔ Claude oversize cannot become successful completion (236.896042ms)
+✔ Claude wrong-session cannot become successful completion (203.1385ms)
+✔ Claude failure cannot become successful completion (204.598875ms)
+✔ Claude edit/fork/import and changed executable arguments cannot reuse native session authority (351.964916ms)
+✔ Claude launch preflights combined attachments and rejects conflicting protocol flags (0.253625ms)
+✔ Claude oversized combined attachments fail before spawn and leave no fabricated run (210.528625ms)
+✔ Claude output shares the actual byte budget and immediate cancellation sends no user prompt (279.052166ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3721.012833

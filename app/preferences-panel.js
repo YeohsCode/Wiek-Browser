@@ -2,11 +2,16 @@
 (() => {
   function createPanel(root, invoke) {
     let data, error = '', pending = false, editor = null, draft = '', dirty = false, destroyed = false;
+    let memoryData = null, memoryQuery = '', memoryResults = null, memoryDocument = null, memoryProjectId = '', memoryProjects = [], memoryNotice = '';
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const make = (tag, value, cls) => { const node = document.createElement(tag); if (value !== undefined) node.textContent = value; if (cls) node.className = cls; return node; };
     const button = (value, fn, cls = '') => { const node = make('button', value, `vp-button ${cls}`); node.type = 'button'; node.disabled = pending; node.onclick = fn; return node; };
-    function update(next) { const value = next?.preferences || next; if (value?.theme && value?.shortcuts) { data = value; if (!dirty) draft = data.instructions; } render(); }
-    async function action(name, payload = {}) { pending = true; error = ''; render(); try { const result = await invoke(name, payload); if (result?.error) throw new Error(result.error); update(result); return result; } catch (failure) { error = failure.message || String(failure); } finally { pending = false; render(); } }
+    function update(next) {
+      if(next?.agents?.projects){memoryProjects=next.agents.projects;if(!memoryProjects.some(p=>p.id===memoryProjectId))memoryProjectId=memoryProjects[0]?.id||'';}
+      const corpus=Array.isArray(next?.memory?.documents)?next.memory:(Array.isArray(next?.documents)&&next?.profileId?next:null);
+      if(corpus){if(memoryData?.profileId!==corpus.profileId){memoryResults=null;memoryDocument=null;memoryNotice='';memoryQuery='';}memoryData=corpus;const live=new Map(corpus.documents.map(row=>[row.id,row.sha256]));if(memoryResults)memoryResults.results=memoryResults.results.filter(row=>live.get(row.id)===row.sha256);if(memoryDocument&&live.get(memoryDocument.id)!==memoryDocument.sha256)memoryDocument=null;}
+      const value = next?.preferences || next; if (value?.theme && value?.shortcuts) { data = value; if (!dirty) draft = data.instructions; } render(); }
+    async function action(name, payload = {}) { const requestedProfile=memoryData?.profileId; pending = true; error = ''; render(); try { const result = await invoke(name, payload); if (result?.error) throw new Error(result.error); if(name.startsWith('memory:')&&requestedProfile&&memoryData?.profileId!==requestedProfile)return; update(result); if(name.startsWith('memory:'))update(await invoke('memory:snapshot',{})); return result; } catch (failure) { error = failure.message || String(failure); } finally { pending = false; render(); } }
     function toggle(parent, label, description, checked, change, disabled = false) {
       const row = make('label', '', 'vp-toggle-row'), copy = make('div', '', 'vp-grow'); copy.append(make('strong', label), make('p', description));
       const input = make('input'); input.type = 'checkbox'; input.checked = checked; input.disabled = disabled || pending; input.setAttribute('aria-label', label); input.onchange = () => change(input.checked); row.append(copy, input); parent.append(row);
@@ -28,6 +33,22 @@
       form.onsubmit = async event => { event.preventDefault(); const result = await action('preferences:shortcuts:set', { action: editor.action, accelerator: editor.value }); if (result) { editor = null; render(); } };
       overlay.append(form); return overlay;
     }
+    function memoryIndex() {
+      if (!memoryData) return;
+      const card = section('Indexed memory', 'Explicitly save page text or selected project text files for local search. Saved copies stay in this profile until removed; disabling a memory category deletes its saved copies. Search uses literal words, including Chinese text.');
+      card.append(make('p', `${memoryData.documents.length} documents in this profile. Copies are not refreshed automatically and are not automatically sent to agents.`, 'vp-description'));
+      const actions = make('div', '', 'vp-actions'); const page = button('Index current page', () => action('memory:index:page')); page.disabled = pending || !data.memory.browserActivity; actions.append(page);
+      const projects = make('select'); projects.setAttribute('aria-label', 'Memory project'); projects.disabled = pending;
+      for (const project of memoryProjects) { const option = make('option', project.name); option.value = project.id; option.selected = project.id === memoryProjectId; projects.append(option); } projects.onchange = () => { memoryProjectId = projects.value; }; actions.append(projects);
+      const files = button('Choose files to index', async () => { const result = await action('memory:choose-files', { projectId: memoryProjectId }); if (result?.indexed !== undefined) memoryNotice = `Indexed ${result.indexed} file(s). ${(result.warnings || []).map(row => `${row.source}: ${row.error}`).join(' ')} `; render(); }); files.disabled = pending || !data.memory.localFiles || !memoryProjectId; actions.append(files, button('Clear indexed memory', () => { memoryResults = null; memoryDocument = null; return action('memory:clear'); }));
+      if (memoryData.busy) { const cancel = button('Cancel indexing', async () => { try { update(await invoke('memory:cancel', {})); } catch (failure) { error = failure.message; render(); } }); cancel.disabled = false; actions.append(cancel); } card.append(actions);
+      if (memoryNotice) card.append(make('p', memoryNotice, 'vp-description'));
+      const form = make('form', '', 'vp-memory-search'), query = make('input'); query.type = 'search'; query.value = memoryQuery; query.dataset.focus = 'memory-search'; query.setAttribute('aria-label', 'Search indexed memory'); query.placeholder = 'Search saved text'; query.maxLength = 512; query.oninput = () => { memoryQuery = query.value; };
+      const submit = make('button', 'Search memory', 'vp-button'); submit.type = 'submit'; submit.disabled = pending; form.append(query, submit); form.onsubmit = async event => { event.preventDefault(); const result = await action('memory:search', { query: memoryQuery }); if (result) memoryResults = result; render(); }; card.append(form);
+      if (memoryResults) card.append(make('p', `${memoryResults.results.length} displayed results.`, 'vp-description'));
+      for (const document of memoryResults ? memoryResults.results : memoryData.documents) { const row = make('div', '', 'vp-memory-item'), info = make('div', '', 'vp-grow'); info.append(make('strong', document.title || document.source), make('p', `${document.kind} · ${document.source} · saved ${new Date(document.indexedAt).toLocaleString()}`, 'vp-description')); if (document.snippet) info.append(make('p', document.snippet, 'vp-memory-snippet')); row.append(info, button('View saved text', async () => { const result = await action('memory:read', { id: document.id }); if (result) memoryDocument = result; render(); }), button('Forget', () => action('memory:remove', { id: document.id }))); card.append(row); }
+      if (memoryDocument) { const detail = make('details'); detail.open = true; detail.append(make('summary', memoryDocument.title || memoryDocument.source), make('pre', memoryDocument.text, 'vp-memory-text'), button('Close saved text', () => { memoryDocument = null; render(); })); card.append(detail); }
+    }
     function render() {
       if (destroyed) return;
       const active = root.contains(document.activeElement) ? document.activeElement : null, focus = active?.dataset.focus, selection = active && 'selectionStart' in active ? [active.selectionStart,active.selectionEnd] : null;
@@ -43,9 +64,10 @@
       for (const [id,label,description] of [['copy','Copy','Copy selected text.'],['ask','Ask agent','Start a question with selected text.'],['save','Save to Library','Keep selected text in your local Library.']]) toggle(selectionCard,label,description,data.selectionToolbar[id],value=>action('preferences:update',{selectionToolbar:{[id]:value}}));
       toggle(selectionCard, 'Translate', 'Unavailable: no translation provider is configured.', false, ()=>{}, true);
       const memory = section('Context and instructions', 'Control which scoped context can be used by your agents.');
-      toggle(memory,'Browser activity','Use activity from the current task’s browser Space as context.',data.memory.browserActivity,browserActivity=>action('preferences:update',{memory:{browserActivity}}));
-      toggle(memory,'Project file context','Use files from the current project as context. This setting does not grant access to unrelated folders.',data.memory.localFiles,localFiles=>action('preferences:update',{memory:{localFiles}}));
+      toggle(memory,'Browser activity','Use task Space activity as context and allow explicit page text indexing.',data.memory.browserActivity,browserActivity=>action('preferences:update',{memory:{browserActivity}}));
+      toggle(memory,'Project file context','Use project file names as context and allow explicit text file indexing inside a chosen project.',data.memory.localFiles,localFiles=>action('preferences:update',{memory:{localFiles}}));
       const label=make('label','Instructions for agents (up to 8 KiB)','vp-instructions'), input=make('textarea'); input.value=draft; input.placeholder='How should your agents respond? (up to 8 KiB)'; input.dataset.focus='instructions'; input.oninput=()=>{draft=input.value;dirty=true}; label.append(input); memory.append(label,button('Save instructions',async()=>{const result=await action('preferences:update',{instructions:draft});if(result){dirty=false;draft=result.instructions;render()}},'vp-primary'));
+      memoryIndex();
       const runtime=section('Local browser behavior','Manage local speech models and background tasks.');
       toggle(runtime,'Keep running in the tray','Continue active tasks after all browser windows close.',data.backgroundMode,backgroundMode=>action('preferences:update',{backgroundMode}));
       toggle(runtime,'On-device speech model','Allow the bundled local speech model to be used. Other AI model capabilities depend on your configured agents.',data.onDeviceModels,onDeviceModels=>action('preferences:update',{onDeviceModels}));

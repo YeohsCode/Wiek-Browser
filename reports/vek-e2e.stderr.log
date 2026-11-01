@@ -21,7 +21,7 @@
   dist/src/index.js                               6.0kb
   ...and 25 more output files...
 
-⚡ Done in 25ms
+⚡ Done in 18ms
 [ego-browser] js() received a function and auto-wrapped it (() => document.title).
   js() is a thin wrapper over CDP Runtime.evaluate; it takes a string expression,
   not a Puppeteer/Playwright-style callable. Auto-wrap does NOT capture closure

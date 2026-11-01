@@ -1,0 +1,29 @@
+✔ scoped resource pagination, templates, text and binary reads do not persist contents (69.890542ms)
+✔ subscriptions retain early updates, invalidate lists, and require explicit rereads (82.846334ms)
+✔ updates during an outstanding read leave it stale (153.236875ms)
+✔ missing resources or subscription capability never sends unsupported methods (106.676583ms)
+✔ invalid pagination and concurrent list invalidation fail explicitly (251.901916ms)
+✔ invalid URIs and content unions or blobs are rejected; inert text stays literal (47.590083ms)
+✔ uncertain subscription outcomes stay unknown; disconnect and reconnect never resubscribe (517.659709ms)
+✔ disconnect cancels pending reads and removes connection memory (78.936125ms)
+✔ resource operation limits and AbortSignal cancellation work with a real stdio peer (453.141542ms)
+✔ session HTTP resource subscriptions receive GET notifications and clear on session recovery (50.419167ms)
+✔ modern HTTP rejects resources locally without sending a legacy method (0.243542ms)
+✔ explicit page indexing stores bounded text, strips query/fragment, searches Chinese and English (12.130167ms)
+✔ profiles, project filters and Space filters do not mix documents (28.977ms)
+✔ selected text files yield partial failures, never crawl directories or follow symlinks (9.137875ms)
+✔ upsert preserves document identity and replaces the saved search corpus; source changes require explicit reindex (18.76525ms)
+✔ disabled defaults reject capture; disabling purges that category across profiles and survives restart (20.768291ms)
+✔ cancel or policy disable during file reading commits no partial corpus (24.308083ms)
+✔ concurrent indexing is rejected while an explicit selection is in progress (7.245375ms)
+✔ delete removes stored text, search does not execute content, and malformed inputs preserve corpus (11.680916ms)
+✔ private state validates hashes, rejects symlinks, and excludes a second owner (6.513291ms)
+✔ resource and memory panels operate through Electron IPC with real services and inert text (636.38125ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1901.865333

@@ -67,7 +67,7 @@ function renderPanel() {
     }
     if (name==='workspace') window.VekWorkspacePanel.update(state);
     else if (name==='mcp') window.VekMcpPanel.update(state);
-    else if (name==='preferences') window.VekPreferencesPanel.update(state.preferences);
+    else if (name==='preferences') window.VekPreferencesPanel.update(state);
     else if (name==='library') window.VekLibraryPanel.update(state.library);
     else if (name==='recorder') window.VekRecorderPanel.update(state.recorder);
     else window.VekToolsPanel.update(state);

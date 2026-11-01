@@ -1,6 +1,12 @@
 # Vek Browser 复刻计划与进度
 
-更新：2026-11-01（Asia/Shanghai）。当前交付版本：**0.10.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
+更新：2026-11-01（Asia/Shanghai）。当前交付版本：**0.11.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
+
+## 当前执行优先级
+
+按用户最新要求（2026-11-01）：**先跳过 P1 中不同 Agent 的集成，优先 P2、P3**。Cursor 未完成的代码已从工作树移出，保存在本机 Git stash `31764915635554521270725e0d0c38e178eea3cf`（`deferred P1 Cursor ACP work; prioritize P2 P3 2026-11-01`）；不是 0.11 发行功能，普通 clone 不包含该本机 stash。
+
+当前顺序：P2 OAuth/现代请求与订阅、资料迁移 → P3 系统能力/退出后调度/执行模式/翻译与远程 Git。涉及 provider gateway 的集成部分随 P1 暂缓；不删除剩余目标。
 
 ## 当前检查点
 
@@ -10,11 +16,11 @@
 | 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Vek 69/69、Ego 68/69 | 当前版本验收完成，非引擎全面等价 |
 | 本地 Agent 工作台 | 通用 CLI、opt-in Codex app-server/Claude stream-json/OpenCode ACP、多 Agent 控制、对话分支/附件/审批、Claude选定历史分支、Codex有效rollout压缩/回滚导入及实时工具/子活动、Codex/Claude模型与effort目录 | 部分完成；其他5种原生 provider、源CLI原生会话迁移/后台任务和真实付费 turn 未验证 |
 | 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，linked worktree 和 PR 流程仍缺失 |
-| MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；OAuth/MRTR/订阅/sampling/elicitation 缺失 |
+| MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；已补 session 资源/模板/订阅；OAuth/MRTR/现代订阅/sampling/elicitation 缺失 |
 | 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 部分完成；应用关闭后不调度，standalone/dedicated 不完整 |
-| 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；无 OS 跨应用采集、翻译或云端润色等价 |
+| 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；新增显式网页/项目文本 memory 索引；无 OS 跨应用采集、翻译或云端润色等价 |
 | 浏览器界面/权限/资料 | 主题/标签布局/快捷键、独立窗口/托盘；权限隔离；Profile 数据归属；Chromium 选择导入和加密 archive | 部分完成；完整迁移/扩展/OS 设备能力仍有缺口 |
-| 交付与基准 | macOS ARM64 应用；264/264 本地测试、109/109 打包宿主集成、81 个上游文件未改 | 本地检查点完成；31 项线上模型任务未运行 |
+| 交付与基准 | macOS ARM64 应用；285/285 本地测试、123/123 打包宿主集成、81 个上游文件未改 | 本地检查点完成；31 项线上模型任务未运行 |
 
 证据入口：[当前结果](reports/RESULTS.md)、[同集对比](reports/comparison.md)、[逐项功能清单](analysis/feature-parity.md)、[机器可读结果](reports/delivery-summary.json)。532 项 SDK 单测沿用未改版结果；不描述为本轮重新运行。
 
@@ -32,7 +38,8 @@
 - [x] 0.9：Codex有效压缩/回滚历史、原生实时command/diff/MCP/子Agent、子turn单次审批及事件归属。
 - [x] 0.9.1：CLI stop等待实际退出、身份核对/超时、同目录立即重启和provider最终快照验证。
 - [x] 0.10：Claude initialize目录、alias/canonical ID、已声明effort控制与fresh validation、取消/lease/旧版unknown。
-- [ ] 后续：原生 provider、迁移、MCP 剩余能力、OS 集成与线上基准；按下面顺序推进。
+- [x] 0.11：P2 session MCP资源/模板/订阅与显式读取；P3按Profile隔离的显式网页/项目文本memory索引。
+- [ ] 后续：优先 P2/P3 剩余项；不同 Agent 的 P1 集成暂缓，线上基准仍属 P4。
 
 ## 执行顺序与阶段验收
 
@@ -46,7 +53,7 @@
 
 完成标准：一个实际本地 provider 修改文件后，UI 可查看该 turn 的真实 diff，明确确认后能恢复文件与 index；失败、中断和重启路径有实际测试证据。现有普通小仓库限制需明确显示；linked worktree 支持单独设计与验证，不在无证据时承诺。
 
-### P1 / 当前阶段：原生 provider 与会话完整性
+### P1 / 不同 Agent 集成暂缓：原生 provider 与会话完整性
 
 - [x] 补 Claude 原生流式协议、会话续接、逐次权限审批、用量和附件；仍须按证据核对其他5种原生 provider。
 - [x] Claude所选JSONL历史分支导入、真实工具结果和子Agent活动展示；保留导出再导入中的有界显示记录。
@@ -55,14 +62,16 @@
 - [x] Codex压缩/回滚历史语义和实时工具/子Agent活动、子turn单次审批。
 - [x] CLI stop等待实际退出并回归同目录立即start、provider终止及最终快照。
 - [x] Claude模型目录、声明能力与显式effort控制，旧版未返回字段保持unknown。
-- [ ] 下一项：核对并接入其余5种原生provider，优先Cursor公开协议与无推理readiness。
+- [ ] 暂缓：核对并接入其余5种原生provider；Cursor探索保存在本机stash，当前未交付。
 - [ ] OpenCode外部历史迁移、原生fork、后台子任务和自动MCP注入仍待实现。
 - [ ] Claude源CLI会话原生resume/fork迁移、多文件子历史及后台任务守护仍缺失，当前导入续接明确为新会话加可见文本。
 - [x] 协议 fixture、实际本机非推理 readiness 与真实模型 turn 分开记录；付费模型/账号任务需要专用配置和明确执行授权。
 
 ### P2：MCP 与资料迁移
 
-- [ ] 补 OAuth、MRTR/订阅和 provider gateway 注入；保持最小 scope、取消、版本边界和无工具 POST 自动重放。
+- [x] 0.11：session MCP资源/模板分页、显式text/blob读取、subscribe/unsubscribe、更新revision/失效提示、断线不重放、scope与有界UI。
+- [ ] 当前下一项：OAuth；随后MRTR/现代订阅，保持最小scope、取消、版本边界和无工具POST自动重放。
+- [ ] provider gateway 注入随 P1 不同 Agent 集成暂缓。
 - [ ] 扩展 Profile archive 的可验证 web storage/会话范围与多来源迁移；只使用明确选定的来源，不自动读取个人 Profile。
 - [ ] 用合成 fixture 验证迁移兼容、部分失败、取消、冲突和恢复；保留 Electron 扩展 API/定制 Chromium 的边界。
 
@@ -70,7 +79,8 @@
 
 - [ ] 设计 OS 跨应用选区/截图/录制及全局快捷键；权限由用户在实际 OS 流程授予，未获权限时明确不可用。
 - [ ] 补应用退出后的调度与 standalone/dedicated 执行语义；验证唤醒、去重、卸载/停用与失败恢复。
-- [ ] 真实翻译适配、memory 内容索引和远程 Git/PR 流程逐项验收；独立交互终端须先确认 Ego 实际功能证据。
+- [x] 0.11：显式网页/项目UTF-8文本memory内容索引；Profile隔离、中文/英文literal搜索、保存副本/重建、删除与取消/开关清除。非语义/全磁盘索引，不自动注入Agent。
+- [ ] 真实翻译适配和远程 Git/PR 流程逐项验收；独立交互终端须先确认 Ego 实际功能证据。
 
 ### P4：同条件线上基准与发布
 
@@ -104,3 +114,5 @@
 0.9.1 实现见 [cli-lifecycle.md](analysis/cli-lifecycle.md)。新增4项真实host/超时/身份/参数回归；source与packaged分别验证，最新全套和SDK结果以当前报告为准。下一项Claude原生目录，不自动调用模型。
 
 0.10 实现见 [claude-model-catalogue.md](analysis/claude-model-catalogue.md)。新增16项目录/控制回归，本地264/264；官方2.1.31实际初始化返回3项模型且缺effort字段，0user/0模型调用；现代effort控制以公开SDK协议及本地peer单独验证，不宣称旧CLI或实际模型已执行。打包109/109、SDK69/69（1248断言），152文件身份一致，81上游文件未改；原生模型菜单和wire顺序完成验收。
+
+0.11 实现与边界见 [mcp-resources-memory.md](analysis/mcp-resources-memory.md)。P1不同Agent集成已暂缓，P2资源订阅与P3本地memory索引完成有界验收；不将P2/P3整体勾选完成。完整测试和打包结果以当前RESULTS为准。

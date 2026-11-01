@@ -1,0 +1,15 @@
+{
+  "version": "0.11.0",
+  "generatedAt": "2026-11-01T15:33:30.795Z",
+  "checks": {
+    "profileIsDefault": true,
+    "pageAndFileIndexed": true,
+    "pageQueryAndFragmentOmitted": true,
+    "actualPageText": true,
+    "actualSelectedFile": true,
+    "postRestartSubscriptionsEmpty": true
+  },
+  "fixtureOnly": true,
+  "modelCalls": 0,
+  "externalAccountActions": 0
+}

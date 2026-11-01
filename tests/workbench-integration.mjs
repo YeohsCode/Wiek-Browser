@@ -148,6 +148,16 @@ try {
   await action('agents:threads:pin',{id:threadId});await action('agents:threads:archive',{id:threadId});thread=await action('agents:threads:read',{id:threadId});check(thread.pinned&&thread.archived,'thread organization persists');
   await action('agents:threads:unarchive',{id:threadId});
   const catalog=await action('catalog:list',{projectId});check(Array.isArray(catalog.entries),'installed instruction catalog available');
+  const resourcesConfig=await action('mcp:integrations:save',{name:'Resource host fixture',scope:{projectId,threadId},command:process.execPath,args:[path.resolve('tests/fixtures/mcp-resource-peer.cjs')]});const resourceId=resourcesConfig.integrations.at(-1).id,resourceScope={projectId,threadId},resourceUri='fixture:///notes';
+  check((await action('mcp:resources:list',{integrationId:resourceId,scope:resourceScope})).resources.length===2,'packaged host paginates MCP resources');
+  check((await action('mcp:resources:templates',{integrationId:resourceId,scope:resourceScope})).resourceTemplates[0].uriTemplate==='fixture:///entry/{id}','packaged host lists resource templates');
+  await action('mcp:resources:subscribe',{integrationId:resourceId,scope:resourceScope,uri:resourceUri});let resourceState=(await action('mcp:snapshot')).connections.find(row=>row.integrationId===resourceId);
+  check(resourceState.resourceSubscriptions[0].revision===1&&resourceState.resourceSubscriptions[0].status==='subscribed','packaged host preserves notification received before subscription acknowledgement');
+  check((await action('mcp:resources:read',{integrationId:resourceId,scope:resourceScope,uri:resourceUri})).contents[0].text==='revision 0','packaged host explicitly reads server resource content');
+  const mutation=await action('mcp:tools:call',{integrationId:resourceId,scope:resourceScope,name:'mutate'});await action('mcp:tasks:wait',{id:mutation.id,scope:resourceScope});resourceState=(await action('mcp:snapshot')).connections.find(row=>row.integrationId===resourceId);
+  check(resourceState.resources===null&&resourceState.resourceSubscriptions[0].revision>resourceState.resourceSubscriptions[0].readRevision,'packaged host invalidates resource list and marks read content stale');
+  await assert.rejects(action('mcp:resources:read',{integrationId:resourceId,scope:{projectId},uri:resourceUri}),/outside/);checks++;
+  await action('mcp:resources:unsubscribe',{integrationId:resourceId,scope:resourceScope,uri:resourceUri});check((await action('mcp:snapshot')).connections.find(row=>row.integrationId===resourceId).resourceSubscriptions.length===0,'packaged host removes acknowledged subscription');
   const pairing=await action('mcp:pairing:create',{name:'Browser integration fixture',scope:{projectId,threadId},browserMethods:['listTabs','createTab','navigate','snapshot']});
   const exchange=await fetch(pairing.exchangeUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:pairing.code})});
   const grant=await exchange.json();check(exchange.status===200&&Boolean(grant.token),'scoped pairing exchange');
@@ -169,6 +179,14 @@ try {
   await action('navigate',url);
   await action('preferences:update',{theme:'dark',tabLayout:'vertical'});
   features=await rpc('getState');check(features.darkMode&&features.chromeBounds.x===410&&features.chromeBounds.y===64,'theme and real viewport layout wired');
+  await action('preferences:update',{memory:{browserActivity:true,localFiles:true}});
+  const pageMemory=await action('memory:index:page');check(pageMemory.documents.some(row=>row.kind==='page'&&row.spaceId===featureSpace),'packaged host explicitly captures current page text in selected profile');
+  check((await action('memory:search',{query:'Scoped local fixture'})).total===1,'packaged memory searches actual page body');
+  const memoryFiles=await action('memory:index:files',{projectId,paths:[path.join(directory,'note.txt')],profileId:'not-the-selected-profile'});check(memoryFiles.indexed===1&&memoryFiles.profileId==='Default','packaged memory binds file indexing to current profile instead of caller override');
+  const fileDocument=memoryFiles.documents.find(row=>row.kind==='file');check((await action('memory:read',{id:fileDocument.id})).text===await fs.readFile(path.join(directory,'note.txt'),'utf8'),'packaged memory saved file text matches selected source bytes');
+  const partialMemory=await action('memory:index:files',{projectId,paths:[path.join(directory,'note.txt'),path.join(os.tmpdir(),'outside-project.txt')]});check(partialMemory.indexed===1&&partialMemory.warnings.length===1,'packaged memory reports partial file selection failure');
+  await action('preferences:update',{memory:{browserActivity:false}});check((await action('memory:snapshot')).documents.every(row=>row.kind==='file'),'disabling browser memory removes indexed page copies');
+  await action('memory:clear');check((await action('memory:snapshot')).documents.length===0,'packaged memory clear removes profile corpus');await action('preferences:update',{memory:{localFiles:false}});
   await rpc('claimTaskSpace',[featureSpace]);
   // Only query native permission state or explicitly block requests. No camera,
   // microphone, location service, system notification or clipboard is accessed.

@@ -6,6 +6,7 @@ const path = require('node:path');
 const http = require('node:http');
 const { spawn } = require('node:child_process');
 const { randomUUID, randomBytes, createHash, timingSafeEqual } = require('node:crypto');
+const { methods: resourceMethods, resetResources, resourceNotification } = require('./mcp-resources.cjs');
 const { createHttpClientClass, validateHttpConfig } = require('./mcp-http-client.cjs');
 const PROTOCOLS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
 const fail = (message, code = 'VEK_MCP_INVALID_REQUEST') => Object.assign(new Error(message), { error_code: code });
@@ -22,7 +23,7 @@ function redact(value, secrets) { if (typeof value === 'string') return safeText
 class StdioClient {
   constructor({ config, cwd, credentials = {}, onChange = () => {}, maxMessageBytes = 1024 * 1024, timeoutMs = 15000 }) {
     this.config = config; this.cwd = cwd; this.credentials = credentials; this.onChange = onChange; this.maxMessageBytes = maxMessageBytes; this.timeoutMs = timeoutMs;
-    this.pending = new Map(); this.nextId = 1; this.buffer = ''; this.state = 'connecting'; this.tools = null; this.stderr = ''; this.secrets = Object.values(credentials).filter(Boolean); this.stopped = false;
+    this.pending = new Map(); this.nextId = 1; this.buffer = ''; this.state = 'connecting'; this.tools = null; this.stderr = ''; this.secrets = Object.values(credentials).filter(Boolean); this.stopped = false; resetResources(this);
   }
   async start() {
     const env = {}; for (const key of ['PATH', 'HOME', 'USER', 'TMPDIR', 'TMP', 'TEMP', 'SystemRoot', 'LANG', 'LC_ALL']) if (process.env[key]) env[key] = process.env[key];
@@ -56,7 +57,8 @@ class StdioClient {
           if (message.method === 'ping') this.write({ jsonrpc: '2.0', id: message.id, result: {} });
           else if (message.method === 'roots/list') this.write({ jsonrpc: '2.0', id: message.id, result: { roots: [{ uri: require('node:url').pathToFileURL(this.cwd).href, name: path.basename(this.cwd) }] } });
           else this.write({ jsonrpc: '2.0', id: message.id, error: { code: -32601, message: 'Client method is not supported' } });
-        } else if (message.method === 'notifications/tools/list_changed') { this.tools = null; this.notifyChange(); }
+        } else if (resourceNotification(this, message)) { /* Connection-local invalidation only. */ }
+        else if (message.method === 'notifications/tools/list_changed') { this.tools = null; this.notifyChange(); }
         continue;
       }
       if (!Object.hasOwn(message, 'id') || Number(Object.hasOwn(message, 'result')) + Number(Object.hasOwn(message, 'error')) !== 1) { this.break(fail('Malformed MCP response', 'VEK_MCP_PROTOCOL_ERROR')); this.stop(); return; }
@@ -99,7 +101,7 @@ class StdioClient {
     }
     throw fail('MCP tools pagination exceeded the limit', 'VEK_MCP_PROTOCOL_ERROR');
   }
-  break(error) { if (this.state !== 'disconnected') { this.state = 'disconnected'; this.error = safeText(error.message, this.secrets); for (const p of this.pending.values()) { clearTimeout(p.timer); p.cleanup?.(); p.reject(error); } this.pending.clear(); this.notifyChange(); } }
+  break(error) { if (this.state !== 'disconnected') { this.state = 'disconnected'; resetResources(this); this.error = safeText(error.message, this.secrets); for (const p of this.pending.values()) { clearTimeout(p.timer); p.cleanup?.(); p.reject(error); } this.pending.clear(); this.notifyChange(); } }
   async stop() {
     if (this.stopped) return; this.stopped = true; this.break(fail('MCP connection stopped', 'VEK_MCP_DISCONNECTED'));
     const child = this.child; if (!child || child.exitCode !== null || child.signalCode) return;
@@ -109,6 +111,7 @@ class StdioClient {
   }
 }
 
+Object.assign(StdioClient.prototype, resourceMethods);
 const HttpClient = createHttpClientClass(StdioClient);
 
 // No raw CDP or token is exposed. The host supplies only selected callbacks and
@@ -152,7 +155,7 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
   const connections = new Map(), activeTasks = new Map(), pairings = new Map(), secrets = new Set(), gatewayCalls = new Map(); let closed = false, closing = false, gateway, gatewayPromise;
   for (const task of state.tasks) if (['queued', 'running'].includes(task.status)) { task.status = 'interrupted'; task.completedAt = new Date().toISOString(); }
   function publicTask(task) { return redact(task, secrets); }
-  function snapshot() { return redact({ integrations: state.integrations, tasks: state.tasks.map(publicTask), grants: state.grants.map(({ tokenHash, ...grant }) => grant), connections: [...connections.values()].map(c => ({ integrationId: c.integrationId, scope: c.scope, status: c.client?.state || 'connecting', serverInfo: c.client?.info?.serverInfo, error: c.client?.error, stderr: c.client?.stderr || '', tools: c.client?.tools || [] })), gateway: gateway ? { url: gateway.url } : null }, secrets); }
+  function snapshot() { return redact({ integrations: state.integrations, tasks: state.tasks.map(publicTask), grants: state.grants.map(({ tokenHash, ...grant }) => grant), connections: [...connections.values()].map(c => ({ integrationId: c.integrationId, scope: c.scope, status: c.client?.state || 'connecting', serverInfo: c.client?.info?.serverInfo, error: c.client?.error, stderr: c.client?.stderr || '', tools: c.client?.tools || [], resourceCapabilities: c.client?.info?.capabilities?.resources || null, resources: c.client?.resources, resourceTemplates: c.client?.resourceTemplates, resourceSubscriptions: [...(c.client?.resourceSubscriptions?.values() || [])] })), gateway: gateway ? { url: gateway.url } : null }, secrets); }
   function publish() { if (closed) return; const tmp = `${stateFile}.${randomUUID()}.tmp`; fs.writeFileSync(tmp, JSON.stringify(redact(state, secrets), null, 2), { mode: 0o600, flag: 'wx' }); fs.renameSync(tmp, stateFile); try { onChange(snapshot()); } catch {} }
   function ensureOpen() { if (closed || closing) throw fail('MCP service is closed', 'VEK_MCP_CLOSED'); }
   async function scopeFor(value) { const scope = normalizeScope(value); const resolved = await resolveScope(scope); if (!resolved || resolved.projectId !== scope.projectId || (scope.threadId && resolved.threadId !== scope.threadId) || !path.isAbsolute(resolved.projectPath || '') || !fs.statSync(resolved.projectPath).isDirectory()) throw fail('Unknown or unavailable project/thread scope', 'VEK_MCP_FORBIDDEN'); return { scope, resolved }; }
@@ -233,6 +236,9 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
     if (action === 'mcp:integrations:connect') { await connect(p.id, p.scope); return snapshot(); }
     if (action === 'mcp:integrations:disconnect') { await disconnect(p.id, p.scope ? normalizeScope(p.scope) : null); return snapshot(); }
     if (action === 'mcp:tools:list') return { tools: await (await connect(p.integrationId, p.scope)).listTools() };
+    if (action === 'mcp:resources:list' || action === 'mcp:resources:templates') return { [action.endsWith(':templates') ? 'resourceTemplates' : 'resources']: await (await connect(p.integrationId, p.scope)).listResources({ templates: action.endsWith(':templates') }) };
+    if (action === 'mcp:resources:read') return (await connect(p.integrationId, p.scope)).readResource(p.uri);
+    if (action === 'mcp:resources:subscribe' || action === 'mcp:resources:unsubscribe') { await (await connect(p.integrationId, p.scope)).setResourceSubscription(p.uri, action.endsWith(':subscribe')); return snapshot(); }
     if (action === 'mcp:tasks:create' || action === 'mcp:tools:call') return startTask(p);
     if (action === 'mcp:tasks:read') return readTask(p.id, p.scope);
     if (action === 'mcp:tasks:wait') return waitTask(p.id, p.scope, p.timeoutMs);

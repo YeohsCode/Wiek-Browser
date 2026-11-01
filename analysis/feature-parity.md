@@ -324,3 +324,11 @@ stop先核对已连接host的PID/instance，再请求shutdown，成功返回前�
 initialize目录发现不发送user、不产生Vek run或已拥有session，使用实际并发与项目lease并可停止。最多256项、alias/resolvedModel、显式effort/adaptive元数据；缺字段unknown，冲突/错误类型拒绝。每次有目录的turn重新校验；显式effort经apply_flag_settings确认后才发user，旧CLI不支持则明确失败。空模型明确重置新resume进程default，canonical UI选择保持。
 
 新增16项回归，本地264/264；官方CLI2.1.31隔离初始化只返回3项目录，无effort字段，0user/0模型调用。现代控制由官方SDK类型和合成wire单独验证，不声称实际模型effort或权益成功。source原生迁移/后台任务和其他5种原生provider仍缺；打包/UI/SDK见 [RESULTS](../reports/RESULTS.md)，设计见 [claude-model-catalogue](claude-model-catalogue.md)。
+
+## 0.11：按新优先级推进 P2/P3
+
+不同Agent的P1集成暂缓，Cursor未合入发行版。新增session MCP资源/模板分页、text/blob显式读取、subscribe/unsubscribe与revision提示，支持stdio和旧版HTTP session；更新不自动读取，断线/重建session清除订阅。现代2026-07-28工具模式本地拒绝legacy资源方法，OAuth/MRTR/现代订阅和gateway资源代理仍缺失。
+
+新增按Profile隔离的显式网页/选定项目UTF-8文本memory索引，支持中文/英文literal搜索、来源hash/保存时间、重建、忘记/clear、取消和开关清除；正文仅私有本地保存，新增语料不自动发送Agent。非全磁盘/语义/OCR/Office索引，无后台网页采集。OS采集/翻译、退出后调度和standalone/dedicated仍待完成。
+
+新增21项专项，完整结果见[RESULTS](../reports/RESULTS.md)，实现和限额见[mcp-resources-memory](mcp-resources-memory.md)。全产品parity继续为false，P2/P3未整体完成。

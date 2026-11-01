@@ -16,6 +16,7 @@ const { createVoiceService } = require('./voice-service.cjs');
 const { createPreferencesService } = require('./preferences-service.cjs');
 const { createLibraryService } = require('./library-service.cjs');
 const { createActionRecorder } = require('./action-recorder.cjs');
+const { createMemoryService } = require('./memory-service.cjs');
 const { createProfileArchive } = require('./profile-archive.cjs');
 const { createSitePermissions } = require('./site-permissions.cjs');
 const { createTurnCheckpoints } = require('./turn-checkpoints.cjs');
@@ -30,7 +31,7 @@ const DATA = path.resolve(process.env.VEK_DATA_DIR || process.env.VEK_BROWSER_DA
 fs.mkdirSync(DATA, { recursive: true, mode: 0o700 });
 app.setPath('userData', path.join(DATA, 'profile'));
 const INSTANCE = crypto.randomUUID();
-let window, server, wss, runtimeFile, saving, closing = false, agentService, workspaceService, mcpService, catalogService, voiceService, preferencesService, libraryService, recorderService, tray, importResult;
+let window, server, wss, runtimeFile, saving, closing = false, agentService, workspaceService, mcpService, catalogService, voiceService, preferencesService, memoryService, libraryService, recorderService, tray, importResult;
 const vaults = new Map();
 const voiceMutedTabs = new Map();
 const spaceWindows = new Map();
@@ -90,7 +91,7 @@ function tabDescriptor(t, index = 0) { return { targetId: t.id, ...(t.openerId ?
 function uiState(selectedSpaceId = store.selected) {
   const s = store.spaces.find(s => s.id === selectedSpaceId);
   const active = s && tabs.get(s.activeTab);
-  return { agents: agentService?.snapshot(), preferences:preferencesService?.snapshot(), library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
+  return { agents: agentService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
 }
 function publish() { if (window && !window.isDestroyed()) window.webContents.send('vek:state', uiState());for(const [id,record]of spaceWindows)if(!record.window.isDestroyed())record.window.webContents.send('vek:state',uiState(id)); }
 let panelOpen = false;
@@ -481,7 +482,20 @@ async function captureTabImage(t) {
 }
 async function uiAction(action, value, selectedSpaceId) {
   if(action==='secret:respond'){const request=secretRequests.get(value?.id);if(request){secretRequests.delete(value.id);request.resolve(typeof value.text==='string'?value.text:null);}return uiState();}
-  if(action.startsWith('preferences:'))return preferencesService.dispatch(action,value);
+  if(action.startsWith('preferences:')){const result=await preferencesService.dispatch(action,value);memoryService?.syncPolicy();return result;}
+  if(action.startsWith('memory:')){
+    const selected=getSpace(selectedSpaceId??store.selected);if(!selected)throw new Error('Select a browser profile');const profileId=selected.profileId;
+    if(action==='memory:index:page'){
+      if(!preferencesService.snapshot().memory.browserActivity)throw new Error('Enable Browser activity memory first');
+      const tab=tabs.get(selected.activeTab);if(!tab)throw new Error('Open a page to index');const wc=tab.view.webContents,before=wc.getURL();
+      if(!/^https?:/i.test(before))throw new Error('Memory capture supports HTTP(S) pages');
+      const page=await wc.executeJavaScript("({url:location.href,title:document.title,text:(document.body?.innerText||'').slice(0,65536)})");
+      if(wc.isDestroyed()||wc.getURL()!==before||page.url!==before||!tabs.has(tab.id)||selected.activeTab!==tab.id)throw new Error('Page changed during memory capture');
+      return memoryService.indexPage(profileId,{...page,spaceId:selected.id});
+    }
+    if(action==='memory:choose-files'){const project=agentService.snapshot().projects.find(p=>p.id===value?.projectId);if(!project)throw new Error('Choose a project');if(!preferencesService.snapshot().memory.localFiles)throw new Error('Enable Project file context first');const pick=await dialog.showOpenDialog(window,{defaultPath:project.path,properties:['openFile','multiSelections'],filters:[{name:'Text files',extensions:['txt','md','csv','json','js','ts','py','rs','go','html','css','yaml','toml','sql','log']}]});if(pick.canceled)return memoryService.snapshot(profileId);return memoryService.dispatch('memory:index:files',{profileId,projectId:project.id,paths:pick.filePaths});}
+    return memoryService.dispatch(action,{...value,profileId});
+  }
   if(action.startsWith('library:'))return libraryService.dispatch(action,value);
   if(action==='recorder:file:export') {const result=await recorderService.dispatch('recorder:export',value);const pick=await dialog.showSaveDialog(window,{defaultPath:result.exportData.filename,filters:[{name:'Action recording',extensions:['json']}]});if(!pick.canceled&&pick.filePath)writePrivateFile(pick.filePath,result.exportData.content);return recorderService.snapshot();}
   if(action.startsWith('recorder:'))return recorderService.dispatch(action,value);
@@ -672,6 +686,7 @@ function agentPromptPrefix(thread,project) {
 app.whenReady().then(async () => {
   const reservedShortcuts=[['CommandOrControl+C','Copy'],['CommandOrControl+X','Cut'],['CommandOrControl+V','Paste'],['CommandOrControl+A','Select all'],['CommandOrControl+Z','Undo'],['CommandOrControl+Shift+Z','Redo'],['CommandOrControl+P','Print'],['CommandOrControl+G','Find next'],['CommandOrControl+Shift+G','Find previous'],['Alt+CommandOrControl+I','Developer tools']].map(([accelerator,label])=>({accelerator,label}));
   preferencesService=createPreferencesService({dataDir:DATA,reservedShortcuts,onChange:applyPreferences});nativeTheme.themeSource=preferencesService.snapshot().theme;
+  memoryService=createMemoryService({dataDir:DATA,policy:()=>preferencesService.snapshot().memory,projects:()=>agentService?.snapshot().projects||[],onChange:publish});
   nativeTheme.on('updated',()=>publish());
   agentService = createAgentService({ dataDir: DATA, onChange: () => publish(), turnCheckpoints:{before:args=>turnCheckpointService.before(args),after:args=>turnCheckpointService.after(args),locked:id=>turnCheckpointService?.locked(id)||false,dispatch:(...args)=>turnCheckpointService.dispatch(...args)}, runContext: ({thread,project}) => ({
     env: { VEK_BROWSER_CLI: path.join(ROOT, 'cli/vek-browser.mjs'), VEK_DATA_DIR: DATA, VEK_THREAD_ID: thread.id, VEK_PROJECT_ID: thread.projectId, VEK_BROWSER_INSTANCE_ID: INSTANCE },
@@ -742,5 +757,5 @@ app.on('before-quit', event => {
   if (runtimeFile) { try { const r = JSON.parse(fs.readFileSync(runtimeFile)); if (r.pid === process.pid) fs.unlinkSync(runtimeFile); } catch {} }
   for (const c of connections) c.ws.close(); server?.close();
   tray?.destroy();
-  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
+  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),memoryService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
 });

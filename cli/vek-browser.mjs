@@ -46,7 +46,7 @@ try {
     process.stdout.write(await readFile(join(root,'skills/vek-browser/API.md'),'utf8'));
   } else if (args[0] === 'api') {
     const action = args[1];
-    if (!action || !/^(agents|workspace|mcp|catalog|voice|preferences|permissions|download|library|recorder|profile|homepin|space|spaces):[A-Za-z0-9:_-]+$/.test(action)) throw new Error('Usage: vek-browser api ACTION [--json JSON] (or JSON on stdin)');
+    if (!action || !/^(agents|workspace|mcp|catalog|voice|preferences|memory|permissions|download|library|recorder|profile|homepin|space|spaces):[A-Za-z0-9:_-]+$/.test(action)) throw new Error('Usage: vek-browser api ACTION [--json JSON] (or JSON on stdin)');
     if (args.length > 2 && (args[2] !== '--json' || args.length !== 4)) throw new Error('Expected --json followed by one JSON object');
     const source = args[2] === '--json' ? args[3] : process.stdin.isTTY ? '{}' : await readStdin();
     const value = source.trim() ? JSON.parse(source) : {};

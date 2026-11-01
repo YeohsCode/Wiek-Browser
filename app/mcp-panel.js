@@ -3,7 +3,7 @@
   function createPanel(root, invoke, initialContext = {}) {
     let data = { integrations: [], tasks: [], grants: [], connections: [], gateway: null }, context = initialContext;
     let projectId = context.projects?.[0]?.id || '', threadId = '', view = 'integrations', error = '', pending = false, dialog = null, destroyed = false;
-    const tools = new Map();
+    const tools = new Map(), resourceSections = new Map();
     const make = (tag, text, cls) => { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (cls) node.className = cls; return node; };
     const button = (label, action, cls = '') => { const node = make('button', label, `vm-button ${cls}`); node.type = 'button'; node.onclick = action; node.disabled = pending; return node; };
     const scope = () => ({ projectId, ...(threadId ? { threadId } : {}) });
@@ -52,6 +52,28 @@
       const result = await action('mcp:tools:list', { integrationId: integration.id, scope: scope() });
       if (result) tools.set(`${integration.id}:${projectId}:${threadId}`, result.tools); render();
     }
+    async function readResource(integration, uri) {
+      const selectedScope = JSON.stringify(scope());
+      const result = await action('mcp:resources:read', { integrationId: integration.id, scope: scope(), uri });
+      if (!result || selectedScope !== JSON.stringify(scope())) return;
+      const contents = result.contents.map(row => row.blob === undefined ? row : { uri: row.uri, mimeType: row.mimeType, binaryBase64Characters: row.blob.length });
+      dialog = { title: 'Resource contents', readonly: true, notice: result.stale ? 'Changed during this read. Read again for current content.' : 'Returned by the selected MCP server. Text is displayed as data; binary content is not opened.', fields: [field('Resource URI', 'uri', uri), field('Contents', 'contents', JSON.stringify(contents, null, 2), true)] }; render();
+    }
+    function resourceUri(integration, template = '') {
+      dialog = { title: 'Read resource URI', notice: template ? `Template: ${template}. Enter a complete resource URI. It is sent to this MCP server only.` : 'Enter a complete resource URI. Vek sends it to this MCP server and displays the returned data.', fields: [field('Resource URI', 'uri', '')], submit: values => readResource(integration, values.uri) }; render();
+    }
+    function resources(card, item, connection) {
+      if (connection?.status !== 'connected') return;
+      if (item.protocolVersion === '2026-07-28') { card.append(make('p', 'Resource browsing currently requires a session protocol.', 'vm-muted')); return; }
+      if (!connection.resourceCapabilities) return;
+      const section = make('details'); section.dataset.resourceKey = `${item.id}:${projectId}:${threadId}`; section.open = resourceSections.get(section.dataset.resourceKey) === true; section.append(make('summary', 'Resources'));
+      const actions = make('div', '', 'vm-actions'); actions.append(button('List resources', () => action('mcp:resources:list', { integrationId: item.id, scope: scope() })), button('List templates', () => action('mcp:resources:templates', { integrationId: item.id, scope: scope() })), button('Read URI', () => resourceUri(item))); section.append(actions);
+      for (const resource of connection.resources || []) { const row = make('div', '', 'vm-tool'), info = make('div', '', 'vm-grow'); info.append(make('strong', resource.title || resource.name), make('p', resource.description || ''), make('code', resource.uri)); row.append(info, button('Read resource', () => readResource(item, resource.uri))); if (connection.resourceCapabilities.subscribe === true && !(connection.resourceSubscriptions || []).some(entry => entry.uri === resource.uri)) row.append(button('Subscribe', () => action('mcp:resources:subscribe', { integrationId: item.id, scope: scope(), uri: resource.uri }))); section.append(row); }
+      if (connection.resources?.length === 0) section.append(make('p', 'No resources listed by this server.', 'vm-muted'));
+      for (const template of connection.resourceTemplates || []) { const row = make('div', '', 'vm-tool'); row.append(make('span', `${template.title || template.name} · ${template.uriTemplate}`, 'vm-grow'), button('Use template', () => resourceUri(item, template.uriTemplate))); section.append(row); }
+      for (const entry of connection.resourceSubscriptions || []) { const row = make('div', '', 'vm-tool'); row.append(make('span', `${entry.uri} · ${entry.status} · ${entry.revision > entry.readRevision ? 'changed — read again' : 'no unread update'} · updates ${entry.revision}`, 'vm-grow'), button('Read latest', () => readResource(item, entry.uri)), button('Unsubscribe', () => action('mcp:resources:unsubscribe', { integrationId: item.id, scope: scope(), uri: entry.uri }))); section.append(row); }
+      section.append(make('p', 'Subscriptions belong to this connection. Updates mark content stale; they do not fetch or execute it. Disconnecting clears subscriptions.', 'vm-muted')); card.append(section);
+    }
     function pairClient() {
       const ids = data.integrations.filter(i => visible(i.scope)).map(i => i.id);
       dialog = { title: 'Pair a local MCP client', notice: 'A one-time code grants the selected project/thread only. Exchange it locally for a bearer token; revoke the client here when finished.', fields: [field('Client name', 'name', 'Local client'), field('Allowed integration IDs — JSON array', 'integrationIds', JSON.stringify(ids), true), field('Allowed browser methods — JSON array; choose only the capabilities needed', 'browserMethods', '[]', true)], submit: async values => {
@@ -73,7 +95,7 @@
         if (connection?.error) card.append(make('div', connection.error, 'vm-error'));
         if (connection?.stderr) card.append(make('p', connection.stderr, 'vm-muted'));
         for (const tool of tools.get(`${item.id}:${projectId}:${threadId}`) || connection?.tools || []) { const row = make('div', '', 'vm-tool'), description = make('div', '', 'vm-grow'); description.append(make('strong', tool.name), make('p', tool.description || 'No description supplied')); row.append(description, button('Run tool', () => toolCall(item, tool))); card.append(row); }
-        body.append(card);
+        resources(card, item, connection); body.append(card);
       }
     }
     function tasks(body) {
@@ -103,6 +125,7 @@
     }
     function render() {
       if (destroyed) return;
+      for(const section of root.querySelectorAll('details[data-resource-key]'))resourceSections.set(section.dataset.resourceKey,section.open);
       const active = root.contains(document.activeElement) ? document.activeElement : null, focused = active?.dataset.focus, selection = active && 'selectionStart' in active ? [active.selectionStart, active.selectionEnd] : null;
       root.classList.add('vek-mcp-panel'); root.replaceChildren();
       const header = make('div', '', 'vm-header'), intro = make('div'); intro.append(make('h1', 'Connected tools'), make('p', 'MCP servers over stdio or HTTP, scoped tool tasks, and paired clients.')); header.append(intro, button('Add MCP server', () => editIntegration(), 'vm-primary'), button('Add HTTP server', () => editIntegration(null, 'http'))); root.append(header);
@@ -110,7 +133,8 @@
       for (const p of context.projects || []) { const option = make('option', p.name); option.value = p.id; option.selected = p.id === projectId; project.append(option); }
       const all = make('option', 'All threads in project'); all.value = ''; thread.append(all);
       for (const t of (context.threads || []).filter(t => t.projectId === projectId)) { const option = make('option', t.title || t.id); option.value = t.id; option.selected = t.id === threadId; thread.append(option); }
-      project.onchange = () => { projectId = project.value; threadId = ''; render(); }; thread.onchange = () => { threadId = thread.value; render(); };
+      project.disabled = pending; thread.disabled = pending;
+      project.onchange = () => { projectId = project.value; threadId = ''; dialog = null; render(); }; thread.onchange = () => { threadId = thread.value; dialog = null; render(); };
       selectors.append(make('span', 'Scope'), project, thread, button('Refresh', () => action('mcp:snapshot', {}))); root.append(selectors);
       const tabs = make('nav', '', 'vm-tabs'); for (const [id, label] of [['integrations', 'Integrations'], ['tasks', 'Tool tasks'], ['clients', 'Paired clients']]) tabs.append(button(label, () => { view = id; render(); }, view === id ? 'is-active' : '')); root.append(tabs);
       if (error && !dialog) root.append(make('div', error, 'vm-error'));

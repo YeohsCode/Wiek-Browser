@@ -1,0 +1,17 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: packaged memory binds file indexing to current profile instead of caller override
+    at check (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/workbench-integration.mjs:23:43)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/workbench-integration.mjs:185:145
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v25.2.1

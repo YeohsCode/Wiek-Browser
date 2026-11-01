@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-31T16:01:06.559Z",
-  "version": "0.10.0",
+  "generatedAt": "2026-11-01T15:37:02.882Z",
+  "version": "0.11.0",
   "versionMatches": true,
-  "checkedFiles": 152,
+  "checkedFiles": 154,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -129,27 +129,37 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "61b6071ca6655dc6f9a92eede9b46dfb431079485b74435162636ae696e0a0a5",
+      "sha256": "a9820b4991acfa1b8e5a86917cf6fe66881708b52f30cc9ff2184fc981540a65",
       "matches": true
     },
     {
       "file": "app/mcp-http-client.cjs",
-      "sha256": "0f3696396948e0c2ec2b46903a9dc82bfc7434088b177e75edddbd62ccb0e1d5",
+      "sha256": "4b2656f76e6c113419ec2377660ce81cadad09b2c21763e7cb6676f0dd2aeaa4",
       "matches": true
     },
     {
       "file": "app/mcp-panel.css",
-      "sha256": "39a614a3b7f4012bb1098bdd5bef44c144cdbcc545002eb136873e18090dad45",
+      "sha256": "6d236db50d2fcf6433883d994573e57c7a76f78a0d02c718b0084f35dfc46592",
       "matches": true
     },
     {
       "file": "app/mcp-panel.js",
-      "sha256": "bc25726ec9cdc7dd0a5a9b2dd502d813263316ee68371b919a49569709120ebe",
+      "sha256": "befb07713bfba488bede11eedfe9ab194b2de7004f0349ba490832623f38205b",
+      "matches": true
+    },
+    {
+      "file": "app/mcp-resources.cjs",
+      "sha256": "389725d5618b4a0d20d799f8bcea0ea4d5eeb80520d3c79384be54952359c761",
       "matches": true
     },
     {
       "file": "app/mcp-service.cjs",
-      "sha256": "16f1ca10906a18b2327ccc6d3fa3eeda246521c14f1f838c779d80790277b823",
+      "sha256": "c3a73dd87755f8a03910ed873340a6a7633abdec0a06cdc03b5ff37d36ceecd2",
+      "matches": true
+    },
+    {
+      "file": "app/memory-service.cjs",
+      "sha256": "e7a750b89022aa927308e79cb440809d50c162a9a3c8c193030abfe56a6c6607",
       "matches": true
     },
     {
@@ -159,12 +169,12 @@
     },
     {
       "file": "app/preferences-panel.css",
-      "sha256": "3a3579aae8b1d77d503b0d69b9a56fea05426c31ac595c9884c4bb643e0641c4",
+      "sha256": "ebf30e805af91e2fa75d923762e724a87eb2e85b540ff4f7d1fcfcf23e930e9e",
       "matches": true
     },
     {
       "file": "app/preferences-panel.js",
-      "sha256": "54f3abadf1512dff39035bfa19979a06e6953d51a2b1a861daa5493f8ab36b88",
+      "sha256": "a00ee5624498f04e9776a12a906695815a0932b0bc36868d9ccd6dffc2a01ead",
       "matches": true
     },
     {
@@ -199,7 +209,7 @@
     },
     {
       "file": "app/renderer.js",
-      "sha256": "33ccb9a0bb24ed1709f26399640f6fe55128cb78f58e7afd98b76ba36bd9a30a",
+      "sha256": "bc76fe32ece79ef6b07767a407e0081905563b564ec35bed74a681f5e2b75e1a",
       "matches": true
     },
     {
@@ -274,7 +284,7 @@
     },
     {
       "file": "cli/vek-browser.mjs",
-      "sha256": "d45d9234fc2a74cef9ac68afff6c420fc08370c0137664a7b7eae0fff0c568ba",
+      "sha256": "0450ae0d9f3aebb4e239cb165695ef84387c8576fbcd03b6ff7792e56e1763fe",
       "matches": true
     },
     {
@@ -759,7 +769,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "707ff7a9d2935eaac6ee6c539c87cc98aa806bfa5c260af8706f8e7999eb228a",
+      "sha256": "8290e57e1235251b833886186b486429d607afe96d1cb3d3323b4889cb6f6ef7",
       "matches": true
     },
     {

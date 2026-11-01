@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-10-31T16:01:35.856667+00:00",
-  "version": "0.10.0",
+  "generatedAt": "2026-11-01T15:39:19.703880+00:00",
+  "version": "0.11.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -30,7 +30,7 @@
           "notRun": 0,
           "assertions": 1248
         },
-        "wallTimeMs": 152515,
+        "wallTimeMs": 153104,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
       }
@@ -43,14 +43,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 264,
+    "pass": 285,
     "fail": 0,
-    "log": "v100-service-tests.log"
+    "log": "v110-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 109,
+    "pass": 123,
     "fail": 0,
-    "log": "v100-package-workbench.log"
+    "log": "v110-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -64,7 +64,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 152,
+    "sourceFilesChecked": 154,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -91,7 +91,9 @@
     "Observed aliases/canonical IDs and optional effort/adaptive fields; absence remains unknown",
     "Fresh capability validation before user input and explicit effort control acknowledgement",
     "Default model reset on resumed process; canonical selection retained in UI",
-    "Discovery cancellation/concurrency/project leases and archive authority boundaries"
+    "Discovery cancellation/concurrency/project leases and archive authority boundaries",
+    "Session MCP resources/templates/read/subscribe/unsubscribe, scoped revision and stale handling, no automatic fetching or resubscription",
+    "Explicit Profile-scoped local webpage/project UTF-8 memory corpus with literal Chinese/English search, cancellation, partial failures, and delete-on-disable"
   ],
   "remainingGaps": [
     "Five other native provider protocols, source native session/history migration and paid generation validation",
@@ -101,10 +103,10 @@
     "Complete Chrome/Safari profile/web storage/extensions migration",
     "Custom Chromium engine equivalence",
     "Linked worktrees, checkpoint retention and remote PR workflow",
-    "MCP OAuth/MRTR/subscriptions/sampling/elicitation",
+    "MCP OAuth/MRTR/modern subscriptions/sampling/elicitation",
     "OS-wide selection/screenshot/recording and translation",
     "OS scheduling while application is closed",
-    "Complete memory index and Ego proprietary services",
+    "Semantic/all-disk/multiformat memory index and Ego proprietary services",
     "31 live-site model benchmark not run",
     "Concurrent independent CLI starts do not yet have leader election"
   ],
@@ -152,14 +154,14 @@
     "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
   },
   "uiQa": {
-    "log": "v080-native-ui-qa.md",
-    "nativeModelAndEffortMenus": true,
-    "nativeFilePickerWithOfficialSyntheticRollout": true,
-    "noExecutionOnImport": true,
-    "newOwnedSessionOnContinuation": true,
-    "sourceBytesUnchanged": true,
-    "defaultUserDataAppVersion": "0.8.0",
-    "wireCheck": "v080-native-ui-check.json"
+    "log": "v110-native-ui-qa.md",
+    "fixtureOnly": true,
+    "nativeFilePicker": true,
+    "pageAndFileChineseSearch": true,
+    "resourceSubscriptionReadAndUnsubscribe": true,
+    "finalDarkThemeReviewed": true,
+    "wireCheck": "v110-native-ui-check.json",
+    "normalAppStatus": "v110-normal-app-status.json"
   },
   "claudeFocusedTests": {
     "pass": 29,
@@ -250,8 +252,19 @@
       "result": "One timeout while full SDK suite was also running; cause not proven. Isolated check and final full 202-test run passed without changing assertions or watcher implementation."
     }
   ],
-  "observedFailures": [],
-  "validationOrderNote": "Final 0.10.0 runtime was tested by 264 local checks, 109 packaged workbench checks, actual model UI and the complete 69-case SDK. Final package has 152 matching source files and 81 unchanged upstream inputs. CLI packaged lifecycle and older Codex UI evidence are retained, not claimed as re-performed.",
+  "observedFailures": [
+    {
+      "report": "v110-package-workbench-attempt1.log",
+      "status": "fixed-and-regressed",
+      "description": "System /var vs /private/var alias with a canonical project root rejected a legitimate explicit memory file selection; final suite preserves boundary checks."
+    },
+    {
+      "report": "v110-native-ui-attempt1.png",
+      "status": "fixed-and-regressed",
+      "description": "Preferences memory boolean settings were mistaken for a corpus response; fixed documents-array discrimination with actual Electron checkbox regression. MCP dark-theme contrast also fixed and visually verified."
+    }
+  ],
+  "validationOrderNote": "Final 285 local checks, 21 focused checks and 123 packaged workbench checks pass after all fixes. SDK 69 ran before the preferences response fix, MCP dark CSS and memory forget/in-flight cancellation branch; SDK and browser page host are unchanged. Native UI validates final appearance, 154 source files match the final build, 81 upstream inputs unchanged. P1 integrations deferred; P2/P3 remain incomplete.",
   "codexReplayActivityTests": {
     "newTests": 21,
     "fixtureOnly": true,
@@ -317,5 +330,37 @@
     "discoveryUserFrames": 0,
     "effortAcknowledgementBeforeUser": true,
     "normalAppStatus": "v100-normal-app-status.json"
+  },
+  "executionPriority": {
+    "asOf": "2026-11-01 Asia/Shanghai",
+    "active": [
+      "P2",
+      "P3"
+    ],
+    "deferred": "P1 integrations with other Agents, including provider gateway injection",
+    "localCursorStash": "31764915635554521270725e0d0c38e178eea3cf",
+    "cursorShipped": false
+  },
+  "p2P3Tests": {
+    "newTests": 21,
+    "pass": 21,
+    "fail": 0,
+    "log": "v110-p2-p3-tests.log",
+    "modelCalls": 0,
+    "externalAccountActions": 0,
+    "mcpResourceTests": 11,
+    "memoryTests": 9,
+    "actualElectronPanelTests": 1,
+    "packagedAdditionalChecks": 14
+  },
+  "previousV080UiQa": {
+    "log": "v080-native-ui-qa.md",
+    "nativeModelAndEffortMenus": true,
+    "nativeFilePickerWithOfficialSyntheticRollout": true,
+    "noExecutionOnImport": true,
+    "newOwnedSessionOnContinuation": true,
+    "sourceBytesUnchanged": true,
+    "defaultUserDataAppVersion": "0.8.0",
+    "wireCheck": "v080-native-ui-check.json"
   }
 }

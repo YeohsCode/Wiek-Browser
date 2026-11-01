@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-01T15:39:19.703880+00:00",
-  "version": "0.11.0",
+  "generatedAt": "2026-11-01T16:20:39.891884+00:00",
+  "version": "0.12.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -30,7 +30,7 @@
           "notRun": 0,
           "assertions": 1248
         },
-        "wallTimeMs": 153104,
+        "wallTimeMs": 154602,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
       }
@@ -43,14 +43,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 285,
+    "pass": 303,
     "fail": 0,
-    "log": "v110-service-tests.log"
+    "log": "v120-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 123,
+    "pass": 132,
     "fail": 0,
-    "log": "v110-package-workbench.log"
+    "log": "v120-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -64,7 +64,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 154,
+    "sourceFilesChecked": 155,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -93,7 +93,8 @@
     "Default model reset on resumed process; canonical selection retained in UI",
     "Discovery cancellation/concurrency/project leases and archive authority boundaries",
     "Session MCP resources/templates/read/subscribe/unsubscribe, scoped revision and stale handling, no automatic fetching or resubscription",
-    "Explicit Profile-scoped local webpage/project UTF-8 memory corpus with literal Chinese/English search, cancellation, partial failures, and delete-on-disable"
+    "Explicit Profile-scoped local webpage/project UTF-8 memory corpus with literal Chinese/English search, cancellation, partial failures, and delete-on-disable",
+    "Explicit HTTP MCP OAuth for pre-registered public clients: protected metadata/OIDC, S256 PKCE and fixed loopback callback, issuer/resource/scope review, bound encrypted credentials, serialized rotating refresh, no tool/code/refresh POST replay"
   ],
   "remainingGaps": [
     "Five other native provider protocols, source native session/history migration and paid generation validation",
@@ -103,7 +104,7 @@
     "Complete Chrome/Safari profile/web storage/extensions migration",
     "Custom Chromium engine equivalence",
     "Linked worktrees, checkpoint retention and remote PR workflow",
-    "MCP OAuth/MRTR/modern subscriptions/sampling/elicitation",
+    "MCP OAuth DCR/hosted client metadata/full step-up; MRTR/modern subscriptions/sampling/elicitation",
     "OS-wide selection/screenshot/recording and translation",
     "OS scheduling while application is closed",
     "Semantic/all-disk/multiformat memory index and Ego proprietary services",
@@ -154,14 +155,14 @@
     "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
   },
   "uiQa": {
-    "log": "v110-native-ui-qa.md",
+    "log": "v120-native-ui-qa.md",
     "fixtureOnly": true,
-    "nativeFilePicker": true,
-    "pageAndFileChineseSearch": true,
-    "resourceSubscriptionReadAndUnsubscribe": true,
-    "finalDarkThemeReviewed": true,
-    "wireCheck": "v110-native-ui-check.json",
-    "normalAppStatus": "v110-normal-app-status.json"
+    "nativePrepareReviewCancel": true,
+    "externalBrowserOpened": false,
+    "codeExchange": false,
+    "keychainTokenWrite": false,
+    "wireCheck": "v120-native-ui-check.json",
+    "normalAppStatus": "v120-normal-app-status.json"
   },
   "claudeFocusedTests": {
     "pass": 29,
@@ -250,9 +251,7 @@
       "log": "v070-service-concurrent-watch-failure.log",
       "test": "project watchers report changes and close without leaking handles",
       "result": "One timeout while full SDK suite was also running; cause not proven. Isolated check and final full 202-test run passed without changing assertions or watcher implementation."
-    }
-  ],
-  "observedFailures": [
+    },
     {
       "report": "v110-package-workbench-attempt1.log",
       "status": "fixed-and-regressed",
@@ -264,7 +263,8 @@
       "description": "Preferences memory boolean settings were mistaken for a corpus response; fixed documents-array discrimination with actual Electron checkbox regression. MCP dark-theme contrast also fixed and visually verified."
     }
   ],
-  "validationOrderNote": "Final 285 local checks, 21 focused checks and 123 packaged workbench checks pass after all fixes. SDK 69 ran before the preferences response fix, MCP dark CSS and memory forget/in-flight cancellation branch; SDK and browser page host are unchanged. Native UI validates final appearance, 154 source files match the final build, 81 upstream inputs unchanged. P1 integrations deferred; P2/P3 remain incomplete.",
+  "observedFailures": [],
+  "validationOrderNote": "Final 0.12.0 code passed 303 local checks, 132 packaged workbench checks, complete 69-case SDK and native OAuth prepare/review/cancel. Final package has 155 matching source files and 81 unchanged upstream inputs. Code/refresh/sign-out use synthetic AS and injected encryption in tests; real AS accounts and Keychain token writes remain unrun. P1 integrations deferred; P2/P3 incomplete.",
   "codexReplayActivityTests": {
     "newTests": 21,
     "fixtureOnly": true,
@@ -332,14 +332,15 @@
     "normalAppStatus": "v100-normal-app-status.json"
   },
   "executionPriority": {
-    "asOf": "2026-11-01 Asia/Shanghai",
+    "asOf": "2026-11-02 Asia/Shanghai",
     "active": [
       "P2",
       "P3"
     ],
     "deferred": "P1 integrations with other Agents, including provider gateway injection",
     "localCursorStash": "31764915635554521270725e0d0c38e178eea3cf",
-    "cursorShipped": false
+    "cursorShipped": false,
+    "next": "P2 Profile storage/session portability and explicit source migration; OAuth DCR and MRTR/modern subscriptions remain queued"
   },
   "p2P3Tests": {
     "newTests": 21,
@@ -362,5 +363,31 @@
     "sourceBytesUnchanged": true,
     "defaultUserDataAppVersion": "0.8.0",
     "wireCheck": "v080-native-ui-check.json"
+  },
+  "previousV110UiQa": {
+    "log": "v110-native-ui-qa.md",
+    "fixtureOnly": true,
+    "nativeFilePicker": true,
+    "pageAndFileChineseSearch": true,
+    "resourceSubscriptionReadAndUnsubscribe": true,
+    "finalDarkThemeReviewed": true,
+    "wireCheck": "v110-native-ui-check.json",
+    "normalAppStatus": "v110-normal-app-status.json"
+  },
+  "oauthTests": {
+    "newTests": 18,
+    "pass": 18,
+    "fail": 0,
+    "log": "v120-oauth-tests.log",
+    "httpCryptoServiceTests": 17,
+    "actualElectronPanelTests": 1,
+    "injectedEncryption": "AES-GCM fixture",
+    "actualSystemBrowserInAutomatedTests": false,
+    "packagedAdditionalChecks": 9,
+    "packagedFlow": "prepare/cancel only",
+    "realAccounts": false,
+    "realKeychainTokenWrite": false,
+    "modelCalls": 0,
+    "externalAccountActions": 0
   }
 }

@@ -1,6 +1,6 @@
 # Ego / Vek Browser 同集测试对比
 
-生成时间：2026-11-01T15:27:47.381Z
+生成时间：2026-11-01T16:17:53.754Z
 
 使用原封不动的上游真实浏览器 E2E runner、SDK 与本地 fixture，串行执行。SKIP 和未运行均不计为通过；本结果不等同 31 项在线模型 benchmark。
 
@@ -9,79 +9,79 @@
 | 浏览器 | 运行状态 | PASS | FAIL | SKIP | 未运行 | 断言 | 退出码 | 总用时 |
 |---|---|---:|---:|---:|---:|---:|---:|---:|
 | ego | fail | 68 | 1 | 0 | 0 | 1235 | 1 | 297.6s |
-| vek | pass | 69 | 0 | 0 | 0 | 1248 | 0 | 153.1s |
+| vek | pass | 69 | 0 | 0 | 0 | 1248 | 0 | 154.6s |
 
 | Case | Ego | Vek |
 |---|---|---|
-| environment initialization | pass (23 assertions, 3100ms) | pass (24 assertions, 2100ms) |
-| helper surface | pass (67 assertions, 206ms) | pass (67 assertions, 166ms) |
-| task spaces and control | pass (58 assertions, 1100ms) | pass (58 assertions, 787ms) |
-| TaskSpace profile selection | pass (19 assertions, 399ms) | pass (19 assertions, 299ms) |
-| v2 cross-space routing | pass (4 assertions, 518ms) | pass (4 assertions, 527ms) |
+| environment initialization | pass (23 assertions, 3100ms) | pass (24 assertions, 2600ms) |
+| helper surface | pass (67 assertions, 206ms) | pass (67 assertions, 173ms) |
+| task spaces and control | pass (58 assertions, 1100ms) | pass (58 assertions, 796ms) |
+| TaskSpace profile selection | pass (19 assertions, 399ms) | pass (19 assertions, 306ms) |
+| v2 cross-space routing | pass (4 assertions, 518ms) | pass (4 assertions, 532ms) |
 | navigation helpers | pass (33 assertions, 2600ms) | pass (33 assertions, 2500ms) |
-| observation helpers | pass (51 assertions, 2600ms) | pass (51 assertions, 1500ms) |
-| pointer and scroll helpers | pass (45 assertions, 28200ms) | pass (45 assertions, 6500ms) |
+| observation helpers | pass (51 assertions, 2600ms) | pass (51 assertions, 1600ms) |
+| pointer and scroll helpers | pass (45 assertions, 28200ms) | pass (45 assertions, 6600ms) |
 | keyboard and file helpers | pass (22 assertions, 2100ms) | pass (22 assertions, 1500ms) |
-| keyboard regression | pass (14 assertions, 783ms) | pass (14 assertions, 734ms) |
-| wait, fetch, cdp, js, help | pass (42 assertions, 2400ms) | pass (42 assertions, 2400ms) |
+| keyboard regression | pass (14 assertions, 783ms) | pass (14 assertions, 739ms) |
+| wait, fetch, cdp, js, help | pass (42 assertions, 2400ms) | pass (42 assertions, 2500ms) |
 | runtime regression | pass (20 assertions, 3200ms) | pass (20 assertions, 3200ms) |
 | target-scoped event isolation | pass (4 assertions, 3200ms) | pass (4 assertions, 3200ms) |
-| page labels: create | pass (13 assertions, 369ms) | pass (13 assertions, 385ms) |
-| page labels: restore and reuse | pass (14 assertions, 412ms) | pass (14 assertions, 396ms) |
-| page labels: close and do not reuse | pass (10 assertions, 692ms) | pass (10 assertions, 531ms) |
-| page labels: persist before hard stop | pass (1 assertions, 327ms) | pass (1 assertions, 301ms) |
-| page labels: restore after hard stop | pass (3 assertions, 403ms) | pass (3 assertions, 297ms) |
-| page inventory and budget | pass (9 assertions, 851ms) | pass (9 assertions, 737ms) |
-| page adoption and release | pass (19 assertions, 580ms) | pass (19 assertions, 508ms) |
-| page basic operations | pass (53 assertions, 3900ms) | pass (53 assertions, 1500ms) |
-| page complex evaluate | pass (23 assertions, 654ms) | pass (23 assertions, 548ms) |
-| page fetch | pass (25 assertions, 646ms) | pass (25 assertions, 558ms) |
+| page labels: create | pass (13 assertions, 369ms) | pass (13 assertions, 386ms) |
+| page labels: restore and reuse | pass (14 assertions, 412ms) | pass (14 assertions, 391ms) |
+| page labels: close and do not reuse | pass (10 assertions, 692ms) | pass (10 assertions, 536ms) |
+| page labels: persist before hard stop | pass (1 assertions, 327ms) | pass (1 assertions, 303ms) |
+| page labels: restore after hard stop | pass (3 assertions, 403ms) | pass (3 assertions, 296ms) |
+| page inventory and budget | pass (9 assertions, 851ms) | pass (9 assertions, 761ms) |
+| page adoption and release | pass (19 assertions, 580ms) | pass (19 assertions, 513ms) |
+| page basic operations | pass (53 assertions, 3900ms) | pass (53 assertions, 1600ms) |
+| page complex evaluate | pass (23 assertions, 654ms) | pass (23 assertions, 542ms) |
+| page fetch | pass (25 assertions, 646ms) | pass (25 assertions, 565ms) |
 | page actions and popup adoption | pass (57 assertions, 32300ms) | pass (57 assertions, 4100ms) |
 | Page click hit target | pass (17 assertions, 8300ms) | pass (17 assertions, 3400ms) |
 | Page action motion tolerance | pass (6 assertions, 1500ms) | pass (6 assertions, 1100ms) |
 | Page drag and canvas drawing | pass (15 assertions, 12800ms) | pass (15 assertions, 1000ms) |
-| Page JavaScript dialog handling | pass (34 assertions, 4700ms) | pass (34 assertions, 1000ms) |
-| Page media playback | pass (17 assertions, 13200ms) | pass (17 assertions, 4600ms) |
-| Page scrolled screenshot | pass (13 assertions, 549ms) | pass (13 assertions, 454ms) |
-| Page snapshot locator quality | pass (4 assertions, 383ms) | pass (4 assertions, 327ms) |
-| Page snapshot iframe viewport | pass (13 assertions, 856ms) | pass (13 assertions, 795ms) |
+| Page JavaScript dialog handling | pass (34 assertions, 4700ms) | pass (34 assertions, 986ms) |
+| Page media playback | pass (17 assertions, 13200ms) | pass (17 assertions, 4700ms) |
+| Page scrolled screenshot | pass (13 assertions, 549ms) | pass (13 assertions, 463ms) |
+| Page snapshot locator quality | pass (4 assertions, 383ms) | pass (4 assertions, 335ms) |
+| Page snapshot iframe viewport | pass (13 assertions, 856ms) | pass (13 assertions, 774ms) |
 | Page snapshot subtree | pass (46 assertions, 2400ms) | pass (46 assertions, 1300ms) |
 | Page ref identity across partial snapshots | pass (14 assertions, 5100ms) | pass (14 assertions, 1400ms) |
-| Page refs across rounds: prepare | pass (5 assertions, 344ms) | pass (5 assertions, 324ms) |
-| Page refs across rounds: resume | pass (12 assertions, 7400ms) | pass (12 assertions, 5000ms) |
-| Page refs in dialog workflows | pass (10 assertions, 1600ms) | pass (10 assertions, 752ms) |
-| Page refs after failed actions: prepare | pass (8 assertions, 768ms) | pass (8 assertions, 748ms) |
-| Page refs after failed actions: resume | pass (3 assertions, 684ms) | pass (3 assertions, 281ms) |
-| Page refs after upload: prepare | pass (2 assertions, 438ms) | pass (2 assertions, 424ms) |
+| Page refs across rounds: prepare | pass (5 assertions, 344ms) | pass (5 assertions, 332ms) |
+| Page refs across rounds: resume | pass (12 assertions, 7400ms) | pass (12 assertions, 5100ms) |
+| Page refs in dialog workflows | pass (10 assertions, 1600ms) | pass (10 assertions, 791ms) |
+| Page refs after failed actions: prepare | pass (8 assertions, 768ms) | pass (8 assertions, 747ms) |
+| Page refs after failed actions: resume | pass (3 assertions, 684ms) | pass (3 assertions, 288ms) |
+| Page refs after upload: prepare | pass (2 assertions, 438ms) | pass (2 assertions, 416ms) |
 | Page refs after upload: resume | pass (3 assertions, 362ms) | pass (3 assertions, 275ms) |
-| Page snapshot lazy iframe | pass (14 assertions, 332ms) | pass (14 assertions, 277ms) |
-| Page snapshot sibling iframes | pass (14 assertions, 536ms) | pass (14 assertions, 468ms) |
-| Page snapshot nested iframes | pass (18 assertions, 521ms) | pass (18 assertions, 452ms) |
-| Page snapshot replaced iframe | pass (11 assertions, 426ms) | pass (11 assertions, 401ms) |
-| Page open Shadow DOM locators | pass (4 assertions, 2000ms) | pass (4 assertions, 782ms) |
-| Page text locators | pass (6 assertions, 3200ms) | pass (6 assertions, 909ms) |
+| Page snapshot lazy iframe | pass (14 assertions, 332ms) | pass (14 assertions, 279ms) |
+| Page snapshot sibling iframes | pass (14 assertions, 536ms) | pass (14 assertions, 485ms) |
+| Page snapshot nested iframes | pass (18 assertions, 521ms) | pass (18 assertions, 468ms) |
+| Page snapshot replaced iframe | pass (11 assertions, 426ms) | pass (11 assertions, 409ms) |
+| Page open Shadow DOM locators | pass (4 assertions, 2000ms) | pass (4 assertions, 771ms) |
+| Page text locators | pass (6 assertions, 3200ms) | pass (6 assertions, 923ms) |
 | Page Playwright selector compatibility | pass (16 assertions, 18200ms) | pass (16 assertions, 3000ms) |
 | Page popup waiter and URL diagnostic | pass (11 assertions, 4600ms) | pass (11 assertions, 1200ms) |
-| Page download lifecycle | pass (8 assertions, 1000ms) | pass (8 assertions, 648ms) |
+| Page download lifecycle | pass (8 assertions, 1000ms) | pass (8 assertions, 659ms) |
 | Concurrent TaskSpace downloads | pass (13 assertions, 5500ms) | pass (13 assertions, 2000ms) |
-| Page Chromium PDF viewer download | pass (13 assertions, 2900ms) | pass (13 assertions, 1000ms) |
-| Page download across rounds: prepare | pass (1 assertions, 1100ms) | pass (1 assertions, 655ms) |
-| Page download across rounds: resume | pass (4 assertions, 1100ms) | pass (4 assertions, 193ms) |
+| Page Chromium PDF viewer download | pass (13 assertions, 2900ms) | pass (13 assertions, 1100ms) |
+| Page download across rounds: prepare | pass (1 assertions, 1100ms) | pass (1 assertions, 651ms) |
+| Page download across rounds: resume | pass (4 assertions, 1100ms) | pass (4 assertions, 210ms) |
 | Page OOPIF actions | pass (15 assertions, 10100ms) | pass (15 assertions, 2100ms) |
-| Page OOPIF restore and close | pass (7 assertions, 1100ms) | pass (7 assertions, 222ms) |
+| Page OOPIF restore and close | pass (7 assertions, 1100ms) | pass (7 assertions, 209ms) |
 | Page load states | pass (50 assertions, 12800ms) | pass (50 assertions, 11500ms) |
-| Page dedicated Worker startup | pass (1 assertions, 387ms) | pass (1 assertions, 309ms) |
+| Page dedicated Worker startup | pass (1 assertions, 387ms) | pass (1 assertions, 317ms) |
 | Page API alignment | pass (40 assertions, 5200ms) | pass (40 assertions, 5300ms) |
-| Page actionability | pass (46 assertions, 12500ms) | pass (46 assertions, 5800ms) |
-| Page evaluate timeout recovery | pass (24 assertions, 48400ms) | pass (24 assertions, 48300ms) |
-| Page delayed popup: schedule | pass (1 assertions, 935ms) | pass (1 assertions, 657ms) |
+| Page actionability | pass (46 assertions, 12500ms) | pass (46 assertions, 5900ms) |
+| Page evaluate timeout recovery | pass (24 assertions, 48400ms) | pass (24 assertions, 48400ms) |
+| Page delayed popup: schedule | pass (1 assertions, 935ms) | pass (1 assertions, 658ms) |
 | Page delayed popup: resume | pass (3 assertions, 1300ms) | pass (3 assertions, 1100ms) |
-| v1 and v2 action parity | pass (13 assertions, 1900ms) | pass (13 assertions, 790ms) |
-| portable keyboard workflow | pass (4 assertions, 880ms) | pass (4 assertions, 814ms) |
+| v1 and v2 action parity | pass (13 assertions, 1900ms) | pass (13 assertions, 799ms) |
+| portable keyboard workflow | pass (4 assertions, 880ms) | pass (4 assertions, 793ms) |
 | Page keyboard interface | fail (26 assertions, 1900ms) | pass (38 assertions, 2000ms) |
-| pure CDP workflow | pass (9 assertions, 467ms) | pass (9 assertions, 375ms) |
+| pure CDP workflow | pass (9 assertions, 467ms) | pass (9 assertions, 383ms) |
 | snapshot workflow | pass (7 assertions, 3100ms) | pass (7 assertions, 1000ms) |
-| visual workflow | pass (5 assertions, 425ms) | pass (5 assertions, 493ms) |
+| visual workflow | pass (5 assertions, 425ms) | pass (5 assertions, 521ms) |
 
 ## 可审计产物
 

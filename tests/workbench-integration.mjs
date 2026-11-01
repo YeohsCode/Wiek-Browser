@@ -9,6 +9,8 @@ import http from 'node:http';
 import { execFileSync } from 'node:child_process';
 import WebSocket from 'ws';
 import {randomUUID} from 'node:crypto';
+import {createRequire} from 'node:module';
+const {createOAuthPeer}=createRequire(import.meta.url)('./fixtures/oauth-mcp-server.cjs');
 const dataDir = path.resolve(process.env.VEK_DATA_DIR || 'data/workbench-e2e');
 const cli = path.resolve(process.env.VEK_WORKBENCH_CLI || 'cli/vek-browser.mjs');
 execFileSync(process.execPath,[cli,'start'],{env:{...process.env,VEK_DATA_DIR:dataDir},stdio:'pipe'});
@@ -23,6 +25,7 @@ const cdp=(spaceId,method,params={})=>new Promise((resolve,reject)=>{const id=++
 const check=(condition,message)=>{ assert.ok(condition,message); checks++; };
 async function waitThread(id) { const limit=Date.now()+20000; while(Date.now()<limit) { const t=await action('agents:threads:read',{id});if(!['running','queued','discovering'].includes(t.status))return t;await new Promise(r=>setTimeout(r,40)); } throw new Error('Thread did not complete'); }
 const directory=await fs.mkdtemp(path.join(os.tmpdir(),'vek-workbench-e2e-'));
+const oauthPeer=await createOAuthPeer();
 const downloadBytes=Buffer.alloc(2*1024*1024,77);
 const web=http.createServer((req,res)=>{
   if(req.url==='/slow-download'){
@@ -158,6 +161,17 @@ try {
   check(resourceState.resources===null&&resourceState.resourceSubscriptions[0].revision>resourceState.resourceSubscriptions[0].readRevision,'packaged host invalidates resource list and marks read content stale');
   await assert.rejects(action('mcp:resources:read',{integrationId:resourceId,scope:{projectId},uri:resourceUri}),/outside/);checks++;
   await action('mcp:resources:unsubscribe',{integrationId:resourceId,scope:resourceScope,uri:resourceUri});check((await action('mcp:snapshot')).connections.find(row=>row.integrationId===resourceId).resourceSubscriptions.length===0,'packaged host removes acknowledged subscription');
+  const oauthConfig=await action('mcp:integrations:save',{name:'OAuth host fixture',transport:'http',url:oauthPeer.url,allowInsecureHttp:true,oauth:{clientId:'vek-public-fixture'},scope:{projectId,threadId}}),oauthId=oauthConfig.integrations.at(-1).id;
+  check(oauthConfig.oauth.available===true,'packaged macOS host advertises secure OS storage for explicit OAuth');
+  const oauthFlow=await action('mcp:oauth:prepare',{integrationId:oauthId,scope:{projectId,threadId}});check(oauthFlow.status==='prepared'&&oauthFlow.resource===oauthPeer.url&&oauthFlow.scopes[0]==='notes:read','packaged OAuth discovers an exact resource and issuer with explicit permission review');
+  check(!JSON.stringify(oauthFlow).includes('code_challenge')&&!JSON.stringify(oauthFlow).includes('authorizationUrl'),'packaged OAuth does not expose the private authorization state/URL in its snapshot');
+  await assert.rejects(action('mcp:integrations:connect',{id:oauthId,scope:{projectId,threadId}}),/in progress/);checks++;
+  await assert.rejects(action('mcp:oauth:cancel',{integrationId:oauthId,scope:{projectId},flowId:oauthFlow.id}),/outside/);checks++;
+  const cancelledFlow=await action('mcp:oauth:cancel',{integrationId:oauthId,scope:{projectId,threadId},flowId:oauthFlow.id});check(cancelledFlow.status==='cancelled','packaged OAuth cancels and closes its bound loopback callback');
+  await assert.rejects(action('mcp:oauth:open',{integrationId:oauthId,scope:{projectId,threadId},flowId:oauthFlow.id}),/ready/);checks++;
+  check(oauthPeer.requests.every(row=>row.method==='GET')&&oauthPeer.tokens.length===0,'packaged OAuth prepare/cancel opens no external browser and exchanges no code or token');
+  await assert.rejects(action('mcp:integrations:save',{name:'OAuth header conflict',transport:'http',url:oauthPeer.url,allowInsecureHttp:true,oauth:{clientId:'vek-public-fixture'},headerRefs:{Authorization:'env:SHOULD_NOT_RESOLVE'},scope:{projectId,threadId}}),/cannot be combined/);checks++;
+  await action('mcp:integrations:remove',{id:oauthId});
   const pairing=await action('mcp:pairing:create',{name:'Browser integration fixture',scope:{projectId,threadId},browserMethods:['listTabs','createTab','navigate','snapshot']});
   const exchange=await fetch(pairing.exchangeUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:pairing.code})});
   const grant=await exchange.json();check(exchange.status===200&&Boolean(grant.token),'scoped pairing exchange');
@@ -252,5 +266,5 @@ try {
   // Shut the disposable host down before removing any fixture it may watch.
   try { await rpc('shutdown'); } catch {}
   socket.close();for(const p of [...pending.values(),...cdpPending.values()])clearTimeout(p.timer);
-  await new Promise(resolve=>web.close(resolve));await fs.rm(directory,{recursive:true,force:true});
+  await new Promise(resolve=>web.close(resolve));await oauthPeer.close();await fs.rm(directory,{recursive:true,force:true});
 }

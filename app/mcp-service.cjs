@@ -6,6 +6,7 @@ const path = require('node:path');
 const http = require('node:http');
 const { spawn } = require('node:child_process');
 const { randomUUID, randomBytes, createHash, timingSafeEqual } = require('node:crypto');
+const { createMcpOAuth } = require('./mcp-oauth.cjs');
 const { methods: resourceMethods, resetResources, resourceNotification } = require('./mcp-resources.cjs');
 const { createHttpClientClass, validateHttpConfig } = require('./mcp-http-client.cjs');
 const PROTOCOLS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
@@ -143,7 +144,7 @@ function createBrowserGateway({ callbacks = {}, resolveScope = async scope => sc
   };
 }
 
-function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveCredential, browserGateway, requestTimeoutMs = 15000, maxResultBytes = 1024 * 1024 } = {}) {
+function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveCredential, browserGateway, oauthOptions = {}, requestTimeoutMs = 15000, maxResultBytes = 1024 * 1024 } = {}) {
   if (!dataDir || typeof resolveScope !== 'function') throw fail('dataDir and resolveScope callbacks are required');
   const directory = path.join(path.resolve(dataDir), 'mcp'); fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   if (fs.lstatSync(directory).isSymbolicLink()) throw fail('MCP directory must not be a symlink'); fs.chmodSync(directory, 0o700);
@@ -153,9 +154,10 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
   if (fs.existsSync(lockPath)) { let live = false; try { process.kill(JSON.parse(fs.readFileSync(lockPath)).pid, 0); live = true; } catch (e) { if (e.code === 'EPERM') live = true; } if (live) throw fail('Another MCP service is using this data directory', 'VEK_MCP_DATA_LOCKED'); fs.unlinkSync(lockPath); }
   fs.writeFileSync(lockPath, JSON.stringify({ pid: process.pid, token: lockToken }), { mode: 0o600, flag: 'wx' });
   const connections = new Map(), activeTasks = new Map(), pairings = new Map(), secrets = new Set(), gatewayCalls = new Map(); let closed = false, closing = false, gateway, gatewayPromise;
+  let oauthManager;try{oauthManager=createMcpOAuth({dataDir,...oauthOptions,onChange:publish,onSecret:value=>{if(secrets.has(value))return;if(secrets.size>=2048)throw fail('OAuth credential redaction capacity reached; restart before authorizing again','VEK_MCP_CAPACITY');const control=JSON.stringify([state.integrations,state.grants.map(({tokenHash,...row})=>row),state.tasks.map(({id,integrationId,scope,name,grantId})=>({id,integrationId,scope,name,grantId}))]);if(control.includes(value)||control.includes(JSON.stringify(value).slice(1,-1)))throw fail('OAuth token collides with public control data','VEK_MCP_OAUTH');secrets.add(value);}});}catch(error){fs.unlinkSync(lockPath);throw error;}
   for (const task of state.tasks) if (['queued', 'running'].includes(task.status)) { task.status = 'interrupted'; task.completedAt = new Date().toISOString(); }
   function publicTask(task) { return redact(task, secrets); }
-  function snapshot() { return redact({ integrations: state.integrations, tasks: state.tasks.map(publicTask), grants: state.grants.map(({ tokenHash, ...grant }) => grant), connections: [...connections.values()].map(c => ({ integrationId: c.integrationId, scope: c.scope, status: c.client?.state || 'connecting', serverInfo: c.client?.info?.serverInfo, error: c.client?.error, stderr: c.client?.stderr || '', tools: c.client?.tools || [], resourceCapabilities: c.client?.info?.capabilities?.resources || null, resources: c.client?.resources, resourceTemplates: c.client?.resourceTemplates, resourceSubscriptions: [...(c.client?.resourceSubscriptions?.values() || [])] })), gateway: gateway ? { url: gateway.url } : null }, secrets); }
+  function snapshot() { return redact({ integrations: state.integrations, tasks: state.tasks.map(publicTask), grants: state.grants.map(({ tokenHash, ...grant }) => grant), connections: [...connections.values()].map(c => ({ integrationId: c.integrationId, scope: c.scope, status: c.client?.state || 'connecting', serverInfo: c.client?.info?.serverInfo, error: c.client?.error, stderr: c.client?.stderr || '', tools: c.client?.tools || [], resourceCapabilities: c.client?.info?.capabilities?.resources || null, resources: c.client?.resources, resourceTemplates: c.client?.resourceTemplates, resourceSubscriptions: [...(c.client?.resourceSubscriptions?.values() || [])] })), oauth:oauthManager?.snapshot(), gateway: gateway ? { url: gateway.url } : null }, secrets); }
   function publish() { if (closed) return; const tmp = `${stateFile}.${randomUUID()}.tmp`; fs.writeFileSync(tmp, JSON.stringify(redact(state, secrets), null, 2), { mode: 0o600, flag: 'wx' }); fs.renameSync(tmp, stateFile); try { onChange(snapshot()); } catch {} }
   function ensureOpen() { if (closed || closing) throw fail('MCP service is closed', 'VEK_MCP_CLOSED'); }
   async function scopeFor(value) { const scope = normalizeScope(value); const resolved = await resolveScope(scope); if (!resolved || resolved.projectId !== scope.projectId || (scope.threadId && resolved.threadId !== scope.threadId) || !path.isAbsolute(resolved.projectPath || '') || !fs.statSync(resolved.projectPath).isDirectory()) throw fail('Unknown or unavailable project/thread scope', 'VEK_MCP_FORBIDDEN'); return { scope, resolved }; }
@@ -176,7 +178,7 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
         credentials[envName] = value; secrets.add(value);
       }
       if (closed || closing) throw fail('MCP service is closed', 'VEK_MCP_CLOSED');
-      connection.client = new (config.transport === 'http' ? HttpClient : StdioClient)({ config, cwd: resolved.projectPath, credentials, timeoutMs: requestTimeoutMs, onChange: publish });
+      connection.client = new (config.transport === 'http' ? HttpClient : StdioClient)({ config, cwd: resolved.projectPath, credentials, ...(config.oauth?{authorization:signal=>oauthManager.authorization(config,scope,signal),onAuthorizationFailure:status=>{if(status===401)oauthManager.forget(config,scope);}}:{}),timeoutMs: requestTimeoutMs, onChange: publish });
       await connection.client.start(); return connection.client;
     })().catch(async error => { connections.delete(key); await connection.client?.stop(); publish(); throw error; });
     publish(); return connection.ready;
@@ -213,6 +215,7 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
   async function dispatch(action, p = {}) {
     ensureOpen();
     if (action === 'mcp:snapshot') return snapshot();
+    if(action.startsWith('mcp:oauth:')){const {scope}=await scopeFor(p.scope),config=integrationFor(p.integrationId,scope);if(!config.enabled||config.transport!=='http'||!config.oauth)throw fail('Choose an enabled HTTP integration with a public OAuth client ID');if(action==='mcp:oauth:prepare'){const preparing=oauthManager.prepare(config,scope).then(value=>({value}),error=>({error}));await disconnect(config.id,scope);const result=await preparing;if(result.error)throw result.error;return result.value;}if(action==='mcp:oauth:open')return oauthManager.open(p.flowId,config,scope);if(action==='mcp:oauth:cancel')return oauthManager.cancel(p.flowId,config,scope);if(action==='mcp:oauth:forget'){await disconnect(config.id,scope);oauthManager.forget(config,scope);return snapshot();}throw fail('Unknown OAuth action');}
     if (action === 'mcp:integrations:save') {
       if (Object.hasOwn(p, 'env') || Object.hasOwn(p, 'credentials') || Object.hasOwn(p, 'token') || Object.hasOwn(p, 'headers')) throw fail('Only credential references may be configured');
       const { scope } = await scopeFor(p.scope); const credentialRefs = {};
@@ -223,16 +226,17 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
         if (p.command !== undefined || p.args !== undefined || Object.keys(credentialRefs).length) throw fail('HTTP integrations use URL and header references, not process configuration');
         transportConfig = { transport: 'http', ...validateHttpConfig(p) };
       } else {
+        if(p.oauth!==undefined)throw fail('OAuth applies to HTTP integrations only');
         if (!Array.isArray(p.args) || p.args.length > 128 || p.args.some(arg => typeof arg !== 'string' || arg.includes('\0') || arg.length > 65536)) throw fail('args must be an array of strings');
         if (p.headerRefs !== undefined || p.url !== undefined) throw fail('Select HTTP transport to configure an endpoint');
         transportConfig = { transport: 'stdio', command: nonempty(p.command, 'command'), args: [...p.args], credentialRefs };
       }
       const config = { id: p.id || randomUUID(), name: nonempty(p.name, 'name', 200), ...transportConfig, scope, enabled: p.enabled !== false };
-      const old = state.integrations.find(item => item.id === config.id); if (p.id && !old) throw fail('MCP integration not found', 'VEK_MCP_NOT_FOUND'); if (old) await disconnect(old.id);
+      const old = state.integrations.find(item => item.id === config.id); if (p.id && !old) throw fail('MCP integration not found', 'VEK_MCP_NOT_FOUND'); if (old) {await disconnect(old.id);if(old.url!==config.url||JSON.stringify(old.oauth)!==JSON.stringify(config.oauth)||scopeKey(old.scope)!==scopeKey(config.scope))oauthManager.forget(old);}
       state.integrations = [...state.integrations.filter(item => item.id !== config.id), config]; publish(); return snapshot();
     }
     if (action === 'mcp:integrations:list') { const scope = p.scope ? (await scopeFor(p.scope)).scope : null; return { integrations: state.integrations.filter(item => !scope || containsScope(item.scope, scope)) }; }
-    if (action === 'mcp:integrations:remove') { await disconnect(p.id); state.integrations = state.integrations.filter(item => item.id !== p.id); publish(); return snapshot(); }
+    if (action === 'mcp:integrations:remove') { await disconnect(p.id);const old=state.integrations.find(item=>item.id===p.id);if(old)oauthManager.forget(old); state.integrations = state.integrations.filter(item => item.id !== p.id); publish(); return snapshot(); }
     if (action === 'mcp:integrations:connect') { await connect(p.id, p.scope); return snapshot(); }
     if (action === 'mcp:integrations:disconnect') { await disconnect(p.id, p.scope ? normalizeScope(p.scope) : null); return snapshot(); }
     if (action === 'mcp:tools:list') return { tools: await (await connect(p.integrationId, p.scope)).listTools() };
@@ -316,7 +320,7 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
     gateway = { server, url: `http://127.0.0.1:${server.address().port}` }; publish(); return gateway;
   }
   async function close() {
-    if (closed || closing) return; closing = true;
+    if (closed || closing) return; closing = true;oauthManager.close();
     for (const active of [...activeTasks.values()]) { active.controller.abort(); active.finish('interrupted'); }
     for (const c of [...connections.values()]) { await c.ready.catch(() => null); await c.client?.stop(); } connections.clear();
     pairings.clear(); gatewayCalls.clear(); if (gatewayPromise) await gatewayPromise.catch(() => null); publish(); closed = true;

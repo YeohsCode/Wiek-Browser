@@ -1,0 +1,26 @@
+✔ Electron OAuth UI reviews permissions before opening, authorizes a fixture, redacts tools and signs out (439.888875ms)
+✔ public OAuth config and challenge parsing reject credentials/ambiguity and retain quoted commas (1.6065ms)
+✔ actual OAuth code flow verifies PKCE/resource/state and stores only encrypted tokens (27.913083ms)
+✔ well-known fallback, OIDC discovery and path-appended tenant metadata are supported (9.06ms)
+✔ wrong resource/issuer, missing PKCE and metadata redirects fail before browser or token requests (9.086ms)
+✔ foreign scope/config and callbacks with wrong state/origin/issuer or duplicate params are rejected (5.3805ms)
+✔ prepare never opens a browser; expired and cancelled discovery cannot resume or store credentials (1140.317625ms)
+✔ refresh is serialized, audience-bound and rotates the encrypted refresh token (11.63875ms)
+✔ uncertain refresh or missing rotation drops credentials and never retries the refresh POST (17.951375ms)
+✔ token exchange failures are terminal, and secure storage is required before discovery (3.284417ms)
+✔ encrypted scope binding survives restart and rejects ciphertext reassignment; forget removes access (5.071208ms)
+✔ MCP service uses only bound encrypted OAuth tokens, redacts echoes and signs out one scope (21.181417ms)
+✔ HTTP 401 invalidates credentials and does not replay a tool POST or reopen sign-in (14.268167ms)
+✔ explicit reauthorization disconnects old sessions and blocks tools until finished or cancelled (21.305459ms)
+✔ an issuer cannot use public control IDs as tokens to corrupt persistent routing via redaction (7.242208ms)
+✔ registered loopback callback ports use a stable path and occupied ports fail without opening (2.240917ms)
+✔ invalid token types, unsafe header tokens, short values and invalid lifetimes never persist (14.522791ms)
+✔ cancelling an in-flight code exchange never stores late-issued credentials or replays the code (235.279584ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1648.884417

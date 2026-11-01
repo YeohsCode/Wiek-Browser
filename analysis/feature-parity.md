@@ -332,3 +332,9 @@ initialize目录发现不发送user、不产生Vek run或已拥有session，使�
 新增按Profile隔离的显式网页/选定项目UTF-8文本memory索引，支持中文/英文literal搜索、来源hash/保存时间、重建、忘记/clear、取消和开关清除；正文仅私有本地保存，新增语料不自动发送Agent。非全磁盘/语义/OCR/Office索引，无后台网页采集。OS采集/翻译、退出后调度和standalone/dedicated仍待完成。
 
 新增21项专项，完整结果见[RESULTS](../reports/RESULTS.md)，实现和限额见[mcp-resources-memory](mcp-resources-memory.md)。全产品parity继续为false，P2/P3未整体完成。
+
+## 0.12：P2预注册公共客户端OAuth
+
+HTTP MCP新增预注册public client none/S256授权，metadata/challenge/OIDC发现、权限审核后显式系统浏览器登录、127.0.0.1固定路径/可选注册端口回调、作用域绑定OS密文、refresh轮换和取消。401不重放工具POST，迟到/被取消code不能保存；跨scope密文重新绑定被拒绝。真实HTTP/crypto/Electron协议fixture验证，打包仅prepare/cancel及OS可用状态；真实AS与Keychain令牌写入未运行。
+
+新增18项专项，本地303/303、打包132/132；最终SDK和身份结果见[RESULTS](../reports/RESULTS.md)。OAuth DCR/托管client metadata/完整step-up、MRTR/现代订阅仍缺失；P1其他Agent集成继续暂缓。下一项优先Profile web storage与明确来源迁移。实现限额见[mcp-oauth-design](mcp-oauth-design.md)，全产品parity保持false。

@@ -1,0 +1,16 @@
+{
+  "version": "0.12.0",
+  "generatedAt": "2026-11-01T16:19:59.278Z",
+  "checks": {
+    "secureStorageAvailable": true,
+    "flowCancelled": true,
+    "noCredentials": true,
+    "noAuthorizationUrl": true,
+    "noVerifier": true
+  },
+  "nativeActions": "prepare, review, dismiss, cancel",
+  "codeExchange": false,
+  "keychainTokenWrite": false,
+  "externalAccountActions": 0,
+  "modelCalls": 0
+}

@@ -1,6 +1,6 @@
 # Vek Browser 复刻计划与进度
 
-更新：2026-11-01（Asia/Shanghai）。当前交付版本：**0.11.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
+更新：2026-11-02（Asia/Shanghai）。当前交付版本：**0.12.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
 
 ## 当前执行优先级
 
@@ -16,11 +16,11 @@
 | 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Vek 69/69、Ego 68/69 | 当前版本验收完成，非引擎全面等价 |
 | 本地 Agent 工作台 | 通用 CLI、opt-in Codex app-server/Claude stream-json/OpenCode ACP、多 Agent 控制、对话分支/附件/审批、Claude选定历史分支、Codex有效rollout压缩/回滚导入及实时工具/子活动、Codex/Claude模型与effort目录 | 部分完成；其他5种原生 provider、源CLI原生会话迁移/后台任务和真实付费 turn 未验证 |
 | 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，linked worktree 和 PR 流程仍缺失 |
-| MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；已补 session 资源/模板/订阅；OAuth/MRTR/现代订阅/sampling/elicitation 缺失 |
+| MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；已补 session 资源/模板/订阅；已补预注册public OAuth/PKCE与加密绑定；DCR/MRTR/现代订阅/sampling/elicitation 缺失 |
 | 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 部分完成；应用关闭后不调度，standalone/dedicated 不完整 |
 | 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；新增显式网页/项目文本 memory 索引；无 OS 跨应用采集、翻译或云端润色等价 |
 | 浏览器界面/权限/资料 | 主题/标签布局/快捷键、独立窗口/托盘；权限隔离；Profile 数据归属；Chromium 选择导入和加密 archive | 部分完成；完整迁移/扩展/OS 设备能力仍有缺口 |
-| 交付与基准 | macOS ARM64 应用；285/285 本地测试、123/123 打包宿主集成、81 个上游文件未改 | 本地检查点完成；31 项线上模型任务未运行 |
+| 交付与基准 | macOS ARM64 应用；303/303 本地测试、132/132 打包宿主集成、81 个上游文件未改 | 本地检查点完成；31 项线上模型任务未运行 |
 
 证据入口：[当前结果](reports/RESULTS.md)、[同集对比](reports/comparison.md)、[逐项功能清单](analysis/feature-parity.md)、[机器可读结果](reports/delivery-summary.json)。532 项 SDK 单测沿用未改版结果；不描述为本轮重新运行。
 
@@ -39,6 +39,7 @@
 - [x] 0.9.1：CLI stop等待实际退出、身份核对/超时、同目录立即重启和provider最终快照验证。
 - [x] 0.10：Claude initialize目录、alias/canonical ID、已声明effort控制与fresh validation、取消/lease/旧版unknown。
 - [x] 0.11：P2 session MCP资源/模板/订阅与显式读取；P3按Profile隔离的显式网页/项目文本memory索引。
+- [x] 0.12：预注册public客户端HTTP OAuth：metadata/PKCE/只读权限审核、显式登录、绑定加密存储/refresh轮换、取消/401不重放。
 - [ ] 后续：优先 P2/P3 剩余项；不同 Agent 的 P1 集成暂缓，线上基准仍属 P4。
 
 ## 执行顺序与阶段验收
@@ -70,9 +71,10 @@
 ### P2：MCP 与资料迁移
 
 - [x] 0.11：session MCP资源/模板分页、显式text/blob读取、subscribe/unsubscribe、更新revision/失效提示、断线不重放、scope与有界UI。
-- [ ] 当前下一项：OAuth；随后MRTR/现代订阅，保持最小scope、取消、版本边界和无工具POST自动重放。
+- [x] 0.12：预注册public OAuth（none/S256）、明确审核/显式打开、loopback callback、作用域绑定密文/refresh轮换、取消与401不重放；实际AS/Keychain令牌写入未运行。
+- [ ] OAuth DCR/托管client metadata/完整step-up；MRTR/现代订阅仍缺失，保持最小scope、取消、版本边界和无工具POST自动重放。
 - [ ] provider gateway 注入随 P1 不同 Agent 集成暂缓。
-- [ ] 扩展 Profile archive 的可验证 web storage/会话范围与多来源迁移；只使用明确选定的来源，不自动读取个人 Profile。
+- [ ] 当前下一项：扩展 Profile archive 的可验证 web storage/会话范围与多来源迁移；只使用明确选定的来源，不自动读取个人 Profile。
 - [ ] 用合成 fixture 验证迁移兼容、部分失败、取消、冲突和恢复；保留 Electron 扩展 API/定制 Chromium 的边界。
 
 ### P3：OS 能力、执行模式与剩余本地功能
@@ -116,3 +118,5 @@
 0.10 实现见 [claude-model-catalogue.md](analysis/claude-model-catalogue.md)。新增16项目录/控制回归，本地264/264；官方2.1.31实际初始化返回3项模型且缺effort字段，0user/0模型调用；现代effort控制以公开SDK协议及本地peer单独验证，不宣称旧CLI或实际模型已执行。打包109/109、SDK69/69（1248断言），152文件身份一致，81上游文件未改；原生模型菜单和wire顺序完成验收。
 
 0.11 实现与边界见 [mcp-resources-memory.md](analysis/mcp-resources-memory.md)。P1不同Agent集成已暂缓，P2资源订阅与P3本地memory索引完成有界验收；不将P2/P3整体勾选完成。完整测试和打包结果以当前RESULTS为准。
+
+0.12 实现与限制见 [mcp-oauth-design.md](analysis/mcp-oauth-design.md)。新增18项OAuth专项，本地303/303、打包132/132；本机打包只验证prepare/cancel和OS存储可用状态，协议/UI正向授权采用合成AS及注入加密器，不冒充真实账号或Keychain写入。其余P2/P3继续推进。

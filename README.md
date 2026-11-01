@@ -1,4 +1,6 @@
 # Vek Browser
+> **0.12.0 更新**：HTTP MCP 可配置预注册公共客户端 OAuth，支持 S256 PKCE、权限审核后显式打开登录、本机回调、绑定加密令牌/轮换刷新和取消。401 与不确定刷新要求重新授权，工具 POST 不自动重放；DCR 和真实账号验收仍未完成。
+>
 > **0.11.0 更新**：按新优先级暂停其他 Agent 集成，补齐 session MCP 资源/模板/订阅和显式读取；Preferences 新增按 Profile 隔离的网页/项目文本 memory 索引、搜索与忘记。更新通知不自动获取内容，新增语料不自动发送给 Agent。
 >
 > **0.10.0 更新**：Claude 原生目录通过 initialize 发现，无需发送 prompt；支持别名/canonical ID、已声明 effort、执行前刷新和明确的旧版 unknown。显式 effort 控制失败会在发送用户输入前停止；没有调用真实模型。
@@ -23,7 +25,7 @@
 >
 > 最新测试以 [reports/RESULTS.md](reports/RESULTS.md) 为准；[analysis/feature-parity.md](analysis/feature-parity.md) 明确列出剩余差距。不能把 69 项 SDK 用例通过理解成整款 Ego 已全量复刻。
 
-进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.11.0；按用户要求优先 P2、P3，其他 Agent 集成暂缓。下一步 MCP OAuth/现代请求、资料迁移及系统/调度能力；Claude源CLI会话迁移和后台任务仍有缺口。
+进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.12.0；按用户要求优先 P2、P3，其他 Agent 集成暂缓。下一步 Profile 资料迁移、MCP 现代请求及系统/调度能力；Claude源CLI会话迁移和后台任务仍有缺口。
 
 本地 Chromium 浏览器与 Agent 工作区。项目在 `vek-browser/` 中独立创建，使用 Electron 实现浏览器宿主、Space、多标签与原生连接层，复用 `citrolabs/ego-lite` 的 MIT SDK。Ego 安装包只用于分析和测试，不进入 Vek 发行包。
 
@@ -102,7 +104,7 @@ await task.finish({ keep: [] }); // 关闭受管理页面并结束
 
 本地 Agent 会话只运行你配置的已安装 CLI；没有 provider 或认证时明确报错，不生成模拟回复。Codex preset 根据本机实际 `exec --help` 发现，默认使用只读 sandbox。通用 CLI 支持 stdin 或 argv 中的 `{prompt}` 模板。测试只使用本地 fake provider；未进行付费模型调用。
 
-尚未完成完整 Chrome/Safari 会话/web storage/扩展迁移、全部 Chrome 扩展 API、其余五种 provider 原生协议、linked worktree/远程 PR、MCP OAuth/MRTR/现代订阅、OS 跨应用采集/翻译、应用退出后的调度、语义/全磁盘 memory index、Ego 专有服务和自动更新。已实现能力也有范围限制，见 [功能对照](analysis/feature-parity.md) 和 [计划](PLAN.md)。
+尚未完成完整 Chrome/Safari 会话/web storage/扩展迁移、全部 Chrome 扩展 API、其余五种 provider 原生协议、linked worktree/远程 PR、MCP OAuth DCR/MRTR/现代订阅、OS 跨应用采集/翻译、应用退出后的调度、语义/全磁盘 memory index、Ego 专有服务和自动更新。已实现能力也有范围限制，见 [功能对照](analysis/feature-parity.md) 和 [计划](PLAN.md)。
 
 ## 当前验证结果
 
@@ -173,3 +175,5 @@ MCP gateway 默认不启动；工作区文件与 Git 始终受所选项目范围
 Profile archive 是 Vek 自有加密格式，并非 Ego 导出文件；只读导入 Chromium v10 加密记录的支持不等于完整 Chrome/Safari 登录迁移。无实际证据时不报告账户服务、原生 provider 或线上模型任务成功。
 
 0.11 的资源订阅与本地memory边界、限额和验证见 [设计](analysis/mcp-resources-memory.md)。MCP Integrations展开Resources后可列举/读取/订阅；Preferences开启对应memory开关后，手动索引当前页或选定项目文本文件。关闭对应开关会删除该类索引副本，来源文件不变。
+
+0.12 OAuth 需要已注册的public client ID、可用的OS凭据存储和S256 PKCE。HTTP配置中添加客户端ID后，Prepare sign-in先审核issuer/resource/scopes，再显式打开系统浏览器。固定回调路径为 `/oauth/callback`；可配置注册端口。完整范围和未运行的真实服务/Keychain验收见 [设计](analysis/mcp-oauth-design.md)。

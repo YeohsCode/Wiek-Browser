@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.13.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
+当前版本 **0.14.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -344,3 +344,9 @@ HTTP MCP新增预注册public client none/S256授权，metadata/challenge/OIDC�
 新增v2归档（读取兼容v1），显式采集所选Profile已打开的顶层HTTP(S) localStorage和per-tab当前origin sessionStorage。UTF-16 code units完整编码；新Profile中无网络bootstrap恢复、逐项回读后打开真实页面。包含导航/关闭/partition/额度边界、独立标签、活动索引、取消、冲突、部分失败及清理。CHIPS cookies识别遗漏，避免丢失partition语义。
 
 新增10项回归（4数据、4捕获、2实际Electron/主应用），全套及打包结果以[RESULTS](../reports/RESULTS.md)为准；真实网站登录未运行。不包含关闭标签/旧origin/iframe/IndexedDB/完整导航栈、退出后sessionStorage或完整Chrome/Safari多来源迁移。P1继续暂缓；P2/P3未整体完成。详见[profile-web-storage](profile-web-storage.md)。
+
+## 0.14：P3显式OS单次采集与全局快捷键
+
+自有Swift AXSelectedText helper，按应用排除/secure控件拒绝，一次读取后先预览；Apple系统工具显式区域/窗口截图进入现有标注编辑器。全局screenshot/selection/chat/voice快捷键默认无分配，OS注册失败可见，app/global冲突双向检查；后台voice只开面板。CLI/RPC仅可读desktop状态，不能取正文或触发OS采集。18项新服务/真实子进程/Electron IPC/panel测试，真实OS只验证权限/注册及截图启动取消清理；全局触发、AX正文和原生PNG正向链路未确认。最终打包和实际OS验证见[RESULTS](../reports/RESULTS.md)。
+
+没有复刻被动选区监听/浮动toolbar、Fn、OS视频/音频录制或Ego所有native backing；原版只有bounded shipped-static证据，Vek的独立本地成功不算Ego运行对标。权限、TCC归属、跨平台、多显示器及应用兼容边界见[desktop-tools](desktop-tools.md)。P2/P3与全量parity仍false。

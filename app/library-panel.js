@@ -107,5 +107,5 @@
     layout.append(main);root.append(layout);if(draft)root.append(screenshotEditor());if(form)root.append(formNode());if(focus){const input=[...root.querySelectorAll('[data-focus]')].find(item=>item.dataset.focus===focus);input?.focus({preventScroll:true});if(input&&selection&&typeof input.setSelectionRange==='function')try{input.setSelectionRange(...selection);}catch{}}
   }
   function update(next){const before=JSON.stringify([state.items.map(item=>[item.id,item.updatedAt,item.deletedAt]),state.collections,state.groups,state.tags,state.capabilities]);apply(next);const after=JSON.stringify([state.items.map(item=>[item.id,item.updatedAt,item.deletedAt]),state.collections,state.groups,state.tags,state.capabilities]);if(before!==after&&!draft&&!form)render();}
-  window.VekLibraryPanel={mount(target,dispatch){root=target;invoke=dispatch;render();invoke('library:snapshot',{}).then(value=>{apply(value);render();}).catch(failure=>{error=failure.message;render();});},update,capture,openCapture,saveActivePage};
+  window.VekLibraryPanel={mount(target,dispatch){root=target;invoke=dispatch;render();invoke('library:snapshot',{}).then(value=>{apply(value);render();}).catch(failure=>{error=failure.message;render();});},update,capture,openCapture,saveActivePage,hasDraft:()=>Boolean(draft)};
 })();

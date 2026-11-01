@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-01T17:41:51.736424+00:00",
-  "version": "0.13.0",
+  "generatedAt": "2026-11-01T21:55:29.389161+00:00",
+  "version": "0.14.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -22,8 +22,8 @@
       },
       {
         "browser": "vek",
-        "startedAt": "2026-11-01T17:38:18.813Z",
-        "wallTimeMs": 153698,
+        "startedAt": "2026-11-01T21:52:03.205Z",
+        "wallTimeMs": 167117,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
         "counts": {
@@ -46,14 +46,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 313,
+    "pass": 331,
     "fail": 0,
-    "log": "v130-service-tests.log"
+    "log": "v140-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 132,
+    "pass": 140,
     "fail": 0,
-    "log": "v130-package-workbench.log"
+    "log": "v140-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -67,7 +67,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 157,
+    "sourceFilesChecked": 162,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -98,7 +98,8 @@
     "Session MCP resources/templates/read/subscribe/unsubscribe, scoped revision and stale handling, no automatic fetching or resubscription",
     "Explicit Profile-scoped local webpage/project UTF-8 memory corpus with literal Chinese/English search, cancellation, partial failures, and delete-on-disable",
     "Explicit HTTP MCP OAuth for pre-registered public clients: protected metadata/OIDC, S256 PKCE and fixed loopback callback, issuer/resource/scope review, bound encrypted credentials, serialized rotating refresh, no tool/code/refresh POST replay",
-    "Explicit encrypted Profile archive v2: top-level open-tab localStorage, independent current-origin tab sessionStorage, exact UTF-16 encoding, v1 decode, no-network bootstrap before site load, new-profile isolation, CHIPS omission, cancellation/conflict/partial-write cleanup"
+    "Explicit encrypted Profile archive v2: top-level open-tab localStorage, independent current-origin tab sessionStorage, exact UTF-16 encoding, v1 decode, no-network bootstrap before site load, new-profile isolation, CHIPS omission, cancellation/conflict/partial-write cleanup",
+    "Explicit macOS one-shot interactive screen capture and AX selected-text adapter, opt-in/exclusions, temporary preview and Library handoff, transactional OS global shortcuts with browser conflict checks; native positive content paths remain unverified"
   ],
   "remainingGaps": [
     "Five other native provider protocols, source native session/history migration and paid generation validation",
@@ -109,7 +110,7 @@
     "Custom Chromium engine equivalence",
     "Linked worktrees, checkpoint retention and remote PR workflow",
     "MCP OAuth DCR/hosted client metadata/full step-up; MRTR/modern subscriptions/sampling/elicitation",
-    "OS-wide selection/screenshot/recording and translation",
+    "Positive native screenshot/AX content and background key trigger validation, passive selection toolbar, OS recording and translation",
     "OS scheduling while application is closed",
     "Semantic/all-disk/multiformat memory index and Ego proprietary services",
     "31 live-site model benchmark not run",
@@ -159,15 +160,16 @@
     "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
   },
   "uiQa": {
-    "log": "v130-native-ui-qa.md",
+    "log": "v140-native-ui-qa.md",
     "fixtureOnly": true,
-    "nativeSaveAndOpenDialogs": true,
-    "nativePassphraseAndRestoreConfirmation": true,
-    "localOrigins": 1,
-    "independentTabSessions": 2,
-    "realSiteLogins": false,
-    "wireCheck": "v130-native-ui-check.json",
-    "normalAppStatus": "v130-normal-app-status.json"
+    "newOSPermissionGrants": 0,
+    "nativeShortcutRegistration": true,
+    "nativeScreenshotStartCancelCleanup": true,
+    "nativeGlobalKeyCallback": false,
+    "nativeSelectedTextRead": false,
+    "nativePositiveScreenshot": false,
+    "normalAppStatus": "v140-normal-app-status.json",
+    "wireCheck": "v140-native-ui-check.json"
   },
   "claudeFocusedTests": {
     "pass": 29,
@@ -266,9 +268,7 @@
       "report": "v110-native-ui-attempt1.png",
       "status": "fixed-and-regressed",
       "description": "Preferences memory boolean settings were mistaken for a corpus response; fixed documents-array discrimination with actual Electron checkbox regression. MCP dark-theme contrast also fixed and visually verified."
-    }
-  ],
-  "observedFailures": [
+    },
     {
       "report": "v130-service-attempt1.log",
       "status": "fixed-and-regressed",
@@ -288,6 +288,13 @@
       "report": "v130-native-before-result-fix.png",
       "status": "fixed-and-regressed",
       "description": "Native import succeeded but transient Space creation hid Settings, leaving the welcome panel. Explicitly reopen Settings with verified import counts; actual renderer regression added."
+    }
+  ],
+  "observedFailures": [
+    {
+      "report": "v140-native-ui-qa.md",
+      "status": "fixed-and-regressed",
+      "description": "Native capture cancellation surfaced an Electron IPC error prefix. Abort rejection now settles normally; panel sanitizes IPC wrappers. Final native cancellation, service and panel tests pass."
     }
   ],
   "validationOrderNote": "Final source: 313/313 full and 17/17 profile checks; final package: 132/132 workbench, 2/2 packaged-module Electron scenarios with 67 internal checks, complete SDK 69/69 with 1248 assertions, and final native Open/Restore/result/two-session CUA verification. 157 package files match, 81 upstream inputs unchanged. No real site login, full browser migration or paid benchmark claimed. P1 integrations deferred; P2/P3 incomplete.",
@@ -366,7 +373,7 @@
     "deferred": "P1 integrations with other Agents, including provider gateway injection",
     "localCursorStash": "31764915635554521270725e0d0c38e178eea3cf",
     "cursorShipped": false,
-    "next": "P3 OS cross-app selection/screenshot and explicit global shortcuts, evidence/permissions first; then closed-app scheduling. P2 explicit source migration, OAuth DCR and MRTR/modern subscriptions remain queued."
+    "next": "P3 closed-app scheduling and standalone/dedicated lifecycle, explicit opt-in/deduplication/disable/uninstall/failure recovery. P2 source migration and MCP remaining work retained; P1 provider integrations deferred."
   },
   "p2P3Tests": {
     "newTests": 21,
@@ -442,5 +449,30 @@
     "keychainTokenWrite": false,
     "wireCheck": "v120-native-ui-check.json",
     "normalAppStatus": "v120-normal-app-status.json"
+  },
+  "previousV130UiQa": {
+    "log": "v130-native-ui-qa.md",
+    "fixtureOnly": true,
+    "nativeSaveAndOpenDialogs": true,
+    "nativePassphraseAndRestoreConfirmation": true,
+    "localOrigins": 1,
+    "independentTabSessions": 2,
+    "realSiteLogins": false,
+    "wireCheck": "v130-native-ui-check.json",
+    "normalAppStatus": "v130-normal-app-status.json"
+  },
+  "desktopToolsTests": {
+    "newTests": 18,
+    "focusedPass": 23,
+    "fail": 0,
+    "log": "v140-desktop-tests.log",
+    "actualElectronPanelTests": 1,
+    "packagedPanelChecks": 20,
+    "packagedLog": "v140-package-desktop-panel.log",
+    "fixtureOSRegistryAndCapture": true,
+    "nativeQA": "v140-native-ui-qa.md",
+    "nativePositiveCaptureOrSelectionVerified": false,
+    "modelCalls": 0,
+    "externalAccountActions": 0
   }
 }

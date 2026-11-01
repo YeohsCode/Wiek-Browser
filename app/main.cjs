@@ -1,5 +1,5 @@
 'use strict';
-const { app, BrowserWindow, WebContentsView, ipcMain, session, dialog, shell, Menu, safeStorage, nativeTheme, nativeImage, Tray, clipboard } = require('electron');
+const { app, BrowserWindow, WebContentsView, ipcMain, session, dialog, shell, Menu, safeStorage, nativeTheme, nativeImage, Tray, clipboard, globalShortcut, systemPreferences } = require('electron');
 const { WebSocketServer } = require('ws');
 const http = require('node:http');
 const fs = require('node:fs');
@@ -18,6 +18,9 @@ const { createLibraryService } = require('./library-service.cjs');
 const { createActionRecorder } = require('./action-recorder.cjs');
 const { createMemoryService } = require('./memory-service.cjs');
 const { createProfileArchive } = require('./profile-archive.cjs');
+const { createDesktopService } = require('./desktop-service.cjs');
+const { createNativeDesktop } = require('./desktop-native.cjs');
+const { physicalChord } = require('./preferences-service.cjs');
 const { captureProfileTabs, captureProfileCookies, restoreArea, restoreLocalStorage } = require('./profile-web-storage.cjs');
 const { createSitePermissions } = require('./site-permissions.cjs');
 const { createTurnCheckpoints } = require('./turn-checkpoints.cjs');
@@ -32,7 +35,7 @@ const DATA = path.resolve(process.env.VEK_DATA_DIR || process.env.VEK_BROWSER_DA
 fs.mkdirSync(DATA, { recursive: true, mode: 0o700 });
 app.setPath('userData', path.join(DATA, 'profile'));
 const INSTANCE = crypto.randomUUID();
-let window, server, wss, runtimeFile, saving, closing = false, agentService, workspaceService, mcpService, catalogService, voiceService, preferencesService, memoryService, libraryService, recorderService, tray, importResult;
+let window, server, wss, runtimeFile, saving, closing = false, agentService, workspaceService, mcpService, catalogService, voiceService, preferencesService, memoryService, libraryService, recorderService, desktopService, tray, importResult;
 const vaults = new Map();
 const voiceMutedTabs = new Map();
 const spaceWindows = new Map();
@@ -96,7 +99,7 @@ function tabDescriptor(t, index = 0) { return { targetId: t.id, ...(t.openerId ?
 function uiState(selectedSpaceId = store.selected) {
   const s = store.spaces.find(s => s.id === selectedSpaceId);
   const active = s && tabs.get(s.activeTab);
-  return { agents: agentService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
+  return { agents: agentService?.snapshot(), desktop:desktopService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
 }
 function publish() { if (window && !window.isDestroyed()) window.webContents.send('vek:state', uiState());for(const [id,record]of spaceWindows)if(!record.window.isDestroyed())record.window.webContents.send('vek:state',uiState(id)); }
 let panelOpen = false;
@@ -485,7 +488,17 @@ async function captureTabImage(t) {
     }
   }finally{layout();}
 }
-async function uiAction(action, value, selectedSpaceId) {
+async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false) {
+  if(action.startsWith('desktop:')){
+    if(action==='desktop:permissions:open'){
+      if(!interactiveDesktop)throw new Error('Open Desktop tools to change OS permissions');
+      if(process.platform!=='darwin')throw new Error('This permission shortcut requires macOS');
+      if(value?.kind==='selection')await shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility');
+      else if(value?.kind==='screenshot')await shell.openExternal('x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture');
+      else throw new Error('Unknown desktop permission');return desktopService.snapshot();
+    }
+    return desktopService.dispatch(action,value,{interactive:interactiveDesktop});
+  }
   if(action==='secret:respond'){const request=secretRequests.get(value?.id);if(request){secretRequests.delete(value.id);request.resolve(typeof value.text==='string'?value.text:null);}return uiState();}
   if(action.startsWith('preferences:')){const result=await preferencesService.dispatch(action,value);memoryService?.syncPolicy();return result;}
   if(action.startsWith('memory:')){
@@ -691,7 +704,7 @@ function agentPromptPrefix(thread,project) {
 }
 app.whenReady().then(async () => {
   const reservedShortcuts=[['CommandOrControl+C','Copy'],['CommandOrControl+X','Cut'],['CommandOrControl+V','Paste'],['CommandOrControl+A','Select all'],['CommandOrControl+Z','Undo'],['CommandOrControl+Shift+Z','Redo'],['CommandOrControl+P','Print'],['CommandOrControl+G','Find next'],['CommandOrControl+Shift+G','Find previous'],['Alt+CommandOrControl+I','Developer tools']].map(([accelerator,label])=>({accelerator,label}));
-  preferencesService=createPreferencesService({dataDir:DATA,reservedShortcuts,onChange:applyPreferences});nativeTheme.themeSource=preferencesService.snapshot().theme;
+  preferencesService=createPreferencesService({dataDir:DATA,reservedShortcuts,externalShortcuts:()=>desktopService?.reserved()||[],onChange:applyPreferences});nativeTheme.themeSource=preferencesService.snapshot().theme;
   memoryService=createMemoryService({dataDir:DATA,policy:()=>preferencesService.snapshot().memory,projects:()=>agentService?.snapshot().projects||[],onChange:publish});
   nativeTheme.on('updated',()=>publish());
   agentService = createAgentService({ dataDir: DATA, onChange: () => publish(), turnCheckpoints:{before:args=>turnCheckpointService.before(args),after:args=>turnCheckpointService.after(args),locked:id=>turnCheckpointService?.locked(id)||false,dispatch:(...args)=>turnCheckpointService.dispatch(...args)}, runContext: ({thread,project}) => ({
@@ -705,6 +718,8 @@ app.whenReady().then(async () => {
   const whisperCommand = path.join(__dirname, 'bin/whisper-cli'), whisperModel = path.join(ROOT, 'models/ggml-tiny.bin');
   voiceService = createVoiceService({ dataDir: DATA, defaultConfig: fs.existsSync(whisperCommand) && fs.existsSync(whisperModel) ? { command:whisperCommand, args:['-m',whisperModel,'-f','{audio}','-l','{language}','-nt','-np','-ng'], output:'stdout' } : null });
   libraryService=createLibraryService({dataDir:DATA,onChange:publish,capture:async()=>{const t=pendingCaptureTarget?tabs.get(pendingCaptureTarget):visibleTab();pendingCaptureTarget=undefined;if(!t)throw new Error('Open a page to capture');const image=await captureTabImage(t);return {pngBase64:image.toPNG().toString('base64'),url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()};},activePage:async()=>{const t=visibleTab();if(!t)throw new Error('Open a page to save');return {url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()};},exportImage:async({pngBase64,suggestedName})=>{const pick=await dialog.showSaveDialog(window,{defaultPath:suggestedName,filters:[{name:'PNG image',extensions:['png']}]});if(pick.canceled||!pick.filePath)return {saved:false};fs.writeFileSync(pick.filePath,Buffer.from(pngBase64,'base64'),{mode:0o600});return {saved:true,path:pick.filePath};},openUrl:async url=>{const s=getSpace(store.selected);userControl(s);await createTab(s,url,{reveal:true});return {opened:true};}});
+  const nativeDesktop=createNativeDesktop({dataDir:DATA,screenPermission:()=>process.platform==='darwin'?systemPreferences.getMediaAccessStatus('screen'):'unknown'});
+  desktopService=createDesktopService({dataDir:DATA,registry:globalShortcut,capture:nativeDesktop.screenshot,selection:nativeDesktop.selection,permissions:()=>({screen:process.platform==='darwin'?systemPreferences.getMediaAccessStatus('screen'):'unsupported',accessibility:process.platform==='darwin'?(systemPreferences.isTrustedAccessibilityClient(false)?'granted':'not-granted'):'unsupported'}),checkChord:key=>{const p=preferencesService.snapshot(),physical=physicalChord(key,process.platform),conflict=[...p.reservedShortcuts,...Object.entries(p.shortcuts).filter(([,value])=>value).map(([action,accelerator])=>({accelerator,label:p.actions.find(a=>a.id===action)?.label||action}))].find(row=>physicalChord(row.accelerator,process.platform)===physical);return conflict?{valid:false,error:'Shortcut conflicts with '+conflict.label}:{valid:true};},onOpen:action=>openPanel(action==='chat'?'agents':action==='voice'?'voice':'desktop'),onChange:publish,copyText:text=>clipboard.writeText(text),saveText:payload=>libraryService.dispatch('library:items:create',{kind:'text',...payload})});
   recorderService=createActionRecorder({dataDir:DATA,onChange:()=>{for(const t of tabs.values())sendPageConfig(t);publish();},activePage:()=>{const t=visibleTab();return t?{targetId:t.id,url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()}:null;},capture:async({targetId})=>{const t=tabs.get(targetId);if(!t||t.view.webContents.isDestroyed())throw new Error('Recorded page was closed');return {pngBase64:(await captureTabImage(t)).toPNG().toString('base64')};}});
   const browserGateway = createBrowserGateway({ resolveScope: resolveAgentScope, callbacks: {
     listTabs: async ({scope}) => { const s = await spaceForScope(scope); return { tabs: s.tabs.map((id, i) => tabDescriptor(tabs.get(id), i)) }; },
@@ -738,7 +753,7 @@ app.whenReady().then(async () => {
     else void saveSelection(data.text,t).catch(error=>window.webContents.send('vek:error',error.message));
   });
   ipcMain.handle('vek:state', event => { if (event.sender === window.webContents)return uiState();const secondary=[...spaceWindows].find(([,record])=>record.window.webContents===event.sender);if(!secondary)throw new Error('Invalid sender');return uiState(secondary[0]); });
-  ipcMain.handle('vek:action', (event, action, value) => { if(event.sender===window.webContents)return uiAction(action,value);const secondary=[...spaceWindows].find(([,record])=>record.window.webContents===event.sender);if(!secondary||!['navigate','back','forward','reload','tab:new','tab:select','tab:close','bookmark:add','space:control','space:attach-window','find','find:close'].includes(action))throw new Error('Invalid sender or detached-window action');return uiAction(action,value,secondary[0]); });
+  ipcMain.handle('vek:action', (event, action, value) => { if(event.sender===window.webContents)return uiAction(action,value,undefined,true);const secondary=[...spaceWindows].find(([,record])=>record.window.webContents===event.sender);if(!secondary||!['navigate','back','forward','reload','tab:new','tab:select','tab:close','bookmark:add','space:control','space:attach-window','find','find:close'].includes(action))throw new Error('Invalid sender or detached-window action');return uiAction(action,value,secondary[0]); });
   await window.loadFile(path.join(__dirname, 'index.html'));
   applyPreferences();
   window.on('resize', layout);
@@ -751,7 +766,7 @@ app.whenReady().then(async () => {
   }
   if (!store.spaces.length) await createSpace('Personal', 'Default', 'user');
   store.selected = store.spaces.some(s => s.id === store.selected) ? store.selected : store.spaces[0].id;
-  browserStoreReady=true;persist();layout(); publish(); await startRPC();
+  browserStoreReady=true;persist();layout(); publish(); await startRPC();desktopService.activate();
 }).catch(err => { console.error(err); app.exit(1); });
 app.on('window-all-closed', () => app.quit());
 app.on('before-quit', event => {
@@ -763,5 +778,5 @@ app.on('before-quit', event => {
   if (runtimeFile) { try { const r = JSON.parse(fs.readFileSync(runtimeFile)); if (r.pid === process.pid) fs.unlinkSync(runtimeFile); } catch {} }
   for (const c of connections) c.ws.close(); server?.close();
   tray?.destroy();
-  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),memoryService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
+  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([desktopService?.close(),agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),memoryService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
 });

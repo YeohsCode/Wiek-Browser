@@ -150,6 +150,9 @@ try {
   await fs.writeFile(historyFile,historyBytes);
   await action('agents:threads:pin',{id:threadId});await action('agents:threads:archive',{id:threadId});thread=await action('agents:threads:read',{id:threadId});check(thread.pinned&&thread.archived,'thread organization persists');
   await action('agents:threads:unarchive',{id:threadId});
+  const desktopSnapshot=await action('desktop:snapshot');check(desktopSnapshot.selectionEnabled===false&&Object.values(desktopSnapshot.shortcuts).every(v=>v===''),'packaged desktop tools default to no selection reading or global shortcuts');
+  check(desktopSnapshot.draft===null&&!JSON.stringify(desktopSnapshot).includes('pngBase64'),'packaged desktop snapshot exposes no captured pixels or selected text');
+  for(const desktopAction of ['desktop:screenshot','desktop:selection:read','desktop:shortcut:set','desktop:selection:policy','desktop:draft:read','desktop:permissions:open']){await assert.rejects(action(desktopAction,{}),/Desktop|desktop|permission/i);checks++;}
   const catalog=await action('catalog:list',{projectId});check(Array.isArray(catalog.entries),'installed instruction catalog available');
   const resourcesConfig=await action('mcp:integrations:save',{name:'Resource host fixture',scope:{projectId,threadId},command:process.execPath,args:[path.resolve('tests/fixtures/mcp-resource-peer.cjs')]});const resourceId=resourcesConfig.integrations.at(-1).id,resourceScope={projectId,threadId},resourceUri='fixture:///notes';
   check((await action('mcp:resources:list',{integrationId:resourceId,scope:resourceScope})).resources.length===2,'packaged host paginates MCP resources');

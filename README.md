@@ -1,4 +1,6 @@
 # Vek Browser
+> **0.14.0 更新**：Settings新增Desktop tools：macOS系统区域/窗口截图、明确启用的一次性跨应用选区读取、按应用排除、全局快捷键注册及OS失败状态。内容先预览，再由用户保存/复制/用作草稿；不是被动监听或跨应用录制。
+>
 > **0.13.0 更新**：加密 Profile archive v2 可显式导出已打开顶层页面的 localStorage 与各标签独立 sessionStorage；先在无网络 bootstrap 中恢复，再加载真实页面。兼容读取 v1，保留取消/冲突/部分失败提示，CHIPS cookies 明确遗漏。完整 Chrome/Safari 迁移仍未完成。
 >
 > **0.12.0 更新**：HTTP MCP 可配置预注册公共客户端 OAuth，支持 S256 PKCE、权限审核后显式打开登录、本机回调、绑定加密令牌/轮换刷新和取消。401 与不确定刷新要求重新授权，工具 POST 不自动重放；DCR 和真实账号验收仍未完成。
@@ -27,7 +29,7 @@
 >
 > 最新测试以 [reports/RESULTS.md](reports/RESULTS.md) 为准；[analysis/feature-parity.md](analysis/feature-parity.md) 明确列出剩余差距。不能把 69 项 SDK 用例通过理解成整款 Ego 已全量复刻。
 
-进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.13.0；按用户要求优先 P2、P3，其他 Agent 集成暂缓。下一步 P3 系统能力与退出后调度设计验收，继续补 P2 明确来源迁移、MCP 现代请求与 OAuth DCR；Claude源CLI会话迁移和后台任务仍有缺口。
+进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.14.0；按用户要求优先 P2、P3，其他 Agent 集成暂缓。下一步 P3 退出后调度与 standalone/dedicated 执行模式，继续补 P2 明确来源迁移、MCP 现代请求与 OAuth DCR；Claude源CLI会话迁移和后台任务仍有缺口。
 
 本地 Chromium 浏览器与 Agent 工作区。项目在 `vek-browser/` 中独立创建，使用 Electron 实现浏览器宿主、Space、多标签与原生连接层，复用 `citrolabs/ego-lite` 的 MIT SDK。Ego 安装包只用于分析和测试，不进入 Vek 发行包。
 
@@ -106,11 +108,11 @@ await task.finish({ keep: [] }); // 关闭受管理页面并结束
 
 本地 Agent 会话只运行你配置的已安装 CLI；没有 provider 或认证时明确报错，不生成模拟回复。Codex preset 根据本机实际 `exec --help` 发现，默认使用只读 sandbox。通用 CLI 支持 stdin 或 argv 中的 `{prompt}` 模板。测试只使用本地 fake provider；未进行付费模型调用。
 
-尚未完成完整 Chrome/Safari 会话/web storage/扩展迁移、全部 Chrome 扩展 API、其余五种 provider 原生协议、linked worktree/远程 PR、MCP OAuth DCR/MRTR/现代订阅、OS 跨应用采集/翻译、应用退出后的调度、语义/全磁盘 memory index、Ego 专有服务和自动更新。已实现能力也有范围限制，见 [功能对照](analysis/feature-parity.md) 和 [计划](PLAN.md)。
+尚未完成完整 Chrome/Safari 会话/web storage/扩展迁移、全部 Chrome 扩展 API、其余五种 provider 原生协议、linked worktree/远程 PR、MCP OAuth DCR/MRTR/现代订阅、被动选区工具栏/跨应用录制/翻译、应用退出后的调度、语义/全磁盘 memory index、Ego 专有服务和自动更新。已实现能力也有范围限制，见 [功能对照](analysis/feature-parity.md) 和 [计划](PLAN.md)。
 
 ## 当前验证结果
 
-0.10.0 最终打包版：**69/69** 同源真实浏览器用例通过；Ego 基准：**68/69**（HTML 粘贴用例失败），两侧无跳过/未运行。另有 **264/264** 本地测试、**109/109** 打包宿主集成、152个打包文件身份匹配；81 个上游测试/fixture 保持原样。SDK 单测 532/532、CDP 探针 22/22 沿用未变更版本记录，没有冒充本轮重跑。详细结果以 [RESULTS.md](reports/RESULTS.md)、[comparison.md](reports/comparison.md) 与原始日志为准。
+0.14.0 最终打包版：**69/69** 同源真实浏览器用例通过；保留同hash Ego 基准 **68/69**（HTML 粘贴失败），两侧无跳过/未运行。另有 **331/331** 本地测试、**140/140** 打包宿主集成、162个发行文件匹配；81 个上游输入未改。SDK 单测 532/532、CDP 探针 22/22 沿用未变更版本记录。本轮实际OS验证仅覆盖权限状态、快捷键注册、截图启动/取消/清理；全局按键触发、跨应用选区正文与原生PNG正向结果仍待验证。详细结果见 [RESULTS.md](reports/RESULTS.md)、[comparison.md](reports/comparison.md)。
 
 Vek引擎为Chromium148.0.7778.280，Ego为156.0.8078.48；现有自动化用例兼容不代表所有Web平台能力等价。
 
@@ -181,3 +183,5 @@ Profile archive 是 Vek 自有加密格式，并非 Ego 导出文件；只读导
 0.12 OAuth 需要已注册的public client ID、可用的OS凭据存储和S256 PKCE。HTTP配置中添加客户端ID后，Prepare sign-in先审核issuer/resource/scopes，再显式打开系统浏览器。固定回调路径为 `/oauth/callback`；可配置注册端口。完整范围和未运行的真实服务/Keychain验收见 [设计](analysis/mcp-oauth-design.md)。
 
 0.13 的 web storage 默认为不导出；在 Settings → Encrypted profile archive 勾选 Include web storage from open tabs 后才捕获。仅包括当前顶层 origin，不含 iframe/IndexedDB/关闭标签；不打开恢复标签会跳过其 sessionStorage，应用退出后也不保证 sessionStorage 恢复。见 [范围与验证](analysis/profile-web-storage.md)。
+
+Desktop tools的选区读取默认关闭，全局快捷键默认未分配。需要macOS相应权限；只读当前AX选区，不模拟Copy或监听所有按键。原生helper自有源码，可用 `npm run build:desktop-native` 重建；真实OS验证和其余边界见 [desktop-tools设计](analysis/desktop-tools.md)。

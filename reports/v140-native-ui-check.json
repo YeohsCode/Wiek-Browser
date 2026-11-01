@@ -1,0 +1,28 @@
+{
+  "generatedAt": "2026-11-01T21:54:10.819108+00:00",
+  "version": "0.14.0",
+  "syntheticEnvironmentOnly": true,
+  "nativeShortcutRegisteredBeforeAndAfterRestart": true,
+  "nativeScreenshotProcessObserved": {
+    "pid": 29318,
+    "fixedArgv": [
+      "/usr/sbin/screencapture",
+      "-i",
+      "-x",
+      "-t",
+      "png",
+      "<private temporary output>"
+    ]
+  },
+  "cancelledOperationSettled": true,
+  "temporaryDirectoryEmpty": true,
+  "resetOptOutAndUnassigned": true,
+  "helperSourceAndBinaryIdentityMatch": true,
+  "nativeGlobalKeyCallbackObserved": false,
+  "nativeAXTextBodyRead": false,
+  "nativePositivePNGProduced": false,
+  "newOSPermissionGrants": 0,
+  "modelCalls": 0,
+  "externalAccountActions": 0,
+  "manualObservationReport": "v140-native-ui-qa.md"
+}

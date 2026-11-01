@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-01T17:41:16.669Z",
-  "version": "0.13.0",
+  "generatedAt": "2026-11-01T21:55:16.213Z",
+  "version": "0.14.0",
   "versionMatches": true,
-  "checkedFiles": 157,
+  "checkedFiles": 162,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -35,6 +35,11 @@
     {
       "file": "app/agent-service.cjs",
       "sha256": "84517385eeb063f6de9901eb020041ae48e91481bdadd3ed2aece0c2c18a1714",
+      "matches": true
+    },
+    {
+      "file": "app/bin/vek-selection",
+      "sha256": "007be15daef4cb65276c74e36ca4a33c5e8b9f6cb1017f182375c6de332d8135",
       "matches": true
     },
     {
@@ -108,8 +113,28 @@
       "matches": true
     },
     {
+      "file": "app/desktop-native.cjs",
+      "sha256": "ac83a070b0b0820aac4fa7fbe748bc47b7fcea5533ce447fc29d79d7f97731e6",
+      "matches": true
+    },
+    {
+      "file": "app/desktop-panel.css",
+      "sha256": "4c3b050036e2bf02b82a822910d822642c39326a8beff5a97f49b7e3d22980b9",
+      "matches": true
+    },
+    {
+      "file": "app/desktop-panel.js",
+      "sha256": "95683439a4db624bf253380ff857aaf99c100b844d33350467a35da901ea2d90",
+      "matches": true
+    },
+    {
+      "file": "app/desktop-service.cjs",
+      "sha256": "c2cf4b703f755f0fe97693688881fbb118d288acafb8a1488410378b455e7984",
+      "matches": true
+    },
+    {
       "file": "app/index.html",
-      "sha256": "032fb18cb731f12af96c59419e05698e28a54f3b25dee5ac99bb3903f2cbce4e",
+      "sha256": "61dd9a1d407a9eacac9f18a2403f374ac8106e94e1dbfd4b229f7aff996858ab",
       "matches": true
     },
     {
@@ -119,7 +144,7 @@
     },
     {
       "file": "app/library-panel.js",
-      "sha256": "abb39a80a1664a4c15b7cde8788bb64d2d705745d3575e6ad0f40c592fd67386",
+      "sha256": "d4884857d7011240cf257f67a0a724629d0198061c1b04331fd45abcf59c139d",
       "matches": true
     },
     {
@@ -129,7 +154,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "023ab63bdc34acfadb96cdcb53a004e200d89a30036d220fa0c0216b563b0ef5",
+      "sha256": "c07d7b2c05358fbe284a826b120d9bb2f9cb8600709801420227039f4a28a361",
       "matches": true
     },
     {
@@ -184,7 +209,7 @@
     },
     {
       "file": "app/preferences-service.cjs",
-      "sha256": "e2f9650f955ea47c58a1499bfe6197c2631afc87dad1cc44ee17623e18dfdffa",
+      "sha256": "b04de94180ff10041b7e6d8152797d629d632e55088d8448da1c12615849ef2f",
       "matches": true
     },
     {
@@ -224,7 +249,7 @@
     },
     {
       "file": "app/renderer.js",
-      "sha256": "f9b470988f8aef8bac682148d70561f3aec4976771961a9e46f7d189c953b06c",
+      "sha256": "fa10dd0b65ce7d9e69f24e5ca551ebc04ad5905a894b5a578940ab98ba9938e5",
       "matches": true
     },
     {
@@ -299,7 +324,7 @@
     },
     {
       "file": "cli/vek-browser.mjs",
-      "sha256": "0450ae0d9f3aebb4e239cb165695ef84387c8576fbcd03b6ff7792e56e1763fe",
+      "sha256": "96659cc357985d8da84c9071f70d8294dd389cecd61f4b6969d8a17290430023",
       "matches": true
     },
     {
@@ -784,7 +809,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "c03f2eb4ebe279c6d863ded5c41ad671988810fb0596b77ecaa48c0771af645a",
+      "sha256": "0a95465e2a3a8bb53d3e946aad56d15775c532abcae3cfffb01e17842daf809d",
       "matches": true
     },
     {

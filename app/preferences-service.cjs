@@ -36,7 +36,7 @@ function physicalChord(value, platform) {
   const parts = normalized.split('+'), key = parts.pop(); const physical = new Set(parts.map(p => p === 'CommandOrControl' ? platform === 'darwin' ? 'Command' : 'Control' : p));
   return [...modifierOrder.filter(m => physical.has(m)), key].join('+');
 }
-function createPreferencesService({ dataDir, onChange = () => {}, platform = process.platform, reservedShortcuts = [] } = {}) {
+function createPreferencesService({ dataDir, onChange = () => {}, platform = process.platform, reservedShortcuts = [], externalShortcuts = () => [] } = {}) {
   if (!dataDir) throw fail('dataDir is required');
   const directory = path.join(path.resolve(dataDir), 'preferences'); fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   if (fs.lstatSync(directory).isSymbolicLink()) throw fail('Preferences directory must not be a symlink'); fs.chmodSync(directory, 0o700);
@@ -62,6 +62,7 @@ function createPreferencesService({ dataDir, onChange = () => {}, platform = pro
     const physical = physicalChord(normalized, platform), conflicts = [];
     if (physical) {
       for (const item of reserved) if (physicalChord(item.accelerator, platform) === physical) conflicts.push({ type: 'system', label: item.label, accelerator: item.accelerator });
+      for (const item of externalShortcuts()) if (physicalChord(item.accelerator, platform) === physical) conflicts.push({ type:'global',label:item.label||'Global shortcut',accelerator:item.accelerator });
       for (const item of ACTIONS) if (item.id !== action && physicalChord(shortcuts[item.id] || '', platform) === physical) conflicts.push({ type: 'application', action: item.id, label: item.label, accelerator: shortcuts[item.id] });
     }
     return { valid: conflicts.length === 0, normalized, physicalChord: physical, conflicts, ...(conflicts.length ? { error: `Shortcut conflicts with ${conflicts.map(c => c.label).join(', ')}` } : {}) };

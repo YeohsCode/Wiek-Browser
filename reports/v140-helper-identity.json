@@ -1,0 +1,14 @@
+{
+  "generatedAt": "2026-11-01T21:42:48.006Z",
+  "architecture": "arm64",
+  "source": "tools/native/selection.swift",
+  "sourceSha256": "8445aa665a0441778e2b7ee9c80ebad4bbe37c34c79d7334acc8407027539dad",
+  "binary": "app/bin/vek-selection",
+  "binarySha256": "007be15daef4cb65276c74e36ca4a33c5e8b9f6cb1017f182375c6de332d8135",
+  "binaryBytes": 85664,
+  "compiler": "Apple Swift version 6.0.3 (swiftlang-6.0.3.1.10 clang-1600.0.30.1)\nTarget: arm64-apple-macosx15.0",
+  "statusOnlyProbe": {
+    "trusted": true
+  },
+  "selectionReadInThisProbe": false
+}

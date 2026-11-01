@@ -1,0 +1,32 @@
+✔ native capture uses fixed interactive argv, reads bounded private PNG and always removes temporary pixels (6.003042ms)
+✔ native capture distinguishes permission refusal/cancel and rejects symlinked output or data directories (24.934625ms)
+✔ selected-text adapter passes exclusions on stdin, maps explicit failures and never runs a shell (15.310125ms)
+✔ native subprocess cancellation/timeout waits for actual exit, bounds output and suppresses stderr (136.90325ms)
+{"ok":true,"checks":20,"realElectronIPC":true,"fixtureCaptureOnly":true,"actualOSCapture":false,"modelCalls":0}
+✔ actual Electron desktop panel previews before copy/save and transfers PNG to the real Library editor (326.631875ms)
+✔ desktop defaults register/read/capture nothing and snapshots contain no draft content (16.976292ms)
+✔ token API access cannot collect/read/configure/copy desktop data or open a draft (9.550083ms)
+✔ global shortcut replacement is transactional and OS failure preserves the old binding (33.92125ms)
+✔ saved shortcut startup reports unavailable and explicit retry registers without pretending success (32.884292ms)
+✔ one-time selection is opt-in, carries provenance, and requires explicit copy/save (21.062208ms)
+✔ secure/excluded/oversized/malformed selections are refused and policy cannot smuggle settings (28.759541ms)
+✔ disabling/excluding clears a selection draft and invalidates an in-flight result (21.615333ms)
+✔ capture cancellation and close prevent late drafts and retain busy state until provider exits (6.153708ms)
+✔ draft replacement/expiry and malformed PNGs never become permanent Library assets (11.213125ms)
+✔ browser shortcut validation includes dynamic desktop reservations in both directions (5.704042ms)
+✔ Desktop reset unregisters only its own keys and restores opt-in privacy defaults (20.141083ms)
+✔ a cancelled or failed replacement preserves the previous unexpired draft (5.767792ms)
+✔ native abort rejection is a normal cancellation and preserves the previous draft (6.006458ms)
+✔ preferences defaults do not collect content and patches persist with owner permissions (34.407083ms)
+✔ shortcut aliases normalize and actual platform chords detect app/system conflicts (27.638ms)
+✔ invalid shortcut syntax, unknown fields and oversized UTF-8 instructions never mutate state (23.037083ms)
+✔ shortcut reset checks collisions and global reset restores privacy defaults (49.852084ms)
+✔ state symlinks and invalid stored shortcuts are rejected instead of silently replaced (19.067208ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 391.022958

@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "selectionEnabled": true,
+  "excludedApps": [],
+  "shortcuts": {
+    "screenshot": "",
+    "selection": "Control+Alt+Shift+K",
+    "chat": "",
+    "voice": ""
+  },
+  "actions": [
+    {
+      "id": "screenshot",
+      "label": "Capture screen region"
+    },
+    {
+      "id": "selection",
+      "label": "Read selected text"
+    },
+    {
+      "id": "chat",
+      "label": "Open Agent chat"
+    },
+    {
+      "id": "voice",
+      "label": "Open voice input"
+    }
+  ],
+  "platform": "darwin",
+  "permissions": {
+    "screen": "granted",
+    "accessibility": "granted"
+  },
+  "capabilities": {
+    "screenshot": true,
+    "selection": true
+  },
+  "shortcutsStatus": {
+    "selection": {
+      "status": "registered",
+      "accelerator": "Control+Alt+Shift+K"
+    }
+  },
+  "busy": {
+    "id": "649a08d0-803c-4142-ba26-882d1879dd40",
+    "kind": "screenshot"
+  },
+  "draft": null,
+  "lastError": ""
+}

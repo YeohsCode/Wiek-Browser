@@ -1,6 +1,6 @@
 {
   "name": "vek-browser",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "private": true,
   "license": "MIT",
   "description": "A local Chromium browser with task spaces and an MIT-compatible agent runtime",
@@ -16,7 +16,8 @@
     "test": "node --test tests/*.test.mjs",
     "test:e2e": "node tests/run-comparison.mjs",
     "dist": "electron-builder --mac dir",
-    "test:workbench": "node tests/workbench-integration.mjs"
+    "test:workbench": "node tests/workbench-integration.mjs",
+    "build:desktop-native": "node tools/build-selection-helper.mjs"
   },
   "dependencies": {
     "ws": "^8.18.0"

@@ -1,0 +1,40 @@
+{
+  "version": "0.13.0",
+  "generatedAt": "2026-11-01T17:39:09.255Z",
+  "fixtureOnly": true,
+  "archive": {
+    "version": 2,
+    "bytes": 1700,
+    "sha256": "05441ca9841fc940414f7bc0e5f784ab794c53ad760e88ab2600d5263c86b64b",
+    "mode": "600",
+    "localStorageOrigins": 1,
+    "tabSessionAreas": 2,
+    "containsPlaintextFixtureValue": false
+  },
+  "restoredProfile": {
+    "newId": true,
+    "spaceCount": 2,
+    "urls": [
+      "about:blank",
+      "http://127.0.0.1:61445/one",
+      "http://127.0.0.1:61445/two"
+    ]
+  },
+  "bootstrapRootNetworkRequests": 0,
+  "qaRuntimeRemoved": true,
+  "nativeObservations": {
+    "input": "CUA only for navigation, settings, save/open dialogs, passphrase confirmation, Restore and tab selection",
+    "resultPanelVisible": true,
+    "siteFirstScriptSessionOne": "one",
+    "siteFirstScriptSessionTwo": "two",
+    "beforeSiteScriptLocalValueMatches": true,
+    "backButtonDisabledOnBothRestoredTabs": true,
+    "screenshots": [
+      "v130-native-profile-result.png",
+      "v130-native-restored-one.png",
+      "v130-native-restored-two.png"
+    ]
+  },
+  "realAccountActions": 0,
+  "modelCalls": 0
+}

@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.10.0**，更新于 2026-11-01；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
+当前版本 **0.13.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -338,3 +338,9 @@ initialize目录发现不发送user、不产生Vek run或已拥有session，使�
 HTTP MCP新增预注册public client none/S256授权，metadata/challenge/OIDC发现、权限审核后显式系统浏览器登录、127.0.0.1固定路径/可选注册端口回调、作用域绑定OS密文、refresh轮换和取消。401不重放工具POST，迟到/被取消code不能保存；跨scope密文重新绑定被拒绝。真实HTTP/crypto/Electron协议fixture验证，打包仅prepare/cancel及OS可用状态；真实AS与Keychain令牌写入未运行。
 
 新增18项专项，本地303/303、打包132/132；最终SDK和身份结果见[RESULTS](../reports/RESULTS.md)。OAuth DCR/托管client metadata/完整step-up、MRTR/现代订阅仍缺失；P1其他Agent集成继续暂缓。下一项优先Profile web storage与明确来源迁移。实现限额见[mcp-oauth-design](mcp-oauth-design.md)，全产品parity保持false。
+
+## 0.13：P2显式Profile web storage与标签会话归档
+
+新增v2归档（读取兼容v1），显式采集所选Profile已打开的顶层HTTP(S) localStorage和per-tab当前origin sessionStorage。UTF-16 code units完整编码；新Profile中无网络bootstrap恢复、逐项回读后打开真实页面。包含导航/关闭/partition/额度边界、独立标签、活动索引、取消、冲突、部分失败及清理。CHIPS cookies识别遗漏，避免丢失partition语义。
+
+新增10项回归（4数据、4捕获、2实际Electron/主应用），全套及打包结果以[RESULTS](../reports/RESULTS.md)为准；真实网站登录未运行。不包含关闭标签/旧origin/iframe/IndexedDB/完整导航栈、退出后sessionStorage或完整Chrome/Safari多来源迁移。P1继续暂缓；P2/P3未整体完成。详见[profile-web-storage](profile-web-storage.md)。

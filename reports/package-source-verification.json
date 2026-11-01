@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-01T16:20:00.771Z",
-  "version": "0.12.0",
+  "generatedAt": "2026-11-01T17:41:16.669Z",
+  "version": "0.13.0",
   "versionMatches": true,
-  "checkedFiles": 155,
+  "checkedFiles": 157,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -129,7 +129,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "12af0ba29f890ac19aa4cfe3eadc863ae50100e7fb446ae61798c9ea39b62aa4",
+      "sha256": "023ab63bdc34acfadb96cdcb53a004e200d89a30036d220fa0c0216b563b0ef5",
       "matches": true
     },
     {
@@ -194,12 +194,22 @@
     },
     {
       "file": "app/profile-archive.cjs",
-      "sha256": "a227041c47f3b5846847e45a014ab31efb1f98667ace7b9199338452856c7c2a",
+      "sha256": "d6a50dc15be62c877936e699e9a617bcbb20cbd35c0de096e106eafb8375e0b8",
       "matches": true
     },
     {
       "file": "app/profile-import.cjs",
       "sha256": "650a5bae3a57bb4ccc50f9262cf47b1fa453fd950940fbd735de54eb6472afd6",
+      "matches": true
+    },
+    {
+      "file": "app/profile-storage-data.cjs",
+      "sha256": "8a793b847b887e2b5a342d11b90a6fa6701e303c9ac84fdccf2e255e3c302826",
+      "matches": true
+    },
+    {
+      "file": "app/profile-web-storage.cjs",
+      "sha256": "84cb6b996ce7984e08419863c4461a42797e523fa114620b5f2c71bbcd61d24e",
       "matches": true
     },
     {
@@ -214,7 +224,7 @@
     },
     {
       "file": "app/renderer.js",
-      "sha256": "bc76fe32ece79ef6b07767a407e0081905563b564ec35bed74a681f5e2b75e1a",
+      "sha256": "f9b470988f8aef8bac682148d70561f3aec4976771961a9e46f7d189c953b06c",
       "matches": true
     },
     {

@@ -1,6 +1,6 @@
 # 文档索引
 
-当前版本 **0.12.0**；优先P2/P3，其余Agent集成暂缓。下一项Profile资料迁移，随后MCP现代请求与OAuth DCR，随后系统/调度能力。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
+当前版本 **0.13.0**；优先P2/P3，其余Agent集成暂缓。已完成有界Profile web storage归档；下一项P3跨应用选区/截图与显式全局快捷键，随后退出后调度，P2明确来源迁移与MCP现代请求/OAuth DCR仍保留。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
 
 | 用途 | 文档 |
 |---|---|
@@ -26,7 +26,7 @@
 | MCP | [stdio/gateway](../analysis/mcp-service-design.md)、[HTTP 与版本差异](../analysis/mcp-http-design.md) |
 | 时区与调度恢复 | [scheduler-timezone.md](../analysis/scheduler-timezone.md) |
 | 权限与 Profile 归属 | [site-permissions.md](../analysis/site-permissions.md)、[browser-shell-v030.md](../analysis/browser-shell-v030.md) |
-| 资料 archive | [profile-archive-design.md](../analysis/profile-archive-design.md) |
+| 资料 archive | [profile-archive-design.md](../analysis/profile-archive-design.md)、[web storage v2](../analysis/profile-web-storage.md) |
 | 语音构建与模型来源 | [whisper-static-build.md](../reports/whisper-static-build.md)、[MODEL-NOTICE.md](../models/MODEL-NOTICE.md) |
 | 许可 | [LICENSE](../LICENSE)、[NOTICE.md](../NOTICE.md) |
 

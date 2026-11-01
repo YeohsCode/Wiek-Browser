@@ -1,0 +1,27 @@
+✔ profile archive writes only ciphertext to a temporary file and restores all supported categories (652.153875ms)
+✔ wrong passphrase and every authenticated header/cipher component fail without returning data (1743.216542ms)
+✔ expired archives and unknown versions, algorithms and MIME types are explicit failures (423.273125ms)
+✔ validation rejects pollution keys, nonplain JSON, accessors and unsupported data fields before encryption (0.759291ms)
+✔ portable URLs, cookie metadata, exact password origins and primitive types are validated (1.100333ms)
+✔ limits reject oversized files, payloads, category counts and structural depth (218.399791ms)
+✔ independent operations are reusable and decoded objects never alias input or one another (437.662583ms)
+✔ v2 ciphertext roundtrip preserves exact UTF-16 storage keys and independent tab sessions (650.025292ms)
+✔ v1 archived fixture from 0.12 decodes without inventing web storage (216.885791ms)
+✔ storage schema refuses origin widening, ambiguous duplicate keys/origins and unbounded code units (11.770833ms)
+✔ aggregate storage budget covers both local origins and per-tab sessions (33.961708ms)
+✔ web storage capture is opt-in and sends no CDP commands by default (0.778084ms)
+✔ navigated, closed and partitioned tabs retain only their URL with explicit skipped-storage warnings (0.88525ms)
+✔ oversized storage is omitted without corrupting the portable tab inventory (0.736083ms)
+✔ cancelled capture yields no partially assembled archive (0.217041ms)
+{"ok":true,"checks":34,"bootstrapNetworkRequests":0,"realBrowserSessions":true,"sourceProfileUnchanged":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron migrates two tab sessions before site scripts, with no bootstrap network and bounded failure cleanup (1499.398334ms)
+{"ok":true,"checks":33,"actualApplicationIPC":true,"injectedNativeDialogs":true,"realPassphraseModal":true,"bootstrapNetworkRequests":0,"modelCalls":0,"externalAccountActions":0}
+✔ actual application exports and restores through trusted IPC and passphrase UI; cancellations create no profile (2240.114292ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3805.935

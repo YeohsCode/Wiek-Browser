@@ -4,7 +4,8 @@ const { randomBytes, scrypt, createCipheriv, createDecipheriv } = require('node:
 const { promisify } = require('node:util');
 const { TextDecoder } = require('node:util');
 const derive = promisify(scrypt);
-const FORMAT = 'vek-browser-profile', MIME_TYPE = 'application/vnd.vek.profile+json', VERSION = 1;
+const { ENCODING, LIMITS: STORAGE_LIMITS, validateArea } = require('./profile-storage-data.cjs');
+const FORMAT = 'vek-browser-profile', MIME_TYPE = 'application/vnd.vek.profile+json', VERSION = 2;
 const KDF = 'scrypt-131072-8-1', CIPHER = 'aes-256-gcm';
 const DEFAULT_MAX_BYTES = 32 * 1024 * 1024;
 const SCRYPT = Object.freeze({ N: 131072, r: 8, p: 1, maxmem: 256 * 1024 * 1024 });
@@ -61,18 +62,18 @@ function plainClone(value, maxBytes) {
   }
   return walk(value);
 }
-function normalizePayload(input, maxBytes) {
+function normalizePayload(input, maxBytes, version = VERSION) {
   const source = plainClone(input, maxBytes);
-  object(source, ['profile','spaces','bookmarks','history','cookies','passwords','extensionsMetadata'], 'profile payload', ['profile']);
+  object(source, ['profile','spaces','bookmarks','history','cookies','passwords','extensionsMetadata',...(version>=2?['webStorage']:[])], 'profile payload', ['profile']);
   const profile = object(source.profile, ['id','name'], 'profile', ['name']);
   const out = { profile: { name: string(profile.name, 'profile name', 1024, false) }, spaces: [], bookmarks: [], history: [], cookies: [], passwords: [], extensionsMetadata: [] };
   optionalText(out.profile, profile, 'id', 128);
-  let totalTabs = 0;
+  let totalTabs = 0; const storageBudget={bytes:0};
   out.spaces = array(source.spaces === undefined ? [] : source.spaces, 'spaces', SPACE_LIMIT).map(space => {
     object(space, ['name','pinned','activeTabIndex','tabs'], 'space', ['name','tabs']);
     const tabs = array(space.tabs, 'tabs', 1024); totalTabs += tabs.length;
     if (totalTabs > TAB_LIMIT) throw error('Archive has too many tabs', 'VEK_PROFILE_ARCHIVE_LIMIT');
-    const normalized = { name: string(space.name, 'space name', 1024, false), tabs: tabs.map(tab => { object(tab, ['url','title'], 'tab', ['url']); const result = { url: url(tab.url, 'tab', true) }; optionalText(result,tab,'title'); return result; }) };
+    const normalized = { name: string(space.name, 'space name', 1024, false), tabs: tabs.map(tab => { object(tab, ['url','title',...(version>=2?['sessionStorage']:[])], 'tab', ['url']); const result = { url: url(tab.url, 'tab', true) }; optionalText(result,tab,'title'); if(Object.hasOwn(tab,'sessionStorage')) { result.sessionStorage=validateArea(tab.sessionStorage,storageBudget);if(result.url==='about:blank'||new URL(result.url).origin!==result.sessionStorage.origin)throw error('Session storage origin must match its tab'); }return result; }) };
     if (Object.hasOwn(space,'pinned')) normalized.pinned = bool(space.pinned,'space pinned');
     if (Object.hasOwn(space,'activeTabIndex')) { if (!Number.isInteger(space.activeTabIndex) || space.activeTabIndex < 0 || space.activeTabIndex >= tabs.length) throw error('Invalid active tab index'); normalized.activeTabIndex = space.activeTabIndex; }
     return normalized;
@@ -104,6 +105,11 @@ function normalizePayload(input, maxBytes) {
   });
   out.passwords = array(source.passwords === undefined ? [] : source.passwords, 'passwords').map(row => { object(row,['origin','username','password'],'password',['origin','username','password']); return {origin:origin(row.origin,'password origin'),username:string(row.username,'username',16384),password:string(row.password,'password',65536)}; });
   out.extensionsMetadata = array(source.extensionsMetadata === undefined ? [] : source.extensionsMetadata, 'extension metadata',512).map(row=>{object(row,['id','name','version','enabled'],'extension metadata',['id','name','version']);const result={id:string(row.id,'extension id',128,false),name:string(row.name,'extension name',1024,false),version:string(row.version,'extension version',128,false)};if(Object.hasOwn(row,'enabled'))result.enabled=bool(row.enabled,'extension enabled');return result;});
+  if(Object.hasOwn(source,'webStorage')) {
+    object(source.webStorage,['encoding','localStorage'],'web storage',['encoding','localStorage']);
+    if(source.webStorage.encoding!==ENCODING)throw error('Unsupported web storage encoding');const seen=new Set();
+    out.webStorage={encoding:ENCODING,localStorage:array(source.webStorage.localStorage,'local storage origins',STORAGE_LIMITS.origins).map(row=>{const area=validateArea(row,storageBudget);if(seen.has(area.origin))throw error('Duplicate local storage origin');seen.add(area.origin);return area;})};
+  }
   if (Buffer.byteLength(JSON.stringify(out)) > maxBytes) throw error('Archive data exceeds the size limit','VEK_PROFILE_ARCHIVE_LIMIT');
   return out;
 }
@@ -149,7 +155,7 @@ function createProfileArchive({maxBytes=DEFAULT_MAX_BYTES}={}) {
       envelope=plainClone(envelope,maxBytes);
       object(envelope,[...headerFields,'tag','data'],'archive envelope',[...headerFields,'tag','data']);
       if(envelope.format!==FORMAT||envelope.mimeType!==MIME_TYPE)throw error('Unrecognized Vek profile archive format or MIME type');
-      if(envelope.version!==VERSION)throw error('Unsupported Vek profile archive version','VEK_PROFILE_ARCHIVE_VERSION');
+      if(![1,VERSION].includes(envelope.version))throw error('Unsupported Vek profile archive version','VEK_PROFILE_ARCHIVE_VERSION');
       if(envelope.kdf!==KDF||envelope.cipher!==CIPHER)throw error('Unsupported archive encryption parameters');
       date(envelope.createdAt,'archive creation date');if(envelope.expiresAt!==null)date(envelope.expiresAt,'archive expiry');
       const salt=base64(envelope.salt,'salt',16,16),iv=base64(envelope.iv,'IV',12,12),tag=base64(envelope.tag,'tag',16,16),data=base64(envelope.data,'ciphertext',null,maxBytes);
@@ -162,7 +168,7 @@ function createProfileArchive({maxBytes=DEFAULT_MAX_BYTES}={}) {
         if(envelope.expiresAt!==null&&(Date.parse(envelope.expiresAt)<=Date.now()||Date.parse(envelope.expiresAt)<=Date.parse(envelope.createdAt)))throw error('Profile archive has expired','VEK_PROFILE_ARCHIVE_EXPIRED');
         if(plain.length>maxBytes)throw error('Archive data exceeds the size limit','VEK_PROFILE_ARCHIVE_LIMIT');
         let payload;try{payload=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(plain));}catch{throw error('Decrypted archive payload is not valid UTF-8 JSON');}
-        return {payload:validate(payload),metadata:{format:FORMAT,mimeType:MIME_TYPE,version:VERSION,createdAt:envelope.createdAt,expiresAt:envelope.expiresAt}};
+        return {payload:normalizePayload(payload,maxBytes,envelope.version),metadata:{format:FORMAT,mimeType:MIME_TYPE,version:envelope.version,createdAt:envelope.createdAt,expiresAt:envelope.expiresAt}};
       } finally {key?.fill(0);plain?.fill(0);part?.fill(0);data.fill(0);}
     },
   };

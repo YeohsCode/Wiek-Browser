@@ -1,26 +1,27 @@
-# Vek Browser 0.12.0 当前结果
+# Vek Browser 0.13.0 当前结果
 
-更新：2026-11-02（Asia/Shanghai）。优先P2/P3，P1其他Agent集成继续暂缓。本轮交付预注册公共客户端的HTTP MCP OAuth；既有资源订阅和显式memory索引保留。**P2/P3及全量Ego复刻均未整体完成**。
+更新：2026-11-02（Asia/Shanghai）。本轮完成有界Profile web storage归档与恢复，继续优先P2/P3；P1其他Agent集成暂缓。**P2/P3和全量Ego复刻仍未完成**。
 
-| 验证 | 完成结果与证据 |
+| 验证 | 结果与证据 |
 |---|---|
-| 本地全套 | **303/303**，含新增18项OAuth协议/crypto/服务和真实Electron IPC/UI。[日志](v120-service-tests.log) |
-| OAuth专项 | **18/18**：17项本地HTTP/加密/服务边界，1项实际Electron界面。使用合成AS、注入AES-GCM和浏览器捕获器，0真实账号。[日志](v120-oauth-tests.log) |
-| 打包宿主 | **132/132**；新增9项OS存储可用、metadata/callback准备、scope、取消、不打开及不重放检查，仅prepare/cancel。[日志](v120-package-workbench.log) |
-| SDK E2E | **Vek69/69、1248断言**；保留同hash Ego **68/69、1235断言**，HTML paste失败。两侧0跳过/0未运行。[本轮日志](v120-package-sdk.log)、[同集对比](comparison.md) |
-| 打包/上游身份 | **155文件匹配**，SDK hash与同集比较一致，**81个上游测试/fixture未改**。[校验](v120-package-verification.log) |
-| 原生打包界面 | 实际Prepare→只读审核issuer/resource/scopes→取消；没有打开系统浏览器或写入Keychain token。[QA](v120-native-ui-qa.md)、[独立核对](v120-native-ui-check.json) |
-| 保留验证 | SDK532/532单测、CDP22/22、历史官方CLI无推理readiness与0.11资源/memory原生UI，本轮没有重复运行这些历史专项；其代码回归仍在全套中 |
-| 官方31线上模型任务 | **未运行**；本轮0付费模型调用、0外部账号操作，不记作通过或Ego服务跳过 |
+| 本地全套 | **313/313**，比0.12新增10项，最终代码独立重跑通过。[日志](v130-service-tests.log) |
+| Profile专项 | **17/17**：原有7项加4数据/4捕获/2实际Electron；后两项共67内部检查，包括真实主应用IPC和口令表单，自动化文件/确认框注入。[日志](v130-profile-storage-tests.log) |
+| 实际打包宿主 | **132/132**，运行0.13.0 macOS应用的受保护API。[日志](v130-package-workbench.log) |
+| 打包模块专项 | **2/2实际Electron、67内部检查**，从发行包读取主应用/存储模块，在本机Electron运行，文件/确认框注入。[日志](v130-package-profile-storage.log) |
+| SDK E2E | **Vek69/69、1248断言**；保留同hash完整Ego **68/69、1235断言**（HTML paste失败），两侧0跳过/0未运行。[日志](v130-package-sdk.log)、[同集对比](comparison.md) |
+| 打包/上游身份 | **157文件匹配、81个上游输入未改**；发行包SDK hash与两侧测试一致。[校验](v130-package-verification.log) |
+| 原生界面 | CUA完成实际Save/Open框、两次口令导出、解锁及原生Restore确认；1 origin/2独立session在网站脚本前恢复，结果可见、Back无bootstrap记录。[QA](v130-native-ui-qa.md)、[核对](v130-native-ui-check.json) |
+| 保留证据 | SDK532/532单测、CDP22/22和历史官方CLI无推理readiness，本轮未重跑这些专项；服务代码仍受全套回归覆盖 |
+| 官方31线上模型任务 | **未运行**；0付费模型、0外部账号操作，不计作通过或Ego服务跳过 |
 
-HTTP配置可添加预注册public client ID。Prepare先进行不带用户凭据的metadata发现，审核后才显式打开系统浏览器；支持none/S256、精确resource、固定loopback路径与可选注册端口。加密凭据绑定integration和project/thread/config，防止密文重新指派；refresh要求不同的新token，结果不确定时重新授权。401、code或refresh均不自动重放原工具POST；重新授权阻止旧session工具请求。详见[设计与限制](../analysis/mcp-oauth-design.md)。
+Settings可显式导出当前Profile已打开顶层HTTP(S)页面的localStorage和各标签独立sessionStorage。v2密文兼容读取v1，保留完整UTF-16 code units；仅向新Profile恢复，在无网络bootstrap中回读后才加载真实页面。检测已有存储冲突，失败关闭目的标签并清理该origin的局部写入；CHIPS cookies明确遗漏，不变成普通cookie。[完整设计](../analysis/profile-web-storage.md)
 
-OAuth DCR/托管client metadata/client secret/DPoP/完整step-up仍不支持；实际第三方AS登录、刷新、撤销与Keychain token写入**未运行**。OS接口可用和注入加密器的协议测试不替代这些证据。Sign out只清本地credential，不等于服务端revoke或退出外部浏览器账号。
+不含关闭标签/旧origin/iframe/IndexedDB、完整导航栈、扩展代码、Safari/Firefox多来源迁移，也不持久恢复应用退出后的sessionStorage。取消文件选择、口令或最终确认不会建新Profile；确认后没有原生中途取消按钮，也不承诺整份事务回滚。真实网站登录迁移未验收。
 
-0.11的session MCP资源/模板/订阅、revision/stale和显式读取，以及Profile隔离的显式网页/项目UTF-8 memory索引继续可用；不自动采集、刷新或发送给Agent。历史修复和界面证据见[0.11设计](../analysis/mcp-resources-memory.md)与[原生QA](v110-native-ui-qa.md)。
+原生测试发现导入成功后结果面板被Space切换隐藏，已修复并加实际renderer断言。另保留两次fixture未等源/目的页面加载完成的失败日志，以及一次既有native interrupt audit失败；补就绪等待后，最终代码313/313独立重跑通过，未改Agent实现或原断言。见[attempt1](v130-service-attempt1.log)、[attempt2](v130-service-attempt2.log)、[interrupt观察](v130-service-native-interrupt-attempt.log)、[UI原始观察](v130-native-before-result-fix.png)。
 
-下一步优先Profile archive的可验证web storage/会话范围和明确来源迁移；随后补OAuth DCR、MRTR/现代订阅及P3系统能力/退出后调度/执行模式/翻译/远程Git。P1不同Agent集成及provider gateway注入保留暂缓；31项线上模型基准继续未运行。
+既有MCP OAuth预注册public客户端/PKCE、session资源订阅及显式memory索引保留；真实AS/Keychain token写入、DCR/MRTR/现代订阅等边界未消失。下一步P3跨应用选区/截图与显式全局快捷键，先核对REA证据和OS权限，随后退出后调度。P2明确来源完整迁移与MCP剩余项继续保留，P1不同Agent集成继续暂缓。
 
-最终应用 `dist/mac-arm64/Vek Browser.app`，正常资料目录已运行0.12.0，见[status](v120-normal-app-status.json)。Electron42.11.18 / Chromium148.0.7778.280不等价Ego Chromium156的完整引擎能力；没有远程发布或签名/公证。
+应用：`dist/mac-arm64/Vek Browser.app`。正常资料运行状态见[status](v130-normal-app-status.json)。Electron42.11.18 / Chromium148.0.7778.280不等价Ego Chromium156完整引擎；应用未签名/公证，无远程发布。
 
 [计划](../PLAN.md) · [功能对照](../analysis/feature-parity.md) · [结构化结果](delivery-summary.json) · [文档索引](../docs/README.md)

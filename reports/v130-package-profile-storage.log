@@ -1,0 +1,12 @@
+{"ok":true,"checks":34,"bootstrapNetworkRequests":0,"realBrowserSessions":true,"sourceProfileUnchanged":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron migrates two tab sessions before site scripts, with no bootstrap network and bounded failure cleanup (1493.223042ms)
+{"ok":true,"checks":33,"actualApplicationIPC":true,"injectedNativeDialogs":true,"realPassphraseModal":true,"bootstrapNetworkRequests":0,"modelCalls":0,"externalAccountActions":0}
+✔ actual application exports and restores through trusted IPC and passphrase UI; cancellations create no profile (2223.498417ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3778.706417

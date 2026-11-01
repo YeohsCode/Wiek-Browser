@@ -1,11 +1,15 @@
 {
-  "generatedAt": "2026-11-01T16:20:39.891884+00:00",
-  "version": "0.12.0",
+  "generatedAt": "2026-11-01T17:41:51.736424+00:00",
+  "version": "0.13.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
       {
         "browser": "ego",
+        "startedAt": "2026-10-30T01:37:12.876Z",
+        "wallTimeMs": 297598,
+        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli",
+        "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
         "counts": {
           "total": 69,
           "selected": 69,
@@ -14,13 +18,14 @@
           "skip": 0,
           "notRun": 0,
           "assertions": 1235
-        },
-        "wallTimeMs": 297598,
-        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli",
-        "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
+        }
       },
       {
         "browser": "vek",
+        "startedAt": "2026-11-01T17:38:18.813Z",
+        "wallTimeMs": 153698,
+        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
+        "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
         "counts": {
           "total": 69,
           "selected": 69,
@@ -29,12 +34,10 @@
           "skip": 0,
           "notRun": 0,
           "assertions": 1248
-        },
-        "wallTimeMs": 154602,
-        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
-        "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56"
+        }
       }
-    ]
+    ],
+    "note": "Current final packaged Vek run and retained complete Ego run; identical SDK/fixture/index hashes verified before merging."
   },
   "sdkUnitTests": {
     "pass": 532,
@@ -43,14 +46,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 303,
+    "pass": 313,
     "fail": 0,
-    "log": "v120-service-tests.log"
+    "log": "v130-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
     "pass": 132,
     "fail": 0,
-    "log": "v120-package-workbench.log"
+    "log": "v130-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -64,7 +67,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 155,
+    "sourceFilesChecked": 157,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -94,7 +97,8 @@
     "Discovery cancellation/concurrency/project leases and archive authority boundaries",
     "Session MCP resources/templates/read/subscribe/unsubscribe, scoped revision and stale handling, no automatic fetching or resubscription",
     "Explicit Profile-scoped local webpage/project UTF-8 memory corpus with literal Chinese/English search, cancellation, partial failures, and delete-on-disable",
-    "Explicit HTTP MCP OAuth for pre-registered public clients: protected metadata/OIDC, S256 PKCE and fixed loopback callback, issuer/resource/scope review, bound encrypted credentials, serialized rotating refresh, no tool/code/refresh POST replay"
+    "Explicit HTTP MCP OAuth for pre-registered public clients: protected metadata/OIDC, S256 PKCE and fixed loopback callback, issuer/resource/scope review, bound encrypted credentials, serialized rotating refresh, no tool/code/refresh POST replay",
+    "Explicit encrypted Profile archive v2: top-level open-tab localStorage, independent current-origin tab sessionStorage, exact UTF-16 encoding, v1 decode, no-network bootstrap before site load, new-profile isolation, CHIPS omission, cancellation/conflict/partial-write cleanup"
   ],
   "remainingGaps": [
     "Five other native provider protocols, source native session/history migration and paid generation validation",
@@ -155,14 +159,15 @@
     "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
   },
   "uiQa": {
-    "log": "v120-native-ui-qa.md",
+    "log": "v130-native-ui-qa.md",
     "fixtureOnly": true,
-    "nativePrepareReviewCancel": true,
-    "externalBrowserOpened": false,
-    "codeExchange": false,
-    "keychainTokenWrite": false,
-    "wireCheck": "v120-native-ui-check.json",
-    "normalAppStatus": "v120-normal-app-status.json"
+    "nativeSaveAndOpenDialogs": true,
+    "nativePassphraseAndRestoreConfirmation": true,
+    "localOrigins": 1,
+    "independentTabSessions": 2,
+    "realSiteLogins": false,
+    "wireCheck": "v130-native-ui-check.json",
+    "normalAppStatus": "v130-normal-app-status.json"
   },
   "claudeFocusedTests": {
     "pass": 29,
@@ -263,8 +268,29 @@
       "description": "Preferences memory boolean settings were mistaken for a corpus response; fixed documents-array discrimination with actual Electron checkbox regression. MCP dark-theme contrast also fixed and visually verified."
     }
   ],
-  "observedFailures": [],
-  "validationOrderNote": "Final 0.12.0 code passed 303 local checks, 132 packaged workbench checks, complete 69-case SDK and native OAuth prepare/review/cancel. Final package has 155 matching source files and 81 unchanged upstream inputs. Code/refresh/sign-out use synthetic AS and injected encryption in tests; real AS accounts and Keychain token writes remain unrun. P1 integrations deferred; P2/P3 incomplete.",
+  "observedFailures": [
+    {
+      "report": "v130-service-attempt1.log",
+      "status": "fixed-and-regressed",
+      "description": "Application fixture inspected imported tabs before dispatched navigations committed; now waits for real destination documents to finish loading without changing data assertions."
+    },
+    {
+      "report": "v130-service-attempt2.log",
+      "status": "fixed-and-regressed",
+      "description": "Export fixture started capture before both source documents settled. Added explicit two-session preconditions and loading waits; storage omission remains a real reported boundary."
+    },
+    {
+      "report": "v130-service-native-interrupt-attempt.log",
+      "status": "passed-on-final-serial-rerun",
+      "description": "An existing native interrupt test did not observe turn/interrupt in the fixture audit while full tests/build overlapped. Cause not proven; no Agent implementation/assertion changes; final serial validation recorded separately. Final full 313/313 passed with no concurrent build; root cause remains unproven."
+    },
+    {
+      "report": "v130-native-before-result-fix.png",
+      "status": "fixed-and-regressed",
+      "description": "Native import succeeded but transient Space creation hid Settings, leaving the welcome panel. Explicitly reopen Settings with verified import counts; actual renderer regression added."
+    }
+  ],
+  "validationOrderNote": "Final source: 313/313 full and 17/17 profile checks; final package: 132/132 workbench, 2/2 packaged-module Electron scenarios with 67 internal checks, complete SDK 69/69 with 1248 assertions, and final native Open/Restore/result/two-session CUA verification. 157 package files match, 81 upstream inputs unchanged. No real site login, full browser migration or paid benchmark claimed. P1 integrations deferred; P2/P3 incomplete.",
   "codexReplayActivityTests": {
     "newTests": 21,
     "fixtureOnly": true,
@@ -340,7 +366,7 @@
     "deferred": "P1 integrations with other Agents, including provider gateway injection",
     "localCursorStash": "31764915635554521270725e0d0c38e178eea3cf",
     "cursorShipped": false,
-    "next": "P2 Profile storage/session portability and explicit source migration; OAuth DCR and MRTR/modern subscriptions remain queued"
+    "next": "P3 OS cross-app selection/screenshot and explicit global shortcuts, evidence/permissions first; then closed-app scheduling. P2 explicit source migration, OAuth DCR and MRTR/modern subscriptions remain queued."
   },
   "p2P3Tests": {
     "newTests": 21,
@@ -389,5 +415,32 @@
     "realKeychainTokenWrite": false,
     "modelCalls": 0,
     "externalAccountActions": 0
+  },
+  "profileStorageTests": {
+    "newTests": 10,
+    "focusedPass": 17,
+    "fail": 0,
+    "log": "v130-profile-storage-tests.log",
+    "packagedSourceModuleElectronTests": 2,
+    "packagedSourceModuleChecks": 67,
+    "packagedLog": "v130-package-profile-storage.log",
+    "actualApplicationIPC": true,
+    "automatedNativeDialogs": "injected file and confirmation responses; real renderer passphrase modal",
+    "fixtureOnly": true,
+    "modelCalls": 0,
+    "externalAccountActions": 0,
+    "bootstrapNetworkRequests": 0,
+    "v1BackwardDecode": true,
+    "fullChromeSessionMigration": false
+  },
+  "previousV120UiQa": {
+    "log": "v120-native-ui-qa.md",
+    "fixtureOnly": true,
+    "nativePrepareReviewCancel": true,
+    "externalBrowserOpened": false,
+    "codeExchange": false,
+    "keychainTokenWrite": false,
+    "wireCheck": "v120-native-ui-check.json",
+    "normalAppStatus": "v120-normal-app-status.json"
   }
 }

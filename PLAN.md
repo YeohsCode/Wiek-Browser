@@ -1,26 +1,26 @@
 # Vek Browser 复刻计划与进度
 
-更新：2026-11-02（Asia/Shanghai）。当前交付版本：**0.12.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
+更新：2026-11-02（Asia/Shanghai）。当前交付版本：**0.13.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
 
 ## 当前执行优先级
 
 按用户最新要求（2026-11-01）：**先跳过 P1 中不同 Agent 的集成，优先 P2、P3**。Cursor 未完成的代码已从工作树移出，保存在本机 Git stash `31764915635554521270725e0d0c38e178eea3cf`（`deferred P1 Cursor ACP work; prioritize P2 P3 2026-11-01`）；不是 0.11 发行功能，普通 clone 不包含该本机 stash。
 
-当前顺序：P2 OAuth/现代请求与订阅、资料迁移 → P3 系统能力/退出后调度/执行模式/翻译与远程 Git。涉及 provider gateway 的集成部分随 P1 暂缓；不删除剩余目标。
+当前顺序：P2有界资料web storage归档已完成 → P3跨应用选区/截图与显式全局快捷键设计验收，随后退出后调度 → P2明确来源迁移、OAuth DCR/现代请求与订阅；继续保留执行模式/翻译与远程Git。涉及 provider gateway 的集成部分随 P1 暂缓；不删除剩余目标。
 
 ## 当前检查点
 
 | 项目 | 已完成的验收 | 当前状态 |
 |---|---|---|
 | 参考制品与调查 | ego-lite MIT 源码、Ego 0.6.1.13 安装包、31 任务 benchmark 已下载；REA daemon/client 证据及覆盖限制保留 | 已完成有界调查；全部 native/client 路径仍未覆盖 |
-| 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Vek 69/69、Ego 68/69 | 当前版本验收完成，非引擎全面等价 |
+| 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Vek 69/69、Ego 68/69 | 0.13最终同集验收完成，非引擎全面等价 |
 | 本地 Agent 工作台 | 通用 CLI、opt-in Codex app-server/Claude stream-json/OpenCode ACP、多 Agent 控制、对话分支/附件/审批、Claude选定历史分支、Codex有效rollout压缩/回滚导入及实时工具/子活动、Codex/Claude模型与effort目录 | 部分完成；其他5种原生 provider、源CLI原生会话迁移/后台任务和真实付费 turn 未验证 |
 | 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，linked worktree 和 PR 流程仍缺失 |
 | MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；已补 session 资源/模板/订阅；已补预注册public OAuth/PKCE与加密绑定；DCR/MRTR/现代订阅/sampling/elicitation 缺失 |
 | 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 部分完成；应用关闭后不调度，standalone/dedicated 不完整 |
 | 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；新增显式网页/项目文本 memory 索引；无 OS 跨应用采集、翻译或云端润色等价 |
-| 浏览器界面/权限/资料 | 主题/标签布局/快捷键、独立窗口/托盘；权限隔离；Profile 数据归属；Chromium 选择导入和加密 archive | 部分完成；完整迁移/扩展/OS 设备能力仍有缺口 |
-| 交付与基准 | macOS ARM64 应用；303/303 本地测试、132/132 打包宿主集成、81 个上游文件未改 | 本地检查点完成；31 项线上模型任务未运行 |
+| 浏览器界面/权限/资料 | 主题/标签布局/快捷键、独立窗口/托盘；权限隔离；Profile 数据归属；Chromium 选择导入和v2显式web storage加密archive | 部分完成；完整迁移/扩展/OS 设备能力仍有缺口 |
+| 交付与基准 | macOS ARM64 应用；313/313 本地测试、132/132 打包宿主集成、81 个上游文件未改 | 0.13检查点完成；157个发行文件匹配，31 项线上模型任务未运行 |
 
 证据入口：[当前结果](reports/RESULTS.md)、[同集对比](reports/comparison.md)、[逐项功能清单](analysis/feature-parity.md)、[机器可读结果](reports/delivery-summary.json)。532 项 SDK 单测沿用未改版结果；不描述为本轮重新运行。
 
@@ -40,6 +40,7 @@
 - [x] 0.10：Claude initialize目录、alias/canonical ID、已声明effort控制与fresh validation、取消/lease/旧版unknown。
 - [x] 0.11：P2 session MCP资源/模板/订阅与显式读取；P3按Profile隔离的显式网页/项目文本memory索引。
 - [x] 0.12：预注册public客户端HTTP OAuth：metadata/PKCE/只读权限审核、显式登录、绑定加密存储/refresh轮换、取消/401不重放。
+- [x] 0.13：Profile archive v2显式顶层localStorage/per-tab sessionStorage、v1兼容、无网络bootstrap、取消/冲突/部分失败和CHIPS遗漏验证。
 - [ ] 后续：优先 P2/P3 剩余项；不同 Agent 的 P1 集成暂缓，线上基准仍属 P4。
 
 ## 执行顺序与阶段验收
@@ -74,8 +75,9 @@
 - [x] 0.12：预注册public OAuth（none/S256）、明确审核/显式打开、loopback callback、作用域绑定密文/refresh轮换、取消与401不重放；实际AS/Keychain令牌写入未运行。
 - [ ] OAuth DCR/托管client metadata/完整step-up；MRTR/现代订阅仍缺失，保持最小scope、取消、版本边界和无工具POST自动重放。
 - [ ] provider gateway 注入随 P1 不同 Agent 集成暂缓。
-- [ ] 当前下一项：扩展 Profile archive 的可验证 web storage/会话范围与多来源迁移；只使用明确选定的来源，不自动读取个人 Profile。
-- [ ] 用合成 fixture 验证迁移兼容、部分失败、取消、冲突和恢复；保留 Electron 扩展 API/定制 Chromium 的边界。
+- [x] 0.13：显式打开顶层HTTP(S) localStorage与当前origin per-tab sessionStorage；v2/v1、UTF-16、无网络bootstrap、新Profile、active index和CHIPS语义验证。
+- [ ] 明确来源多浏览器迁移及IndexedDB/完整会话仍缺失；只使用用户选定来源，不自动读个人Profile。
+- [x] 0.13有界archive使用合成fixture验证兼容、部分失败、取消、冲突、恢复；不代表完整浏览器迁移或退出后会话已完成。
 
 ### P3：OS 能力、执行模式与剩余本地功能
 
@@ -120,3 +122,5 @@
 0.11 实现与边界见 [mcp-resources-memory.md](analysis/mcp-resources-memory.md)。P1不同Agent集成已暂缓，P2资源订阅与P3本地memory索引完成有界验收；不将P2/P3整体勾选完成。完整测试和打包结果以当前RESULTS为准。
 
 0.12 实现与限制见 [mcp-oauth-design.md](analysis/mcp-oauth-design.md)。新增18项OAuth专项，本地303/303、打包132/132；本机打包只验证prepare/cancel和OS存储可用状态，协议/UI正向授权采用合成AS及注入加密器，不冒充真实账号或Keychain写入。其余P2/P3继续推进。
+
+0.13 实现与限制见 [profile-web-storage.md](analysis/profile-web-storage.md)。新增10项回归，全套/打包/SDK和原生UI的最终数字以当前RESULTS为准。下一步优先P3跨应用选区/截图和显式全局快捷键，随后退出后调度，先核对已有REA功能证据与OS边界；P2完整来源迁移、DCR/MRTR/现代订阅仍在队列。

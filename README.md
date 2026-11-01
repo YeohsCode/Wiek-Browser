@@ -1,4 +1,6 @@
 # Vek Browser
+> **0.13.0 更新**：加密 Profile archive v2 可显式导出已打开顶层页面的 localStorage 与各标签独立 sessionStorage；先在无网络 bootstrap 中恢复，再加载真实页面。兼容读取 v1，保留取消/冲突/部分失败提示，CHIPS cookies 明确遗漏。完整 Chrome/Safari 迁移仍未完成。
+>
 > **0.12.0 更新**：HTTP MCP 可配置预注册公共客户端 OAuth，支持 S256 PKCE、权限审核后显式打开登录、本机回调、绑定加密令牌/轮换刷新和取消。401 与不确定刷新要求重新授权，工具 POST 不自动重放；DCR 和真实账号验收仍未完成。
 >
 > **0.11.0 更新**：按新优先级暂停其他 Agent 集成，补齐 session MCP 资源/模板/订阅和显式读取；Preferences 新增按 Profile 隔离的网页/项目文本 memory 索引、搜索与忘记。更新通知不自动获取内容，新增语料不自动发送给 Agent。
@@ -25,7 +27,7 @@
 >
 > 最新测试以 [reports/RESULTS.md](reports/RESULTS.md) 为准；[analysis/feature-parity.md](analysis/feature-parity.md) 明确列出剩余差距。不能把 69 项 SDK 用例通过理解成整款 Ego 已全量复刻。
 
-进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.12.0；按用户要求优先 P2、P3，其他 Agent 集成暂缓。下一步 Profile 资料迁移、MCP 现代请求及系统/调度能力；Claude源CLI会话迁移和后台任务仍有缺口。
+进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.13.0；按用户要求优先 P2、P3，其他 Agent 集成暂缓。下一步 P3 系统能力与退出后调度设计验收，继续补 P2 明确来源迁移、MCP 现代请求与 OAuth DCR；Claude源CLI会话迁移和后台任务仍有缺口。
 
 本地 Chromium 浏览器与 Agent 工作区。项目在 `vek-browser/` 中独立创建，使用 Electron 实现浏览器宿主、Space、多标签与原生连接层，复用 `citrolabs/ego-lite` 的 MIT SDK。Ego 安装包只用于分析和测试，不进入 Vek 发行包。
 
@@ -177,3 +179,5 @@ Profile archive 是 Vek 自有加密格式，并非 Ego 导出文件；只读导
 0.11 的资源订阅与本地memory边界、限额和验证见 [设计](analysis/mcp-resources-memory.md)。MCP Integrations展开Resources后可列举/读取/订阅；Preferences开启对应memory开关后，手动索引当前页或选定项目文本文件。关闭对应开关会删除该类索引副本，来源文件不变。
 
 0.12 OAuth 需要已注册的public client ID、可用的OS凭据存储和S256 PKCE。HTTP配置中添加客户端ID后，Prepare sign-in先审核issuer/resource/scopes，再显式打开系统浏览器。固定回调路径为 `/oauth/callback`；可配置注册端口。完整范围和未运行的真实服务/Keychain验收见 [设计](analysis/mcp-oauth-design.md)。
+
+0.13 的 web storage 默认为不导出；在 Settings → Encrypted profile archive 勾选 Include web storage from open tabs 后才捕获。仅包括当前顶层 origin，不含 iframe/IndexedDB/关闭标签；不打开恢复标签会跳过其 sessionStorage，应用退出后也不保证 sessionStorage 恢复。见 [范围与验证](analysis/profile-web-storage.md)。

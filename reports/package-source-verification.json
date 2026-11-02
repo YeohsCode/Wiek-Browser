@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-02T07:17:39.315Z",
-  "version": "0.16.0",
+  "generatedAt": "2026-11-02T07:40:40.590Z",
+  "version": "0.17.0",
   "versionMatches": true,
-  "checkedFiles": 168,
+  "checkedFiles": 169,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -159,7 +159,7 @@
     },
     {
       "file": "app/mcp-http-client.cjs",
-      "sha256": "6dae44f7862eee02a2f42936553175a9a67289562cdd1c5abdda7ca53fbe1637",
+      "sha256": "1e8c3b797c4a8923c3140462e64d7b8dd4949e94a729a41d7740b5d4168b7b72",
       "matches": true
     },
     {
@@ -174,17 +174,22 @@
     },
     {
       "file": "app/mcp-panel.js",
-      "sha256": "dd9d323f66a892fde50c5225a73cb1489bc3c2fc5662544314a8252a6752a7ec",
+      "sha256": "c297e9dfdc0fe8cf5f1218e24092e01956ee64226f259d063d4732b15eaf11e4",
       "matches": true
     },
     {
       "file": "app/mcp-resources.cjs",
-      "sha256": "389725d5618b4a0d20d799f8bcea0ea4d5eeb80520d3c79384be54952359c761",
+      "sha256": "1f4d0bb85bac16b3abf84015086f6e524e1373bdf645139fa065777adef3f634",
       "matches": true
     },
     {
       "file": "app/mcp-service.cjs",
-      "sha256": "15838a3c89288f8e86255d2efdd267735148db5172fea6a4d88fee1b743951ac",
+      "sha256": "3d8902d253eeb300b5375cfbd6faa5af446ac16ccda1edf3b04de8fb767e7250",
+      "matches": true
+    },
+    {
+      "file": "app/mcp-subscriptions.cjs",
+      "sha256": "f328fd870029977768cea4e2b797399fd43248b5fb244a880e30d1bac9b40ade",
       "matches": true
     },
     {
@@ -839,7 +844,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "8914201af2a24a1f73f006203dc64be8ca85f7e745f50a29cac1984a6ab865ce",
+      "sha256": "7522b7fa593ab8ffdf98f58bcf2c3933eb2a7408745358ad0abb36a1b8ccc1be",
       "matches": true
     },
     {

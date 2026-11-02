@@ -1,6 +1,6 @@
 # 文档索引
 
-当前版本 **0.16.0**；优先P2/P3，其余Agent集成暂缓。已完成有界Profile归档与P3显式Desktop tools；已补三种执行模式与显式closed-app tick；已补审核式macOS login job/前台接管；下一项P2 MCP现代请求/订阅，P2明确来源迁移/MCP剩余项仍保留。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
+当前版本 **0.17.0**；优先P2/P3，其余Agent集成暂缓。已完成有界Profile归档与P3显式Desktop tools；已补三种执行模式与显式closed-app tick；已补审核式macOS login job/前台接管；已补现代HTTP资源与显式订阅；下一项P2可审核MRTR输入续传，P2明确来源迁移/MCP剩余项仍保留。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
 
 | 用途 | 文档 |
 |---|---|
@@ -9,6 +9,7 @@
 | 当前测试结果与交付边界 | [RESULTS.md](../reports/RESULTS.md)、[结构化结果](../reports/delivery-summary.json) |
 | Ego/Vek 同集比较 | [comparison.md](../reports/comparison.md) |
 | 产品功能与未完成项 | [feature-parity.md](../analysis/feature-parity.md)；0.3 条目覆盖对应 0.2 时点 |
+| 现代HTTP MCP资源/通知流 | [mcp-modern-subscriptions.md](../analysis/mcp-modern-subscriptions.md) |
 | 本地 API | [API.md](../skills/vek-browser/API.md) |
 | REA 来源、证据与覆盖限制 | [rea-investigation.md](../analysis/rea-investigation.md)、[daemon](../analysis/shipped-daemon-features.md)、[client](../analysis/client-resource-feature-ledger.md) |
 | Agent/Codex/附件 | [扩展设计](../analysis/agent-service-extensions.md)、[附件](../analysis/agent-attachments.md) |

@@ -18,17 +18,17 @@ function descriptor(row, template) {
 }
 function resetResources(client) { client.resourceListRevision = (client.resourceListRevision || 0) + 1; client.resources = null; client.resourceTemplates = null; client.resourceSubscriptions = new Map(); client.resourceOperations = new Set(); }
 function capability(client, subscribe = false) {
-  if (client.modern) throw fail('Resource browsing and subscriptions currently require a session MCP protocol', 'VEK_MCP_UNSUPPORTED_CAPABILITY');
   if (client.state !== 'connected' || client.stopped) throw fail('MCP connection is disconnected', 'VEK_MCP_DISCONNECTED');
   if (!client.info?.capabilities?.resources || typeof client.info.capabilities.resources !== 'object' || Array.isArray(client.info.capabilities.resources) || subscribe && client.info.capabilities.resources.subscribe !== true) throw fail(subscribe ? 'MCP server does not advertise resource subscriptions' : 'MCP server does not advertise resources', 'VEK_MCP_UNSUPPORTED_CAPABILITY');
 }
-function resourceNotification(client, message) {
+function resourceNotification(client, message, authorizedStream = false) {
+  if (client.modern && !authorizedStream) return message.method.startsWith('notifications/resources/');
   if (message.method === 'notifications/resources/list_changed') {
-    if (!client.modern && client.info?.capabilities?.resources?.listChanged === true) { client.resourceListRevision++; client.resources = null; client.resourceTemplates = null; client.notifyChange(); }
+    if (client.info?.capabilities?.resources?.listChanged === true) { client.resourceListRevision++; client.resources = null; client.resourceTemplates = null; client.notifyChange(); }
     return true;
   }
   if (message.method !== 'notifications/resources/updated') return false;
-  if (client.modern || client.info?.capabilities?.resources?.subscribe !== true) return true;
+  if (client.info?.capabilities?.resources?.subscribe !== true) return true;
   const subscription = client.resourceSubscriptions.get(message.params?.uri);
   if (subscription) { subscription.revision = Math.min(Number.MAX_SAFE_INTEGER, subscription.revision + 1); subscription.updatedAt = new Date().toISOString(); client.notifyChange(); }
   return true;
@@ -36,7 +36,7 @@ function resourceNotification(client, message) {
 const methods = {
   async listResources({ signal, templates = false } = {}) {
     capability(this); const cache = templates ? 'resourceTemplates' : 'resources', field = templates ? 'resourceTemplates' : 'resources';
-    if (this[cache]) return this[cache];
+    if (!this.modern && this[cache]) return this[cache];
     const rows = [], ids = new Set(), cursors = new Set(), generation = this.resourceSubscriptions, listRevision = this.resourceListRevision; let cursor;
     for (let page = 0; page < 50; page++) {
       const result = object(await this.request(templates ? 'resources/templates/list' : 'resources/list', cursor === undefined ? {} : { cursor }, { signal }));
@@ -65,6 +65,7 @@ const methods = {
     return { contents, ...(revision === undefined ? {} : { revision, stale: subscription.revision !== revision }) };
   },
   async setResourceSubscription(value, enabled, { signal } = {}) {
+    if (this.modern) return this.changeModernResourceSubscription(value, enabled, { signal });
     capability(this, true); uri(value);
     if (this.resourceOperations.has(value)) throw fail('This resource subscription is already changing', 'VEK_MCP_BUSY');
     const previous = this.resourceSubscriptions.get(value);
@@ -83,4 +84,4 @@ const methods = {
     finally { if (this.resourceSubscriptions === generation) this.resourceOperations.delete(value); this.notifyChange(); }
   },
 };
-module.exports = { methods, resetResources, resourceNotification };
+module.exports = { methods, resetResources, resourceNotification, uri, capability };

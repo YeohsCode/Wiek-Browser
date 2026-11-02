@@ -1,0 +1,30 @@
+{"ok":true,"checks":14,"actualElectronIPC":true,"realLoopbackSSE":true,"modelCalls":0,"externalAccountActions":0}
+✔ modern resource and list watches operate through real Electron IPC with visible stream loss and explicit retry (420.4095ms)
+✔ modern resources use per-request envelope, pagination, inert text and binary without legacy traffic (15.914959ms)
+✔ explicit modern list and URI streams correlate acknowledgment and only mark changes without rereading (13.780792ms)
+✔ concurrent modern read remains stale when an update arrives before its response (14.603834ms)
+✔ modern lists are explicitly refreshed without reusing stale protocol caches (1.87625ms)
+✔ modern subscription rejects early before accepting any update (7.7865ms)
+✔ modern subscription rejects wrongid before accepting any update (7.835958ms)
+✔ modern subscription rejects wrongfilter before accepting any update (8.290917ms)
+✔ server acknowledgment may decline a requested subscription without leaving an active stream (7.811625ms)
+✔ unrequested notification or wrong stream metadata loses only that stream and never refetches (13.708584ms)
+✔ graceful completion and abrupt loss remain visible with no automatic replay or relisten (47.198584ms)
+✔ ack timeout and AbortSignal close pending HTTP streams without cancellation notifications (310.122875ms)
+✔ stream lives beyond request timeout and supports over a thousand bounded events (353.858084ms)
+✔ malformed UTF-8 and oversized subscription frames close safely without poisoning the client (22.223375ms)
+✔ capability and stream capacity limits reject locally; explicit cancellation frees capacity (8.352042ms)
+✔ MRTR inputs and missing complete discriminant never become successful resource content (1.222375ms)
+✔ scope isolation, disconnect and restart clear streams without persisting resource contents (18.272208ms)
+✔ partial acknowledged list filter permits only its honored types (7.538125ms)
+✔ notification race rejects an outdated modern tool list and a subsequent explicit refresh succeeds (14.652959ms)
+✔ modern one-off responses cannot deliver unsolicited notifications (1.157542ms)
+✔ HTTP subscription authorization failure is surfaced once without retries (0.993875ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 953.669791

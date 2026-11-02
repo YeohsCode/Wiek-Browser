@@ -1,26 +1,26 @@
 # Vek Browser 复刻计划与进度
 
-更新：2026-11-02（Asia/Shanghai）。当前交付版本：**0.16.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
+更新：2026-11-02（Asia/Shanghai）。当前交付版本：**0.17.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
 
 ## 当前执行优先级
 
 按用户最新要求（2026-11-01）：**先跳过 P1 中不同 Agent 的集成，优先 P2、P3**。Cursor 未完成的代码已从工作树移出，保存在本机 Git stash `31764915635554521270725e0d0c38e178eea3cf`（`deferred P1 Cursor ACP work; prioritize P2 P3 2026-11-01`）；不是 0.11 发行功能，普通 clone 不包含该本机 stash。
 
-当前顺序：P2有界资料web storage归档已完成 → P3单次采集/全局快捷键已实现有界范围 → 执行模式与显式closed-app tick已实现 → P3有界login job/前台接管已实现 → P2明确来源迁移、OAuth DCR/现代请求与订阅；继续保留执行模式剩余语义、翻译与远程Git。涉及 provider gateway 的集成部分随 P1 暂缓；不删除剩余目标。
+当前顺序：P2有界资料web storage归档已完成 → P3单次采集/全局快捷键已实现有界范围 → 执行模式与显式closed-app tick已实现 → P3有界login job/前台接管已实现 → P2现代HTTP资源/显式订阅已实现 → MRTR可审核输入续传、OAuth CIMD/DCR与明确来源完整迁移；继续保留执行模式剩余语义、翻译与远程Git。涉及 provider gateway 的集成部分随 P1 暂缓；不删除剩余目标。
 
 ## 当前检查点
 
 | 项目 | 已完成的验收 | 当前状态 |
 |---|---|---|
 | 参考制品与调查 | ego-lite MIT 源码、Ego 0.6.1.13 安装包、31 任务 benchmark 已下载；REA daemon/client 证据及覆盖限制保留 | 已完成有界调查；全部 native/client 路径仍未覆盖 |
-| 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Vek 69/69、Ego 68/69 | 0.16最终同集验收完成，非引擎全面等价 |
+| 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Vek 69/69、Ego 68/69 | 0.17最终同集验收完成，非引擎全面等价 |
 | 本地 Agent 工作台 | 通用 CLI、opt-in Codex app-server/Claude stream-json/OpenCode ACP、多 Agent 控制、对话分支/附件/审批、Claude选定历史分支、Codex有效rollout压缩/回滚导入及实时工具/子活动、Codex/Claude模型与effort目录 | 部分完成；其他5种原生 provider、源CLI原生会话迁移/后台任务和真实付费 turn 未验证 |
 | 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，linked worktree 和 PR 流程仍缺失 |
-| MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；已补 session 资源/模板/订阅；已补预注册public OAuth/PKCE与加密绑定；DCR/MRTR/现代订阅/sampling/elicitation 缺失 |
+| MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；已补 session 资源/模板/订阅；已补预注册public OAuth/PKCE与加密绑定；现代HTTP资源/列表与更新订阅已补；MRTR/CIMD/DCR/sampling/elicitation仍缺失 |
 | 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 0.16新增明确审核的macOS login job/前台接管；三种mode和closed-app tick可用，物理sleep/login撤销未实测，busy延期/completion contract仍缺 |
 | 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；新增显式网页/项目文本 memory 索引；0.14增加显式OS单次采集；正向native内容仍待验收，无被动监听/跨应用录制/翻译等价 |
 | 浏览器界面/权限/资料 | 主题/标签布局/快捷键、独立窗口/托盘；权限隔离；Profile 数据归属；Chromium 选择导入和v2显式web storage加密archive | 部分完成；完整迁移/扩展/OS 设备能力仍有缺口 |
-| 交付与基准 | macOS ARM64 应用；378/378 本地测试、158/158 打包宿主集成、81 个上游文件未改 | 0.16检查点完成；168个发行文件匹配，31 项线上模型任务未运行 |
+| 交付与基准 | macOS ARM64 应用；399/399 本地测试、173/173 打包宿主集成、81 个上游文件未改 | 0.17检查点完成；169个发行文件匹配，31 项线上模型任务未运行 |
 
 证据入口：[当前结果](reports/RESULTS.md)、[同集对比](reports/comparison.md)、[逐项功能清单](analysis/feature-parity.md)、[机器可读结果](reports/delivery-summary.json)。532 项 SDK 单测沿用未改版结果；不描述为本轮重新运行。
 
@@ -44,6 +44,7 @@
 - [x] 0.14：macOS显式原生区域/窗口截图、一次性AX选区/应用排除、临时预览与Library标注、全局快捷键注册/冲突/退出释放；真实OS仅验证注册、启动/取消/清理；正向内容待验收，范围见RESULTS。
 - [x] 0.15：三种执行模式与专属线程归属、干净新会话、显式一次性closed-app worker、互斥/timeout/取消及真实Git快照；未安装OS唤醒。
 - [x] 0.16：默认关闭的审核式macOS login job、代码/runtime receipt、停用/卸载、认证停止端点及真实foreground接管；物理睡眠与登录边界保留。
+- [x] 0.17：现代HTTP资源/模板/读取、显式subscriptions/listen、首条确认/精确ID/子集校验、断流状态/明确重试、取消与列表竞态；MRTR续传保留。
 - [ ] 后续：优先 P2/P3 剩余项；不同 Agent 的 P1 集成暂缓，线上基准仍属 P4。
 
 ## 执行顺序与阶段验收
@@ -76,7 +77,8 @@
 
 - [x] 0.11：session MCP资源/模板分页、显式text/blob读取、subscribe/unsubscribe、更新revision/失效提示、断线不重放、scope与有界UI。
 - [x] 0.12：预注册public OAuth（none/S256）、明确审核/显式打开、loopback callback、作用域绑定密文/refresh轮换、取消与401不重放；实际AS/Keychain令牌写入未运行。
-- [ ] OAuth DCR/托管client metadata/完整step-up；MRTR/现代订阅仍缺失，保持最小scope、取消、版本边界和无工具POST自动重放。
+- [x] 0.17：现代HTTP资源与显式tools/resources列表和resource URI通知流；逐条ack/ID/过滤校验、取消/断开/不自动重连和scope边界。
+- [ ] OAuth CIMD/DCR/完整step-up；MRTR输入续传、sampling/elicitation、现代stdio与prompt通知仍缺失，保持最小scope、取消、版本边界和无工具POST自动重放。
 - [ ] provider gateway 注入随 P1 不同 Agent 集成暂缓。
 - [x] 0.13：显式打开顶层HTTP(S) localStorage与当前origin per-tab sessionStorage；v2/v1、UTF-16、无网络bootstrap、新Profile、active index和CHIPS语义验证。
 - [ ] 明确来源多浏览器迁移及IndexedDB/完整会话仍缺失；只使用用户选定来源，不自动读个人Profile。
@@ -136,3 +138,5 @@
 0.15 实现与静态证据边界见 [automation-execution.md](analysis/automation-execution.md)。本轮新增27项，closed-app只是一条显式tick命令，不自动安装/唤醒或持续执行。下一步P3系统作业生命周期和foreground handoff，再补P2迁移/MCP；P1继续暂缓。
 
 0.16 设计与验收范围见 [background-scheduling.md](analysis/background-scheduling.md)。20项新增回归，真实OS fixture不写用户Library安装路径且最终卸载。下一步P2 MCP现代请求/订阅；保留DCR/完整来源迁移及P3其余边界，P1继续暂缓。
+
+0.17 设计与验收范围见 [mcp-modern-subscriptions.md](analysis/mcp-modern-subscriptions.md)。新增21项（20协议/服务、1实际Electron panel含14检查）；现代资源与显式通知流是有界完成。下一步优先P2可审核MRTR输入续传，OAuth身份机制重新核对现代规范；P1不同Agent集成保持暂缓。

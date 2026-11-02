@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-02T07:18:10.514159+00:00",
-  "version": "0.16.0",
+  "generatedAt": "2026-11-02T07:41:29.915167+00:00",
+  "version": "0.17.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -22,8 +22,8 @@
       },
       {
         "browser": "vek",
-        "startedAt": "2026-11-02T07:14:29.650Z",
-        "wallTimeMs": 166979,
+        "startedAt": "2026-11-02T07:37:25.715Z",
+        "wallTimeMs": 167584,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
         "counts": {
@@ -46,14 +46,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 378,
+    "pass": 399,
     "fail": 0,
-    "log": "v160-service-tests.log"
+    "log": "v170-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 158,
+    "pass": 173,
     "fail": 0,
-    "log": "v160-package-workbench.log"
+    "log": "v170-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -67,7 +67,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 168,
+    "sourceFilesChecked": 169,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -103,7 +103,8 @@
     "Heartbeat/standalone/dedicated execution ownership, clean generated conversations, explicit memory, cancellation/deletion/restart/import authority boundaries",
     "Explicit opt-in plain CLI closed-app one-shot tick with cutoff, shared writer lease, no stale Agent-lock reaping, real workspace/turn checkpoints and signal/timeout settlement",
     "Default-off reviewed macOS login job lifecycle: private launcher, executable/Node/app-JS receipt, minute calendar, disabled-on-change, unload/remove with graceful worker settlement",
-    "Foreground gate and authenticated loopback stop-only endpoint; actual provider exit/checkpoint/lease release before foreground Agent state opens; no force-kill on timeout"
+    "Foreground gate and authenticated loopback stop-only endpoint; actual provider exit/checkpoint/lease release before foreground Agent state opens; no force-kill on timeout",
+    "Modern 2026-07-28 HTTP resources/templates/read, explicit POST subscriptions/listen for tool/resource list changes and resource URI updates, first-ack/exact-ID/accepted-subset validation, visible stream loss and manual retry, bounded frames with long-lived streams, no automatic fetch/replay/reconnect"
   ],
   "remainingGaps": [
     "Five other native provider protocols, source native session/history migration and paid generation validation",
@@ -113,7 +114,7 @@
     "Complete Chrome/Safari profile/web storage/extensions migration",
     "Custom Chromium engine equivalence",
     "Linked worktrees, checkpoint retention and remote PR workflow",
-    "MCP OAuth DCR/hosted client metadata/full step-up; MRTR/modern subscriptions/sampling/elicitation",
+    "MCP OAuth CIMD/DCR/full step-up; MRTR continuations/sampling/elicitation, modern stdio, prompt notifications and task extensions",
     "Positive native screenshot/AX content and background key trigger validation, passive selection toolbar, OS recording and translation",
     "Physical sleep/wake, logout/login, OS background-item revocation, additional runtime layouts and CLI authentication environments; busy defer/completion contract and hard-kill recovery",
     "Semantic/all-disk/multiformat memory index and Ego proprietary services",
@@ -164,19 +165,19 @@
     "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
   },
   "uiQa": {
-    "log": "v160-native-ui-qa.md",
+    "log": "v170-native-ui-qa.md",
     "fixtureOnly": true,
-    "nativeReviewCancelRefresh": true,
-    "reviewedRuntime": "final packaged Vek executable",
-    "reviewedNodeVersion": "24.19.0",
-    "setupAbsentAfterCancel": true,
-    "temporaryRealOSJobTested": true,
-    "persistentDefaultJobInstalled": false,
-    "wireCheck": "v160-native-ui-check.json",
-    "normalAppStatus": "v160-normal-app-status.json",
+    "nativeModernConnectListWatchSubscribeReadStop": true,
+    "wireCheck": "v170-native-ui-check.json",
+    "normalAppStatus": "v170-normal-app-status.json",
+    "resourceReadsBeforeExplicitRead": 0,
+    "resourceReadsAfterExplicitRead": 1,
+    "streamsAfterStop": 0,
+    "nativeStreamLossRetried": false,
+    "automatedElectronStreamLossRetried": true,
     "darkNativeLayoutReviewed": false,
-    "normalDefaultConsentOff": true,
-    "normalDefaultSetupAbsent": true
+    "normalDefaultJobConsentOff": true,
+    "normalDefaultJobSetupAbsent": true
   },
   "claudeFocusedTests": {
     "pass": 29,
@@ -310,9 +311,7 @@
       "report": "v150-native-ui-qa.md",
       "status": "fixed-and-regressed",
       "description": "Dedicated view still displayed edit/rollback/delete/model controls rejected by backend ownership guard. Removed with actual Electron regression and final native UI check."
-    }
-  ],
-  "observedFailures": [
+    },
     {
       "report": "v160-control-cleanup-attempt.log",
       "status": "fixture-corrected",
@@ -329,7 +328,8 @@
       "description": "First packaged real-OS fixture kickstarted before previous process was idle and timed out waiting for final no-op. Unreached false markers are not observed duplication/unload failures; finally cleanup independently confirmed. Wait for OS no-pid before kickstart, preserve no-duplicate assertion; final packaged run success and cleanupConfirmed."
     }
   ],
-  "validationOrderNote": "Final source 378/378; final package workbench 158/158 and scheduler 32/32 (two actual Electron panels, 21 internal checks), real packaged-runtime launchd bootstrap/RunAtLoad/gate/dedicated continuity/no-duplicate/bootout with cleanup, CUA review/cancel/refresh, complete SDK 69/69 with 1248 assertions, then 168 source/package files matched and 81 upstream inputs unchanged. Normal default-data packaged browser restored at 0.16.0 with login job off/uninstalled. No paid model or external account action. P1 integrations deferred; P2/P3 and full parity incomplete.",
+  "observedFailures": [],
+  "validationOrderNote": "Final socket-reserve source 399/399 and MCP focused 73/73; final package workbench 173/173 and new MCP modules 21/21 (actual Electron IPC panel with 14 checks), native CUA list/watch/subscribe/stale/read/unsubscribe/stop with wire verification; then SDK 69/69 with 1248 assertions, 169 package/source files matched and 81 upstream inputs unchanged. Normal default-data app restored at 0.17.0, default job off/uninstalled. Historical 0.16 native launchd proof retained, not rerun as a 0.17 OS installation. Zero paid models/external account actions. P1 integrations deferred; P2/P3 and full parity incomplete.",
   "codexReplayActivityTests": {
     "newTests": 21,
     "fixtureOnly": true,
@@ -405,7 +405,7 @@
     "deferred": "P1 integrations with other Agents, including provider gateway injection",
     "localCursorStash": "31764915635554521270725e0d0c38e178eea3cf",
     "cursorShipped": false,
-    "next": "P2 MCP modern request/subscription negotiation, cancellation and disconnect semantics; DCR and source-complete migration retained; P3 remaining OS/mode gaps retained; P1 integrations deferred."
+    "next": "P2 reviewed/cancellable MRTR input continuations with uncertainty boundaries; modern OAuth CIMD/DCR and source-complete migration retained; remaining P3 OS/mode gaps retained; P1 integrations deferred."
   },
   "p2P3Tests": {
     "newTests": 21,
@@ -572,5 +572,40 @@
     "modelCalls": 0,
     "externalAccountActions": 0,
     "cleanupRecheck": "v160-launchd-cleanup-check.json"
+  },
+  "previousV160UiQa": {
+    "log": "v160-native-ui-qa.md",
+    "fixtureOnly": true,
+    "nativeReviewCancelRefresh": true,
+    "reviewedRuntime": "final packaged Vek executable",
+    "reviewedNodeVersion": "24.19.0",
+    "setupAbsentAfterCancel": true,
+    "temporaryRealOSJobTested": true,
+    "persistentDefaultJobInstalled": false,
+    "wireCheck": "v160-native-ui-check.json",
+    "normalAppStatus": "v160-normal-app-status.json",
+    "darkNativeLayoutReviewed": false,
+    "normalDefaultConsentOff": true,
+    "normalDefaultSetupAbsent": true
+  },
+  "modernMcpTests": {
+    "newTests": 21,
+    "httpProtocolAndServiceTests": 20,
+    "actualElectronIPCPanelTests": 1,
+    "panelChecks": 14,
+    "focusedPass": 73,
+    "focusedLog": "v170-mcp-focused.log",
+    "fullSuiteLog": "v170-service-tests.log",
+    "packagedModulePass": 21,
+    "packagedModuleLog": "v170-package-modern.log",
+    "packagedAdditionalWorkbenchChecks": 15,
+    "packagedWorkbenchLog": "v170-package-workbench.log",
+    "actualLoopbackSSE": true,
+    "capacityAndReadAt16ActiveStreams": true,
+    "automaticResourceReads": 0,
+    "automaticRelisten": false,
+    "MRTRContinuationImplemented": false,
+    "modelCalls": 0,
+    "externalAccountActions": 0
   }
 }

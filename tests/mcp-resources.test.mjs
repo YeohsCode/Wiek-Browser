@@ -120,9 +120,9 @@ test('session HTTP resource subscriptions receive GET notifications and clear on
  assert.equal(h.calls.filter(m => m.method === 'resources/subscribe').length, 1);
 });
 
-test('modern HTTP rejects resources locally without sending a legacy method', async () => {
+test('modern HTTP rejects unadvertised resources locally without network traffic', async () => {
  const client = new HttpClient({ config: { url: 'https://example.invalid/mcp', protocolVersion: '2026-07-28' }, cwd: os.tmpdir() });
- client.state = 'connected'; client.info = { capabilities: { resources: { subscribe: true } } };
- await assert.rejects(client.listResources(), /session MCP/); await assert.rejects(client.readResource(uri), /session MCP/); await assert.rejects(client.setResourceSubscription(uri, true), /session MCP/);
- assert.equal(client.pending.size, 0); await client.stop();
+ client.state = 'connected'; client.info = { capabilities: {} }; let requests=0;client.open=()=>{requests++;throw Error('Unexpected network')};
+ await assert.rejects(client.listResources(), /advertise/); await assert.rejects(client.readResource(uri), /advertise/); await assert.rejects(client.setResourceSubscription(uri, true), /advertise/);
+ assert.equal(requests, 0); await client.stop();
 });

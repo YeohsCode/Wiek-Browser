@@ -1,5 +1,7 @@
 # MCP 资源订阅与本地 memory 内容索引
 
+> 0.17已增加现代HTTP资源/显式通知流，覆盖此前仅session的限制，参见[mcp-modern-subscriptions](mcp-modern-subscriptions.md)。本篇保留0.11历史证据。
+
 日期：2026-11-01，Asia/Shanghai。0.11.0 的独立实现。本轮按用户要求，暂停 P1 的不同 Agent 集成，优先推进 P2/P3；没有继续合入 Cursor 原生扩展。
 
 ## P2：MCP 资源

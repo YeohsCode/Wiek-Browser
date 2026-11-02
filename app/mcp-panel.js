@@ -50,7 +50,7 @@
     }
     async function listTools(integration) {
       const result = await action('mcp:tools:list', { integrationId: integration.id, scope: scope() });
-      if (result) tools.set(`${integration.id}:${projectId}:${threadId}`, result.tools); render();
+      if (result && integration.protocolVersion!=='2026-07-28') tools.set(`${integration.id}:${projectId}:${threadId}`, result.tools); render();
     }
     async function readResource(integration, uri) {
       const selectedScope = JSON.stringify(scope());
@@ -79,15 +79,14 @@
     }
     function resources(card, item, connection) {
       if (connection?.status !== 'connected') return;
-      if (item.protocolVersion === '2026-07-28') { card.append(make('p', 'Resource browsing currently requires a session protocol.', 'vm-muted')); return; }
       if (!connection.resourceCapabilities) return;
       const section = make('details'); section.dataset.resourceKey = `${item.id}:${projectId}:${threadId}`; section.open = resourceSections.get(section.dataset.resourceKey) === true; section.append(make('summary', 'Resources'));
       const actions = make('div', '', 'vm-actions'); actions.append(button('List resources', () => action('mcp:resources:list', { integrationId: item.id, scope: scope() })), button('List templates', () => action('mcp:resources:templates', { integrationId: item.id, scope: scope() })), button('Read URI', () => resourceUri(item))); section.append(actions);
       for (const resource of connection.resources || []) { const row = make('div', '', 'vm-tool'), info = make('div', '', 'vm-grow'); info.append(make('strong', resource.title || resource.name), make('p', resource.description || ''), make('code', resource.uri)); row.append(info, button('Read resource', () => readResource(item, resource.uri))); if (connection.resourceCapabilities.subscribe === true && !(connection.resourceSubscriptions || []).some(entry => entry.uri === resource.uri)) row.append(button('Subscribe', () => action('mcp:resources:subscribe', { integrationId: item.id, scope: scope(), uri: resource.uri }))); section.append(row); }
       if (connection.resources?.length === 0) section.append(make('p', 'No resources listed by this server.', 'vm-muted'));
       for (const template of connection.resourceTemplates || []) { const row = make('div', '', 'vm-tool'); row.append(make('span', `${template.title || template.name} · ${template.uriTemplate}`, 'vm-grow'), button('Use template', () => resourceUri(item, template.uriTemplate))); section.append(row); }
-      for (const entry of connection.resourceSubscriptions || []) { const row = make('div', '', 'vm-tool'); row.append(make('span', `${entry.uri} · ${entry.status} · ${entry.revision > entry.readRevision ? 'changed — read again' : 'no unread update'} · updates ${entry.revision}`, 'vm-grow'), button('Read latest', () => readResource(item, entry.uri)), button('Unsubscribe', () => action('mcp:resources:unsubscribe', { integrationId: item.id, scope: scope(), uri: entry.uri }))); section.append(row); }
-      section.append(make('p', 'Subscriptions belong to this connection. Updates mark content stale; they do not fetch or execute it. Disconnecting clears subscriptions.', 'vm-muted')); card.append(section);
+      for (const entry of connection.resourceSubscriptions || []) { const row = make('div', '', 'vm-tool'); row.append(make('span', `${entry.uri} · ${entry.status} · ${entry.revision > entry.readRevision ? 'changed — read again' : 'no unread update'} · updates ${entry.revision}`, 'vm-grow'), button('Read latest', () => readResource(item, entry.uri)), button('Unsubscribe', () => action('mcp:resources:unsubscribe', { integrationId: item.id, scope: scope(), uri: entry.uri }))); if(item.protocolVersion==='2026-07-28'&& !['subscribed','subscribing','unsubscribing'].includes(entry.status))row.append(button('Retry subscription',()=>action('mcp:resources:subscribe',{integrationId:item.id,scope:scope(),uri:entry.uri}))); if(entry.error)row.append(make('span',entry.error,'vm-error')); section.append(row); }
+      section.append(make('p', 'Subscriptions belong to this connection. Updates mark content stale; they do not fetch or execute it. Disconnecting clears subscriptions. Ended streams require an explicit retry; missed updates are not replayed.', 'vm-muted')); card.append(section);
     }
     function pairClient() {
       const ids = data.integrations.filter(i => visible(i.scope)).map(i => i.id);
@@ -109,7 +108,8 @@
         actions.append(button(connection?.status === 'connected' ? 'Disconnect' : 'Connect', () => action(`mcp:integrations:${connection?.status === 'connected' ? 'disconnect' : 'connect'}`, { id: item.id, scope: scope() })), button('List tools', () => listTools(item)), button('Configure', () => editIntegration(item)), button('Remove', () => { dialog = { title: 'Remove integration?', notice: `Disconnect ${item.name} and remove its configuration.`, fields: [], submit: () => action('mcp:integrations:remove', { id: item.id }) }; render(); })); card.append(actions);
         if (connection?.error) card.append(make('div', connection.error, 'vm-error'));
         if (connection?.stderr) card.append(make('p', connection.stderr, 'vm-muted'));
-        for (const tool of tools.get(`${item.id}:${projectId}:${threadId}`) || connection?.tools || []) { const row = make('div', '', 'vm-tool'), description = make('div', '', 'vm-grow'); description.append(make('strong', tool.name), make('p', tool.description || 'No description supplied')); row.append(description, button('Run tool', () => toolCall(item, tool))); card.append(row); }
+        for (const tool of (item.protocolVersion==='2026-07-28'?connection?.tools:tools.get(`${item.id}:${projectId}:${threadId}`)||connection?.tools) || []) { const row = make('div', '', 'vm-tool'), description = make('div', '', 'vm-grow'); description.append(make('strong', tool.name), make('p', tool.description || 'No description supplied')); row.append(description, button('Run tool', () => toolCall(item, tool))); card.append(row); }
+        if(item.protocolVersion==='2026-07-28'&&connection?.status==='connected'){const watch=connection.notificationStreams?.lists;card.append(make('p','List updates: '+(watch?.status||'off')+'. Refresh lists after a gap; streams do not reconnect automatically.','vm-muted'),button(watch?.status==='subscribed'?'Stop watching lists':'Watch list changes',()=>action(watch?.status==='subscribed'?'mcp:subscriptions:stop':'mcp:subscriptions:watch',{integrationId:item.id,scope:scope()})));if(watch?.error)card.append(make('p',watch.error,'vm-error'));}
         oauthControls(card,item);resources(card, item, connection); body.append(card);
       }
     }

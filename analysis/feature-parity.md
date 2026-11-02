@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.16.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
+当前版本 **0.17.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以历次版本增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -368,3 +368,12 @@ Settings显式prepare/review/enable，默认关闭；固定argv/calendar-minute/
 Foreground取得gate，认证请求worker停止，实际provider/checkpoint收尾并释放writer lease后才打开状态；ack不算完成，timeout不抢占。真实临时launchd fixture验证bootstrap/RunAtLoad、gate跳过、同专属线程续接、不重复和卸载，发行Electron Node runtime再次验证。新增20项，最终[RESULTS](../reports/RESULTS.md)；设计见[background-scheduling](background-scheduling.md)。
 
 没有Ego同OS安装后端的runtime对标；物理sleep/wake、登录退出、OS后台项撤销和完整恢复未验收，当前不会唤醒睡眠机器。P2/P3/full parity仍false，P1其他Agent继续暂缓。
+
+
+## 0.17：P2现代HTTP MCP资源与显式通知流
+
+现代2026-07-28 HTTP模式新增资源/模板分页与明确读取，基于subscriptions/listen分别订阅tools/resources列表变化及resource URI更新；首条ack、精确subscriptionId和实际filter子集逐条校验。空子集显示unsupported，协议异常或断流显示lost，graceful显示closed，重试必须明确操作，disconnect/reconnect不自动重建。
+
+通知只增加revision/使列表失效，不读取正文或执行内容；并发read保留stale，工具列表竞态拒绝旧结果，界面移除失效工具按钮。确认后流可超出普通timeout，逐事件/行有界；16流上限仍给普通请求留socket空间。新增21项、实际Electron panel14内部检查，精确发行结果见[RESULTS](../reports/RESULTS.md)，设计/公开规范见[mcp-modern-subscriptions](mcp-modern-subscriptions.md)。
+
+没有MRTR续传、采样/表单、prompt通知、现代stdio或task extension，也未进行Ego同功能runtime对测。OAuth CIMD/DCR/完整step-up、来源迁移与P3剩余项保留；全量parity仍false，P1不同Agent集成继续暂缓。

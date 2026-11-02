@@ -10,6 +10,7 @@ import { execFileSync } from 'node:child_process';
 import WebSocket from 'ws';
 import {randomUUID} from 'node:crypto';
 import {createRequire} from 'node:module';
+const {createFixture:createModernPeer}=createRequire(import.meta.url)('./fixtures/modern-mcp-server.cjs');
 const {createOAuthPeer}=createRequire(import.meta.url)('./fixtures/oauth-mcp-server.cjs');
 const dataDir = path.resolve(process.env.VEK_DATA_DIR || 'data/workbench-e2e');
 const cli = path.resolve(process.env.VEK_WORKBENCH_CLI || 'cli/vek-browser.mjs');
@@ -25,7 +26,7 @@ const cdp=(spaceId,method,params={})=>new Promise((resolve,reject)=>{const id=++
 const check=(condition,message)=>{ assert.ok(condition,message); checks++; };
 async function waitThread(id) { const limit=Date.now()+20000; while(Date.now()<limit) { const t=await action('agents:threads:read',{id});if(!['running','queued','discovering'].includes(t.status))return t;await new Promise(r=>setTimeout(r,40)); } throw new Error('Thread did not complete'); }
 const directory=await fs.mkdtemp(path.join(os.tmpdir(),'vek-workbench-e2e-'));
-const oauthPeer=await createOAuthPeer();
+const oauthPeer=await createOAuthPeer();const modernPeer=await createModernPeer();
 const downloadBytes=Buffer.alloc(2*1024*1024,77);
 const web=http.createServer((req,res)=>{
   if(req.url==='/slow-download'){
@@ -276,6 +277,26 @@ try {
   await assert.rejects(action('agents:automations:update',{id:standaloneId,executionMode:'invalid'}),/Execution mode/);checks++;
   const lockedTick=JSON.parse(execFileSync(process.execPath,[cli,'scheduler','tick'],{env:{...process.env,VEK_DATA_DIR:dataDir},encoding:'utf8'}));check(lockedTick.status==='skipped-locked'&&lockedTick.attempted.length===0,'real packaged CLI worker does not steal the running browser data lease');
   await action('agents:automations:delete',{id:dedicatedId});const released=await action('agents:threads:read',{id:dedicatedThread});check(!released.automationOwnerId&&released.runs.length===2,'deleting a packaged automation releases retained thread history');
+  const modernScope={projectId,threadId},modernConfig=await action('mcp:integrations:save',{name:'Modern host fixture',scope:modernScope,transport:'http',url:modernPeer.url,allowInsecureHttp:true,protocolVersion:'2026-07-28'}),modernId=modernConfig.integrations.at(-1).id;
+  const modern=(verb,extra={})=>action(verb,{integrationId:modernId,scope:modernScope,uri:'fixture:///notes',...extra}),modernConnection=async()=>(await action('mcp:snapshot')).connections.find(c=>c.integrationId===modernId);
+  check((await modern('mcp:resources:list')).resources.length===2,'packaged host lists modern resources');
+  check((await modern('mcp:resources:templates')).resourceTemplates.length===1,'packaged host lists modern templates');
+  check((await modern('mcp:resources:read')).contents[0].text.includes('离线内容'),'packaged host reads inert modern resource text');
+  check((await modernConnection()).notificationStreams.activeStreams===0,'modern connections never start streams implicitly');
+  await modern('mcp:subscriptions:watch');check((await modernConnection()).notificationStreams.lists.status==='subscribed','packaged host explicitly watches modern list changes');
+  await modern('mcp:resources:subscribe');check((await modernConnection()).resourceSubscriptions[0].status==='subscribed','packaged host acknowledges a modern resource stream');
+  const priorReads=modernPeer.calls.filter(c=>c.message.method==='resources/read').length;modernPeer.emit('notifications/resources/updated',{uri:'fixture:///notes'});modernPeer.emit('notifications/resources/list_changed');
+  let modernState;for(let i=0;i<100;i++){modernState=await modernConnection();if(modernState.resourceSubscriptions[0].revision>0&&modernState.resources===null)break;await new Promise(r=>setTimeout(r,10));}
+  check(modernState.resources===null&&modernState.resourceSubscriptions[0].revision>0,'packaged host invalidates modern resource data from correlated stream notifications');
+  check(modernPeer.calls.filter(c=>c.message.method==='resources/read').length===priorReads,'modern notifications never fetch resource contents automatically');
+  await assert.rejects(modern('mcp:subscriptions:watch',{scope:{projectId}}),/outside/);checks++;
+  [...modernPeer.streams].find(s=>s.message.params.notifications.resourceSubscriptions).res.destroy();for(let i=0;i<100;i++){modernState=await modernConnection();if(modernState.resourceSubscriptions[0].status==='lost')break;await new Promise(r=>setTimeout(r,10));}
+  check(modernState.resourceSubscriptions[0].status==='lost','packaged host reports dropped resource stream');
+  await modern('mcp:resources:subscribe');check((await modernConnection()).resourceSubscriptions[0].status==='subscribed'&&modernPeer.calls.filter(c=>c.message.method==='subscriptions/listen').length===3,'packaged host retries only on explicit action');
+  await modern('mcp:resources:unsubscribe');await modern('mcp:subscriptions:stop');check((await modernConnection()).notificationStreams.activeStreams===0,'packaged host closes all explicitly stopped streams');
+  check(!modernPeer.calls.some(c=>c.method!=='POST'||['initialize','resources/subscribe','resources/unsubscribe','notifications/cancelled'].includes(c.message.method)),'modern host never sends legacy lifecycle or resource methods');
+  await action('mcp:integrations:disconnect',{id:modernId,scope:modernScope});await modern('mcp:resources:list');check((await modernConnection()).resourceSubscriptions.length===0&&(await modernConnection()).notificationStreams.lists===null,'modern reconnect has no automatic subscriptions');
+  check(!(await fs.readFile(path.join(dataDir,'mcp/state.json'),'utf8')).includes('离线内容'),'modern resource body is absent from persisted MCP state');
   const loginJob=await action('scheduler:snapshot');check(loginJob.supported&&!loginJob.enabled&&!loginJob.installed&&!loginJob.configured,'packaged OS scheduling is off and uninstalled by default');
   for(const name of ['prepare','enable','disable','remove','cancel','refresh']){await assert.rejects(action('scheduler:job:'+name,{}),/Background scheduling/);checks++;}
   const afterDeniedJob=await action('scheduler:snapshot');check(!afterDeniedJob.enabled&&!afterDeniedJob.installed&&!afterDeniedJob.plan,'remote API attempts leave no consent, plan or login job');
@@ -285,5 +306,5 @@ try {
   // Shut the disposable host down before removing any fixture it may watch.
   try { await rpc('shutdown'); } catch {}
   socket.close();for(const p of [...pending.values(),...cdpPending.values()])clearTimeout(p.timer);
-  await new Promise(resolve=>web.close(resolve));await oauthPeer.close();await fs.rm(directory,{recursive:true,force:true});
+  await new Promise(resolve=>web.close(resolve));await oauthPeer.close();await modernPeer.close();await fs.rm(directory,{recursive:true,force:true});
 }

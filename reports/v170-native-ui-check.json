@@ -1,0 +1,25 @@
+{
+  "version": "0.17.0",
+  "fixtureOnly": true,
+  "nativeCUAConnectListWatchSubscribeReadStop": true,
+  "realLoopbackSSE": true,
+  "streamsAfterExplicitSubscribe": 2,
+  "resourceReadsBeforeNativeRead": 0,
+  "resourceReadsAfterNativeRead": 1,
+  "staleRevision": 1,
+  "readRevision": 1,
+  "streamsAfterNativeStop": 0,
+  "trackedSubscriptionsAfterNativeStop": 0,
+  "listWatchAfterNativeStop": null,
+  "legacyMethodsSent": [],
+  "resourceBodyPersisted": false,
+  "modelCalls": 0,
+  "externalAccountActions": 0,
+  "nativeStreamLossRetried": false,
+  "automatedElectronStreamLossRetried": true,
+  "screenshots": [
+    "v170-native-modern-stale.png",
+    "v170-native-modern-read.png"
+  ],
+  "checkedAt": "2026-11-02T07:36:45.008Z"
+}

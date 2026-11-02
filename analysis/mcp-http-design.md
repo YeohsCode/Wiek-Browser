@@ -1,5 +1,7 @@
 # Outbound MCP Streamable HTTP client
 
+> 0.17更新：现代资源和显式subscriptions/listen已补齐有界HTTP范围，参见[mcp-modern-subscriptions](mcp-modern-subscriptions.md)。下文缺失项反映0.3时点；MRTR/采样/表单续传等仍未完成。
+
 `app/mcp-http-client.cjs` adds an independent public-protocol HTTP transport to `mcp-service.cjs`. Existing stdio integrations, task/grant scope checks and service dispatch remain compatible. `mcp-panel.js/css` adds HTTP configuration. No main/preload/renderer/API changes are required.
 
 ## Configuration and connection contract

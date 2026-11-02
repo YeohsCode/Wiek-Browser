@@ -1,5 +1,7 @@
 # 0.15 Automation modes and explicit closed-app worker
 
+> 0.16已增加明确审核的macOS login job和带认证的loopback停止端点；本页以下保留0.15检查点，当前生命周期见[background-scheduling](background-scheduling.md)。
+
 本轮优先P3，不新增其他Agent集成。独立实现三种执行模式和一次性CLI worker；**未安装系统定时唤醒作业，退出后自动唤醒/前台handoff尚未完成**。
 
 ## Ego证据与边界

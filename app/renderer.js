@@ -10,6 +10,7 @@ function render(next) {
   state = next;
   if(next.panelOpen===false&&currentPanel){if(currentPanel==='voice')window.VekToolsPanel.dispose();currentPanel=null;}
   if(currentPanel!=='desktop')window.VekDesktopPanel?.dispose();
+  if(currentPanel!=='scheduler')window.VekSchedulerPanel?.dispose();
   document.documentElement.dataset.theme=next.darkMode?'dark':'light';document.body.dataset.tabLayout=next.preferences?.tabLayout||'horizontal';
   $('version').textContent = next.version;
   const spaces = $('spaces'); spaces.replaceChildren();
@@ -51,8 +52,8 @@ function render(next) {
 async function showPanel(name) { if (currentPanel === 'voice' && name !== 'voice') window.VekToolsPanel.dispose(); currentPanel = name; await act('panel', true); renderPanel(); }
 function renderPanel() {
   const p = $('panel-content'); p.hidden = false; $('empty').hidden = true;
-  if (['workspace','mcp','catalog','voice','preferences','library','recorder','desktop'].includes(currentPanel)) {
-    const name = currentPanel, titles = { workspace:'Workspace & Git', mcp:'MCP integrations', catalog:'Skills & commands', voice:'Voice input',preferences:'Browser preferences',library:'Library & screenshots',recorder:'Action recordings',desktop:'Desktop tools' };
+  if (['workspace','mcp','catalog','voice','preferences','library','recorder','desktop','scheduler'].includes(currentPanel)) {
+    const name = currentPanel, titles = { workspace:'Workspace & Git', mcp:'MCP integrations', catalog:'Skills & commands', voice:'Voice input',preferences:'Browser preferences',library:'Library & screenshots',recorder:'Action recordings',desktop:'Desktop tools',scheduler:'Background scheduling' };
     let root = document.getElementById(`workbench-${name}`);
     if (!root) {
       p.replaceChildren(); const header = text('div','','panel-heading'); header.append(text('h1',titles[name]));
@@ -62,6 +63,7 @@ function renderPanel() {
       if (name==='workspace') window.VekWorkspacePanel.mount(root,dispatch);
       else if (name==='mcp') window.VekMcpPanel.mount(root,dispatch,state.agents || {});
       else if (name==='desktop') window.VekDesktopPanel.mount(root,dispatch);
+      else if(name==='scheduler')window.VekSchedulerPanel.mount(root,dispatch);
       else if (name==='preferences') window.VekPreferencesPanel.mount(root,dispatch);
       else if (name==='library') window.VekLibraryPanel.mount(root,dispatch);
       else if (name==='recorder') window.VekRecorderPanel.mount(root,dispatch);
@@ -70,6 +72,7 @@ function renderPanel() {
     if (name==='workspace') window.VekWorkspacePanel.update(state);
     else if (name==='mcp') window.VekMcpPanel.update(state);
     else if (name==='desktop') window.VekDesktopPanel.update(state);
+    else if(name==='scheduler')window.VekSchedulerPanel.update(state);
     else if (name==='preferences') window.VekPreferencesPanel.update(state);
     else if (name==='library') window.VekLibraryPanel.update(state.library);
     else if (name==='recorder') window.VekRecorderPanel.update(state.recorder);
@@ -132,6 +135,7 @@ function settingsPanel(p) {
   const imp = text('button', 'Import cookie JSON'); imp.onclick = () => act('cookies:import');
   const clear = text('button', 'Clear profile site data'); clear.onclick = () => { if (confirm('Clear cookies and site data for the current profile?')) act('data:clear'); };
   actions.append(imp, clear); data.append(actions);
+  const scheduler=card('Background scheduling','Review a macOS login job for opted-in plain CLI automations. Default off; foreground Vek takes priority.');const schedulerButton=text('button','Background scheduling…');schedulerButton.onclick=()=>showPanel('scheduler');scheduler.append(schedulerButton);
   const desktop=card('Desktop tools','Choose a screen region or read selected text once with a global shortcut. OS permissions and explicit selected-text enablement are required; captures are previewed before use.');const desktopButton=text('button','Desktop capture & global shortcuts…');desktopButton.onclick=()=>showPanel('desktop');desktop.append(desktopButton);
   const archive=card('Encrypted profile archive','Export tabs, bookmarks, history and cookies from this profile. Saved logins and web storage are optional. Web storage covers current top-level origins in open tabs, with separate tab sessions; it can contain login tokens. Archives require a passphrase and restore into a new profile. IndexedDB, iframe storage, permissions and extension binaries are excluded.');
   const archiveOptions=text('div','','settings-actions'),includeLabel=text('label','Include saved logins'),include=document.createElement('input');include.type='checkbox';includeLabel.prepend(include);const storageLabel=text('label','Include web storage from open tabs'),storage=document.createElement('input');storage.type='checkbox';storageLabel.prepend(storage);const exportProfile=text('button','Export encrypted profile…');exportProfile.onclick=()=>act('profile:file:export',{includePasswords:include.checked,includeWebStorage:storage.checked});const restoreLabel=text('label','Open restored tabs'),restore=document.createElement('input');restore.type='checkbox';restore.checked=true;restoreLabel.prepend(restore);const importProfile=text('button','Import encrypted profile…');importProfile.onclick=()=>act('profile:file:import',{restoreTabs:restore.checked});archiveOptions.append(includeLabel,storageLabel,exportProfile,restoreLabel,importProfile);archive.append(archiveOptions);
@@ -179,7 +183,7 @@ $('finish-task').onclick = () => { act('space:finish'); closeMenu(); };
 $('close-space').onclick = () => { if (confirm('Close this space and all of its tabs?')) act('space:close'); closeMenu(); };
 function closeMenu() { $('space-menu').hidden = true; act('panel', Boolean(currentPanel)); }
 for (const b of document.querySelectorAll('[data-panel]')) b.onclick = () => showPanel(b.dataset.panel);
-window.addEventListener('vek:show-panel', event => { if (['agents','voice','catalog','workspace','mcp','preferences','library','recorder','spaces','desktop'].includes(event.detail)) void showPanel(event.detail); });
+window.addEventListener('vek:show-panel', event => { if (['agents','voice','catalog','workspace','mcp','preferences','library','recorder','spaces','desktop','scheduler'].includes(event.detail)) void showPanel(event.detail); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('space-modal').hidden) $('cancel-space').click(); closeMenu(); } });
 window.VekDesktopActions={openImage:async value=>{await showPanel('library');if(window.VekLibraryPanel.hasDraft()&&!confirm('Replace your unsaved screenshot edits with this desktop capture?'))return false;await window.VekLibraryPanel.openCapture(value);return true;}};
 window.addEventListener('vek:desktop-text',async event=>{await showPanel('agents');if(!window.VekAgentPanel.appendDraft(event.detail))toast('Select a conversation first, then use the selection again.');});

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-02T00:14:58.484816+00:00",
-  "version": "0.15.0",
+  "generatedAt": "2026-11-02T07:18:10.514159+00:00",
+  "version": "0.16.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -22,8 +22,8 @@
       },
       {
         "browser": "vek",
-        "startedAt": "2026-11-02T00:11:33.262Z",
-        "wallTimeMs": 167234,
+        "startedAt": "2026-11-02T07:14:29.650Z",
+        "wallTimeMs": 166979,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
         "counts": {
@@ -46,14 +46,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 358,
+    "pass": 378,
     "fail": 0,
-    "log": "v150-service-tests.log"
+    "log": "v160-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 150,
+    "pass": 158,
     "fail": 0,
-    "log": "v150-package-workbench.log"
+    "log": "v160-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -67,7 +67,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 163,
+    "sourceFilesChecked": 168,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -101,7 +101,9 @@
     "Explicit encrypted Profile archive v2: top-level open-tab localStorage, independent current-origin tab sessionStorage, exact UTF-16 encoding, v1 decode, no-network bootstrap before site load, new-profile isolation, CHIPS omission, cancellation/conflict/partial-write cleanup",
     "Explicit macOS one-shot interactive screen capture and AX selected-text adapter, opt-in/exclusions, temporary preview and Library handoff, transactional OS global shortcuts with browser conflict checks; native positive content paths remain unverified",
     "Heartbeat/standalone/dedicated execution ownership, clean generated conversations, explicit memory, cancellation/deletion/restart/import authority boundaries",
-    "Explicit opt-in plain CLI closed-app one-shot tick with cutoff, shared writer lease, no stale reaping, real workspace/turn checkpoints, signal/timeout settlement and browser autostart disabled; no OS wake-up job installed"
+    "Explicit opt-in plain CLI closed-app one-shot tick with cutoff, shared writer lease, no stale Agent-lock reaping, real workspace/turn checkpoints and signal/timeout settlement",
+    "Default-off reviewed macOS login job lifecycle: private launcher, executable/Node/app-JS receipt, minute calendar, disabled-on-change, unload/remove with graceful worker settlement",
+    "Foreground gate and authenticated loopback stop-only endpoint; actual provider exit/checkpoint/lease release before foreground Agent state opens; no force-kill on timeout"
   ],
   "remainingGaps": [
     "Five other native provider protocols, source native session/history migration and paid generation validation",
@@ -113,10 +115,10 @@
     "Linked worktrees, checkpoint retention and remote PR workflow",
     "MCP OAuth DCR/hosted client metadata/full step-up; MRTR/modern subscriptions/sampling/elicitation",
     "Positive native screenshot/AX content and background key trigger validation, passive selection toolbar, OS recording and translation",
-    "OS automatic wake-up job installation/disable/uninstall, stable runtime identity, foreground handoff and sleep recovery",
+    "Physical sleep/wake, logout/login, OS background-item revocation, additional runtime layouts and CLI authentication environments; busy defer/completion contract and hard-kill recovery",
     "Semantic/all-disk/multiformat memory index and Ego proprietary services",
     "31 live-site model benchmark not run",
-    "Concurrent independent CLI starts do not yet have leader election"
+    "Scheduler/Agent foreground writer gate is implemented; application-wide independent CLI startup election and all recovery paths are not established"
   ],
   "turnCheckpointTests": {
     "pass": 11,
@@ -162,16 +164,19 @@
     "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
   },
   "uiQa": {
-    "log": "v150-native-ui-qa.md",
+    "log": "v160-native-ui-qa.md",
     "fixtureOnly": true,
-    "nativeModeAndConsentMenus": true,
-    "sameDedicatedThreadAcrossUIAndClosedWorker": true,
-    "runs": 2,
-    "runningBrowserLockRespected": true,
-    "nativeOwnedComposerAndUnsupportedActionsAbsent": true,
-    "systemWakeJobInstalled": false,
-    "wireCheck": "v150-native-ui-check.json",
-    "normalAppStatus": "v150-normal-app-status.json"
+    "nativeReviewCancelRefresh": true,
+    "reviewedRuntime": "final packaged Vek executable",
+    "reviewedNodeVersion": "24.19.0",
+    "setupAbsentAfterCancel": true,
+    "temporaryRealOSJobTested": true,
+    "persistentDefaultJobInstalled": false,
+    "wireCheck": "v160-native-ui-check.json",
+    "normalAppStatus": "v160-normal-app-status.json",
+    "darkNativeLayoutReviewed": false,
+    "normalDefaultConsentOff": true,
+    "normalDefaultSetupAbsent": true
   },
   "claudeFocusedTests": {
     "pass": 29,
@@ -295,9 +300,7 @@
       "report": "v140-native-ui-qa.md",
       "status": "fixed-and-regressed",
       "description": "Native capture cancellation surfaced an Electron IPC error prefix. Abort rejection now settles normally; panel sanitizes IPC wrappers. Final native cancellation, service and panel tests pass."
-    }
-  ],
-  "observedFailures": [
+    },
     {
       "report": "v150-initial-fixture-failure.log",
       "status": "fixture-corrected",
@@ -309,7 +312,24 @@
       "description": "Dedicated view still displayed edit/rollback/delete/model controls rejected by backend ownership guard. Removed with actual Electron regression and final native UI check."
     }
   ],
-  "validationOrderNote": "Final source: 313/313 full and 17/17 profile checks; final package: 132/132 workbench, 2/2 packaged-module Electron scenarios with 67 internal checks, complete SDK 69/69 with 1248 assertions, and final native Open/Restore/result/two-session CUA verification. 157 package files match, 81 upstream inputs unchanged. No real site login, full browser migration or paid benchmark claimed. P1 integrations deferred; P2/P3 incomplete.",
+  "observedFailures": [
+    {
+      "report": "v160-control-cleanup-attempt.log",
+      "status": "fixture-corrected",
+      "description": "Initial fixture removed its directory before service.close. Cleanup now waits for actual service settlement before removing test files."
+    },
+    {
+      "report": "v160-service-parallel-attempt.log",
+      "status": "fixture-readiness-corrected",
+      "description": "Native interrupt test saw request audit before acknowledged nativeTurnId. Added client ACK readiness wait; original interrupt assertion retained. Focused and final full suite pass. Other historical timeout causes are not established."
+    },
+    {
+      "report": "v160-native-launchd-attempt1.json",
+      "status": "fixture-idle-precondition-corrected",
+      "description": "First packaged real-OS fixture kickstarted before previous process was idle and timed out waiting for final no-op. Unreached false markers are not observed duplication/unload failures; finally cleanup independently confirmed. Wait for OS no-pid before kickstart, preserve no-duplicate assertion; final packaged run success and cleanupConfirmed."
+    }
+  ],
+  "validationOrderNote": "Final source 378/378; final package workbench 158/158 and scheduler 32/32 (two actual Electron panels, 21 internal checks), real packaged-runtime launchd bootstrap/RunAtLoad/gate/dedicated continuity/no-duplicate/bootout with cleanup, CUA review/cancel/refresh, complete SDK 69/69 with 1248 assertions, then 168 source/package files matched and 81 upstream inputs unchanged. Normal default-data packaged browser restored at 0.16.0 with login job off/uninstalled. No paid model or external account action. P1 integrations deferred; P2/P3 and full parity incomplete.",
   "codexReplayActivityTests": {
     "newTests": 21,
     "fixtureOnly": true,
@@ -385,7 +405,7 @@
     "deferred": "P1 integrations with other Agents, including provider gateway injection",
     "localCursorStash": "31764915635554521270725e0d0c38e178eea3cf",
     "cursorShipped": false,
-    "next": "P3 explicit OS wake-up job lifecycle and stable runtime/foreground handoff/sleep recovery; P2 source migration and MCP remaining work retained; P1 integrations deferred."
+    "next": "P2 MCP modern request/subscription negotiation, cancellation and disconnect semantics; DCR and source-complete migration retained; P3 remaining OS/mode gaps retained; P1 integrations deferred."
   },
   "p2P3Tests": {
     "newTests": 21,
@@ -513,6 +533,44 @@
     "modelCalls": 0,
     "externalAccountActions": 0,
     "osJobInstalled": false,
-    "automaticWakeupVerified": false
+    "automaticWakeupVerified": false,
+    "note": "Historical 0.15 scope; 0.16 adds reviewed temporary OS-job verification, without installing a persistent default-user job."
+  },
+  "previousV150UiQa": {
+    "log": "v150-native-ui-qa.md",
+    "fixtureOnly": true,
+    "nativeModeAndConsentMenus": true,
+    "sameDedicatedThreadAcrossUIAndClosedWorker": true,
+    "runs": 2,
+    "runningBrowserLockRespected": true,
+    "nativeOwnedComposerAndUnsupportedActionsAbsent": true,
+    "systemWakeJobInstalled": false,
+    "wireCheck": "v150-native-ui-check.json",
+    "normalAppStatus": "v150-normal-app-status.json"
+  },
+  "backgroundSchedulingTests": {
+    "newTests": 20,
+    "controlTests": 8,
+    "jobLauncherTests": 11,
+    "actualElectronPanelTests": 1,
+    "panelChecks": 11,
+    "focusedPass": 31,
+    "focusedLog": "v160-scheduler-tests.log",
+    "packagedPass": 32,
+    "packagedPanelChecks": 21,
+    "packagedLog": "v160-package-scheduler.log",
+    "actualPackagedHostForegroundHandoff": true,
+    "packagedControlJobLauncherModules": true,
+    "actualLaunchd": "v160-native-launchd-check.json",
+    "sourceNodeLaunchd": "v160-native-launchd-source-check.json",
+    "actualOSRunAtLoad": true,
+    "actualOSBootout": true,
+    "cleanupConfirmed": true,
+    "userLibraryPlistWrittenByFixture": false,
+    "physicalSleepWakeTested": false,
+    "logoutLoginTested": false,
+    "modelCalls": 0,
+    "externalAccountActions": 0,
+    "cleanupRecheck": "v160-launchd-cleanup-check.json"
   }
 }

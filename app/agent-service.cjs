@@ -136,7 +136,7 @@ function discoverOpenCode() {
   return { id: 'opencode-native', name: 'OpenCode ACP session (opt-in)', command, args: ['acp'], inputMode: 'stdin', modelArgs: [], models: [], protocol: 'opencode-acp', enabled: false, verifiedBy: 'local acp --help; no authentication or inference checked' };
 }
 
-function createAgentService({ dataDir, onChange = () => {}, runContext, turnCheckpoints, maxConcurrentRuns = 2, maxOutputBytes = 1024 * 1024, autoSchedule = true, discoverProviders = true, recoverLock = true } = {}) {
+function createAgentService({ dataDir, onChange = () => {}, runContext, turnCheckpoints, maxConcurrentRuns = 2, maxOutputBytes = 1024 * 1024, autoSchedule = true, discoverProviders = true, recoverLock = true, lockRole = 'foreground' } = {}) {
   if (!dataDir) throw fail('dataDir is required');
   maxConcurrentRuns = Math.max(1, Math.min(16, Number(maxConcurrentRuns) || 2));
   maxOutputBytes = Math.max(128, Math.min(16 * 1024 * 1024, Number(maxOutputBytes) || 1024 * 1024));
@@ -156,7 +156,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     fs.unlinkSync(lockPath);
   }
   let lock;try { lock = fs.openSync(lockPath, 'wx', 0o600); } catch (error) { if(error.code==='EEXIST')throw fail('Another Agent service is using this data directory','VEK_AGENT_DATA_LOCKED');throw error; }
-  fs.writeFileSync(lock, JSON.stringify({ pid: process.pid, token: lockToken })); fs.closeSync(lock);
+  fs.writeFileSync(lock, JSON.stringify({ pid: process.pid, token: lockToken,role:lockRole })); fs.closeSync(lock);
   let state;
   try {
     if (fs.existsSync(statePath)) {

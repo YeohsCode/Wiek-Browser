@@ -276,6 +276,9 @@ try {
   await assert.rejects(action('agents:automations:update',{id:standaloneId,executionMode:'invalid'}),/Execution mode/);checks++;
   const lockedTick=JSON.parse(execFileSync(process.execPath,[cli,'scheduler','tick'],{env:{...process.env,VEK_DATA_DIR:dataDir},encoding:'utf8'}));check(lockedTick.status==='skipped-locked'&&lockedTick.attempted.length===0,'real packaged CLI worker does not steal the running browser data lease');
   await action('agents:automations:delete',{id:dedicatedId});const released=await action('agents:threads:read',{id:dedicatedThread});check(!released.automationOwnerId&&released.runs.length===2,'deleting a packaged automation releases retained thread history');
+  const loginJob=await action('scheduler:snapshot');check(loginJob.supported&&!loginJob.enabled&&!loginJob.installed&&!loginJob.configured,'packaged OS scheduling is off and uninstalled by default');
+  for(const name of ['prepare','enable','disable','remove','cancel','refresh']){await assert.rejects(action('scheduler:job:'+name,{}),/Background scheduling/);checks++;}
+  const afterDeniedJob=await action('scheduler:snapshot');check(!afterDeniedJob.enabled&&!afterDeniedJob.installed&&!afterDeniedJob.plan,'remote API attempts leave no consent, plan or login job');
   await action('preferences:update',{theme:'light',tabLayout:'horizontal'});
   console.log(JSON.stringify({passed:true,checks,hostVersion:scopedState.version,paidModelCalls:0,externalAccountActions:0},null,2));
 } finally {

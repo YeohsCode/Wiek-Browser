@@ -18,6 +18,10 @@ const { createLibraryService } = require('./library-service.cjs');
 const { createActionRecorder } = require('./action-recorder.cjs');
 const { createMemoryService } = require('./memory-service.cjs');
 const { createProfileArchive } = require('./profile-archive.cjs');
+const {claimForeground}=require('./scheduler-control.cjs');
+let foregroundLease;
+const {createSchedulerJob}=require('./scheduler-job.cjs');
+let schedulerJobService;
 const { createDesktopService } = require('./desktop-service.cjs');
 const { createNativeDesktop } = require('./desktop-native.cjs');
 const { physicalChord } = require('./preferences-service.cjs');
@@ -99,7 +103,7 @@ function tabDescriptor(t, index = 0) { return { targetId: t.id, ...(t.openerId ?
 function uiState(selectedSpaceId = store.selected) {
   const s = store.spaces.find(s => s.id === selectedSpaceId);
   const active = s && tabs.get(s.activeTab);
-  return { agents: agentService?.snapshot(), desktop:desktopService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
+  return { schedulerJob:schedulerJobService?.snapshot(),agents: agentService?.snapshot(), desktop:desktopService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
 }
 function publish() { if (window && !window.isDestroyed()) window.webContents.send('vek:state', uiState());for(const [id,record]of spaceWindows)if(!record.window.isDestroyed())record.window.webContents.send('vek:state',uiState(id)); }
 let panelOpen = false;
@@ -489,6 +493,7 @@ async function captureTabImage(t) {
   }finally{layout();}
 }
 async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false) {
+  if(action.startsWith('scheduler:'))return schedulerJobService.dispatch(action,value,{interactive:interactiveDesktop});
   if(action.startsWith('desktop:')){
     if(action==='desktop:permissions:open'){
       if(!interactiveDesktop)throw new Error('Open Desktop tools to change OS permissions');
@@ -703,6 +708,8 @@ function agentPromptPrefix(thread,project) {
   return `You are running in Vek Browser with a local browser automation CLI. To use it, run node with the path in VEK_BROWSER_CLI and the nodejs subcommand; pipe JavaScript on stdin or use -e. Read its skill subcommand first for the full SDK guide. VEK_DATA_DIR selects this browser instance. Use taskSpace(${JSON.stringify('agent-'+thread.id)}) to keep this conversation's browser work in its own persistent Space. The browser SDK requires its documented Space ownership and user handoff. Do not read other browser profile files or credentials. The api subcommand accepts a workbench action and --json payload, including workspace:*, agents:control:* and mcp:*; use only user-authorized task scope.\n${preferences.instructions?`User instructions:\n${preferences.instructions}`:''}${memory}${catalogService?.promptForThread(thread)||''}`;
 }
 app.whenReady().then(async () => {
+  foregroundLease=await claimForeground(DATA);
+  schedulerJobService=createSchedulerJob({dataDir:DATA,root:ROOT,executable:process.execPath});
   const reservedShortcuts=[['CommandOrControl+C','Copy'],['CommandOrControl+X','Cut'],['CommandOrControl+V','Paste'],['CommandOrControl+A','Select all'],['CommandOrControl+Z','Undo'],['CommandOrControl+Shift+Z','Redo'],['CommandOrControl+P','Print'],['CommandOrControl+G','Find next'],['CommandOrControl+Shift+G','Find previous'],['Alt+CommandOrControl+I','Developer tools']].map(([accelerator,label])=>({accelerator,label}));
   preferencesService=createPreferencesService({dataDir:DATA,reservedShortcuts,externalShortcuts:()=>desktopService?.reserved()||[],onChange:applyPreferences});nativeTheme.themeSource=preferencesService.snapshot().theme;
   memoryService=createMemoryService({dataDir:DATA,policy:()=>preferencesService.snapshot().memory,projects:()=>agentService?.snapshot().projects||[],onChange:publish});
@@ -767,7 +774,8 @@ app.whenReady().then(async () => {
   if (!store.spaces.length) await createSpace('Personal', 'Default', 'user');
   store.selected = store.spaces.some(s => s.id === store.selected) ? store.selected : store.spaces[0].id;
   browserStoreReady=true;persist();layout(); publish(); await startRPC();desktopService.activate();
-}).catch(err => { console.error(err); app.exit(1); });
+}).catch(err => { console.error(err); foregroundLease?.release();app.exit(1); });
+app.on('will-quit',()=>foregroundLease?.release());
 app.on('window-all-closed', () => app.quit());
 app.on('before-quit', event => {
   if (closing) return; closing = true;
@@ -778,5 +786,5 @@ app.on('before-quit', event => {
   if (runtimeFile) { try { const r = JSON.parse(fs.readFileSync(runtimeFile)); if (r.pid === process.pid) fs.unlinkSync(runtimeFile); } catch {} }
   for (const c of connections) c.ws.close(); server?.close();
   tray?.destroy();
-  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([desktopService?.close(),agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),memoryService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
+  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([schedulerJobService?.close(),desktopService?.close(),agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),memoryService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
 });

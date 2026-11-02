@@ -1,0 +1,64 @@
+✔ foreground gate defaults to no worker start and is released only by its owner (9.163875ms)
+✔ foreground handoff settles a real worker/provider before releasing its writer lease (288.96925ms)
+✔ simultaneous foreground claims elect one live owner without replacing its token (5.656834ms)
+✔ stale foreground claims recover under an exclusive guard; unknown recovery guards are preserved (9.289375ms)
+✔ worker control is loopback/token protected and rejects browser origins or malformed requests (16.136084ms)
+✖ acknowledgement is not settlement; a stuck worker is not force-killed or stolen (113.7655ms)
+✖ symlinked foreground metadata and foreign active Agent services fail without changing their files (23.046583ms)
+✔ actual browser startup takes over from an active worker and clean stop releases its foreground gate (1885.357416ms)
+✔ default is off; remote APIs cannot prepare/enable/disable OS jobs (6.773417ms)
+✔ prepare/cancel/expiry are review-only and never create a login file (104.612ms)
+✔ reviewed enable writes private escaped plist with fixed argv and no inherited credentials (131.949792ms)
+✔ disable removes the login file and unloads, while remove clears only its own setup and preserves history (141.113583ms)
+✔ bootstrap failure rolls back execution consent and owned login files (139.290375ms)
+✔ unload failure remains explicit with consent off and a retryable owned receipt (154.111625ms)
+✔ changed or foreign setup files and symlinks are never overwritten or removed (207.274ms)
+✔ runtime changes invalidate the exact review before any OS install (92.449125ms)
+✔ stable launcher checks consent and code receipt before loading a worker, and records bounded status (116.977375ms)
+✔ unsupported platforms and invalid runtime timeouts do not install jobs (1.927375ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 16
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2454.34625
+
+✖ failing tests:
+
+test at tests/scheduler-control.test.mjs:12:1
+✖ acknowledgement is not settlement; a stuck worker is not force-killed or stolen (113.7655ms)
+  Error: ENOENT: no such file or directory, open '/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/vek-control-6PVuh1/agents/.state-73064-8ca6a4b6-2d1f-47c3-82ea-1c8773961151.tmp'
+      at Object.openSync (node:fs:555:18)
+      at persist (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/agent-service.cjs:187:15)
+      at Object.close (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/agent-service.cjs:912:5)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/scheduler-control.test.mjs:12:316)
+      at async TestHook.run (node:internal/test_runner/test:1113:7)
+      at async Test.runHook (node:internal/test_runner/test:1024:9)
+      at async after (node:internal/test_runner/test:1064:9)
+      at async Test.run (node:internal/test_runner/test:1132:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/vek-control-6PVuh1/agents/.state-73064-8ca6a4b6-2d1f-47c3-82ea-1c8773961151.tmp'
+  }
+
+test at tests/scheduler-control.test.mjs:13:1
+✖ symlinked foreground metadata and foreign active Agent services fail without changing their files (23.046583ms)
+  Error: ENOENT: no such file or directory, open '/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/vek-control-vaNMvH/agents/.state-73064-9a8829a6-519c-4140-83d3-1d0ad9270b31.tmp'
+      at Object.openSync (node:fs:555:18)
+      at persist (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/agent-service.cjs:187:15)
+      at Object.close (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/agent-service.cjs:912:5)
+      at async TestHook.run (node:internal/test_runner/test:1113:7)
+      at async Test.runHook (node:internal/test_runner/test:1024:9)
+      at async after (node:internal/test_runner/test:1064:9)
+      at async Test.run (node:internal/test_runner/test:1132:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/vek-control-vaNMvH/agents/.state-73064-9a8829a6-519c-4140-83d3-1d0ad9270b31.tmp'
+  }

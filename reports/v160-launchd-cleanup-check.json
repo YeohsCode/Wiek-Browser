@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-11-02T07:18:29.536Z",
+  "fixtureOnly": true,
+  "checks": [
+    {
+      "report": "v160-native-launchd-source-check.json",
+      "label": "app.vek.scheduler.c1ab168d864cea2a989b96df",
+      "osAbsent": true,
+      "consentOff": true,
+      "receiptRemoved": true
+    },
+    {
+      "report": "v160-native-launchd-attempt1.json",
+      "label": "app.vek.scheduler.1d26a965db53f91fb0b9171e",
+      "osAbsent": true,
+      "consentOff": true,
+      "receiptRemoved": true
+    },
+    {
+      "report": "v160-native-launchd-check.json",
+      "label": "app.vek.scheduler.8e12aefb18a9d79b95c4a9a5",
+      "osAbsent": true,
+      "consentOff": true,
+      "receiptRemoved": true
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-02T00:14:33.554Z",
-  "version": "0.15.0",
+  "generatedAt": "2026-11-02T07:17:39.315Z",
+  "version": "0.16.0",
   "versionMatches": true,
-  "checkedFiles": 163,
+  "checkedFiles": 168,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -29,12 +29,12 @@
     },
     {
       "file": "app/agent-panel.js",
-      "sha256": "630c16fa69fe2fa2d99da3fc7358b7872eda764bce650a4176864d57b6d0a087",
+      "sha256": "f616790e7929db0684d3e07b8e25f2042ab06ba6d9e38281ef4b381fb85fda30",
       "matches": true
     },
     {
       "file": "app/agent-service.cjs",
-      "sha256": "f4aebd34264eafa7ab2136ca59e24391114ef88ee6f747afc70b54aa149450d2",
+      "sha256": "b10514a9bd93f20315214f8696ee6b35a4679a7b9ccc67986d523e415624722d",
       "matches": true
     },
     {
@@ -134,7 +134,7 @@
     },
     {
       "file": "app/index.html",
-      "sha256": "61dd9a1d407a9eacac9f18a2403f374ac8106e94e1dbfd4b229f7aff996858ab",
+      "sha256": "b6e40e62e49042eb02d24de20dd19dc76d6c012fa020a17f88eee1bb2542674d",
       "matches": true
     },
     {
@@ -154,7 +154,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "c07d7b2c05358fbe284a826b120d9bb2f9cb8600709801420227039f4a28a361",
+      "sha256": "464a370e614085e45e1cb5ed6d58913eb182a8d8b0f7eba0ca200bc4669cf631",
       "matches": true
     },
     {
@@ -249,12 +249,37 @@
     },
     {
       "file": "app/renderer.js",
-      "sha256": "fa10dd0b65ce7d9e69f24e5ca551ebc04ad5905a894b5a578940ab98ba9938e5",
+      "sha256": "2b7896a58aaabb25928d184fe4e550c473bb6bd4262862cde65b466ef00590f6",
+      "matches": true
+    },
+    {
+      "file": "app/scheduler-control.cjs",
+      "sha256": "ba8532edfe9fcf8d9bb9377209b64e53726df2cc41f22a8510a0b4c586c2018a",
+      "matches": true
+    },
+    {
+      "file": "app/scheduler-job.cjs",
+      "sha256": "d7849991e1ef8e5e59f99ec472a0da1382e6ff268611bfb4bf631238f317e39e",
+      "matches": true
+    },
+    {
+      "file": "app/scheduler-launch.cjs",
+      "sha256": "fd1ec53bd2ef12cf2b4e2cff160434faf6f63c8dbe7238f8446c98ab4ae90b04",
+      "matches": true
+    },
+    {
+      "file": "app/scheduler-panel.css",
+      "sha256": "29174cc9c05dc5987bc7e28ca70aa1a98489d28ec39c8121e640f23ea5e35965",
+      "matches": true
+    },
+    {
+      "file": "app/scheduler-panel.js",
+      "sha256": "4699a84e8d710377b569bb0d565afe4314a3bc909c7953524ca8dc04fa62e705",
       "matches": true
     },
     {
       "file": "app/scheduler-worker.cjs",
-      "sha256": "c4738fe955585a0a331f77378f95c81b199e253b5f56a4eb813dd7b812e63c2a",
+      "sha256": "961d76722a02f3f2d71ea6e89db327a34ccce61eed9b826e458d930d8e0ab269",
       "matches": true
     },
     {
@@ -329,7 +354,7 @@
     },
     {
       "file": "cli/vek-browser.mjs",
-      "sha256": "9ab21461311e1bb611b377c978b66fde6a7982e26482222902dc6ff04f8af947",
+      "sha256": "cbede4388534d8dd8f39d107c396c87ff2b7cb79fdf844939d31be74ccac7268",
       "matches": true
     },
     {
@@ -814,7 +839,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "b3f3f421ea863b6c2441c9de98e7b84a449997f992628b534fea89ba286875c4",
+      "sha256": "8914201af2a24a1f73f006203dc64be8ca85f7e745f50a29cac1984a6ab865ce",
       "matches": true
     },
     {

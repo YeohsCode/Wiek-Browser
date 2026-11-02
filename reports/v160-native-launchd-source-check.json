@@ -1,0 +1,21 @@
+{
+  "version": "0.16.0",
+  "fixtureOnly": true,
+  "dataDir": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v160-launchd-fixture-hnxoxV",
+  "systemJobLabel": "app.vek.scheduler.c1ab168d864cea2a989b96df",
+  "realOSBootstrap": true,
+  "realRunAtLoad": true,
+  "foregroundGateRespected": true,
+  "noDuplicate": true,
+  "realOSBootout": true,
+  "loginFileInUserLibrary": false,
+  "physicalSleepWakeTested": false,
+  "modelCalls": 0,
+  "externalAccountActions": 0,
+  "reviewedRuntime": "/opt/homebrew/Cellar/node/25.2.1/bin/node",
+  "runtimeVersion": "0.16.0",
+  "firstThreadId": "9ba080b5-39d2-49d3-a397-08e9c5c35a6c",
+  "sameDedicatedThreadAcrossOSChecks": true,
+  "success": true,
+  "completedAt": "2026-11-02T06:54:43.536Z"
+}

@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.15.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
+当前版本 **0.16.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -359,3 +359,12 @@ heartbeat继续原thread，standalone每次干净thread，dedicated持久绑定�
 新增默认关闭的普通CLI一次性worker，浏览器关闭后可显式tick已到期任务；复用预约、锁、workspace和turn checkpoint。锁存在即skip，不清陈旧锁；signal/timeout等待实际退出。CLI子上下文禁止自动启动浏览器，只读user instructions，不加载网页Profile或MCP。Native provider/审批UI、OS作业安装与睡眠唤醒、自动前台handoff未实现。
 
 新增27项，完整/专项/打包/SDK结果见[RESULTS](../reports/RESULTS.md)。Ego modes依据匹配身份shipped-static dispatch语义，没有runtime对测；busy/cooldown延期、iteration重开与completion工具契约仍不等价。设计与精确证据见[automation-execution](automation-execution.md)。P2/P3和全量parity仍false，P1不同Agent集成继续暂缓。
+
+
+## 0.16：P3审核式macOS login job与前台接管
+
+Settings显式prepare/review/enable，默认关闭；固定argv/calendar-minute/RunAtLoad，code receipt在runtime更新/移动时阻止执行。禁用先撤销consent，等待worker后bootout并删除自有login文件；remove再清自有launcher/receipt。未知或修改过的文件不覆盖，可选job设置损坏不阻止浏览器打开。只用于已opt-in的普通CLI任务，无新Agent集成或自动OS授权。
+
+Foreground取得gate，认证请求worker停止，实际provider/checkpoint收尾并释放writer lease后才打开状态；ack不算完成，timeout不抢占。真实临时launchd fixture验证bootstrap/RunAtLoad、gate跳过、同专属线程续接、不重复和卸载，发行Electron Node runtime再次验证。新增20项，最终[RESULTS](../reports/RESULTS.md)；设计见[background-scheduling](background-scheduling.md)。
+
+没有Ego同OS安装后端的runtime对标；物理sleep/wake、登录退出、OS后台项撤销和完整恢复未验收，当前不会唤醒睡眠机器。P2/P3/full parity仍false，P1其他Agent继续暂缓。

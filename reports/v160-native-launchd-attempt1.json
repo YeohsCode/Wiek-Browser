@@ -1,0 +1,22 @@
+{
+  "version": "0.16.0",
+  "fixtureOnly": true,
+  "dataDir": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v160-launchd-fixture-pqLlFj",
+  "systemJobLabel": "app.vek.scheduler.1d26a965db53f91fb0b9171e",
+  "realOSBootstrap": true,
+  "realRunAtLoad": true,
+  "foregroundGateRespected": true,
+  "noDuplicate": false,
+  "realOSBootout": false,
+  "loginFileInUserLibrary": false,
+  "physicalSleepWakeTested": false,
+  "modelCalls": 0,
+  "externalAccountActions": 0,
+  "reviewedRuntime": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/MacOS/Vek Browser",
+  "runtimeVersion": "0.16.0",
+  "firstThreadId": "39697d6a-e75c-44e0-8c66-a60c687812de",
+  "sameDedicatedThreadAcrossOSChecks": true,
+  "success": false,
+  "error": "Native launchd fixture timed out",
+  "completedAt": "2026-11-02T07:06:55.105Z"
+}

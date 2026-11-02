@@ -1,0 +1,25 @@
+{
+  "version": "0.16.0",
+  "fixtureOnly": true,
+  "nativeCUAPrepareAndCancel": true,
+  "reviewedRuntimeVersion": "0.16.0",
+  "reviewedNodeVersion": "24.19.0",
+  "nativeStatusRefresh": true,
+  "enabled": false,
+  "installed": false,
+  "configured": false,
+  "loaded": false,
+  "planCleared": true,
+  "loginFileAbsent": true,
+  "privateLauncherAbsent": true,
+  "receiptAbsent": true,
+  "foregroundGateReleasedAfterStop": true,
+  "newOSPermissionGrants": 0,
+  "modelCalls": 0,
+  "externalAccountActions": 0,
+  "screenshots": [
+    "v160-native-scheduler-review.png",
+    "v160-native-scheduler.png"
+  ],
+  "checkedAt": "2026-11-02T07:15:09.281824+00:00"
+}

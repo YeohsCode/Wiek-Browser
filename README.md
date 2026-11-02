@@ -1,5 +1,7 @@
 # Vek Browser
 
+> **0.16.0 更新**：Settings可明确审核macOS login job，按分钟检查已opt-in的普通CLI任务；支持停用/移除及前台等待worker真实收尾。runtime变更要求重新审核，默认关闭，不物理唤醒睡眠机器。
+>
 > **0.15.0 更新**：自动化可选择 heartbeat 延续原会话、standalone 每次新会话或 dedicated 专属会话。新增默认关闭的单次 closed-app CLI worker；无系统定时唤醒安装，原生 provider 仍需浏览器审批界面。
 >
 > **0.14.0 更新**：Settings新增Desktop tools：macOS系统区域/窗口截图、明确启用的一次性跨应用选区读取、按应用排除、全局快捷键注册及OS失败状态。内容先预览，再由用户保存/复制/用作草稿；不是被动监听或跨应用录制。
@@ -32,7 +34,7 @@
 >
 > 最新测试以 [reports/RESULTS.md](reports/RESULTS.md) 为准；[analysis/feature-parity.md](analysis/feature-parity.md) 明确列出剩余差距。不能把 69 项 SDK 用例通过理解成整款 Ego 已全量复刻。
 
-进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.15.0；按用户要求优先 P2、P3，其他 Agent 集成暂缓。下一步 P3 系统唤醒作业与前台 handoff，继续补 P2 明确来源迁移、MCP 现代请求与 OAuth DCR；Claude源CLI会话迁移和后台任务仍有缺口。
+进度与下一步验收见 [PLAN.md](PLAN.md)，全部文档入口见 [docs/README.md](docs/README.md)。当前检查点为 0.16.0；按用户要求优先 P2、P3，其他 Agent 集成暂缓。下一步 P2 MCP 现代请求/订阅；明确来源完整迁移与 OAuth DCR 仍保留；Claude源CLI会话迁移和后台任务仍有缺口。
 
 本地 Chromium 浏览器与 Agent 工作区。项目在 `vek-browser/` 中独立创建，使用 Electron 实现浏览器宿主、Space、多标签与原生连接层，复用 `citrolabs/ego-lite` 的 MIT SDK。Ego 安装包只用于分析和测试，不进入 Vek 发行包。
 
@@ -106,16 +108,16 @@ await task.finish({ keep: [] }); // 关闭受管理页面并结束
 - 本地 Agent 工作区：项目、通用 CLI、opt-in Codex app-server、流式/审批、多 Agent 控制、对话分支/附件/导入导出。
 - 文件编辑/搜索/watch、常用 Git 操作、命名 checkpoint 预览与明确确认恢复，以及恢复前保护快照。
 - stdio/远程 HTTP MCP、scoped pairing/gateway、技能目录与会话上下文。
-- 一次性、间隔、IANA 时区 cron 与 heartbeat 自动化，运行记忆/提案/停止条件。正常随 Vek 调度；显式允许的普通CLI任务也可用单次closed-app tick。系统唤醒尚缺，DST与恢复取舍见专项文档。
+- 一次性、间隔、IANA 时区 cron 与 heartbeat 自动化，运行记忆/提案/停止条件。正常随 Vek 调度；显式允许的普通CLI任务也可用单次closed-app tick。可在Settings审核macOS login job；物理sleep/login边界与恢复取舍见专项文档。
 - Library/Collections、实际网页截图/标注、操作录制，以及本地 Whisper 转写/语音历史/词典。
 
 本地 Agent 会话只运行你配置的已安装 CLI；没有 provider 或认证时明确报错，不生成模拟回复。Codex preset 根据本机实际 `exec --help` 发现，默认使用只读 sandbox。通用 CLI 支持 stdin 或 argv 中的 `{prompt}` 模板。测试只使用本地 fake provider；未进行付费模型调用。
 
-尚未完成完整 Chrome/Safari 会话/web storage/扩展迁移、全部 Chrome 扩展 API、其余五种 provider 原生协议、linked worktree/远程 PR、MCP OAuth DCR/MRTR/现代订阅、被动选区工具栏/跨应用录制/翻译、OS自动唤醒调度与前台handoff、语义/全磁盘 memory index、Ego 专有服务和自动更新。已实现能力也有范围限制，见 [功能对照](analysis/feature-parity.md) 和 [计划](PLAN.md)。
+尚未完成完整 Chrome/Safari 会话/web storage/扩展迁移、全部 Chrome 扩展 API、其余五种 provider 原生协议、linked worktree/远程 PR、MCP OAuth DCR/MRTR/现代订阅、被动选区工具栏/跨应用录制/翻译、OS睡眠/登录/后台项撤销与hard-kill完整恢复、语义/全磁盘 memory index、Ego 专有服务和自动更新。已实现能力也有范围限制，见 [功能对照](analysis/feature-parity.md) 和 [计划](PLAN.md)。
 
 ## 当前验证结果
 
-0.15.0 最终打包版：**69/69** 同源真实浏览器用例通过；保留同hash Ego **68/69**（HTML 粘贴失败），两侧无跳过/未运行。另有 **358/358** 本地测试、**150/150** 打包宿主集成、163个发行文件匹配；81个上游输入未改。SDK532/532单测、CDP22/22沿用原记录。原生UI和发行CLI验证同一专属会话先在UI运行、关闭浏览器后由显式worker续跑；不算OS自动唤醒验收。0.14原生截图/选区正向路径仍待确认。详细结果见 [RESULTS.md](reports/RESULTS.md)、[comparison.md](reports/comparison.md)。
+0.16.0 最终打包版：**69/69** 同源浏览器用例通过；保留同hash Ego **68/69**（HTML paste失败），两侧0跳过/0未运行。另有 **378/378** 本地测试、**158/158** 打包宿主集成、168个发行文件匹配；81个上游输入未改。SDK532/532单测、CDP22/22沿用原记录。真实临时launchd job和foreground接管已验收；物理sleep/wake与登录场景未运行，0.14原生采集正向仍待确认。详细结果见 [RESULTS](reports/RESULTS.md)。
 
 Vek引擎为Chromium148.0.7778.280，Ego为156.0.8078.48；现有自动化用例兼容不代表所有Web平台能力等价。
 
@@ -190,3 +192,5 @@ Profile archive 是 Vek 自有加密格式，并非 Ego 导出文件；只读导
 Desktop tools的选区读取默认关闭，全局快捷键默认未分配。需要macOS相应权限；只读当前AX选区，不模拟Copy或监听所有按键。原生helper自有源码，可用 `npm run build:desktop-native` 重建；真实OS验证和其余边界见 [desktop-tools设计](analysis/desktop-tools.md)。
 
 0.15 closed-app单次执行：先在Automation中明确开启 Allow a closed-app worker tick，关闭该资料目录的浏览器后运行 `VEK_DATA_DIR=/absolute/directory node cli/vek-browser.mjs scheduler tick`。默认timeout60秒，支持 `--timeout-ms`；此命令不安装系统作业、不唤醒睡眠机器，也不持续轮询。范围见 [automation-execution](analysis/automation-execution.md)。
+
+0.16 系统作业入口：Settings → Background scheduling → Review。只在确认后写入user login job，Disable/Remove有独立按钮；详细范围见 [background-scheduling](analysis/background-scheduling.md)。

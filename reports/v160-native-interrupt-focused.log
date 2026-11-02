@@ -1,0 +1,12 @@
+✔ opt-in native provider performs initialize/start/delta/usage and resumes the actual returned thread id (253.824ms)
+✔ native steering uses turn/steer within the same run and interrupt stops a real protocol process (258.199083ms)
+✔ native approval requests wait for an explicit limited decision and never auto-approve (268.253083ms)
+✔ a native disconnect without turn/completed is a failure rather than a fake successful reply (167.341ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1014.839708

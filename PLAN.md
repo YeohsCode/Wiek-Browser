@@ -1,26 +1,26 @@
 # Vek Browser 复刻计划与进度
 
-更新：2026-11-02（Asia/Shanghai）。当前交付版本：**0.15.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
+更新：2026-11-02（Asia/Shanghai）。当前交付版本：**0.16.0**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
 
 ## 当前执行优先级
 
 按用户最新要求（2026-11-01）：**先跳过 P1 中不同 Agent 的集成，优先 P2、P3**。Cursor 未完成的代码已从工作树移出，保存在本机 Git stash `31764915635554521270725e0d0c38e178eea3cf`（`deferred P1 Cursor ACP work; prioritize P2 P3 2026-11-01`）；不是 0.11 发行功能，普通 clone 不包含该本机 stash。
 
-当前顺序：P2有界资料web storage归档已完成 → P3单次采集/全局快捷键已实现有界范围 → 执行模式与显式closed-app tick已实现 → P3系统唤醒/前台handoff → P2明确来源迁移、OAuth DCR/现代请求与订阅；继续保留执行模式剩余语义、翻译与远程Git。涉及 provider gateway 的集成部分随 P1 暂缓；不删除剩余目标。
+当前顺序：P2有界资料web storage归档已完成 → P3单次采集/全局快捷键已实现有界范围 → 执行模式与显式closed-app tick已实现 → P3有界login job/前台接管已实现 → P2明确来源迁移、OAuth DCR/现代请求与订阅；继续保留执行模式剩余语义、翻译与远程Git。涉及 provider gateway 的集成部分随 P1 暂缓；不删除剩余目标。
 
 ## 当前检查点
 
 | 项目 | 已完成的验收 | 当前状态 |
 |---|---|---|
 | 参考制品与调查 | ego-lite MIT 源码、Ego 0.6.1.13 安装包、31 任务 benchmark 已下载；REA daemon/client 证据及覆盖限制保留 | 已完成有界调查；全部 native/client 路径仍未覆盖 |
-| 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Vek 69/69、Ego 68/69 | 0.15最终同集验收完成，非引擎全面等价 |
+| 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Vek 69/69、Ego 68/69 | 0.16最终同集验收完成，非引擎全面等价 |
 | 本地 Agent 工作台 | 通用 CLI、opt-in Codex app-server/Claude stream-json/OpenCode ACP、多 Agent 控制、对话分支/附件/审批、Claude选定历史分支、Codex有效rollout压缩/回滚导入及实时工具/子活动、Codex/Claude模型与effort目录 | 部分完成；其他5种原生 provider、源CLI原生会话迁移/后台任务和真实付费 turn 未验证 |
 | 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，linked worktree 和 PR 流程仍缺失 |
 | MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；已补 session 资源/模板/订阅；已补预注册public OAuth/PKCE与加密绑定；DCR/MRTR/现代订阅/sampling/elicitation 缺失 |
-| 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 0.15新增heartbeat/standalone/dedicated及显式closed-app CLI tick；无系统自动唤醒/前台handoff，busy延期/completion contract仍缺 |
+| 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 0.16新增明确审核的macOS login job/前台接管；三种mode和closed-app tick可用，物理sleep/login撤销未实测，busy延期/completion contract仍缺 |
 | 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；新增显式网页/项目文本 memory 索引；0.14增加显式OS单次采集；正向native内容仍待验收，无被动监听/跨应用录制/翻译等价 |
 | 浏览器界面/权限/资料 | 主题/标签布局/快捷键、独立窗口/托盘；权限隔离；Profile 数据归属；Chromium 选择导入和v2显式web storage加密archive | 部分完成；完整迁移/扩展/OS 设备能力仍有缺口 |
-| 交付与基准 | macOS ARM64 应用；358/358 本地测试、150/150 打包宿主集成、81 个上游文件未改 | 0.15检查点完成；163个发行文件匹配，31 项线上模型任务未运行 |
+| 交付与基准 | macOS ARM64 应用；378/378 本地测试、158/158 打包宿主集成、81 个上游文件未改 | 0.16检查点完成；168个发行文件匹配，31 项线上模型任务未运行 |
 
 证据入口：[当前结果](reports/RESULTS.md)、[同集对比](reports/comparison.md)、[逐项功能清单](analysis/feature-parity.md)、[机器可读结果](reports/delivery-summary.json)。532 项 SDK 单测沿用未改版结果；不描述为本轮重新运行。
 
@@ -43,6 +43,7 @@
 - [x] 0.13：Profile archive v2显式顶层localStorage/per-tab sessionStorage、v1兼容、无网络bootstrap、取消/冲突/部分失败和CHIPS遗漏验证。
 - [x] 0.14：macOS显式原生区域/窗口截图、一次性AX选区/应用排除、临时预览与Library标注、全局快捷键注册/冲突/退出释放；真实OS仅验证注册、启动/取消/清理；正向内容待验收，范围见RESULTS。
 - [x] 0.15：三种执行模式与专属线程归属、干净新会话、显式一次性closed-app worker、互斥/timeout/取消及真实Git快照；未安装OS唤醒。
+- [x] 0.16：默认关闭的审核式macOS login job、代码/runtime receipt、停用/卸载、认证停止端点及真实foreground接管；物理睡眠与登录边界保留。
 - [ ] 后续：优先 P2/P3 剩余项；不同 Agent 的 P1 集成暂缓，线上基准仍属 P4。
 
 ## 执行顺序与阶段验收
@@ -86,7 +87,8 @@
 - [x] 0.14有界实现：单次OS截图与AX选区读取、默认关闭/按应用排除、全局快捷键、预览与明确使用；权限由真实OS流程授予，不伪造成功。
 - [ ] 被动选区浮动工具栏、OS跨应用录制、多显示器/权限撤销和所有应用兼容仍待验证；0.14不代表这些完成。
 - [x] 0.15：heartbeat/standalone/dedicated线程生命周期；显式closed-app单次CLI tick，默认关闭、非native provider、预约去重、锁互斥、signal/timeout/真实快照。
-- [ ] 补OS自动唤醒、明确opt-in安装/停用卸载、稳定runtime路径与前台handoff；busy延期、Ego completion contract与崩溃后恢复仍需逐项验证。
+- [x] 0.16：明确opt-in的macOS login job安装/停用卸载、runtime变更阻止执行、foreground等待真实收尾；真实一次性launchd fixture完成bootstrap/运行/卸载。
+- [ ] 物理sleep/wake、logout/login/OS后台项撤销和更多安装布局仍需验收；busy延期、Ego completion contract与hard-kill恢复仍有缺口。
 - [x] 0.11：显式网页/项目UTF-8文本memory内容索引；Profile隔离、中文/英文literal搜索、保存副本/重建、删除与取消/开关清除。非语义/全磁盘索引，不自动注入Agent。
 - [ ] 真实翻译适配和远程 Git/PR 流程逐项验收；独立交互终端须先确认 Ego 实际功能证据。
 
@@ -132,3 +134,5 @@
 0.14 实现/证据/权限边界见 [desktop-tools.md](analysis/desktop-tools.md)。下一步P3退出后调度与standalone/dedicated执行语义：先做明确opt-in的生命周期、去重和退出/卸载设计；不自动安装后台常驻服务。P2完整来源迁移与MCP剩余项保留，P1继续暂缓。
 
 0.15 实现与静态证据边界见 [automation-execution.md](analysis/automation-execution.md)。本轮新增27项，closed-app只是一条显式tick命令，不自动安装/唤醒或持续执行。下一步P3系统作业生命周期和foreground handoff，再补P2迁移/MCP；P1继续暂缓。
+
+0.16 设计与验收范围见 [background-scheduling.md](analysis/background-scheduling.md)。20项新增回归，真实OS fixture不写用户Library安装路径且最终卸载。下一步P2 MCP现代请求/订阅；保留DCR/完整来源迁移及P3其余边界，P1继续暂缓。

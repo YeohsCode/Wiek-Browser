@@ -1,0 +1,22 @@
+{
+  "version": "0.16.0",
+  "fixtureOnly": true,
+  "dataDir": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v160-launchd-fixture-VkSeaB",
+  "systemJobLabel": "app.vek.scheduler.8e12aefb18a9d79b95c4a9a5",
+  "realOSBootstrap": true,
+  "realRunAtLoad": true,
+  "foregroundGateRespected": true,
+  "noDuplicate": true,
+  "realOSBootout": true,
+  "loginFileInUserLibrary": false,
+  "physicalSleepWakeTested": false,
+  "modelCalls": 0,
+  "externalAccountActions": 0,
+  "reviewedRuntime": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/MacOS/Vek Browser",
+  "runtimeVersion": "0.16.0",
+  "firstThreadId": "3ac8ffbc-af6e-4a59-bdd0-4127a1cbfaaa",
+  "sameDedicatedThreadAcrossOSChecks": true,
+  "success": true,
+  "cleanupConfirmed": true,
+  "completedAt": "2026-11-02T07:08:13.638Z"
+}

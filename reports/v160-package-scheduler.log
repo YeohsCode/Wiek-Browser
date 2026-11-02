@@ -1,0 +1,42 @@
+{"ok":true,"checks":10,"actualElectron":true,"fixtureOnly":true,"modelCalls":0}
+✔ actual Electron automation editor submits explicit mode/consent and owned threads have no manual composer (767.516625ms)
+✔ foreground gate defaults to no worker start and is released only by its owner (20.899ms)
+✔ foreground handoff settles a real worker/provider before releasing its writer lease (353.394625ms)
+✔ simultaneous foreground claims elect one live owner without replacing its token (17.158042ms)
+✔ stale foreground claims recover under an exclusive guard; unknown recovery guards are preserved (40.706875ms)
+✔ worker control is loopback/token protected and rejects browser origins or malformed requests (17.700958ms)
+✔ acknowledgement is not settlement; a stuck worker is not force-killed or stolen (128.773542ms)
+✔ symlinked foreground metadata and foreign active Agent services fail without changing their files (68.004334ms)
+✔ actual browser startup takes over from an active worker and clean stop releases its foreground gate (1946.676125ms)
+✔ default is off; remote APIs cannot prepare/enable/disable OS jobs (7.110125ms)
+✔ prepare/cancel/expiry are review-only and never create a login file (107.100583ms)
+✔ reviewed enable writes private escaped plist with fixed argv and no inherited credentials (164.837333ms)
+✔ disable removes the login file and unloads, while remove clears only its own setup and preserves history (194.95125ms)
+✔ bootstrap failure rolls back execution consent and owned login files (197.456ms)
+✔ unload failure remains explicit with consent off and a retryable owned receipt (156.299583ms)
+✔ changed or foreign setup files and symlinks are never overwritten or removed (256.245791ms)
+✔ runtime changes invalidate the exact review before any OS install (97.926958ms)
+✔ stable launcher checks consent and code receipt before loading a worker, and records bounded status (138.449208ms)
+✔ unsupported platforms and invalid runtime timeouts do not install jobs (20.737083ms)
+✔ damaged optional job settings remain read-only without preventing creation of the browser settings service (13.554416ms)
+{"ok":true,"checks":11,"actualElectronIPC":true,"fixtureOSAdapterOnly":true,"actualLaunchd":false,"modelCalls":0}
+✔ actual Electron IPC login-job panel reviews/cancels before enable and removes only fixture setup (983.033292ms)
+✔ a closed-app tick never consumes unapproved or future schedules and never starts a browser (215.19125ms)
+✔ actual CLI workers persist a dedicated conversation across invocations and do not replay a due occurrence (749.12875ms)
+✔ worker context disables CLI browser autostart and stdout does not expose provider body (330.576917ms)
+✔ an active browser/service lock is never stolen by the worker (135.582959ms)
+✔ stale locks are not reaped by a worker and symlinked lock paths fail closed (197.829666ms)
+✔ simultaneous real workers produce one run; SIGTERM waits for actual provider exit and releases the lease (342.377833ms)
+✔ worker timeout settles an actual child and a newly due schedule is left for a later tick (831.79475ms)
+✔ closed-app generated runs retain real before/after Git checkpoint associations (829.3155ms)
+✔ provider reconfiguration to a native protocol is skipped without consuming its due reservation (186.921958ms)
+✔ a real failing provider records failure and stop-on-failure without replaying its reservation (347.830833ms)
+✔ worker setup failures release the Agent lock and never run a provider (152.234167ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4401.936458

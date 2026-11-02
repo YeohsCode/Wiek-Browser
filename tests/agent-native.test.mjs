@@ -73,6 +73,9 @@ test('native steering uses turn/steer within the same run and interrupt stops a 
   assert.equal((await f.audit()).find(entry => entry.method === 'turn/steer').params.expectedTurnId, 'turn-fixture');
   await f.service.dispatch('agents:threads:prompt', { id: f.threadId, prompt: '[slow-native]' });
   await waitFor(f.audit, audit => audit.filter(entry => entry.method === 'turn/start').length === 2);
+  // Request receipt is logged before its response is consumed by the client.
+  // Exercise turn/interrupt only after the native target is acknowledged.
+  await waitFor(f.thread, thread => thread.runs.at(-1)?.nativeTurnId === 'turn-fixture');
   await f.service.dispatch('agents:control:stop', { id: f.threadId });
   assert.equal(f.thread().status, 'stopped'); assert.ok((await f.audit()).some(entry => entry.method === 'turn/interrupt'));
 });

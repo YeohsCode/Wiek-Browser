@@ -11,10 +11,12 @@ import WebSocket from 'ws';
 import {randomUUID} from 'node:crypto';
 import {createRequire} from 'node:module';
 const {createFixture:createModernPeer}=createRequire(import.meta.url)('./fixtures/modern-mcp-server.cjs');
+const {createTestTLS,createCimdPeer}=createRequire(import.meta.url)('./fixtures/cimd-peer.cjs');
 const {createOAuthPeer}=createRequire(import.meta.url)('./fixtures/oauth-mcp-server.cjs');
 const dataDir = path.resolve(process.env.VEK_DATA_DIR || 'data/workbench-e2e');
 const cli = path.resolve(process.env.VEK_WORKBENCH_CLI || 'cli/vek-browser.mjs');
-execFileSync(process.execPath,[cli,'start'],{env:{...process.env,VEK_DATA_DIR:dataDir},stdio:'pipe'});
+const cimdTLS=await createTestTLS();
+execFileSync(process.execPath,[cli,'start'],{env:{...process.env,VEK_DATA_DIR:dataDir,NODE_EXTRA_CA_CERTS:cimdTLS.certFile},stdio:'pipe'});
 const runtime = JSON.parse(await fs.readFile(path.join(dataDir,'runtime.json'),'utf8'));
 const socket = new WebSocket(`ws://127.0.0.1:${runtime.port}/rpc?token=${encodeURIComponent(runtime.token)}`);
 await new Promise((resolve,reject)=>{socket.once('open',resolve);socket.once('error',reject);});
@@ -26,7 +28,7 @@ const cdp=(spaceId,method,params={})=>new Promise((resolve,reject)=>{const id=++
 const check=(condition,message)=>{ assert.ok(condition,message); checks++; };
 async function waitThread(id) { const limit=Date.now()+20000; while(Date.now()<limit) { const t=await action('agents:threads:read',{id});if(!['running','queued','discovering'].includes(t.status))return t;await new Promise(r=>setTimeout(r,40)); } throw new Error('Thread did not complete'); }
 const directory=await fs.mkdtemp(path.join(os.tmpdir(),'vek-workbench-e2e-'));
-const oauthPeer=await createOAuthPeer();const modernPeer=await createModernPeer({inputTool:true});
+const cimdPeer=await createCimdPeer(cimdTLS);const oauthPeer=await createOAuthPeer();const modernPeer=await createModernPeer({inputTool:true});
 const downloadBytes=Buffer.alloc(2*1024*1024,77);
 const web=http.createServer((req,res)=>{
   if(req.url==='/slow-download'){
@@ -175,6 +177,22 @@ try {
   await assert.rejects(action('mcp:oauth:open',{integrationId:oauthId,scope:{projectId,threadId},flowId:oauthFlow.id}),/ready/);checks++;
   check(oauthPeer.requests.every(row=>row.method==='GET')&&oauthPeer.tokens.length===0,'packaged OAuth prepare/cancel opens no external browser and exchanges no code or token');
   await assert.rejects(action('mcp:integrations:save',{name:'OAuth header conflict',transport:'http',url:oauthPeer.url,allowInsecureHttp:true,oauth:{clientId:'vek-public-fixture'},headerRefs:{Authorization:'env:SHOULD_NOT_RESOLVE'},scope:{projectId,threadId}}),/cannot be combined/);checks++;
+  const cimdScope={projectId,threadId},cimdSaved=await action('mcp:integrations:save',{name:'CIMD host fixture',transport:'http',url:cimdPeer.url,oauth:{registration:'metadata',clientId:cimdPeer.clientId,redirectPort:cimdPeer.redirectPort,issuer:cimdPeer.base},scope:cimdScope}),cimdConfig=cimdSaved.integrations.at(-1),cimdId=cimdConfig.id;
+  const clientDoc=await action('mcp:oauth:client-document',{integrationId:cimdId,scope:cimdScope});check(clientDoc.document.client_id===cimdPeer.clientId&&clientDoc.document.redirect_uris[0]===`http://127.0.0.1:${cimdPeer.redirectPort}/oauth/callback`,'host exports exact public client identity and native callback');
+  check(cimdPeer.requests.length===0,'public metadata template export makes no network request');
+  const cimdFlow=await action('mcp:oauth:prepare',{integrationId:cimdId,scope:cimdScope});check(cimdFlow.status==='prepared'&&cimdFlow.clientIdentity.registration==='metadata'&&cimdFlow.clientIdentity.clientId===cimdPeer.clientId,'packaged host validates CIMD using its process-local test CA');
+  check(cimdFlow.clientIdentity.clientName.includes('<script>')&&cimdFlow.clientIdentity.redirectUri===clientDoc.document.redirect_uris[0],'host returns inert identity text and exact callback for review');
+  check(cimdPeer.requests.filter(r=>r.path==='/client.json').length===1&&cimdPeer.requests.every(r=>!r.authorization&&!r.cookie),'CIMD preparation fetches document without tokens or cookies');
+  check(!JSON.stringify(cimdFlow).includes('authorizationUrl')&&!JSON.stringify(cimdFlow).includes('code_challenge'),'CIMD review omits private sign-in URL and PKCE');
+  await assert.rejects(action('mcp:oauth:client-document',{integrationId:cimdId,scope:{projectId}}),/outside/);checks++;
+  await action('mcp:oauth:cancel',{integrationId:cimdId,scope:cimdScope,flowId:cimdFlow.id});await assert.rejects(action('mcp:oauth:open',{integrationId:cimdId,scope:cimdScope,flowId:cimdFlow.id}),/ready/);checks++;
+  await assert.rejects(action('mcp:integrations:save',{...cimdConfig,oauth:{...cimdConfig.oauth,redirectPort:0}}),/fixed/);checks++;
+  const secondCimd=await action('mcp:oauth:prepare',{integrationId:cimdId,scope:cimdScope});await action('mcp:integrations:save',{...cimdConfig,oauth:{...cimdConfig.oauth,issuer:cimdPeer.base+'/unexpected'}});
+  await assert.rejects(action('mcp:oauth:open',{integrationId:cimdId,scope:cimdScope,flowId:secondCimd.id}),/outside/);checks++;
+  await assert.rejects(action('mcp:oauth:prepare',{integrationId:cimdId,scope:cimdScope}),/expected issuer/);checks++;
+  check(!cimdPeer.requests.some(r=>['/register','/authorize','/token'].includes(r.path)),'host identity review never registers, opens authorization or exchanges tokens implicitly');
+  check(!(await fs.readFile(path.join(dataDir,'mcp/state.json'),'utf8')).includes('Vek fixture <script>'),'fetched client metadata body is not saved to MCP history');
+
   await action('mcp:integrations:remove',{id:oauthId});
   const pairing=await action('mcp:pairing:create',{name:'Browser integration fixture',scope:{projectId,threadId},browserMethods:['listTabs','createTab','navigate','snapshot']});
   const exchange=await fetch(pairing.exchangeUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:pairing.code})});
@@ -325,5 +343,5 @@ try {
   // Shut the disposable host down before removing any fixture it may watch.
   try { await rpc('shutdown'); } catch {}
   socket.close();for(const p of [...pending.values(),...cdpPending.values()])clearTimeout(p.timer);
-  await new Promise(resolve=>web.close(resolve));await oauthPeer.close();await modernPeer.close();await fs.rm(directory,{recursive:true,force:true});
+  await new Promise(resolve=>web.close(resolve));await oauthPeer.close();await modernPeer.close();await cimdPeer.close();await cimdTLS.close();await fs.rm(directory,{recursive:true,force:true});
 }

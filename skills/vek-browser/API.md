@@ -112,3 +112,13 @@ Modern HTTP (`2026-07-28`) local tool tasks may enter `awaiting_input` with an e
 - Reviews, input values, opaque state and interactive results are not written to MCP history. Results remain available in memory during this app session (`resultRetained:false`). Restart cannot resume a review.
 
 This is bounded tool-task form support. Resource reads, prompts, URL elicitation, sampling, roots, modern stdio and paired-client interactive continuations remain unsupported. Paired-client tool requests do not advertise form elicitation.
+
+### 0.19: explicit OAuth Client ID Metadata Documents
+
+HTTP OAuth configuration may add `registration:"metadata"` and optional exact `issuer`. Omit registration (or select `preregistered`) to retain existing public-client behavior. Metadata mode requires a canonical HTTPS `clientId` document URL with a non-root path, no query/fragment/dot segments, and a fixed `redirectPort` between 1024 and 65535.
+
+`mcp:oauth:client-document` accepts `{integrationId,scope}` and returns `{document}` without network access or callback listeners. Host that public JSON at the configured client ID URL yourself. Vek does not publish documents, register domains or automatically fall back to DCR. The document must declare the exact client ID, a client name, the exact `http://127.0.0.1:PORT/oauth/callback`, authorization-code grants/responses and public token authentication `none`.
+
+Prepare requires the AS metadata flag `client_id_metadata_document_supported:true`; it fetches the configured document with normal TLS validation, no credentials/cookies, no redirect, 5 KiB and timeout bounds. The read-only review adds `clientIdentity:{registration,clientId,clientName?,redirectUri}`. Only explicit Open sign-in page starts authorization. Existing PKCE, resource binding, single-use callback, encrypted storage, refresh rotation and no tool POST replay remain in effect. New prepares refetch documents; the client does not fetch logos or other document URLs.
+
+An explicit issuer must match discovery exactly. An existing pre-registered credential additionally binds reauthorization to its encrypted issuer. A CIMD identity is portable between issuers when not explicitly pinned, with fresh review. Forgetting an unpinned pre-registered credential also removes its remembered issuer; configure `issuer` when that binding must survive sign-out. This is a bounded native public-client implementation, requiring your hosted document and AS acceptance of loopback redirects; shared secrets, private-key JWT, automatic hosting, DCR and complete step-up are unsupported.

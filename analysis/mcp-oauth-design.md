@@ -1,5 +1,6 @@
 # HTTP MCP OAuth：预注册公共客户端
 
+> 0.19增量：已新增显式CIMD、公共文档模板/身份审核及issuer约束；仍无自动托管/DCR/完整step-up。旧版范围保留为历史，当前实现见 [mcp-client-identity.md](mcp-client-identity.md)。
 日期：2026-11-02（Asia/Shanghai）。0.12.0 的独立实现。依据公开 [MCP 2025-11-25 Authorization](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization) 和已安装 Electron 的 safeStorage API；没有调用 Ego 私有认证服务或真实账号。
 
 ## 用户流程与协议范围

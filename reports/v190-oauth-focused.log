@@ -1,0 +1,47 @@
+{"ok":true,"checks":20,"actualElectronIPC":true,"realTrustedHTTPS":true,"modelCalls":0,"externalAccountActions":0}
+✔ CIMD config, public document, identity review, cancel and code authorization use actual isolated Electron IPC and trusted HTTPS (414.630708ms)
+✔ CIMD configuration is explicit and canonical, rejects path normalization and requires a fixed callback port (108.73975ms)
+✔ public client document template is deterministic, bounded and contains exact native callback without secrets (0.226584ms)
+✔ CIMD validates exact client ID, identity, public auth, grants and callback rather than following document URLs (0.139416ms)
+✔ real trusted HTTPS CIMD flow checks advertised support, fetches without credentials, reviews identity before opening and authorizes with URL ID (38.0435ms)
+✔ unadvertised or malformed CIMD capability fails without metadata fetch, browser or fallback registration (23.890459ms)
+✔ pre-registered client remains first choice even when CIMD is advertised and never fetches its opaque ID (7.266542ms)
+✔ CIMD rejects wrong document ID, callback, auth methods and malformed declarations before opening (67.793042ms)
+✔ metadata redirect, error status, wrong MIME, malformed UTF-8/JSON and oversize never fall back or open a browser (52.865458ms)
+✔ CIMD accepts JSON suffix MIME and refetches on a new explicit sign-in rather than retaining a validated document (15.572083ms)
+✔ cancellation aborts document fetch and does not leave a callback listener or prepared sign-in (13.1055ms)
+✔ fixed callback port conflict fails cleanly and template export needs no port listener (7.881916ms)
+✔ CIMD token refresh preserves exact URL identity, uses rotation and restores encrypted scope binding after restart (16.438666ms)
+✔ expected issuer mismatch fails before CIMD fetch or authorization and binds the exact issuer string (13.092125ms)
+✔ pre-registered credentials cannot be reused for reauthorization with a newly discovered issuer (18.17ms)
+✔ editing public issuer metadata cannot rebind the encrypted pre-registered client identity (19.078583ms)
+✔ service exports public metadata offline with exact scope checks, export does not create a flow or connection (3.60875ms)
+✔ CIMD document TLS rejects an untrusted publisher without an insecure override or any HTTP application data (29.3945ms)
+✔ deadline during CIMD document fetch stays expired and never produces a late prepared flow (176.359792ms)
+✔ un-pinned CIMD identity is portable to a newly discovered issuer with a fresh explicit review (18.182417ms)
+✔ Electron OAuth UI reviews permissions before opening, authorizes a fixture, redacts tools and signs out (452.638292ms)
+✔ public OAuth config and challenge parsing reject credentials/ambiguity and retain quoted commas (1.730083ms)
+✔ actual OAuth code flow verifies PKCE/resource/state and stores only encrypted tokens (28.933417ms)
+✔ well-known fallback, OIDC discovery and path-appended tenant metadata are supported (10.537667ms)
+✔ wrong resource/issuer, missing PKCE and metadata redirects fail before browser or token requests (8.532959ms)
+✔ foreign scope/config and callbacks with wrong state/origin/issuer or duplicate params are rejected (4.671792ms)
+✔ prepare never opens a browser; expired and cancelled discovery cannot resume or store credentials (1127.046667ms)
+✔ refresh is serialized, audience-bound and rotates the encrypted refresh token (7.859917ms)
+✔ uncertain refresh or missing rotation drops credentials and never retries the refresh POST (13.084458ms)
+✔ token exchange failures are terminal, and secure storage is required before discovery (3.825833ms)
+✔ encrypted scope binding survives restart and rejects ciphertext reassignment; forget removes access (4.504833ms)
+✔ MCP service uses only bound encrypted OAuth tokens, redacts echoes and signs out one scope (20.331208ms)
+✔ HTTP 401 invalidates credentials and does not replay a tool POST or reopen sign-in (15.45225ms)
+✔ explicit reauthorization disconnects old sessions and blocks tools until finished or cancelled (26.158416ms)
+✔ an issuer cannot use public control IDs as tokens to corrupt persistent routing via redaction (10.463333ms)
+✔ registered loopback callback ports use a stable path and occupied ports fail without opening (4.713667ms)
+✔ invalid token types, unsafe header tokens, short values and invalid lifetimes never persist (15.546042ms)
+✔ cancelling an in-flight code exchange never stores late-issued credentials or replays the code (232.057167ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1629.197

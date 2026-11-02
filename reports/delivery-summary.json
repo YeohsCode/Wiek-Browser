@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-02T15:33:19.377756+00:00",
-  "version": "0.18.0",
+  "generatedAt": "2026-11-02T16:11:12.321737+00:00",
+  "version": "0.19.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -22,8 +22,8 @@
       },
       {
         "browser": "vek",
-        "startedAt": "2026-11-02T15:29:01.161Z",
-        "wallTimeMs": 167483,
+        "startedAt": "2026-11-02T16:06:33.655Z",
+        "wallTimeMs": 167739,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
         "counts": {
@@ -37,7 +37,7 @@
         }
       }
     ],
-    "note": "Final 0.18 packaged run and retained complete Ego run; identical SDK/fixture/index hashes, no skipped or unrun cases."
+    "note": "Final 0.19 packaged run and retained complete Ego run; same SDK/fixture/index hashes, no skips or unrun cases."
   },
   "sdkUnitTests": {
     "pass": 532,
@@ -46,16 +46,14 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 416,
+    "pass": 436,
     "fail": 0,
-    "log": "v180-service-tests.log",
-    "note": "Final functional implementation; subsequent select and dark-result CSS checked by final packaged panels/native review."
+    "log": "v190-service-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 184,
+    "pass": 197,
     "fail": 0,
-    "log": "v180-package-workbench.log",
-    "note": "Final functional implementation; later CSS changes do not alter host logic."
+    "log": "v190-package-workbench.log"
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -69,7 +67,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 170,
+    "sourceFilesChecked": 171,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -109,7 +107,10 @@
     "Modern 2026-07-28 HTTP resources/templates/read, explicit POST subscriptions/listen for tool/resource list changes and resource URI updates, first-ack/exact-ID/accepted-subset validation, visible stream loss and manual retry, bounded frames with long-lived streams, no automatic fetch/replay/reconnect",
     "Modern HTTP local tool form MRTR with explicit review, typed input validation, scoped single-use review IDs, exact opaque state echo and fresh JSON-RPC request IDs",
     "Awaiting input counts toward original task deadline; cancel/disconnect/shutdown abort waiting or in-flight continuation; no automatic POST replay or restart resume",
-    "Input schemas/values/state and interactive results excluded from MCP disk history; current-session results marked resultRetained:false"
+    "Input schemas/values/state and interactive results excluded from MCP disk history; current-session results marked resultRetained:false",
+    "Explicit HTTPS CIMD public-client configuration and offline metadata template; advertised AS capability, exact ID/native callback and bounded credential-free document checks",
+    "Read-only client identity review before external authorization; optional exact issuer pin, encrypted pre-registered issuer binding and explicitly portable CIMD identity",
+    "No automatic hosting, DCR fallback, attached metadata URL fetching, browser opening or tool POST replay"
   ],
   "remainingGaps": [
     "Five other native provider protocols, source native session/history migration and paid generation validation",
@@ -119,7 +120,7 @@
     "Complete Chrome/Safari profile/web storage/extensions migration",
     "Custom Chromium engine equivalence",
     "Linked worktrees, checkpoint retention and remote PR workflow",
-    "MCP OAuth CIMD/DCR/full step-up; resource/URL MRTR, sampling/roots, modern stdio, prompt notifications and task extensions",
+    "Managed Vek client metadata hosting, MCP OAuth DCR/full step-up; resource/URL MRTR, sampling/roots, modern stdio, prompt notifications and task extensions",
     "Positive native screenshot/AX content and background key trigger validation, passive selection toolbar, OS recording and translation",
     "Physical sleep/wake, logout/login, OS background-item revocation, additional runtime layouts and CLI authentication environments; busy defer/completion contract and hard-kill recovery",
     "Semantic/all-disk/multiformat memory index and Ego proprietary services",
@@ -316,9 +317,7 @@
       "report": "v160-native-launchd-attempt1.json",
       "status": "fixture-idle-precondition-corrected",
       "description": "First packaged real-OS fixture kickstarted before previous process was idle and timed out waiting for final no-op. Unreached false markers are not observed duplication/unload failures; finally cleanup independently confirmed. Wait for OS no-pid before kickstart, preserve no-duplicate assertion; final packaged run success and cleanupConfirmed."
-    }
-  ],
-  "observedFailures": [
+    },
     {
       "report": "v180-sdk-attempt1.log",
       "cases": "v180-initial-vek-e2e.json",
@@ -335,7 +334,8 @@
       "description": "Native QA found compact select sizing and low dark-result contrast. Added select layout/focus and dark result colors; final package MCP 38/38 and SDK 69/69 passed."
     }
   ],
-  "validationOrderNote": "Final functional source 416/416 and packaged host 184/184; CUA input review/submit/cancel; final select and dark-result CSS, final packaged MCP 38/38; then isolated final package SDK 69/69 with 1248 assertions. Source identity 170 files and upstream integrity 81 unchanged inputs. First overlapping SDK failure retained separately, no assertion/fixture changes. Normal data app at 0.18.0, job off/uninstalled. Historical 0.16 launchd install proof not rerun. P1 deferred and product parity false.",
+  "observedFailures": [],
+  "validationOrderNote": "Final empty-CIMD-URL validation source 436/436, OAuth focused 38/38, packaged MCP 58/58 (new actual Electron panel 20 checks), packaged host 197/197, then isolated final package SDK 69/69 with 1248 assertions. Source identity 171 files; 81 upstream inputs unchanged. Native CUA metadata/review/cancel before the final empty-URL guard; final Electron covers that guard. Test CA files removed and temporary native host/peer stopped. Normal data app restored to 0.19.0, fixture integration absent, default job off/uninstalled. Historical 0.16 OS job proof not rerun. P1 deferred and complete product parity false.",
   "codexReplayActivityTests": {
     "newTests": 21,
     "fixtureOnly": true,
@@ -631,19 +631,6 @@
     "normalDefaultJobConsentOff": true,
     "normalDefaultJobSetupAbsent": true
   },
-  "uiQa": {
-    "log": "v180-native-ui-qa.md",
-    "wireCheck": "v180-native-ui-check.json",
-    "fixtureOnly": true,
-    "nativeCUAFormSubmit": true,
-    "nativeCUACancelTask": true,
-    "finalDarkContrastReviewed": true,
-    "finalContrastResultPreparedThroughOwnAPI": true,
-    "allSizesOrLightThemeReviewed": false,
-    "normalAppStatus": "v180-normal-app-status.json",
-    "normalDefaultJobConsentOff": true,
-    "normalDefaultJobSetupAbsent": true
-  },
   "mcpInputTests": {
     "newTests": 17,
     "protocolAndServiceTests": 16,
@@ -665,5 +652,61 @@
     "diskInputRetention": false,
     "automaticReplay": false,
     "MRTRFormContinuationImplemented": true
+  },
+  "previousV180UiQa": {
+    "log": "v180-native-ui-qa.md",
+    "wireCheck": "v180-native-ui-check.json",
+    "fixtureOnly": true,
+    "nativeCUAFormSubmit": true,
+    "nativeCUACancelTask": true,
+    "finalDarkContrastReviewed": true,
+    "finalContrastResultPreparedThroughOwnAPI": true,
+    "allSizesOrLightThemeReviewed": false,
+    "normalAppStatus": "v180-normal-app-status.json",
+    "normalDefaultJobConsentOff": true,
+    "normalDefaultJobSetupAbsent": true
+  },
+  "uiQa": {
+    "log": "v190-native-ui-qa.md",
+    "wireCheck": "v190-native-ui-check.json",
+    "fixtureOnly": true,
+    "nativeCUAPublicDocument": true,
+    "nativeCUAIdentityReview": true,
+    "nativeCUACancelSignIn": true,
+    "externalBrowserOpened": false,
+    "codeExchangePerformed": false,
+    "tokenStoreCreated": false,
+    "testCAInstalledInOS": false,
+    "darkNativeLayoutReviewed": true,
+    "allSizesOrLightThemeReviewed": false,
+    "normalAppStatus": "v190-normal-app-status.json",
+    "note": "Native snapshots precede only the final empty-CIMD-URL save guard; final packaged actual Electron tests validate that guard and valid configuration flow.",
+    "normalDefaultJobConsentOff": true,
+    "normalDefaultJobSetupAbsent": true,
+    "normalFixtureIntegrationAbsent": true
+  },
+  "clientIdentityTests": {
+    "newTests": 20,
+    "protocolAndServiceTests": 19,
+    "actualElectronIPCPanelTests": 1,
+    "panelChecks": 20,
+    "focusedPass": 38,
+    "focusedLog": "v190-oauth-focused.log",
+    "fullSuitePass": 436,
+    "fullSuiteLog": "v190-service-tests.log",
+    "packagedModulePass": 58,
+    "packagedLog": "v190-package-mcp.log",
+    "additionalWorkbenchChecks": 13,
+    "packagedWorkbenchPass": 197,
+    "packagedWorkbenchLog": "v190-package-workbench.log",
+    "realTrustedFixtureTLS": true,
+    "testCAInstalledInOS": false,
+    "publicMetadataHostedForUsers": false,
+    "DCRImplemented": false,
+    "completeStepUpImplemented": false,
+    "realAccountAuthorization": false,
+    "nativeTokenStoreWritten": false,
+    "modelCalls": 0,
+    "externalAccountActions": 0
   }
 }

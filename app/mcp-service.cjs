@@ -7,6 +7,7 @@ const http = require('node:http');
 const { spawn } = require('node:child_process');
 const { randomUUID, randomBytes, createHash, timingSafeEqual } = require('node:crypto');
 const { prepareInput, validateResponses } = require('./mcp-input.cjs');
+const { createClientDocument } = require('./mcp-client-identity.cjs');
 const { createMcpOAuth } = require('./mcp-oauth.cjs');
 const { methods: resourceMethods, resetResources, resourceNotification } = require('./mcp-resources.cjs');
 const { createHttpClientClass, validateHttpConfig } = require('./mcp-http-client.cjs');
@@ -234,7 +235,7 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
   async function dispatch(action, p = {}) {
     ensureOpen();
     if (action === 'mcp:snapshot') return snapshot();
-    if(action.startsWith('mcp:oauth:')){const {scope}=await scopeFor(p.scope),config=integrationFor(p.integrationId,scope);if(!config.enabled||config.transport!=='http'||!config.oauth)throw fail('Choose an enabled HTTP integration with a public OAuth client ID');if(action==='mcp:oauth:prepare'){const preparing=oauthManager.prepare(config,scope).then(value=>({value}),error=>({error}));await disconnect(config.id,scope);const result=await preparing;if(result.error)throw result.error;return result.value;}if(action==='mcp:oauth:open')return oauthManager.open(p.flowId,config,scope);if(action==='mcp:oauth:cancel')return oauthManager.cancel(p.flowId,config,scope);if(action==='mcp:oauth:forget'){await disconnect(config.id,scope);oauthManager.forget(config,scope);return snapshot();}throw fail('Unknown OAuth action');}
+    if(action.startsWith('mcp:oauth:')){const {scope}=await scopeFor(p.scope),config=integrationFor(p.integrationId,scope);if(!config.enabled||config.transport!=='http'||!config.oauth)throw fail('Choose an enabled HTTP integration with a public OAuth client ID');if(action==='mcp:oauth:client-document')return {document:createClientDocument(config.oauth)};if(action==='mcp:oauth:prepare'){const preparing=oauthManager.prepare(config,scope).then(value=>({value}),error=>({error}));await disconnect(config.id,scope);const result=await preparing;if(result.error)throw result.error;return result.value;}if(action==='mcp:oauth:open')return oauthManager.open(p.flowId,config,scope);if(action==='mcp:oauth:cancel')return oauthManager.cancel(p.flowId,config,scope);if(action==='mcp:oauth:forget'){await disconnect(config.id,scope);oauthManager.forget(config,scope);return snapshot();}throw fail('Unknown OAuth action');}
     if (action === 'mcp:integrations:save') {
       if (Object.hasOwn(p, 'env') || Object.hasOwn(p, 'credentials') || Object.hasOwn(p, 'token') || Object.hasOwn(p, 'headers')) throw fail('Only credential references may be configured');
       const { scope } = await scopeFor(p.scope); const credentialRefs = {};

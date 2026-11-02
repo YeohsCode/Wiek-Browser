@@ -35,8 +35,12 @@ async function createFixture(settings={}){
   }
   if(m.method==='tools/list'&&settings.holdTools){const finish=()=>json(res,m.id,{tools:[]});held.add(finish);res.on('close',()=>held.delete(finish));return;}
   if(m.method==='tools/list'&&settings.unsolicited){res.writeHead(200,{'content-type':'text/event-stream'});event({res},{method:'notifications/tools/list_changed',params:{}});event({res},{id:m.id,result:{resultType:'complete',tools:[]}});res.end();return;}
-  if(m.method==='tools/list')return json(res,m.id,{tools:['echo','mutate','inspect'].map(name=>({name,inputSchema:{type:'object'}}))});
+  if(m.method==='tools/list')return json(res,m.id,{tools:['echo','mutate','inspect',...(settings.inputTool?['interactive']:[])].map(name=>({name,inputSchema:{type:'object'}}))});
   if(m.method==='tools/call'){
+   if(settings.inputTool&&m.params.name==='interactive'){
+    if(m.params.inputResponses)return json(res,m.id,{content:[{type:'text',text:'Reviewed input: '+JSON.stringify(m.params.inputResponses)}]});
+    return json(res,m.id,{resultType:'input_required',requestState:'opaque-local-state',inputRequests:{profile:{method:'elicitation/create',params:{mode:'form',message:'Local fixture: choose a display name and count. <script>inert</script>',requestedSchema:{type:'object',properties:{name:{type:'string',title:'Display name',minLength:2},count:{type:'integer',title:'Count',minimum:1,maximum:3,default:2},confirm:{type:'boolean',title:'Confirm',default:false}},required:['name','count','confirm']}}}}});
+   }
    if(m.params.name==='mutate'){revision++;emit('notifications/resources/updated',{uri:'fixture:///notes'});emit('notifications/resources/list_changed');emit('notifications/tools/list_changed');}
    return json(res,m.id,{content:[{type:'text',text:m.params.name==='inspect'?JSON.stringify({calls:calls.map(c=>c.message.method),activeStreams:streams.size}):'offline fixture result'}]});
   }
@@ -46,4 +50,4 @@ async function createFixture(settings={}){
  return {settings,calls,streams,held,event,notification,emit,url:'http://127.0.0.1:'+server.address().port+'/mcp',close:async()=>{for(const s of streams)s.res.destroy();server.closeAllConnections();await new Promise(r=>server.close(r));}};
 }
 module.exports={createFixture};
-if(require.main===module)createFixture().then(f=>{if(process.argv[2])fs.writeFileSync(process.argv[2],JSON.stringify({url:f.url,pid:process.pid}));console.log(f.url);process.once('SIGTERM',async()=>{await f.close();process.exit(0);});});
+if(require.main===module)createFixture({inputTool:process.argv.includes('--input')}).then(f=>{if(process.argv[2])fs.writeFileSync(process.argv[2],JSON.stringify({url:f.url,pid:process.pid}));console.log(f.url);process.once('SIGTERM',async()=>{await f.close();process.exit(0);});});

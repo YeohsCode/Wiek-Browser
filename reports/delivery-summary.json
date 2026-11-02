@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-02T07:41:29.915167+00:00",
-  "version": "0.17.0",
+  "generatedAt": "2026-11-02T15:33:19.377756+00:00",
+  "version": "0.18.0",
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
@@ -22,8 +22,8 @@
       },
       {
         "browser": "vek",
-        "startedAt": "2026-11-02T07:37:25.715Z",
-        "wallTimeMs": 167584,
+        "startedAt": "2026-11-02T15:29:01.161Z",
+        "wallTimeMs": 167483,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
         "counts": {
@@ -37,7 +37,7 @@
         }
       }
     ],
-    "note": "Current final packaged Vek run and retained complete Ego run; identical SDK/fixture/index hashes verified before merging."
+    "note": "Final 0.18 packaged run and retained complete Ego run; identical SDK/fixture/index hashes, no skipped or unrun cases."
   },
   "sdkUnitTests": {
     "pass": 532,
@@ -46,14 +46,16 @@
     "note": "Retained unchanged SDK version; source and bundle identities still match."
   },
   "localServiceAndParser": {
-    "pass": 399,
+    "pass": 416,
     "fail": 0,
-    "log": "v170-service-tests.log"
+    "log": "v180-service-tests.log",
+    "note": "Final functional implementation; subsequent select and dark-result CSS checked by final packaged panels/native review."
   },
   "packagedWorkbenchIntegration": {
-    "pass": 173,
+    "pass": 184,
     "fail": 0,
-    "log": "v170-package-workbench.log"
+    "log": "v180-package-workbench.log",
+    "note": "Final functional implementation; later CSS changes do not alter host logic."
   },
   "cdpValueProbe": {
     "pass": 22,
@@ -67,7 +69,7 @@
   "package": {
     "path": "dist/mac-arm64/Vek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 169,
+    "sourceFilesChecked": 170,
     "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "sdkMatchesTested": true,
     "versions": {
@@ -104,7 +106,10 @@
     "Explicit opt-in plain CLI closed-app one-shot tick with cutoff, shared writer lease, no stale Agent-lock reaping, real workspace/turn checkpoints and signal/timeout settlement",
     "Default-off reviewed macOS login job lifecycle: private launcher, executable/Node/app-JS receipt, minute calendar, disabled-on-change, unload/remove with graceful worker settlement",
     "Foreground gate and authenticated loopback stop-only endpoint; actual provider exit/checkpoint/lease release before foreground Agent state opens; no force-kill on timeout",
-    "Modern 2026-07-28 HTTP resources/templates/read, explicit POST subscriptions/listen for tool/resource list changes and resource URI updates, first-ack/exact-ID/accepted-subset validation, visible stream loss and manual retry, bounded frames with long-lived streams, no automatic fetch/replay/reconnect"
+    "Modern 2026-07-28 HTTP resources/templates/read, explicit POST subscriptions/listen for tool/resource list changes and resource URI updates, first-ack/exact-ID/accepted-subset validation, visible stream loss and manual retry, bounded frames with long-lived streams, no automatic fetch/replay/reconnect",
+    "Modern HTTP local tool form MRTR with explicit review, typed input validation, scoped single-use review IDs, exact opaque state echo and fresh JSON-RPC request IDs",
+    "Awaiting input counts toward original task deadline; cancel/disconnect/shutdown abort waiting or in-flight continuation; no automatic POST replay or restart resume",
+    "Input schemas/values/state and interactive results excluded from MCP disk history; current-session results marked resultRetained:false"
   ],
   "remainingGaps": [
     "Five other native provider protocols, source native session/history migration and paid generation validation",
@@ -114,7 +119,7 @@
     "Complete Chrome/Safari profile/web storage/extensions migration",
     "Custom Chromium engine equivalence",
     "Linked worktrees, checkpoint retention and remote PR workflow",
-    "MCP OAuth CIMD/DCR/full step-up; MRTR continuations/sampling/elicitation, modern stdio, prompt notifications and task extensions",
+    "MCP OAuth CIMD/DCR/full step-up; resource/URL MRTR, sampling/roots, modern stdio, prompt notifications and task extensions",
     "Positive native screenshot/AX content and background key trigger validation, passive selection toolbar, OS recording and translation",
     "Physical sleep/wake, logout/login, OS background-item revocation, additional runtime layouts and CLI authentication environments; busy defer/completion contract and hard-kill recovery",
     "Semantic/all-disk/multiformat memory index and Ego proprietary services",
@@ -163,21 +168,6 @@
     "realToolsAndUsage": true,
     "defaultUserDataAppVersion": "0.5.0",
     "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
-  },
-  "uiQa": {
-    "log": "v170-native-ui-qa.md",
-    "fixtureOnly": true,
-    "nativeModernConnectListWatchSubscribeReadStop": true,
-    "wireCheck": "v170-native-ui-check.json",
-    "normalAppStatus": "v170-normal-app-status.json",
-    "resourceReadsBeforeExplicitRead": 0,
-    "resourceReadsAfterExplicitRead": 1,
-    "streamsAfterStop": 0,
-    "nativeStreamLossRetried": false,
-    "automatedElectronStreamLossRetried": true,
-    "darkNativeLayoutReviewed": false,
-    "normalDefaultJobConsentOff": true,
-    "normalDefaultJobSetupAbsent": true
   },
   "claudeFocusedTests": {
     "pass": 29,
@@ -328,8 +318,24 @@
       "description": "First packaged real-OS fixture kickstarted before previous process was idle and timed out waiting for final no-op. Unreached false markers are not observed duplication/unload failures; finally cleanup independently confirmed. Wait for OS no-pid before kickstart, preserve no-duplicate assertion; final packaged run success and cleanupConfirmed."
     }
   ],
-  "observedFailures": [],
-  "validationOrderNote": "Final socket-reserve source 399/399 and MCP focused 73/73; final package workbench 173/173 and new MCP modules 21/21 (actual Electron IPC panel with 14 checks), native CUA list/watch/subscribe/stale/read/unsubscribe/stop with wire verification; then SDK 69/69 with 1248 assertions, 169 package/source files matched and 81 upstream inputs unchanged. Normal default-data app restored at 0.17.0, default job off/uninstalled. Historical 0.16 native launchd proof retained, not rerun as a 0.17 OS installation. Zero paid models/external account actions. P1 integrations deferred; P2/P3 and full parity incomplete.",
+  "observedFailures": [
+    {
+      "report": "v180-sdk-attempt1.log",
+      "cases": "v180-initial-vek-e2e.json",
+      "pass": 19,
+      "fail": 50,
+      "skip": 0,
+      "notRun": 0,
+      "status": "final isolated packaged full run passed 69/69; root cause of first overlap remains unproven",
+      "description": "Initial SDK run overlapped newly started native QA instance. Earliest label-ref and keyboard-space failures cascaded into page-budget failures. Focus/window interference suspected, single root cause unproven. No SDK assertions or fixture semantics changed."
+    },
+    {
+      "report": "v180-native-ui-qa.md",
+      "status": "fixed and visually rechecked",
+      "description": "Native QA found compact select sizing and low dark-result contrast. Added select layout/focus and dark result colors; final package MCP 38/38 and SDK 69/69 passed."
+    }
+  ],
+  "validationOrderNote": "Final functional source 416/416 and packaged host 184/184; CUA input review/submit/cancel; final select and dark-result CSS, final packaged MCP 38/38; then isolated final package SDK 69/69 with 1248 assertions. Source identity 170 files and upstream integrity 81 unchanged inputs. First overlapping SDK failure retained separately, no assertion/fixture changes. Normal data app at 0.18.0, job off/uninstalled. Historical 0.16 launchd install proof not rerun. P1 deferred and product parity false.",
   "codexReplayActivityTests": {
     "newTests": 21,
     "fixtureOnly": true,
@@ -606,6 +612,58 @@
     "automaticRelisten": false,
     "MRTRContinuationImplemented": false,
     "modelCalls": 0,
-    "externalAccountActions": 0
+    "externalAccountActions": 0,
+    "currentPackagedRegressionLog": "v180-package-mcp.log",
+    "version": "0.17.0 historical new-feature suite; rerun as part of final 0.18 packaged MCP 38/38"
+  },
+  "previousV170UiQa": {
+    "log": "v170-native-ui-qa.md",
+    "fixtureOnly": true,
+    "nativeModernConnectListWatchSubscribeReadStop": true,
+    "wireCheck": "v170-native-ui-check.json",
+    "normalAppStatus": "v170-normal-app-status.json",
+    "resourceReadsBeforeExplicitRead": 0,
+    "resourceReadsAfterExplicitRead": 1,
+    "streamsAfterStop": 0,
+    "nativeStreamLossRetried": false,
+    "automatedElectronStreamLossRetried": true,
+    "darkNativeLayoutReviewed": false,
+    "normalDefaultJobConsentOff": true,
+    "normalDefaultJobSetupAbsent": true
+  },
+  "uiQa": {
+    "log": "v180-native-ui-qa.md",
+    "wireCheck": "v180-native-ui-check.json",
+    "fixtureOnly": true,
+    "nativeCUAFormSubmit": true,
+    "nativeCUACancelTask": true,
+    "finalDarkContrastReviewed": true,
+    "finalContrastResultPreparedThroughOwnAPI": true,
+    "allSizesOrLightThemeReviewed": false,
+    "normalAppStatus": "v180-normal-app-status.json",
+    "normalDefaultJobConsentOff": true,
+    "normalDefaultJobSetupAbsent": true
+  },
+  "mcpInputTests": {
+    "newTests": 17,
+    "protocolAndServiceTests": 16,
+    "actualElectronIPCPanelTests": 1,
+    "panelChecks": 13,
+    "fullSuitePass": 416,
+    "fullSuiteLog": "v180-service-tests.log",
+    "finalPackagedMcpPass": 38,
+    "packagedLog": "v180-package-mcp.log",
+    "additionalWorkbenchChecks": 11,
+    "packagedWorkbenchPass": 184,
+    "packagedWorkbenchLog": "v180-package-workbench.log",
+    "modelCalls": 0,
+    "externalAccountActions": 0,
+    "resourceReadContinuation": false,
+    "urlElicitation": false,
+    "sampling": false,
+    "pairedClientContinuation": false,
+    "diskInputRetention": false,
+    "automaticReplay": false,
+    "MRTRFormContinuationImplemented": true
   }
 }

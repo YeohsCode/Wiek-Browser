@@ -1,0 +1,39 @@
+{
+  "version": "0.18.0",
+  "fixtureOnly": true,
+  "nativeCUAFormSubmit": true,
+  "nativeCUACancelTask": true,
+  "nativeTypedEcho": {
+    "name": "NativeFinalQA",
+    "count": 2,
+    "confirm": false
+  },
+  "resultAfterRestartAbsent": true,
+  "finalContrastResultPreparedThroughOwnAPI": true,
+  "finalContrastTypedEcho": {
+    "name": "FinalContrastQA",
+    "count": 2,
+    "confirm": false
+  },
+  "cancelledTasks": 1,
+  "activeReviews": 0,
+  "opaqueStatePersisted": false,
+  "inputPersisted": false,
+  "interactiveResultPersisted": false,
+  "realLoopbackHTTP": true,
+  "modelCalls": 0,
+  "externalAccountActions": 0,
+  "darkNativeLayoutReviewed": true,
+  "allSizesOrLightThemeReviewed": false,
+  "checkedAt": "2026-11-02T15:28:29.145Z",
+  "temporaryPeerStopped": true,
+  "temporaryNativeHostStopped": true,
+  "normalAppVersion": "0.18.0",
+  "normalDefaultJobConsentOff": true,
+  "normalDefaultJobSetupAbsent": true,
+  "screenshots": [
+    "v180-native-input-review.png",
+    "v180-native-input-result.png",
+    "v180-native-input-cancel.png"
+  ]
+}

@@ -1,0 +1,48 @@
+{"ok":true,"checks":13,"actualElectronIPC":true,"realLoopbackHTTP":true,"modelCalls":0,"externalAccountActions":0}
+✔ input review UI runs typed submissions, decline and cancellation through real Electron IPC (538.475875ms)
+✔ form schema validates typed primitive/enum/array values, required fields and closed properties (1.759459ms)
+✔ form validation rejects unsupported schemas, unsafe keys, invalid defaults and malformed input results (0.219541ms)
+✔ string formats and Unicode length constraints are checked without navigation or network (0.988292ms)
+✔ modern tool review waits for explicit submission, echoes exact opaque state, new ID, unchanged arguments and per-call capabilities (24.835166ms)
+✔ scope and stale-review validation happen before any continuation is sent, validation failure leaves review available (15.883791ms)
+✔ decline/dismiss responses are explicit wire actions, empty state remains exact and previous state never leaks to next round (21.652375ms)
+✔ state-only response requires explicit review and does not trigger automatic busy polling (14.298208ms)
+✔ cancellation while awaiting input clears review and prevents any late submission/replay (9.625542ms)
+✔ task deadline expires input review without replay (186.018167ms)
+✔ disconnect cancels awaiting reviews immediately and reconnect cannot revive them (10.800334ms)
+✔ round limit ends repeated prompts; malformed and unsupported forms never replay automatically (58.14675ms)
+✔ unsupported sampling fails without a model or continuation request (8.935083ms)
+✔ uncertain continuation POST is never retried, input and server state are not saved in error history (15.554792ms)
+✔ concurrent thread tasks have isolated review state, responses and requestState (15.862916ms)
+✔ closing and restarting service discards reviews and session-only results without reviving requests (20.502792ms)
+✔ cancelling an in-flight continuation aborts the POST and does not send legacy cancellation or replay (19.0265ms)
+{"ok":true,"checks":14,"actualElectronIPC":true,"realLoopbackSSE":true,"modelCalls":0,"externalAccountActions":0}
+✔ modern resource and list watches operate through real Electron IPC with visible stream loss and explicit retry (419.256375ms)
+✔ modern resources use per-request envelope, pagination, inert text and binary without legacy traffic (16.551208ms)
+✔ explicit modern list and URI streams correlate acknowledgment and only mark changes without rereading (13.446583ms)
+✔ concurrent modern read remains stale when an update arrives before its response (13.31325ms)
+✔ modern lists are explicitly refreshed without reusing stale protocol caches (1.889041ms)
+✔ modern subscription rejects early before accepting any update (7.137625ms)
+✔ modern subscription rejects wrongid before accepting any update (6.693166ms)
+✔ modern subscription rejects wrongfilter before accepting any update (7.256541ms)
+✔ server acknowledgment may decline a requested subscription without leaving an active stream (5.5715ms)
+✔ unrequested notification or wrong stream metadata loses only that stream and never refetches (12.573458ms)
+✔ graceful completion and abrupt loss remain visible with no automatic replay or relisten (44.945ms)
+✔ ack timeout and AbortSignal close pending HTTP streams without cancellation notifications (308.743917ms)
+✔ stream lives beyond request timeout and supports over a thousand bounded events (346.716709ms)
+✔ malformed UTF-8 and oversized subscription frames close safely without poisoning the client (22.954917ms)
+✔ capability and stream capacity limits reject locally; explicit cancellation frees capacity (9.522125ms)
+✔ MRTR inputs and missing complete discriminant never become successful resource content (1.687792ms)
+✔ scope isolation, disconnect and restart clear streams without persisting resource contents (18.265333ms)
+✔ partial acknowledged list filter permits only its honored types (5.76425ms)
+✔ notification race rejects an outdated modern tool list and a subsequent explicit refresh succeeds (13.594916ms)
+✔ modern one-off responses cannot deliver unsolicited notifications (1.311458ms)
+✔ HTTP subscription authorization failure is surfaced once without retries (1.208792ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 934.262875

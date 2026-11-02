@@ -1,5 +1,6 @@
 # 0.17 Modern HTTP MCP resources and explicit subscriptions
 
+> 0.18增量：本地现代HTTP工具任务已支持有界form MRTR审阅/续传/取消，其他请求与输入模式仍缺；见 [mcp-input-continuations.md](mcp-input-continuations.md)。本文旧版缺口描述保留为历史记录。
 本轮按用户优先级推进P2，P1不同Agent集成继续暂缓。扩展既有显式`2026-07-28` HTTP客户端，新增资源/模板/读取及通知流；不是全部现代MCP、Ego私有服务或Agent gateway集成的完成声明。
 
 ## 公共协议依据与实现范围

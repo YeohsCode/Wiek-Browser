@@ -101,3 +101,14 @@ HTTP integrations configured with `protocolVersion: "2026-07-28"` now support th
 Snapshots expose `connections[].notificationStreams` (list status/filter and active stream count) and resource subscription status/revisions. Acknowledgment filters may decline a subscription. Ended streams remain `closed` or `lost`; retry is explicit, missed updates are not replayed, and reconnect starts without subscriptions. UI offers Watch list changes, Stop watching lists and Retry subscription. Changes mark content stale only; resources are not fetched or inserted into Agent input automatically.
 
 At most 16 active modern streams per connection and 128 tracked resource entries; each SSE frame/line stays bounded while an acknowledged stream can outlive an ordinary request timeout. Aborting or stopping closes HTTP streams without sending legacy cancellation notifications. Listings refresh explicitly instead of reusing a protocol cache across calls; displayed prior lists are not a freshness guarantee. `input_required` still fails explicitly: MRTR continuation, sampling, elicitation, modern stdio, prompts, task extensions and full latest-protocol equivalence are not implemented.
+
+### 0.18: reviewed MCP tool input
+
+Modern HTTP (`2026-07-28`) local tool tasks may enter `awaiting_input` with an ephemeral `inputReview`: `{id, round, expiresAt, forms:[{id,message,schema}]}`. Only form elicitation is advertised on these tool requests. Review the named integration/endpoint, tool and scope before sharing any values. No passwords, API keys or payment credentials belong in these forms.
+
+- `mcp:tasks:respond` takes `{id,scope,reviewId,responses}`; responses must cover exactly the displayed form IDs with `{action:"accept",content:{...}}`, `{action:"decline"}` or `{action:"cancel"}`. Accept validates the bounded flat schema; decline/cancel omit content. For a state-only review, pass `{}` explicitly.
+- Every submitted review is consumed once. Vek sends the original tool/arguments, a new JSON-RPC ID, only the current round's responses, and the exact opaque server state. It does not automatically replay POSTs or retry a lost continuation.
+- `mcp:tasks:cancel` cancels the entire task, including its current review/HTTP continuation. Disconnect, shutdown and the original task deadline also end reviews. Maximum 8 rounds, 8 forms per round and 32 fields per form.
+- Reviews, input values, opaque state and interactive results are not written to MCP history. Results remain available in memory during this app session (`resultRetained:false`). Restart cannot resume a review.
+
+This is bounded tool-task form support. Resource reads, prompts, URL elicitation, sampling, roots, modern stdio and paired-client interactive continuations remain unsupported. Paired-client tool requests do not advertise form elicitation.

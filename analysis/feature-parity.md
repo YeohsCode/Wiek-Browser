@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.17.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以历次版本增量和当前报告为准。
+当前版本 **0.18.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以历次版本增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -377,3 +377,9 @@ Foreground取得gate，认证请求worker停止，实际provider/checkpoint收�
 通知只增加revision/使列表失效，不读取正文或执行内容；并发read保留stale，工具列表竞态拒绝旧结果，界面移除失效工具按钮。确认后流可超出普通timeout，逐事件/行有界；16流上限仍给普通请求留socket空间。新增21项、实际Electron panel14内部检查，精确发行结果见[RESULTS](../reports/RESULTS.md)，设计/公开规范见[mcp-modern-subscriptions](mcp-modern-subscriptions.md)。
 
 没有MRTR续传、采样/表单、prompt通知、现代stdio或task extension，也未进行Ego同功能runtime对测。OAuth CIMD/DCR/完整step-up、来源迁移与P3剩余项保留；全量parity仍false，P1不同Agent集成继续暂缓。
+
+## 0.18：P2有界MCP工具表单MRTR
+
+现代HTTP本地工具任务支持awaiting_input、typed form、逐项accept/decline/cancel、明确续传和整任务取消。新请求ID/当前轮response与原样opaque state绑定原工具/参数，按scope和一次性review ID校验；旧审阅、断线、超时、关闭不重放。表单/输入/state与交互结果不写MCP历史，重启不恢复。
+
+新增17项（含实际Electron面板13内部检查），完整本地416/416，打包宿主184/184。公开协议独立实现，没有Ego同功能runtime对测；资源读取/URL/sampling/现代stdio等仍缺，全量parity=false。P1不同Agent集成暂缓。详情见[mcp-input-continuations](mcp-input-continuations.md)和[当前结果](../reports/RESULTS.md)。

@@ -14,6 +14,7 @@
       if (next?.agents) context = { ...context, projects: next.agents.projects || context.projects, threads: next.agents.threads || context.threads };
       const incoming = next?.mcp || next;
       if (Array.isArray(incoming?.integrations) && Array.isArray(incoming?.tasks)) data = incoming;
+      if(dialog?.reviewId&&!data.tasks.some(t=>t.id===dialog.taskId&&t.inputReview?.id===dialog.reviewId))dialog=null;
       if (!context.projects?.some(p => p.id === projectId)) { projectId = context.projects?.[0]?.id || ''; threadId = ''; }
       render();
     }
@@ -113,14 +114,36 @@
         oauthControls(card,item);resources(card, item, connection); body.append(card);
       }
     }
+    function reviewInput(task) {
+      const review=task.inputReview, integration=data.integrations.find(i=>i.id===task.integrationId), fields=[], groups=[];
+      for(const [index,form] of review.forms.entries()){
+        const actionKey=`action-${index}`;fields.push({label:form.message,key:actionKey,value:'accept',options:[{value:'accept',label:'Provide input'},{value:'decline',label:'Decline this input'},{value:'cancel',label:'Dismiss this input'}]});
+        const entries=[];
+        for(const [key,schema] of Object.entries(form.schema.properties)){
+          const fieldKey=`input-${index}-${entries.length}`,required=(form.schema.required||[]).includes(key),f={label:`${schema.title||key}${required?' (required)':''}${schema.description?' — '+schema.description:''}`,key:fieldKey,value:schema.default??'',optional:true,schema};
+          const choice=value=>value.enum?.map(v=>({value:v,label:v}))||(value.oneOf||value.anyOf)?.map(v=>({value:v.const,label:v.title}));
+          if(schema.type==='boolean'){f.options=[{value:'',label:'Choose…'},{value:'true',label:'True'},{value:'false',label:'False'}];f.value=schema.default===undefined?'':String(schema.default);}
+          else if(schema.type==='array'){f.options=choice(schema.items);f.multiple=true;f.value=schema.default||[];}
+          else if(choice(schema)){f.options=[{value:'',label:'Choose…'},...choice(schema)];}
+          if(['integer','number'].includes(schema.type))f.inputType='number';
+          fields.push(f);entries.push({key,fieldKey,schema,required});
+        }
+        groups.push({id:form.id,actionKey,entries});
+      }
+      const payload=responses=>({id:task.id,scope:task.scope,reviewId:review.id,responses});
+      dialog={title:'Review requested input',taskId:task.id,reviewId:review.id,submitLabel:'Submit reviewed inputs',notice:`${integration?.name||task.integrationId} · ${integration?.url||''}\nTool: ${task.name} · Scope: ${scopeName(task.scope)} · Round ${review.round} · Expires ${new Date(review.expiresAt).toLocaleString()}. Inputs go to this server. Do not enter passwords, API keys or payment credentials. Submitted values and interactive results are kept only for this running app session.`,fields,
+        extraActions:[{label:'Decline all',run:()=>action('mcp:tasks:respond',payload(Object.fromEntries(groups.map(g=>[g.id,{action:'decline'}]))))},{label:'Cancel task',run:()=>action('mcp:tasks:cancel',{id:task.id,scope:task.scope})}],
+        submit:values=>{const responses=Object.fromEntries(groups.map(g=>{const selected=values[g.actionKey];if(selected!=='accept')return[g.id,{action:selected}];const content=Object.fromEntries(g.entries.flatMap(f=>{let value=values[f.fieldKey];if(value===''&&!f.required||f.schema.type==='array'&&!value.length&&!f.required)return[];if(f.schema.type==='boolean')value=value==='true'?true:value==='false'?false:undefined;else if(['number','integer'].includes(f.schema.type))value=value===''?undefined:Number(value);return[[f.key,value]];}));return[g.id,{action:'accept',content}];}));return action('mcp:tasks:respond',payload(responses));}};render();
+    }
     function tasks(body) {
       const list = [...data.tasks].reverse().filter(t => t.scope.projectId === projectId && (!threadId || t.scope.threadId === threadId));
       if (!list.length) body.append(make('div', 'Tool calls appear here with their real status and result.', 'vm-empty'));
       for (const task of list) {
         const card = make('article', '', 'vm-card'), row = make('div', '', 'vm-row'), info = make('div', '', 'vm-grow');
         info.append(make('h3', task.name), make('p', `${scopeName(task.scope)} · ${new Date(task.createdAt).toLocaleString()}`)); row.append(info, make('span', task.status, `vm-status vm-${task.status}`));
-        if (['queued', 'running'].includes(task.status)) row.append(button('Cancel', () => action('mcp:tasks:cancel', { id: task.id, scope: task.scope })));
-        card.append(row); if (task.error) card.append(make('div', task.error, 'vm-error'));
+        if(task.inputReview)row.append(button('Review input',()=>reviewInput(task)));
+        if (['queued', 'running','awaiting_input'].includes(task.status)) row.append(button('Cancel', () => action('mcp:tasks:cancel', { id: task.id, scope: task.scope })));
+        card.append(row); if(task.resultRetained===false)card.append(make('p','Interactive results are not saved in task history.','vm-muted')); if (task.error) card.append(make('div', task.error, 'vm-error'));
         if (task.result !== undefined) { const details = make('details'); details.append(make('summary', 'Tool result'), make('pre', JSON.stringify(task.result, null, 2), 'vm-result')); card.append(details); } body.append(card);
       }
     }
@@ -132,9 +155,12 @@
     }
     function dialogNode() {
       const overlay = make('div', '', 'vm-overlay'), form = make('form', '', 'vm-dialog'); form.setAttribute('role', 'dialog'); form.setAttribute('aria-modal', 'true'); form.append(make('h2', dialog.title), make('p', dialog.notice || ''));
-      for (const f of dialog.fields || []) { const label = make('label', f.label), input = make(f.multiline ? 'textarea' : 'input'); input.value = f.value; input.name = f.key; input.readOnly = Boolean(dialog.readonly||f.readonly); input.required = !dialog.readonly&&!f.optional; input.dataset.focus = f.key; input.oninput = () => { f.value = input.value; }; label.append(input); form.append(label); }
+      for (const f of dialog.fields || []) { const label = make('label', f.label), input = make(f.options?'select':f.multiline ? 'textarea' : 'input');
+        if(f.options){input.multiple=!!f.multiple;for(const o of f.options){const option=make('option',o.label);option.value=o.value;option.selected=f.multiple?f.value.includes(o.value):String(f.value)===o.value;input.append(option);}}else{input.value=f.value;if(f.inputType){input.type=f.inputType;input.step=f.schema?.type==='integer'?'1':'any';}}
+        input.name = f.key; input.readOnly = Boolean(dialog.readonly||f.readonly); input.required = !dialog.readonly&&!f.optional&&!dialog.reviewId; input.dataset.focus = f.key; input.oninput = () => { f.value = f.multiple?[...input.selectedOptions].map(o=>o.value):input.value; }; label.append(input); form.append(label); }
       if (error) form.append(make('div', error, 'vm-error'));
       const buttons = make('div', '', 'vm-actions'); buttons.append(button(dialog.readonly ? 'Done' : 'Cancel', () => { dialog = null; error = ''; render(); }));
+      for(const extra of dialog.extraActions||[])buttons.append(button(extra.label,extra.run));
       if (!dialog.readonly) { const submit = make('button', pending ? 'Working…' : dialog.submitLabel||'Save / continue', 'vm-button vm-primary'); submit.type = 'submit'; submit.disabled = pending; buttons.append(submit); }
       form.append(buttons); form.onsubmit = async event => { event.preventDefault(); error = ''; try { await dialog.submit(Object.fromEntries(dialog.fields.map(f => [f.key, f.value]))); } catch (failure) { error = failure.message; render(); } }; overlay.append(form); return overlay;
     }

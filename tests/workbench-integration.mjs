@@ -26,7 +26,7 @@ const cdp=(spaceId,method,params={})=>new Promise((resolve,reject)=>{const id=++
 const check=(condition,message)=>{ assert.ok(condition,message); checks++; };
 async function waitThread(id) { const limit=Date.now()+20000; while(Date.now()<limit) { const t=await action('agents:threads:read',{id});if(!['running','queued','discovering'].includes(t.status))return t;await new Promise(r=>setTimeout(r,40)); } throw new Error('Thread did not complete'); }
 const directory=await fs.mkdtemp(path.join(os.tmpdir(),'vek-workbench-e2e-'));
-const oauthPeer=await createOAuthPeer();const modernPeer=await createModernPeer();
+const oauthPeer=await createOAuthPeer();const modernPeer=await createModernPeer({inputTool:true});
 const downloadBytes=Buffer.alloc(2*1024*1024,77);
 const web=http.createServer((req,res)=>{
   if(req.url==='/slow-download'){
@@ -297,6 +297,25 @@ try {
   check(!modernPeer.calls.some(c=>c.method!=='POST'||['initialize','resources/subscribe','resources/unsubscribe','notifications/cancelled'].includes(c.message.method)),'modern host never sends legacy lifecycle or resource methods');
   await action('mcp:integrations:disconnect',{id:modernId,scope:modernScope});await modern('mcp:resources:list');check((await modernConnection()).resourceSubscriptions.length===0&&(await modernConnection()).notificationStreams.lists===null,'modern reconnect has no automatic subscriptions');
   check(!(await fs.readFile(path.join(dataDir,'mcp/state.json'),'utf8')).includes('离线内容'),'modern resource body is absent from persisted MCP state');
+  const inputTask=await modern('mcp:tasks:create',{name:'interactive',arguments:{}});
+  async function waitInputTask(id,status){for(let i=0;i<200;i++){const row=await action('mcp:tasks:read',{id,scope:modernScope});if(row.status===status)return row;await new Promise(r=>setTimeout(r,10));}throw Error('Host input task did not reach '+status);}
+  const inputReview=await waitInputTask(inputTask.id,'awaiting_input'),beforeContinuation=modernPeer.calls.filter(c=>c.message.method==='tools/call'&&c.message.params.name==='interactive');
+  check(beforeContinuation.length===1,'host does not automatically continue a form input request');
+  check(!JSON.stringify(inputReview).includes('opaque-local-state')&&inputReview.inputReview.forms.length===1,'host exposes review form without opaque server state');
+  await assert.rejects(action('mcp:tasks:respond',{id:inputTask.id,scope:{projectId},reviewId:inputReview.inputReview.id,responses:{profile:{action:'decline'}}}),/outside/);checks++;
+  await assert.rejects(action('mcp:tasks:respond',{id:inputTask.id,scope:modernScope,reviewId:inputReview.inputReview.id,responses:{profile:{action:'accept',content:{name:'x'}}}}),/schema/);checks++;
+  await action('mcp:tasks:respond',{id:inputTask.id,scope:modernScope,reviewId:inputReview.inputReview.id,responses:{profile:{action:'accept',content:{name:'HostInput',count:2,confirm:false}}}});
+  const inputResult=await waitInputTask(inputTask.id,'completed'),continuations=modernPeer.calls.filter(c=>c.message.method==='tools/call'&&c.message.params.name==='interactive');
+  check(inputResult.result.content[0].text.includes('HostInput')&&inputResult.resultRetained===false,'host returns interactive result for current session');
+  check(continuations.length===2&&continuations[0].message.id!==continuations[1].message.id&&continuations[1].message.params.requestState==='opaque-local-state','host continues with fresh ID and exact opaque state');
+  await assert.rejects(action('mcp:tasks:respond',{id:inputTask.id,scope:modernScope,reviewId:inputReview.inputReview.id,responses:{profile:{action:'decline'}}}),/ended or changed/);checks++;
+  const cancelledInput=await modern('mcp:tasks:create',{name:'interactive',arguments:{}}),cancelReview=await waitInputTask(cancelledInput.id,'awaiting_input');
+  await action('mcp:tasks:cancel',{id:cancelledInput.id,scope:modernScope});
+  check((await waitInputTask(cancelledInput.id,'cancelled')).inputReview===undefined,'host cancellation clears input review');
+  await assert.rejects(action('mcp:tasks:respond',{id:cancelledInput.id,scope:modernScope,reviewId:cancelReview.inputReview.id,responses:{profile:{action:'decline'}}}),/ended or changed/);checks++;
+  check(modernPeer.calls.filter(c=>c.message.method==='tools/call'&&c.message.params.name==='interactive').length===3,'host cancellation never replays an input request');
+  const persistedInputState=await fs.readFile(path.join(dataDir,'mcp/state.json'),'utf8');check(!persistedInputState.includes('HostInput')&&!persistedInputState.includes('opaque-local-state'),'host does not persist input content or server continuation state');
+
   const loginJob=await action('scheduler:snapshot');check(loginJob.supported&&!loginJob.enabled&&!loginJob.installed&&!loginJob.configured,'packaged OS scheduling is off and uninstalled by default');
   for(const name of ['prepare','enable','disable','remove','cancel','refresh']){await assert.rejects(action('scheduler:job:'+name,{}),/Background scheduling/);checks++;}
   const afterDeniedJob=await action('scheduler:snapshot');check(!afterDeniedJob.enabled&&!afterDeniedJob.installed&&!afterDeniedJob.plan,'remote API attempts leave no consent, plan or login job');

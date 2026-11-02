@@ -1,6 +1,6 @@
 # 文档索引
 
-当前版本 **0.17.0**；优先P2/P3，其余Agent集成暂缓。已完成有界Profile归档与P3显式Desktop tools；已补三种执行模式与显式closed-app tick；已补审核式macOS login job/前台接管；已补现代HTTP资源与显式订阅；下一项P2可审核MRTR输入续传，P2明确来源迁移/MCP剩余项仍保留。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
+当前版本 **0.18.0**；优先P2/P3，其余Agent集成暂缓。已完成有界Profile归档与P3显式Desktop tools；已补三种执行模式与显式closed-app tick；已补审核式macOS login job/前台接管；已补现代HTTP资源与显式订阅；已补有界工具表单MRTR审阅/取消；下一项核对现代OAuth CIMD/身份机制，P2明确来源迁移/MCP剩余项仍保留。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
 
 | 用途 | 文档 |
 |---|---|
@@ -22,6 +22,7 @@
 | Claude原生协议 | [claude-native-design.md](../analysis/claude-native-design.md) |
 | Agent turn 文件快照 | [turn-checkpoints-design.md](../analysis/turn-checkpoints-design.md) |
 | Git checkpoint | [git-checkpoints.md](../analysis/git-checkpoints.md) |
+| MCP工具表单MRTR | [mcp-input-continuations.md](../analysis/mcp-input-continuations.md) |
 | MCP公共客户端OAuth | [mcp-oauth-design.md](../analysis/mcp-oauth-design.md) |
 | MCP资源订阅 / 本地memory索引 | [mcp-resources-memory.md](../analysis/mcp-resources-memory.md) |
 | MCP | [stdio/gateway](../analysis/mcp-service-design.md)、[HTTP 与版本差异](../analysis/mcp-http-design.md) |

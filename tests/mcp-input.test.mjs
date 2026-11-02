@@ -1,0 +1,80 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import http from 'node:http';
+import {mkdtemp,readFile,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),root=process.env.VEK_MCP_APP_ROOT||resolve(import.meta.dirname,'..');
+const {createMcpService,HttpClient}=require(join(root,'app/mcp-service.cjs'));
+const {prepareInput,validateResponses,validateSchema}=require(join(root,'app/mcp-input.cjs'));
+const schema={type:'object',properties:{name:{type:'string',minLength:2},count:{type:'integer',minimum:1,maximum:3},flag:{type:'boolean'},color:{type:'string',oneOf:[{const:'red',title:'Red'},{const:'blue',title:'Blue'}]},tags:{type:'array',minItems:1,maxItems:2,items:{anyOf:[{const:'a',title:'A'},{const:'b',title:'B'}]}}},required:['name']};
+const input=(state='opaque-secret <raw>')=>({resultType:'input_required',inputRequests:{profile:{method:'elicitation/create',params:{message:'Provide profile <script id="untrusted">',requestedSchema:schema}}},...(state===undefined?{}:{requestState:state})});
+async function fixture(t,{reply,timeout=2000,credential=false}={}){
+ const dir=await mkdtemp(join(tmpdir(),'vek-input-')),calls=[],sockets=new Set();let toolCalls=0;
+ const server=http.createServer(async(req,res)=>{try{let body='';for await(const b of req)body+=b;const message=JSON.parse(body);calls.push({message,headers:req.headers});let result={resultType:'complete'};
+ if(message.method==='server/discover')result={...result,supportedVersions:['2026-07-28'],capabilities:{tools:{}}};
+ else if(message.method==='tools/list')result={...result,tools:[{name:'interactive',inputSchema:{type:'object'}}]};
+ else{toolCalls++;result=reply?await reply(message,toolCalls,res):message.params.inputResponses?{...result,content:[{type:'text',text:'received '+message.params.inputResponses.profile.content?.name}]}:input();if(res.destroyed||res.writableEnded||result===null)return;}
+ res.writeHead(200,{'content-type':'application/json'}).end(JSON.stringify({jsonrpc:'2.0',id:message.id,result}));}catch{res.destroy();}});
+ server.on('connection',s=>{sockets.add(s);s.on('close',()=>sockets.delete(s));});await new Promise(r=>server.listen(0,'127.0.0.1',r));const scope={projectId:'p',threadId:'one'},url=`http://127.0.0.1:${server.address().port}/mcp`,service=createMcpService({dataDir:dir,requestTimeoutMs:timeout,resolveScope:async s=>({...s,projectPath:dir}),resolveCredential:()=> 'opaque-secret <raw>'});
+ await service.dispatch('mcp:integrations:save',{name:'Interactive fixture',transport:'http',url,protocolVersion:'2026-07-28',allowInsecureHttp:true,scope:{projectId:'p'},...(credential?{headerRefs:{Authorization:'env:FIXTURE'}}:{})});const integrationId=service.snapshot().integrations[0].id;
+ t.after(async()=>{await service.close();for(const s of sockets)s.destroy();await new Promise(r=>server.close(r));await rm(dir,{recursive:true,force:true});});
+ const start=(s=scope,extra={})=>service.dispatch('mcp:tasks:create',{integrationId,scope:s,name:'interactive',arguments:{original:'unchanged'},...extra});
+ const wait=async(id,status)=>{for(let i=0;i<300;i++){const row=await service.dispatch('mcp:tasks:read',{id,scope});if(row.status===status)return row;if(['failed','cancelled','timed_out'].includes(row.status)&&row.status!==status)throw Error(JSON.stringify(row));await new Promise(r=>setTimeout(r,5));}throw Error('Task status timeout '+status);};
+ const respond=(task,responses={profile:{action:'accept',content:{name:'Alice'}}},s=scope)=>service.dispatch('mcp:tasks:respond',{id:task.id,scope:s,reviewId:task.inputReview.id,responses});
+ return{dir,service,scope,url,integrationId,calls,start,wait,respond};
+}
+test('form schema validates typed primitive/enum/array values, required fields and closed properties',()=>{
+ const forms=prepareInput(input()).forms,valid={profile:{action:'accept',content:{name:'Alice',count:2,flag:false,color:'red',tags:['a','b']}}};assert.deepEqual(validateResponses(forms,valid),valid);
+ for(const content of[{name:'a'},{name:'ok',count:1.5},{name:'ok',count:4},{name:'ok',flag:'false'},{name:'ok',tags:['a','a']},{name:'ok',tags:['x']},{name:'ok',extra:1},{}])assert.throws(()=>validateResponses(forms,{profile:{action:'accept',content}}));
+ for(const action of['decline','cancel'])assert.deepEqual(validateResponses(forms,{profile:{action}}),{profile:{action}});
+ assert.throws(()=>validateResponses(forms,{profile:{action:'decline',content:{}}}));assert.throws(()=>validateResponses(forms,{}));assert.throws(()=>validateResponses(forms,{profile:{action:'accept',content:{name:'ok'}},extra:{action:'decline'}}));
+});
+test('form validation rejects unsupported schemas, unsafe keys, invalid defaults and malformed input results',()=>{
+ for(const bad of[{...schema,properties:{nested:{type:'object'}}},{...schema,properties:{evil:{type:'string',pattern:'.*'}}},{...schema,properties:{v:{type:'integer',default:1.1}}},{...schema,properties:{v:{type:'array',items:{type:'object'}}}},{...schema,required:['missing']},{...schema,properties:JSON.parse('{"__proto__":{"type":"string"}}')},{...schema,properties:{v:{type:'string',enum:['a','a']}}}])assert.throws(()=>validateSchema(bad));
+ for(const bad of[{resultType:'input_required'},{...input(),requestState:42},{...input(),inputRequests:[]},{...input(),inputRequests:{x:{method:'sampling/createMessage',params:{}}}},{...input(),inputRequests:{x:{method:'elicitation/create',params:{mode:'url',message:'go',url:'https://example.com'}}}},{...input(),requestState:'x'.repeat(65537)}])assert.throws(()=>prepareInput(bad));
+});
+test('string formats and Unicode length constraints are checked without navigation or network',()=>{
+ for(const [format,good,bad] of[['date','2024-02-29','2025-02-29'],['date-time','2026-11-02T12:10:20Z','2026-11-02'],['uri','urn:example:one','not a URI'],['email','a@example.com','a@']]){const forms=prepareInput({...input(),inputRequests:{x:{method:'elicitation/create',params:{message:'input',requestedSchema:{type:'object',properties:{v:{type:'string',format}},required:['v']}}}}}).forms;assert.doesNotThrow(()=>validateResponses(forms,{x:{action:'accept',content:{v:good}}}));assert.throws(()=>validateResponses(forms,{x:{action:'accept',content:{v:bad}}}));}
+ validateSchema({type:'object',properties:{emoji:{type:'string',maxLength:1,default:'🧪'}}});
+});
+test('modern tool review waits for explicit submission, echoes exact opaque state, new ID, unchanged arguments and per-call capabilities',async t=>{
+ const f=await fixture(t,{credential:true}),task=await f.start(),waiting=await f.wait(task.id,'awaiting_input');assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,1);assert.equal(JSON.stringify(waiting).includes('opaque-secret'),false);assert.equal(waiting.inputReview.forms[0].message.includes('<script'),true);
+ const original=f.calls.at(-1).message;assert.deepEqual(original.params._meta['io.modelcontextprotocol/clientCapabilities'],{elicitation:{form:{}}});await f.respond(waiting);const final=await f.wait(task.id,'completed'),last=f.calls.at(-1).message;
+ assert.notEqual(last.id,original.id);assert.equal(last.params.requestState,'opaque-secret <raw>');assert.deepEqual(last.params.arguments,original.params.arguments);assert.deepEqual(last.params.inputResponses,{profile:{action:'accept',content:{name:'Alice'}}});assert.equal(final.result.content[0].text,'received Alice');assert.equal(final.resultRetained,false);
+ assert.equal(f.calls.filter(c=>c.message.method!=='tools/call').every(c=>Object.keys(c.message.params._meta['io.modelcontextprotocol/clientCapabilities']).length===0),true);
+ const persisted=await readFile(join(f.dir,'mcp/state.json'),'utf8');for(const value of['opaque-secret','Alice','inputReview','Provide profile','received'])assert.equal(persisted.includes(value),false,value);
+});
+test('scope and stale-review validation happen before any continuation is sent, validation failure leaves review available',async t=>{
+ const f=await fixture(t),task=await f.start(),waiting=await f.wait(task.id,'awaiting_input');await assert.rejects(f.respond(waiting,undefined,{projectId:'p',threadId:'two'}),e=>e.error_code==='VEK_MCP_FORBIDDEN');await assert.rejects(f.respond(waiting,{profile:{action:'accept',content:{name:'x'}}}),/schema/);
+ assert.equal((await f.service.dispatch('mcp:tasks:read',{id:task.id,scope:f.scope})).inputReview.id,waiting.inputReview.id);
+ await f.respond(waiting);await assert.rejects(f.respond(waiting),e=>e.error_code==='VEK_MCP_INPUT_EXPIRED');await f.wait(task.id,'completed');assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,2);
+});
+test('decline/dismiss responses are explicit wire actions, empty state remains exact and previous state never leaks to next round',async t=>{
+ const f=await fixture(t,{reply:(message,n)=>n===1?input(''):n===2?{resultType:'input_required',inputRequests:input().inputRequests}:({resultType:'complete',content:[]})}),task=await f.start(),first=await f.wait(task.id,'awaiting_input');await f.respond(first,{profile:{action:'decline'}});
+ let second;for(let i=0;i<200;i++){second=await f.service.dispatch('mcp:tasks:read',{id:task.id,scope:f.scope});if(second.inputReview?.round===2)break;await new Promise(r=>setTimeout(r,5));}assert.equal(f.calls.at(-1).message.params.requestState,'');assert.notEqual(second.inputReview.id,first.inputReview.id);await assert.rejects(f.respond(first),/ended or changed/);await f.respond(second,{profile:{action:'cancel'}});await f.wait(task.id,'completed');assert.equal(Object.hasOwn(f.calls.at(-1).message.params,'requestState'),false);assert.deepEqual(f.calls.at(-1).message.params.inputResponses,{profile:{action:'cancel'}});
+});
+test('state-only response requires explicit review and does not trigger automatic busy polling',async t=>{
+ const f=await fixture(t,{reply:(m,n)=>n===1?{resultType:'input_required',requestState:'wait'}:{resultType:'complete',content:[]}}),task=await f.start(),review=await f.wait(task.id,'awaiting_input');assert.deepEqual(review.inputReview.forms,[]);assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,1);await f.respond(review,{});await f.wait(task.id,'completed');assert.equal(f.calls.at(-1).message.params.requestState,'wait');
+});
+test('cancellation while awaiting input clears review and prevents any late submission/replay',async t=>{
+ const f=await fixture(t),task=await f.start(),waiting=await f.wait(task.id,'awaiting_input');await f.service.dispatch('mcp:tasks:cancel',{id:task.id,scope:f.scope});await f.wait(task.id,'cancelled');await assert.rejects(f.respond(waiting),/ended or changed/);assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,1);assert.equal(f.calls.some(c=>c.message.method==='notifications/cancelled'),false);
+});
+test('task deadline expires input review without replay',async t=>{const f=await fixture(t,{timeout:180}),task=await f.start(),waiting=await f.wait(task.id,'awaiting_input');await f.wait(task.id,'timed_out');await assert.rejects(f.respond(waiting),/ended or changed/);assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,1);});
+test('disconnect cancels awaiting reviews immediately and reconnect cannot revive them',async t=>{const f=await fixture(t),task=await f.start(),waiting=await f.wait(task.id,'awaiting_input');await f.service.dispatch('mcp:integrations:disconnect',{id:f.integrationId,scope:f.scope});await f.wait(task.id,'cancelled');await f.service.dispatch('mcp:integrations:connect',{id:f.integrationId,scope:f.scope});await assert.rejects(f.respond(waiting),/ended or changed/);assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,1);});
+test('round limit ends repeated prompts; malformed and unsupported forms never replay automatically',async t=>{
+ const f=await fixture(t,{reply:()=>input()}),task=await f.start();for(let round=1;round<=8;round++){let row;for(let i=0;i<200;i++){row=await f.service.dispatch('mcp:tasks:read',{id:task.id,scope:f.scope});if(row.inputReview?.round===round)break;await new Promise(r=>setTimeout(r,5));}assert.equal(row.inputReview.round,round);await f.respond(row,{profile:{action:'decline'}});}await f.wait(task.id,'failed');assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,9);
+});
+test('unsupported sampling fails without a model or continuation request',async t=>{const f=await fixture(t,{reply:()=>({...input(),inputRequests:{model:{method:'sampling/createMessage',params:{maxTokens:100}}}})}),task=await f.start();await f.wait(task.id,'failed');assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,1);});
+test('uncertain continuation POST is never retried, input and server state are not saved in error history',async t=>{const f=await fixture(t,{reply:(m,n,res)=>{if(n===1)return input();res.destroy();return null;}}),task=await f.start(),waiting=await f.wait(task.id,'awaiting_input');await f.respond(waiting);await f.wait(task.id,'failed');assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,2);const saved=await readFile(join(f.dir,'mcp/state.json'),'utf8');assert.equal(saved.includes('Alice'),false);assert.equal(saved.includes('opaque-secret'),false);});
+test('concurrent thread tasks have isolated review state, responses and requestState',async t=>{
+ const f=await fixture(t,{reply:m=>m.params.inputResponses?{resultType:'complete',content:[]}:{...input('state-'+m.id)}}),a=await f.start(),b=await f.start({projectId:'p',threadId:'two'}),wa=await f.wait(a.id,'awaiting_input');let wb;for(let i=0;i<200;i++){wb=await f.service.dispatch('mcp:tasks:read',{id:b.id,scope:{projectId:'p',threadId:'two'}});if(wb.inputReview)break;await new Promise(r=>setTimeout(r,5));}await f.respond(wa);assert.equal((await f.service.dispatch('mcp:tasks:read',{id:b.id,scope:wb.scope})).status,'awaiting_input');await f.respond(wb,{profile:{action:'decline'}},wb.scope);await f.wait(a.id,'completed');const calls=f.calls.filter(c=>c.message.method==='tools/call');assert.equal(calls.length,4);assert.notEqual(wa.inputReview.id,wb.inputReview.id);
+});
+test('closing and restarting service discards reviews and session-only results without reviving requests',async t=>{
+ const f=await fixture(t),completed=await f.start(),first=await f.wait(completed.id,'awaiting_input');await f.respond(first);await f.wait(completed.id,'completed');const pending=await f.start(),review=await f.wait(pending.id,'awaiting_input');await f.service.close();
+ const reopened=createMcpService({dataDir:f.dir,resolveScope:async s=>({...s,projectPath:f.dir})});try{const rows=reopened.snapshot().tasks;assert.equal(rows.find(r=>r.id===pending.id).status,'interrupted');assert.equal(rows.find(r=>r.id===completed.id).result,undefined);assert.equal(rows.some(r=>r.inputReview),false);await assert.rejects(reopened.dispatch('mcp:tasks:respond',{id:pending.id,scope:f.scope,reviewId:review.inputReview.id,responses:{profile:{action:'decline'}}}),/ended or changed/);assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,3);}finally{await reopened.close();}
+});
+test('cancelling an in-flight continuation aborts the POST and does not send legacy cancellation or replay',async t=>{
+ let opened=false,closed=false;const f=await fixture(t,{reply:(m,n,res)=>{if(n===1)return input();opened=true;res.writeHead(200,{'content-type':'text/event-stream'});res.flushHeaders();res.on('close',()=>{closed=true;});return null;}}),task=await f.start(),review=await f.wait(task.id,'awaiting_input');await f.respond(review);for(let i=0;i<200&&!opened;i++)await new Promise(r=>setTimeout(r,5));assert.equal(opened,true);await f.service.dispatch('mcp:tasks:cancel',{id:task.id,scope:f.scope});await f.wait(task.id,'cancelled');for(let i=0;i<200&&!closed;i++)await new Promise(r=>setTimeout(r,5));assert.equal(closed,true);assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,2);assert.equal(f.calls.some(c=>c.message.method==='notifications/cancelled'),false);
+});

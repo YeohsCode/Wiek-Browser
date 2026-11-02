@@ -1,0 +1,15 @@
+Error occurred in handler for 'test-mcp': Error: Use HTTPS, or explicitly allow HTTP on a loopback endpoint; URL credentials/query/fragment are forbidden
+    at fail (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/mcp-http-client.cjs:8:67)
+    at validateHttpConfig (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/mcp-http-client.cjs:14:204)
+    at Object.dispatch (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/mcp-service.cjs:246:51)
+    at async Session.<anonymous> (node:electron/js2c/browser_init:2:117721) {
+  error_code: 'VEK_MCP_INVALID_REQUEST'
+}
+Error occurred in handler for 'test-mcp': Error: HTTP header credentials require explicit env:VARIABLE references
+    at fail (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/mcp-http-client.cjs:8:67)
+    at validateHttpConfig (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/mcp-http-client.cjs:18:476)
+    at Object.dispatch (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/mcp-service.cjs:246:51)
+    at async Session.<anonymous> (node:electron/js2c/browser_init:2:117721) {
+  error_code: 'VEK_MCP_INVALID_REQUEST'
+}
+{"ok":true,"assertions":8,"screenshot":"reports/mcp-http-panel.png"}

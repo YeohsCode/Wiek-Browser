@@ -1,5 +1,6 @@
 # Outbound MCP Streamable HTTP client
 
+> 0.18增量：本地现代HTTP工具任务已支持有界form MRTR审阅/续传/取消，其他请求与输入模式仍缺；见 [mcp-input-continuations.md](mcp-input-continuations.md)。本文旧版缺口描述保留为历史记录。
 > 0.17更新：现代资源和显式subscriptions/listen已补齐有界HTTP范围，参见[mcp-modern-subscriptions](mcp-modern-subscriptions.md)。下文缺失项反映0.3时点；MRTR/采样/表单续传等仍未完成。
 
 `app/mcp-http-client.cjs` adds an independent public-protocol HTTP transport to `mcp-service.cjs`. Existing stdio integrations, task/grant scope checks and service dispatch remain compatible. `mcp-panel.js/css` adds HTTP configuration. No main/preload/renderer/API changes are required.

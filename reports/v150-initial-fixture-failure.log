@@ -1,0 +1,37 @@
+✔ legacy mode defaults to heartbeat; invalid mode/closed-app edits are atomic (87.019833ms)
+✖ standalone creates a fresh thread per run without source history/attachments/native identity (167.335792ms)
+✔ dedicated owns one clean conversation and continues it across restart (198.465084ms)
+✔ dedicated conversation rejects independent prompt/steer/edit/model/attachment/delete writers (120.911167ms)
+✔ heartbeat appends to the supplied thread with its existing conversation (169.006542ms)
+✔ one definition cannot overlap standalone runs; capacity failure leaves no empty owned thread (164.970125ms)
+✔ Stop pauses future ticks and terminates the generated run, not its template (134.767875ms)
+✔ Delete stops an active dedicated run and releases its retained conversation (2200.086708ms)
+✔ changing mode is blocked while active; an idle change releases the old dedicated thread (182.417959ms)
+✖ imports retain transcript data but never inherit owned binding or closed-app consent (141.24675ms)
+✔ scheduled reservation precedes generated thread creation and never replays after reopen (162.929458ms)
+✔ deleting a template stops linked generated runs and releases their history (99.946584ms)
+✔ closed-app opt-in refuses native protocols and defaults to off for every mode (69.946458ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 11
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3968.691584
+
+✖ failing tests:
+
+test at tests/automation-modes.test.mjs:28:1
+✖ standalone creates a fresh thread per run without source history/attachments/native identity (167.335792ms)
+  TypeError: Cannot read properties of undefined (reading 'id')
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/automation-modes.test.mjs:31:24)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)
+
+test at tests/automation-modes.test.mjs:58:1
+✖ imports retain transcript data but never inherit owned binding or closed-app consent (141.24675ms)
+  TypeError: Cannot read properties of undefined (reading 'runs')
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/automation-modes.test.mjs:59:570)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7)

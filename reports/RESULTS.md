@@ -1,27 +1,27 @@
-# Vek Browser 0.14.0 当前结果
+# Vek Browser 0.15.0 当前结果
 
-更新：2026-11-02（Asia/Shanghai）。本轮补P3显式Desktop tools和全局快捷键注册，继续优先P2/P3；P1其他Agent集成暂缓。**P2/P3和全量Ego复刻仍未完成**。
+更新：2026-11-02（Asia/Shanghai）。本轮推进P3三种自动化执行模式与显式closed-app单次worker；P1其他Agent集成继续暂缓。**OS自动唤醒尚缺，P2/P3和全量复刻未完成**。
 
 | 验证 | 结果与证据 |
 |---|---|
-| 本地全套 | **331/331**，比0.13新增18项，最终代码重跑通过。[日志](v140-service-tests.log) |
-| Desktop专项 | **23/23**：13服务/4 native adapter/1实际Electron，加原有5偏好测试。[日志](v140-desktop-tests.log) |
-| 实际打包宿主 | **140/140**，0.14.0受保护API；新增8项默认/权限边界检查。[日志](v140-package-workbench.log) |
-| 打包模块专项 | **1/1实际Electron、20内部检查**；读取发行包模块，真实IPC/Library editor，OS registry/capture为fixture。[日志](v140-package-desktop-panel.log) |
-| SDK E2E | **Vek69/69、1248断言**；保留同hash完整Ego **68/69、1235断言**（HTML paste失败），两侧0跳过/0未运行。[日志](v140-package-sdk.log)、[同集对比](comparison.md) |
-| 打包/上游身份 | **162文件匹配、81个上游输入未改**；发行SDK hash与两侧测试一致。[校验](v140-package-verification.log) |
-| 原生界面 | 既有权限状态、全局键注册/重启恢复、真实截图进程启动/取消/清理和默认重置已确认。**背景按键触发、AX正文、原生PNG正向链路未确认**。[QA](v140-native-ui-qa.md) |
-| 保留证据 | SDK532/532单测、CDP22/22和历史官方CLI无推理readiness，未重跑；上一轮[Profile原生验收](v130-native-ui-qa.md)保留 |
-| 官方31线上模型任务 | **未运行**；0付费模型、0外部账号操作，不计作通过或Ego服务跳过 |
+| 本地全套 | **358/358**，比0.14新增27项，最终代码重跑。[日志](v150-service-tests.log) |
+| 调度专项 | **38/38**：15 mode、11真实worker、1实际Electron和原11时区回归。[日志](v150-scheduler-tests.log) |
+| 实际打包宿主 | **150/150**，新增10项mode/进程/归属/锁验收。[日志](v150-package-workbench.log) |
+| 打包模块/CLI专项 | **12/12**：11实际发行CLI worker测试、1发行panel源码在Electron执行，共10界面检查。[日志](v150-package-scheduler.log) |
+| SDK E2E | **Vek69/69、1248断言**；保留同hash完整Ego **68/69、1235断言**（HTML paste失败），两侧0跳过/0未运行。[日志](v150-package-sdk.log)、[同集对比](comparison.md) |
+| 打包/上游身份 | **163文件匹配、81个上游输入未改**；发行SDK与两侧测试hash一致。[校验](v150-package-verification.log) |
+| 原生UI + closed-app | CUA实际选择mode/consent、UI第一次执行、关闭后发行worker第二次执行、同专属线程续接、重开可见且无手工写入入口。[QA](v150-native-ui-qa.md)、[核对](v150-native-ui-check.json) |
+| 保留证据 | SDK532/532单测、CDP22/22及历史官方CLI无推理readiness未重跑；0.14原生正向截图/AX正文/背景键触发仍未确认 |
+| 官方31线上模型任务 | **未运行**；0付费模型、0外部账号操作，不算通过或Ego服务跳过 |
 
-Settings → Desktop capture & global shortcuts可配置一次性采集。选区默认关闭，只读当前AXSelectedText，按bundle ID排除/secure控件拒绝；不模拟Copy、轮询剪贴板或被动监听。截图走系统固定区域/窗口选择器；取消等待进程实际退出，失败/取消替换保留原有未过期draft。正文仅在内存保留3分钟，先预览再明确复制/保存/用作草稿；图片进入既有Library标注，保存后遵循Library持久生命周期。CLI/RPC只有元数据，不能采集/取正文/更改设置。[完整设计与REA边界](../analysis/desktop-tools.md)
+Heartbeat延续既有thread，standalone每次新建，dedicated首次新建后复用专属线程。新线程只复制project/provider/model/effort，不带源历史、附件、native身份或Space authority；显式automation memory可用于所有mode。专属会话拒绝独立prompt/steer/编辑/model/附件等写入；Pause只停未来，Stop取消实际run，删除定义停止owned进程并释放保留会话。scheduled先持久预约，再创建线程，crash不自动重放，仍可能丢一次。[设计和Ego静态证据](../analysis/automation-execution.md)
 
-四种全局键默认未分配；实际OS注册失败显示unavailable，重配失败保留旧键，与浏览器快捷键双向冲突检查；退出只注销模块自己拥有的键。chat/voice只打开面板，不自动发送或启动麦克风。当前仅macOS ARM64原生实现；Fn、被动选区浮动工具栏、跨应用音视频录制、多屏/所有应用兼容尚缺。权限由真实OS授予，本轮没有自动授权。
+`closedAppAllowed`默认false，显式 `scheduler tick`只运行cutoff已到期的opt-in普通CLI任务，复用同一Agent锁/workspace/turn checkpoints；存在锁即skip，不清陈旧锁。signal/timeout等待实际退出，输出正文不进入CLI结果；worker只读user instructions，禁止子上下文自动启动浏览器。它不会打开网页Profile、安装OS作业、唤醒睡眠机器或持续轮询。Native provider需浏览器审批界面，worker明确不支持。
 
-实际取消发现了Electron IPC错误前缀显示问题，已修正，最终原生取消无错误，新增abort-rejection与panel回归。Ego侧只复用身份匹配的有界shipped-static证据，没有native正向对测；不能把独立实现或注入fixture通过描述为Ego等价。
+初始新增fixture错误地选择model却缺少provider模板参数、并尝试运行仍禁用的导入provider；补齐fixture配置/明确启用后原断言通过，没有改弱产品边界。[初始日志](v150-initial-fixture-failure.log)。原生QA另发现专属视图残留不可用编辑/回滚/删除入口，已移除并补Electron检查，最终包复验。
 
-下一步P3应用退出后调度与standalone/dedicated执行语义，先实现明确opt-in的生命周期、去重、停用/卸载和失败恢复；不会自动安装后台常驻服务。P2明确来源完整迁移与MCP DCR/MRTR/现代订阅保留，P1不同Agent集成继续暂缓。
+下一步P3：明确opt-in的系统唤醒作业安装/状态/停用卸载、稳定runtime路径、前台handoff和睡眠后恢复；Ego busy延期/completion contract仍有差异。P2来源完整迁移与MCP DCR/MRTR/现代订阅保留，P1继续暂缓。
 
-应用：`dist/mac-arm64/Vek Browser.app`。正常资料运行状态见[status](v140-normal-app-status.json)。Electron42.11.18 / Chromium148.0.7778.280不等价Ego Chromium156完整引擎；应用未签名/公证，无远程发布。
+应用：`dist/mac-arm64/Vek Browser.app`，正常资料状态见[status](v150-normal-app-status.json)。Electron42.11.18 / Chromium148.0.7778.280不等价Ego Chromium156完整引擎；未签名/公证，无远程发布。
 
 [计划](../PLAN.md) · [功能对照](../analysis/feature-parity.md) · [结构化结果](delivery-summary.json) · [文档索引](../docs/README.md)

@@ -1,0 +1,21 @@
+{"ok":true,"checks":10,"actualElectron":true,"fixtureOnly":true,"modelCalls":0}
+✔ actual Electron automation editor submits explicit mode/consent and owned threads have no manual composer (268.840917ms)
+✔ a closed-app tick never consumes unapproved or future schedules and never starts a browser (177.029083ms)
+✔ actual CLI workers persist a dedicated conversation across invocations and do not replay a due occurrence (517.434541ms)
+✔ worker context disables CLI browser autostart and stdout does not expose provider body (314.214791ms)
+✔ an active browser/service lock is never stolen by the worker (131.136167ms)
+✔ stale locks are not reaped by a worker and symlinked lock paths fail closed (198.311ms)
+✔ simultaneous real workers produce one run; SIGTERM waits for actual provider exit and releases the lease (333.973792ms)
+✔ worker timeout settles an actual child and a newly due schedule is left for a later tick (833.485167ms)
+✔ closed-app generated runs retain real before/after Git checkpoint associations (801.993041ms)
+✔ provider reconfiguration to a native protocol is skipped without consuming its due reservation (179.665583ms)
+✔ a real failing provider records failure and stop-on-failure without replaying its reservation (342.353083ms)
+✔ worker setup failures release the Agent lock and never run a provider (149.532291ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4047.955417

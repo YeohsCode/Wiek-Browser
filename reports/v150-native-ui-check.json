@@ -1,0 +1,22 @@
+{
+  "generatedAt": "2026-11-02T00:07:14.081595+00:00",
+  "version": "0.15.0",
+  "fixtureOnly": true,
+  "nativeModeAndConsentSelected": true,
+  "sameOwnedThreadAcrossUIAndClosedWorker": true,
+  "ownedThreadId": "04c9fea0-58da-4606-b88d-7be251c2b3af",
+  "runCount": 2,
+  "statuses": [
+    "completed",
+    "completed"
+  ],
+  "sourceTranscriptExcluded": true,
+  "runningBrowserLockRespected": true,
+  "browserAbsentDuringWorker": true,
+  "workerLockReleased": true,
+  "systemWakeJobInstalled": false,
+  "modelCalls": 0,
+  "externalAccountActions": 0,
+  "finalNativeOwnedComposerAndUnsupportedActionsAbsent": true,
+  "finalNativeConversationToolsNoModelEdit": true
+}

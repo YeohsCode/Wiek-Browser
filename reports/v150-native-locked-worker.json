@@ -1,0 +1,6 @@
+{
+  "status": "skipped-locked",
+  "attempted": [],
+  "skipped": [],
+  "reason": "Agent directory is locked. A browser/worker may be active; open the browser to recover a stale lock."
+}

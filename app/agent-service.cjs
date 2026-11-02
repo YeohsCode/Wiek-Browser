@@ -136,7 +136,7 @@ function discoverOpenCode() {
   return { id: 'opencode-native', name: 'OpenCode ACP session (opt-in)', command, args: ['acp'], inputMode: 'stdin', modelArgs: [], models: [], protocol: 'opencode-acp', enabled: false, verifiedBy: 'local acp --help; no authentication or inference checked' };
 }
 
-function createAgentService({ dataDir, onChange = () => {}, runContext, turnCheckpoints, maxConcurrentRuns = 2, maxOutputBytes = 1024 * 1024 } = {}) {
+function createAgentService({ dataDir, onChange = () => {}, runContext, turnCheckpoints, maxConcurrentRuns = 2, maxOutputBytes = 1024 * 1024, autoSchedule = true, discoverProviders = true, recoverLock = true } = {}) {
   if (!dataDir) throw fail('dataDir is required');
   maxConcurrentRuns = Math.max(1, Math.min(16, Number(maxConcurrentRuns) || 2));
   maxOutputBytes = Math.max(128, Math.min(16 * 1024 * 1024, Number(maxOutputBytes) || 1024 * 1024));
@@ -148,12 +148,14 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   const lockPath = path.join(directory, 'service.lock');
   const lockToken = randomUUID();
   if (fs.existsSync(lockPath)) {
+    if (fs.lstatSync(lockPath).isSymbolicLink() || !fs.lstatSync(lockPath).isFile()) throw fail('Agent lock must be a regular file');
+    if (!recoverLock) throw fail('Agent data directory is locked; start the browser to recover a stale lock', 'VEK_AGENT_DATA_LOCKED');
     let alive = false;
     try { const lock = JSON.parse(fs.readFileSync(lockPath, 'utf8')); process.kill(lock.pid, 0); alive = true; } catch (error) { if (error.code === 'EPERM') alive = true; }
     if (alive) throw fail('Another Agent service is using this data directory', 'VEK_AGENT_DATA_LOCKED');
     fs.unlinkSync(lockPath);
   }
-  const lock = fs.openSync(lockPath, 'wx', 0o600);
+  let lock;try { lock = fs.openSync(lockPath, 'wx', 0o600); } catch (error) { if(error.code==='EEXIST')throw fail('Another Agent service is using this data directory','VEK_AGENT_DATA_LOCKED');throw error; }
   fs.writeFileSync(lock, JSON.stringify({ pid: process.pid, token: lockToken })); fs.closeSync(lock);
   let state;
   try {
@@ -213,13 +215,13 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       thread.updatedAt = now();
     }
   }
-  const discovered = discoverCodex();
+  const discovered = discoverProviders ? discoverCodex() : null;
   if (discovered && !state.providers.some((provider) => provider.id === discovered.id)) state.providers.push(discovered);
   if (discovered && !state.providers.some((provider) => provider.id === 'codex-native')) state.providers.push({ ...discovered, id: 'codex-native', name: 'Codex native session (opt-in)', args: ['app-server', '--stdio'], modelArgs: [], protocol: 'codex-app-server', enabled: false });
-  const claudeDiscovered = discoverClaude();
+  const claudeDiscovered = discoverProviders ? discoverClaude() : null;
   if (claudeDiscovered && !state.providers.some(provider => provider.id === claudeDiscovered.id)) state.providers.push(claudeDiscovered);
 
-  const openCodeDiscovered = discoverOpenCode();
+  const openCodeDiscovered = discoverProviders ? discoverOpenCode() : null;
   if (openCodeDiscovered && !state.providers.some(provider => provider.id === openCodeDiscovered.id)) state.providers.push(openCodeDiscovered);
 
   function killTree(child, signal) {
@@ -327,6 +329,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   }
   function startRun(thread, prompt, automationId, automationReservationId) {
     if (closed) throw fail('Agent service is closed');
+    automationAccess(thread, automationId);
     if (running.has(thread.id)) throw fail('This thread is already running', 'VEK_AGENT_OVERLAP');
     if (running.size >= maxConcurrentRuns) throw fail('Agent concurrency limit reached', 'VEK_AGENT_CAPACITY');
     prompt = nonempty(prompt, 'prompt');
@@ -456,8 +459,15 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     const kind = input.kind ?? previous.kind;
     if (!['at', 'interval', 'cron', 'heartbeat'].includes(kind)) throw fail('Automation kind must be at, interval, cron, or heartbeat');
     const threadId = input.threadId ?? previous.threadId; locate('threads', threadId);
+    const template=locate('threads',threadId);
+    if(template.automationOwnerId)throw fail('Choose a user conversation as the automation template');
+    const executionMode=input.executionMode ?? previous.executionMode ?? 'heartbeat';
+    if(!['heartbeat','standalone','dedicated'].includes(executionMode))throw fail('Execution mode must be heartbeat, standalone or dedicated');
+    const closedAppAllowed=input.closedAppAllowed ?? previous.closedAppAllowed ?? false;
+    if(typeof closedAppAllowed!=='boolean')throw fail('closedAppAllowed must be a boolean');
+    if(closedAppAllowed && locate('providers',template.providerId).protocol && locate('providers',template.providerId).protocol!=='cli')throw fail('The closed-app worker currently supports plain CLI providers only; native approvals require the browser');
     const prompt = nonempty(input.prompt ?? previous.prompt, 'prompt');
-    const result = { ...previous, name: nonempty(input.name ?? previous.name ?? 'Automation', 'name', 256), threadId, prompt, kind };
+    const result = { ...previous, name: nonempty(input.name ?? previous.name ?? 'Automation', 'name', 256), threadId, prompt, kind, executionMode, closedAppAllowed };
     if (kind === 'at') {
       const at = new Date(input.at ?? previous.at);
       if (!Number.isFinite(at.getTime())) throw fail('Automation at must be a valid date');
@@ -483,6 +493,23 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     return result;
   }
   function nextTime(automation) { return automation.kind === 'at' ? automation.at : automation.kind === 'cron' ? nextCronAt(automation.cron, Date.now(), automation.timeZone || 'UTC') : new Date(Date.now() + automation.intervalMs).toISOString(); }
+  function automationAccess(thread, automationId) {
+    if(thread.automationMode==='dedicated' && thread.automationOwnerId && state.automations.some(a=>a.id===thread.automationOwnerId) && automationId!==thread.automationOwnerId)throw fail('This conversation belongs to an automation. Use its Run now/Stop controls, or delete the automation to release it.','VEK_AGENT_AUTOMATION_OWNED');
+  }
+  function releaseAutomationThreads(automation) {
+    for(const thread of state.threads)if(thread.automationOwnerId===automation.id){thread.formerAutomationId=automation.id;delete thread.automationOwnerId;thread.updatedAt=now();}
+    delete automation.ownedThreadId;
+  }
+  async function stopAutomation(automation) {
+    await Promise.all([...running.values()].filter(active=>active.run.automationId===automation.id).map(active=>stopThread(active.thread.id)));
+  }
+  function automationThread(automation) {
+    const mode=automation.executionMode||'heartbeat',template=locate('threads',automation.threadId);
+    if(mode==='heartbeat')return {thread:template,created:false};
+    if(mode==='dedicated' && automation.ownedThreadId){const thread=locate('threads',automation.ownedThreadId);if(thread.archived)throw fail('The dedicated conversation is archived; unarchive it before running this automation');if(thread.automationOwnerId!==automation.id||thread.automationMode!=='dedicated')throw fail('Dedicated conversation ownership changed; edit the automation to choose a new template');return {thread,created:false};}
+    const thread=newThread(template.projectId,template.providerId,`${automation.name} · ${mode==='dedicated'?'dedicated':'run '+((automation.runCount||0)+1)}`,{automationOwnerId:automation.id,automationMode:mode,automationTemplateId:template.id,...(template.model?{model:template.model}:{}),...(template.reasoningEffort?{reasoningEffort:template.reasoningEffort}:{})});
+    state.threads.push(thread);if(mode==='dedicated')automation.ownedThreadId=thread.id;return {thread,created:true};
+  }
   function runAutomation(automation, scheduled) {
     const timestamp = Date.now();
     if ((automation.maxRuns && (automation.runCount || 0) >= automation.maxRuns) || (automation.stopAfter && timestamp >= Date.parse(automation.stopAfter))) {
@@ -511,14 +538,23 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       if (minuteKey) automation.lastScheduledMinute = minuteKey;
       automation.lastScheduledFor = scheduledFor; automation.lastReservationId = reservationId = randomUUID(); automation.lastOutcome = 'reserved'; automation.updatedAt = now(); publish();
     }
-    const prompt = automation.kind === 'heartbeat' && automation.memory ? `${automation.prompt}\n\nHeartbeat memory (local notes):\n${automation.memory}` : automation.prompt;
-    try { const run = startRun(locate('threads', automation.threadId), prompt, automation.id, reservationId); automation.runCount = (automation.runCount || 0) + 1; automation.lastOutcome = 'started'; automation.lastRunId = run.id; delete automation.lastError; }
-    catch (error) { automation.lastOutcome = ['VEK_AGENT_OVERLAP','VEK_AGENT_PROJECT_BUSY'].includes(error.error_code) ? 'skipped-overlap' : error.error_code === 'VEK_AGENT_CAPACITY' ? 'skipped-capacity' : 'failed'; automation.lastError = error.message; if (automation.lastOutcome === 'failed' && automation.stopOnFailure) { automation.status = 'paused'; automation.stopReason = 'Provider run failed'; } }
+    const prompt = automation.memory ? `${automation.prompt}\n\nAutomation memory (local notes):\n${automation.memory}` : automation.prompt;
+    let target;
+    try {
+      if([...running.values()].some(active=>active.run.automationId===automation.id))throw fail('This automation already has an active run','VEK_AGENT_OVERLAP');
+      target=automationThread(automation);
+      const run = startRun(target.thread, prompt, automation.id, reservationId);
+      automation.runCount = (automation.runCount || 0) + 1; automation.lastOutcome = 'started'; automation.lastRunId = run.id;automation.lastRunThreadId=target.thread.id; delete automation.lastError;
+    }
+    catch (error) {
+      if(target?.created && !target.thread.runs.length){state.threads=state.threads.filter(t=>t.id!==target.thread.id);if(automation.ownedThreadId===target.thread.id)delete automation.ownedThreadId;}
+      automation.lastOutcome = ['VEK_AGENT_OVERLAP','VEK_AGENT_PROJECT_BUSY'].includes(error.error_code) ? 'skipped-overlap' : error.error_code === 'VEK_AGENT_CAPACITY' ? 'skipped-capacity' : 'failed'; automation.lastError = error.message; if (automation.lastOutcome === 'failed' && automation.stopOnFailure) { automation.status = 'paused'; automation.stopReason = 'Provider run failed'; }
+    }
     automation.updatedAt = now();
   }
   function armScheduler() {
     clearTimeout(scheduleTimer); scheduleTimer = undefined;
-    if (closed) return;
+    if (closed || !autoSchedule) return;
     const due = state.automations.filter((automation) => automation.status === 'active' && automation.nextRunAt);
     if (!due.length) return;
     const wait = Math.max(1, Math.min(2147483647, Math.min(...due.map((automation) => Date.parse(automation.nextRunAt))) - Date.now()));
@@ -530,11 +566,21 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     scheduleTimer.unref?.();
   }
 
+  function runDueOnce({accept=()=>true,through=Date.now()}={}) {
+    if(closed)throw fail('Agent service is closed');
+    const attempted=[],skipped=[];
+    for(const automation of state.automations)if(automation.status==='active'&&automation.nextRunAt&&Date.parse(automation.nextRunAt)<=through){
+      const reason=accept(clone(automation),clone(locate('threads',automation.threadId)));
+      if(reason!==true){skipped.push({automationId:automation.id,reason:typeof reason==='string'?reason:'not-selected'});continue;}
+      runAutomation(automation,true);attempted.push({automationId:automation.id,outcome:automation.lastOutcome,runId:automation.lastRunId||null,threadId:automation.lastRunThreadId||null});
+    }
+    publish();return {attempted,skipped};
+  }
   function newThread(projectId, providerId, title, extra = {}) {
     locate('projects', projectId); locate('providers', providerId);
     return { id: randomUUID(), projectId, providerId, title: nonempty(title || 'New thread', 'title', 256), status: 'idle', createdAt: now(), updatedAt: now(), messages: [], runs: [], attachments: [], archived: false, pinned: false, notes: '', markers: [], revisions: [], ...extra };
   }
-  function editable(thread) { if (running.has(thread.id)) throw fail('Stop the current run before changing its transcript', 'VEK_AGENT_OVERLAP'); }
+  function editable(thread) { automationAccess(thread);if (running.has(thread.id)) throw fail('Stop the current run before changing its transcript', 'VEK_AGENT_OVERLAP'); }
   function revise(thread, kind, messages) {
     thread.revisions ||= [];
     thread.revisions.push({ id: randomUUID(), kind, createdAt: now(), messages: clone(thread.messages) });
@@ -616,7 +662,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       }
       for (const item of data.automations) {
         if (!item || !threadIds.has(item.threadId)) throw fail('Invalid imported automation thread');
-        const automation = validateAutomation({ ...item, threadId: threadIds.get(item.threadId) });
+        const automation = validateAutomation({ ...item, threadId: threadIds.get(item.threadId),closedAppAllowed:false });
         state.automations.push({ ...automation, id: randomUUID(), status: 'paused', nextRunAt: nextTime(automation), createdAt: now(), updatedAt: now(), runCount: 0 });
       }
       if (Array.isArray(data.proposals)) for (const proposal of data.proposals) {
@@ -653,7 +699,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         });
       }
       case 'agents:control:steer': {
-        const thread = locate('threads', id), prompt = nonempty(payload.prompt, 'follow-up prompt');
+        const thread = locate('threads', id), prompt = nonempty(payload.prompt, 'follow-up prompt');automationAccess(thread);
         const active = running.get(thread.id);
         if (active?.discovery) throw fail('Wait for model discovery to finish before sending a prompt');
         if (active?.claude || active?.acp) { thread.pendingFollowUps ||= []; thread.pendingFollowUps.push({ id: randomUUID(), prompt, createdAt: now() }); thread.updatedAt = now(); }
@@ -668,6 +714,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         const request = nonempty(payload.prompt, 'handoff prompt', 32768);
         if (payload.toThreadId === source.id) throw fail('Handoff requires a different destination thread');
         let destination = payload.toThreadId ? locate('threads', payload.toThreadId) : null;
+        if(destination)automationAccess(destination);
         if (destination && running.has(destination.id)) throw fail('Handoff destination is already running', 'VEK_AGENT_OVERLAP');
         await stopThread(source.id);
         if (!destination) { destination = newThread(source.projectId, source.providerId, payload.title || `Handoff: ${source.title}`, { parentThreadId: source.id, kind: 'handoff', model: source.model || '', ...(source.browserSpaceId !== undefined ? { browserSpaceId: source.browserSpaceId } : {}) }); copyAttachments(source, destination); state.threads.push(destination); }
@@ -797,7 +844,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       case 'agents:threads:goal': { const thread = locate('threads', id); const text = typeof payload.goal === 'string' ? payload.goal : payload.goal?.text; if (text === '' || payload.goal === null) delete thread.goal; else thread.goal = { text: nonempty(text, 'goal'), status: (payload.status || payload.goal?.status) === 'complete' ? 'complete' : 'active' }; thread.updatedAt = now(); break; }
       case 'agents:threads:marker:add': { const thread = locate('threads', id); if (payload.messageId && !thread.messages.some((item) => item.id === payload.messageId)) throw fail('Marker message not found'); thread.markers.push({ id: randomUUID(), label: nonempty(payload.label, 'marker label', 256), ...(payload.messageId ? { messageId: payload.messageId } : {}), createdAt: now() }); thread.updatedAt = now(); break; }
       case 'agents:threads:marker:remove': { const thread = locate('threads', id); thread.markers = thread.markers.filter((item) => item.id !== payload.markerId); thread.updatedAt = now(); break; }
-      case 'agents:threads:discover-models': startModelDiscovery(locate('threads', id)); break;
+      case 'agents:threads:discover-models': {const thread=locate('threads',id);automationAccess(thread);startModelDiscovery(thread);break;}
       case 'agents:threads:model': {
         const thread = locate('threads', id); editable(thread); const protocol = locate('providers', thread.providerId).protocol;
         const model = payload.model ? nonempty(payload.model, 'model', 256) : '';
@@ -832,16 +879,16 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
         const thread = locate('threads', id); editable(thread); const index = thread.messages.findIndex((item) => item.id === payload.messageId); if (index < 0) throw fail('Rollback message not found');
         revise(thread, 'rollback', thread.messages.slice(0, index + (payload.includeMessage === false ? 0 : 1))); break;
       }
-      case 'agents:threads:delete': await stopThread(id); locate('threads', id); state.threads = state.threads.filter((thread) => thread.id !== id); state.automations = state.automations.filter((automation) => automation.threadId !== id); state.proposals = state.proposals.filter((proposal) => proposal.threadId !== id); break;
+      case 'agents:threads:delete': {const thread=locate('threads',id);automationAccess(thread);for(const a of state.automations.filter(a=>a.threadId===id)){a.status='paused';await stopAutomation(a);releaseAutomationThreads(a);}await stopThread(id);state.threads=state.threads.filter(t=>t.id!==id);state.automations=state.automations.filter(a=>a.threadId!==id);state.proposals=state.proposals.filter(p=>p.threadId!==id);break;}
       case 'agents:threads:prompt': startRun(locate('threads', id), payload.prompt); break;
       case 'agents:threads:stop': locate('threads', id); await stopThread(id); break;
       case 'agents:automations:create': { const automation = validateAutomation(payload); state.automations.push({ ...automation, id: randomUUID(), status: payload.status === 'paused' ? 'paused' : 'active', nextRunAt: nextTime(automation), createdAt: now(), updatedAt: now() }); break; }
-      case 'agents:automations:update': { const previous = locate('automations', id), candidate = validateAutomation(payload, previous), next = nextTime(candidate); Object.assign(previous, candidate, { updatedAt: now() }); if (previous.kind !== 'at') delete previous.at; if (!['interval', 'heartbeat'].includes(previous.kind)) delete previous.intervalMs; if (previous.kind !== 'cron') { delete previous.cron; delete previous.timeZone; delete previous.dstPolicy; } delete previous.lastScheduleError; if (previous.stopReason === 'Cannot calculate next cron occurrence') delete previous.stopReason; previous.nextRunAt = next; if (previous.status === 'completed') previous.status = 'paused'; break; }
-      case 'agents:automations:delete': locate('automations', id); state.automations = state.automations.filter((automation) => automation.id !== id); break;
+      case 'agents:automations:update': { const previous = locate('automations', id), candidate = validateAutomation(payload, previous), next = nextTime(candidate); if(candidate.executionMode!==(previous.executionMode||'heartbeat')||candidate.threadId!==previous.threadId){if([...running.values()].some(active=>active.run.automationId===id))throw fail('Stop the automation run before changing its mode or template');releaseAutomationThreads(previous);delete candidate.ownedThreadId;} Object.assign(previous, candidate, { updatedAt: now() }); if (previous.kind !== 'at') delete previous.at; if (!['interval', 'heartbeat'].includes(previous.kind)) delete previous.intervalMs; if (previous.kind !== 'cron') { delete previous.cron; delete previous.timeZone; delete previous.dstPolicy; } delete previous.lastScheduleError; if (previous.stopReason === 'Cannot calculate next cron occurrence') delete previous.stopReason; previous.nextRunAt = next; if (previous.status === 'completed') previous.status = 'paused'; break; }
+      case 'agents:automations:delete': {const a=locate('automations',id);a.status='paused';await stopAutomation(a);releaseAutomationThreads(a);state.automations=state.automations.filter(item=>item.id!==id);break;}
       case 'agents:automations:pause': { const automation = locate('automations', id); automation.status = 'paused'; automation.updatedAt = now(); break; }
       case 'agents:automations:resume': { const automation = locate('automations', id), next = nextTime(automation); automation.status = 'active'; automation.nextRunAt = next; delete automation.lastScheduleError; if (automation.stopReason === 'Cannot calculate next cron occurrence') delete automation.stopReason; automation.updatedAt = now(); break; }
       case 'agents:automations:run': runAutomation(locate('automations', id), false); break;
-      case 'agents:automations:stop': { const automation = locate('automations', id); automation.status = 'paused'; automation.updatedAt = now(); if (running.get(automation.threadId)?.run.automationId === automation.id) await stopThread(automation.threadId); break; }
+      case 'agents:automations:stop': { const automation = locate('automations', id); automation.status = 'paused'; automation.updatedAt = now(); await stopAutomation(automation); break; }
       case 'agents:proposals:create': {
         const automation = payload.automationId ? locate('automations', payload.automationId) : null;
         const thread = locate('threads', payload.threadId || automation?.threadId);
@@ -884,7 +931,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     for(const record of records){const thread=state.threads.find(t=>t.id===record.threadId&&t.projectId===record.projectId),run=thread?.runs.find(r=>r.id===record.runId);if(run)run.fileChanges=clone(record);}
     persist();
   }
-  return { dispatch, snapshot, close, recoverFileChanges };
+  return { dispatch, snapshot, close, recoverFileChanges,runDueOnce };
 }
 
 module.exports = { createAgentService, nextCronAt };

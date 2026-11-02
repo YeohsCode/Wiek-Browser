@@ -1,6 +1,6 @@
 # 文档索引
 
-当前版本 **0.14.0**；优先P2/P3，其余Agent集成暂缓。已完成有界Profile归档与P3显式Desktop tools；下一项退出后调度和执行模式，P2明确来源迁移/MCP剩余项仍保留。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
+当前版本 **0.15.0**；优先P2/P3，其余Agent集成暂缓。已完成有界Profile归档与P3显式Desktop tools；已补三种执行模式与显式closed-app tick；下一项系统自动唤醒/前台handoff，P2明确来源迁移/MCP剩余项仍保留。最新进度只认 [PLAN.md](../PLAN.md)，当前验收只认 [RESULTS.md](../reports/RESULTS.md)。历史调查/设计反映其记录时点，不自动代表当前功能缺失或已通过。
 
 | 用途 | 文档 |
 |---|---|
@@ -24,6 +24,7 @@
 | MCP公共客户端OAuth | [mcp-oauth-design.md](../analysis/mcp-oauth-design.md) |
 | MCP资源订阅 / 本地memory索引 | [mcp-resources-memory.md](../analysis/mcp-resources-memory.md) |
 | MCP | [stdio/gateway](../analysis/mcp-service-design.md)、[HTTP 与版本差异](../analysis/mcp-http-design.md) |
+| 自动化执行模式与单次worker | [automation-execution.md](../analysis/automation-execution.md) |
 | 时区与调度恢复 | [scheduler-timezone.md](../analysis/scheduler-timezone.md) |
 | 权限与 Profile 归属 | [site-permissions.md](../analysis/site-permissions.md)、[browser-shell-v030.md](../analysis/browser-shell-v030.md) |
 | OS单次采集与全局快捷键 | [desktop-tools.md](../analysis/desktop-tools.md) |

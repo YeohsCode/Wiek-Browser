@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-11-01T21:55:16.213Z",
-  "version": "0.14.0",
+  "generatedAt": "2026-11-02T00:14:33.554Z",
+  "version": "0.15.0",
   "versionMatches": true,
-  "checkedFiles": 162,
+  "checkedFiles": 163,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
@@ -29,12 +29,12 @@
     },
     {
       "file": "app/agent-panel.js",
-      "sha256": "fdca102aba594ce16ddbd82836879ef0c6c0644a2c154014c1b380d8c996a95f",
+      "sha256": "630c16fa69fe2fa2d99da3fc7358b7872eda764bce650a4176864d57b6d0a087",
       "matches": true
     },
     {
       "file": "app/agent-service.cjs",
-      "sha256": "84517385eeb063f6de9901eb020041ae48e91481bdadd3ed2aece0c2c18a1714",
+      "sha256": "f4aebd34264eafa7ab2136ca59e24391114ef88ee6f747afc70b54aa149450d2",
       "matches": true
     },
     {
@@ -253,6 +253,11 @@
       "matches": true
     },
     {
+      "file": "app/scheduler-worker.cjs",
+      "sha256": "c4738fe955585a0a331f77378f95c81b199e253b5f56a4eb813dd7b812e63c2a",
+      "matches": true
+    },
+    {
       "file": "app/site-permissions.cjs",
       "sha256": "c32c1ffca848359b8b63ef02dc796e7696f53b1c84f0ad5163eb421ce4fa53bc",
       "matches": true
@@ -324,7 +329,7 @@
     },
     {
       "file": "cli/vek-browser.mjs",
-      "sha256": "96659cc357985d8da84c9071f70d8294dd389cecd61f4b6969d8a17290430023",
+      "sha256": "9ab21461311e1bb611b377c978b66fde6a7982e26482222902dc6ff04f8af947",
       "matches": true
     },
     {
@@ -809,7 +814,7 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "0a95465e2a3a8bb53d3e946aad56d15775c532abcae3cfffb01e17842daf809d",
+      "sha256": "b3f3f421ea863b6c2441c9de98e7b84a449997f992628b534fea89ba286875c4",
       "matches": true
     },
     {

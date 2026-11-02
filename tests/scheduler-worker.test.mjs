@@ -1,0 +1,59 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,writeFile,readFile,rm,symlink} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+import {spawn,execFileSync} from 'node:child_process';
+import {createRequire} from 'node:module';
+const require=createRequire(import.meta.url),{createAgentService}=require('../app/agent-service.cjs'),{runSchedulerTick}=require('../app/scheduler-worker.cjs');
+const root=process.env.VEK_SCHEDULER_APP_ROOT||resolve(import.meta.dirname,'..'),cli=join(root,'cli/vek-browser.mjs');
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+async function until(read,match){for(let i=0;i<400;i++){let value;try{value=await read();}catch{}if(value&&match(value))return value;await delay(10);}throw Error('Worker fixture timed out');}
+async function fixture(t,{body="console.log(text)",mode='standalone',closedAppAllowed=true,prompt='WORKER_FIXTURE',kind='at',extra={}}={}){
+ const dir=await mkdtemp(join(tmpdir(),'vek-worker-')),provider=join(dir,'provider.cjs'),audit=join(dir,'audit');
+ await writeFile(provider,`const fs=require('node:fs');let text='';process.stdin.on('data',b=>text+=b);process.stdin.on('end',()=>{fs.appendFileSync(${JSON.stringify(audit)},'START:'+process.pid+'\\n');${body}});`);
+ let service=createAgentService({dataDir:dir,autoSchedule:false,discoverProviders:false});
+ t.after(async()=>{await service?.close();await rm(dir,{recursive:true,force:true});});
+ await service.dispatch('agents:providers:configure',{id:'fixture',name:'Local fixture',command:process.execPath,args:[provider],inputMode:'stdin'});
+ await service.dispatch('agents:projects:create',{name:'Fixture',path:dir});await service.dispatch('agents:threads:create',{projectId:service.snapshot().projects[0].id,providerId:'fixture',title:'Template'});
+ await service.dispatch('agents:automations:create',{name:'Worker task',threadId:service.snapshot().threads[0].id,prompt,executionMode:mode,closedAppAllowed,kind,at:new Date(Date.now()-1000).toISOString(),intervalMs:60000,...extra});
+ const state=()=>JSON.parse(require('node:fs').readFileSync(join(dir,'agents/state.json'),'utf8'));
+ return {dir,provider,audit,state,get service(){return service;},async close(){await service.close();service=null;},async reopen(){service=createAgentService({dataDir:dir,autoSchedule:false,discoverProviders:false});return service;},tick(args=[]){const child=spawn(process.execPath,[cli,'scheduler','tick',...args],{env:{...process.env,VEK_DATA_DIR:dir},stdio:['ignore','pipe','pipe']});let stdout='',stderr='';child.stdout.on('data',b=>stdout+=b);child.stderr.on('data',b=>stderr+=b);const done=new Promise(r=>child.once('close',code=>r({code,stdout,stderr,result:stdout.trim()?JSON.parse(stdout):null})));return {child,done};}};
+}
+test('a closed-app tick never consumes unapproved or future schedules and never starts a browser',async t=>{
+ const f=await fixture(t,{closedAppAllowed:false});const original=f.state().automations[0];await f.close();const run=await f.tick().done;assert.equal(run.code,0);assert.equal(run.result.status,'completed');assert.equal(run.result.attempted.length,0);assert.equal(run.result.skipped.length,1);assert.equal(f.state().automations[0].nextRunAt,original.nextRunAt);assert.equal(require('node:fs').existsSync(join(f.dir,'runtime.json')),false);assert.equal(require('node:fs').existsSync(f.audit),false);
+});
+test('actual CLI workers persist a dedicated conversation across invocations and do not replay a due occurrence',async t=>{
+ const f=await fixture(t,{mode:'dedicated',kind:'interval'});await f.close();let saved=f.state();saved.automations[0].nextRunAt=new Date(Date.now()-1000).toISOString();await writeFile(join(f.dir,'agents/state.json'),JSON.stringify(saved));
+ const first=await f.tick().done;assert.equal(first.code,0);assert.equal(first.result.attempted[0].outcome,'completed');const id=f.state().automations[0].ownedThreadId;assert.equal(f.state().threads.find(t=>t.id===id).runs.length,1);
+ const noReplay=await f.tick().done;assert.equal(noReplay.result.attempted.length,0);saved=f.state();saved.automations[0].nextRunAt=new Date(Date.now()-1000).toISOString();await writeFile(join(f.dir,'agents/state.json'),JSON.stringify(saved));const second=await f.tick().done;assert.equal(second.result.attempted[0].threadId,id);assert.equal(f.state().threads.find(t=>t.id===id).runs.length,2);assert.equal((await readFile(f.audit,'utf8')).split('START:').length-1,2);
+});
+test('worker context disables CLI browser autostart and stdout does not expose provider body',async t=>{
+ const body=`const cp=require('node:child_process');const probe=cp.spawnSync(process.execPath,[${JSON.stringify(cli)},'api','agents:snapshot','--json','{}'],{encoding:'utf8',env:process.env});console.log('RULE_SEEN:'+text.includes('WORKER_USER_RULE'));console.log('PRIVATE_BODY:'+process.env.VEK_BROWSER_AUTOSTART+':'+probe.status+':'+probe.stderr);`;
+ const f=await fixture(t,{body});const {createPreferencesService}=require('../app/preferences-service.cjs'),prefs=createPreferencesService({dataDir:f.dir});await prefs.dispatch('preferences:update',{instructions:'WORKER_USER_RULE'});prefs.close();const prefsBefore=await readFile(join(f.dir,'preferences/state.json'),'utf8');await f.close();const run=await f.tick().done;assert.equal(run.code,0);assert.ok(!run.stdout.includes('PRIVATE_BODY'));const output=f.state().threads.at(-1).runs[0].stdout;assert.match(output,/PRIVATE_BODY:0:1:/);assert.ok(f.state().threads.at(-1).messages[0].content.includes('WORKER_USER_RULE')===false);assert.equal(await readFile(join(f.dir,'preferences/state.json'),'utf8'),prefsBefore);assert.match(output,/auto-start is disabled/);assert.match(output,/RULE_SEEN:true/);assert.equal(require('node:fs').existsSync(join(f.dir,'runtime.json')),false);
+});
+test('an active browser/service lock is never stolen by the worker',async t=>{
+ const f=await fixture(t);const lock=await readFile(join(f.dir,'agents/service.lock'),'utf8'),state=await readFile(join(f.dir,'agents/state.json'),'utf8');const result=await f.tick().done;assert.equal(result.result.status,'skipped-locked');assert.equal(await readFile(join(f.dir,'agents/service.lock'),'utf8'),lock);assert.equal(await readFile(join(f.dir,'agents/state.json'),'utf8'),state);assert.equal(f.service.snapshot().runningCount,0);
+});
+test('stale locks are not reaped by a worker and symlinked lock paths fail closed',async t=>{
+ const f=await fixture(t);await f.close();const lock=join(f.dir,'agents/service.lock');await writeFile(lock,JSON.stringify({pid:2147483647,token:'stale-fixture'}));const original=await readFile(lock,'utf8');assert.equal((await f.tick().done).result.status,'skipped-locked');assert.equal(await readFile(lock,'utf8'),original);await rm(lock);const outside=join(f.dir,'outside-lock');await writeFile(outside,'do not alter');await symlink(outside,lock);const attempt=await f.tick().done;assert.equal(attempt.code,1);assert.match(attempt.stderr,/regular file/);assert.equal(await readFile(outside,'utf8'),'do not alter');await rm(lock);
+});
+test('simultaneous real workers produce one run; SIGTERM waits for actual provider exit and releases the lease',async t=>{
+ const f=await fixture(t,{body:"console.log('READY');setTimeout(()=>console.log('TOO_LATE'),5000)"});await f.close();const first=f.tick();await until(()=>readFile(f.audit,'utf8'),v=>v.includes('START:'));const second=await f.tick().done;assert.equal(second.result.status,'skipped-locked');assert.throws(()=>createAgentService({dataDir:f.dir,discoverProviders:false,recoverLock:false}),e=>e.error_code==='VEK_AGENT_DATA_LOCKED');first.child.kill('SIGTERM');const result=await first.done;assert.equal(result.code,2);assert.equal(result.result.status,'cancelled');const state=f.state();assert.equal(state.threads.at(-1).runs[0].status,'interrupted');assert.equal(state.threads.at(-1).runs[0].stdout.includes('TOO_LATE'),false);const pid=Number((await readFile(f.audit,'utf8')).match(/START:(\d+)/)[1]);assert.throws(()=>process.kill(pid,0),e=>e.code==='ESRCH');assert.equal(require('node:fs').existsSync(join(f.dir,'agents/service.lock')),false);const service=await f.reopen();assert.equal(service.snapshot().threads.at(-1).runs.length,1);
+});
+test('worker timeout settles an actual child and a newly due schedule is left for a later tick',async t=>{
+ const f=await fixture(t,{body:"console.log('READY');setTimeout(()=>console.log('TOO_LATE'),5000)"});await f.service.dispatch('agents:automations:create',{threadId:f.service.snapshot().threads[0].id,prompt:'FUTURE',executionMode:'standalone',closedAppAllowed:true,kind:'at',at:new Date(Date.now()+400).toISOString()});await f.close();const result=await f.tick(['--timeout-ms','650']).done;assert.equal(result.code,2);assert.equal(result.result.status,'timed-out');assert.equal(result.result.attempted.length,1);assert.equal(f.state().automations[1].lastRunId,undefined);assert.equal(f.state().automations[1].status,'active');assert.equal(f.state().threads.at(-1).runs[0].status,'interrupted');
+});
+test('closed-app generated runs retain real before/after Git checkpoint associations',async t=>{
+ const f=await fixture(t,{body:"require('node:fs').writeFileSync('fixture.txt','after worker');console.log('changed fixture');"});execFileSync('git',['init','-q'],{cwd:f.dir});execFileSync('git',['config','user.email','fixture@example.invalid'],{cwd:f.dir});execFileSync('git',['config','user.name','Fixture'],{cwd:f.dir});await writeFile(join(f.dir,'fixture.txt'),'before worker');execFileSync('git',['add','fixture.txt'],{cwd:f.dir});execFileSync('git',['commit','-qm','fixture'],{cwd:f.dir});await f.service.dispatch('agents:projects:checkpoints',{projectId:f.service.snapshot().projects[0].id,enabled:true});await f.close();const result=await f.tick().done;assert.equal(result.code,0);const thread=f.state().threads.at(-1),changes=thread.runs[0].fileChanges;assert.equal(changes.status,'complete');assert.ok(changes.before.id&&changes.after.id);assert.equal(await readFile(join(f.dir,'fixture.txt'),'utf8'),'after worker');const records=JSON.parse(await readFile(join(f.dir,'turn-checkpoints/state.json'),'utf8')).records;assert.equal(records[0].threadId,thread.id);assert.equal(records[0].runId,thread.runs[0].id);
+});
+test('provider reconfiguration to a native protocol is skipped without consuming its due reservation',async t=>{
+ const f=await fixture(t);await f.service.dispatch('agents:providers:configure',{id:'fixture',name:'Changed native fixture',command:process.execPath,args:[],protocol:'codex-app-server',inputMode:'stdin'});const before=f.state().automations[0].nextRunAt;await f.close();const result=await f.tick().done;assert.equal(result.result.attempted.length,0);assert.match(result.result.skipped[0].reason,/approval UI/);assert.equal(f.state().automations[0].nextRunAt,before);assert.equal(require('node:fs').existsSync(f.audit),false);
+});
+
+test('a real failing provider records failure and stop-on-failure without replaying its reservation',async t=>{
+ const f=await fixture(t,{body:"console.error('fixture failure');process.exitCode=7",extra:{stopOnFailure:true}});await f.close();const tick=await f.tick().done;assert.equal(tick.code,0);assert.equal(tick.result.attempted[0].outcome,'failed');assert.equal(f.state().threads.at(-1).runs[0].exitCode,7);assert.equal(f.state().automations[0].status,'paused');assert.equal((await f.tick().done).result.attempted.length,0);
+});
+test('worker setup failures release the Agent lock and never run a provider',async t=>{
+ const f=await fixture(t);await f.close();const fs=require('node:fs');fs.mkdirSync(join(f.dir,'turn-checkpoints'));await writeFile(join(f.dir,'turn-checkpoints/state.json'),'invalid fixture');const attempt=await f.tick().done;assert.equal(attempt.code,1);assert.equal(fs.existsSync(join(f.dir,'agents/service.lock')),false);assert.equal(fs.existsSync(f.audit),false);
+});

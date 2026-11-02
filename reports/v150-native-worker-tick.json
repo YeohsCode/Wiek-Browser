@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "attempted": [
+    {
+      "automationId": "912d9533-4658-4aa4-bf79-758b4512e6b6",
+      "outcome": "completed",
+      "runId": "6ac06ad7-84f8-4a7a-84ca-27c10cac29f9",
+      "threadId": "04c9fea0-58da-4606-b88d-7be251c2b3af"
+    }
+  ],
+  "skipped": [],
+  "elapsedMs": 104
+}

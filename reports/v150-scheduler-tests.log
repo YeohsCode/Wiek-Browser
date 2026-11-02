@@ -1,0 +1,47 @@
+{"ok":true,"checks":10,"actualElectron":true,"fixtureOnly":true,"modelCalls":0}
+✔ actual Electron automation editor submits explicit mode/consent and owned threads have no manual composer (393.548292ms)
+✔ legacy mode defaults to heartbeat; invalid mode/closed-app edits are atomic (153.716ms)
+✔ standalone creates a fresh thread per run without source history/attachments/native identity (414.943875ms)
+✔ dedicated owns one clean conversation and continues it across restart (262.530542ms)
+✔ dedicated conversation rejects independent prompt/steer/edit/model/attachment/delete writers (190.593292ms)
+✔ heartbeat appends to the supplied thread with its existing conversation (269.624042ms)
+✔ one definition cannot overlap standalone runs; capacity failure leaves no empty owned thread (270.609375ms)
+✔ Stop pauses future ticks and terminates the generated run, not its template (169.017958ms)
+✔ Delete stops an active dedicated run and releases its retained conversation (2260.753041ms)
+✔ changing mode is blocked while active; an idle change releases the old dedicated thread (165.781584ms)
+✔ imports retain transcript data but never inherit owned binding or closed-app consent (234.887625ms)
+✔ scheduled reservation precedes generated thread creation and never replays after reopen (192.705667ms)
+✔ deleting a template stops linked generated runs and releases their history (136.066541ms)
+✔ closed-app opt-in refuses native protocols and defaults to off for every mode (76.612542ms)
+✔ an archived or missing dedicated conversation is reported and never silently replaced (162.884375ms)
+✔ Pause preserves the current generated run while Stop explicitly cancels it (2135.171125ms)
+✔ New York spring gap skips nonexistent 02:30 while minute cron moves directly to 03:00 (12.768667ms)
+✔ New York fall fold returns only the earlier 01:30 and never schedules a repeated logical minute (1.224458ms)
+✔ calendar filters use the selected local day; fractional offsets, non-hour DST and leap dates remain valid (1.06225ms)
+✔ invalid zones/timestamps and impossible calendar expressions return bounded explicit errors (1.808083ms)
+✔ timezone persists across pause/restart, resume skips the second fold, and invalid edits are atomic (428.456083ms)
+✔ persisted duplicate fold minute is skipped after restart without starting any provider (357.905625ms)
+✔ scheduled reservation is persisted before spawn and successful local process output remains real (341.123416ms)
+✔ crash reservation recovery restores run count/maxRuns and never replays a reserved command (372.927375ms)
+✔ invalid saved timezone is paused and provider failure policy still pauses a real failed fixture run (418.605708ms)
+✔ exhausting the bounded future window runs the valid due occurrence once and pauses without crashing (234.426208ms)
+✔ real Electron cron editor submits a selected IANA timezone and displays the DST rule (283.202458ms)
+✔ a closed-app tick never consumes unapproved or future schedules and never starts a browser (288.941583ms)
+✔ actual CLI workers persist a dedicated conversation across invocations and do not replay a due occurrence (684.405166ms)
+✔ worker context disables CLI browser autostart and stdout does not expose provider body (510.290916ms)
+✔ an active browser/service lock is never stolen by the worker (192.802459ms)
+✔ stale locks are not reaped by a worker and symlinked lock paths fail closed (292.394125ms)
+✔ simultaneous real workers produce one run; SIGTERM waits for actual provider exit and releases the lease (342.120542ms)
+✔ worker timeout settles an actual child and a newly due schedule is left for a later tick (821.4575ms)
+✔ closed-app generated runs retain real before/after Git checkpoint associations (787.077625ms)
+✔ provider reconfiguration to a native protocol is skipped without consuming its due reservation (217.356584ms)
+✔ a real failing provider records failure and stop-on-failure without replaying its reservation (449.345458ms)
+✔ worker setup failures release the Agent lock and never run a provider (211.6115ms)
+ℹ tests 38
+ℹ suites 0
+ℹ pass 38
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7174.196458

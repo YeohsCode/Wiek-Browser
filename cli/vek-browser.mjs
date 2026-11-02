@@ -19,11 +19,15 @@ const defaultData = packaged
 const dataDir = resolve(process.env.VEK_DATA_DIR || defaultData);
 const runtimePath = join(dataDir, 'runtime.json');
 const args = process.argv.slice(2);
-const usage = `Vek Browser — local browser and agent workspace\n\n  vek-browser start                  Open the browser\n  vek-browser status                 Show host status\n  vek-browser api ACTION --json JSON Call the local workbench API\n  vek-browser skill                  Print the agent API guide\n  vek-browser nodejs [-e JavaScript]  Run a script (or read stdin)\n  vek-browser nodejs --sdk-path PATH  Use an explicit compatible SDK\n  vek-browser stop [--timeout-ms N]  Wait for this browser to exit (default 30000 ms)\n\nExample:\n  const task = await taskSpace('research');\n  const page = task.page('p1');\n  await page.goto('https://example.com');\n  console.log(await page.snapshot());\n\nVEK_DATA_DIR selects an independent persistent browser data directory.\n`;
+const usage = `Vek Browser — local browser and agent workspace\n\n  vek-browser start                  Open the browser\n  vek-browser status                 Show host status\n  vek-browser scheduler tick         Run opted-in due CLI automations once while closed\n  vek-browser api ACTION --json JSON Call the local workbench API\n  vek-browser skill                  Print the agent API guide\n  vek-browser nodejs [-e JavaScript]  Run a script (or read stdin)\n  vek-browser nodejs --sdk-path PATH  Use an explicit compatible SDK\n  vek-browser stop [--timeout-ms N]  Wait for this browser to exit (default 30000 ms)\n\nExample:\n  const task = await taskSpace('research');\n  const page = task.page('p1');\n  await page.goto('https://example.com');\n  console.log(await page.snapshot());\n\nVEK_DATA_DIR selects an independent persistent browser data directory.\n`;
 let rpc;
 try {
   if (args.includes('--help') || args[0] === '-h') {
     process.stdout.write(usage);
+  } else if (args[0] === 'scheduler') {
+    if(args[1]!=='tick'||(args.length!==2&&(args.length!==4||args[2]!=='--timeout-ms')))throw new Error('Usage: vek-browser scheduler tick [--timeout-ms N]');
+    const controller=new AbortController(),abort=()=>controller.abort();process.once('SIGINT',abort);process.once('SIGTERM',abort);
+    try {const {runSchedulerTick}=require('../app/scheduler-worker.cjs');const result=await runSchedulerTick({dataDir,timeoutMs:args.length===4?Number(args[3]):60000,signal:controller.signal});process.stdout.write(JSON.stringify(result,null,2)+'\n');if(['timed-out','cancelled'].includes(result.status))process.exitCode=2;}finally{process.removeListener('SIGINT',abort);process.removeListener('SIGTERM',abort);}
   } else if (args[0] === 'skill') {
     const text = await readFile(join(root, 'packages/sdk/skill-body/SKILL.md'), 'utf8');
     process.stdout.write(text.replaceAll('ego-browser', 'vek-browser'));
@@ -105,6 +109,7 @@ async function readStdin() {
 
 async function connect(autoStart) {
   try { return await connectExisting(); } catch (error) {
+    if (autoStart && process.env.VEK_BROWSER_AUTOSTART==='0') throw new Error('Browser auto-start is disabled in this automation worker');
     if (!autoStart) throw new Error(`Vek Browser is not running (${error.message}). Run vek-browser start.`);
   }
   await mkdir(dataDir, { recursive: true, mode: 0o700 });

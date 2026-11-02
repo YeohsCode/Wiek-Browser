@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.14.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
+当前版本 **0.15.0**，更新于 2026-11-02；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以末尾0.3/0.4/0.5/0.6/0.7/0.8/0.9增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -350,3 +350,12 @@ HTTP MCP新增预注册public client none/S256授权，metadata/challenge/OIDC�
 自有Swift AXSelectedText helper，按应用排除/secure控件拒绝，一次读取后先预览；Apple系统工具显式区域/窗口截图进入现有标注编辑器。全局screenshot/selection/chat/voice快捷键默认无分配，OS注册失败可见，app/global冲突双向检查；后台voice只开面板。CLI/RPC仅可读desktop状态，不能取正文或触发OS采集。18项新服务/真实子进程/Electron IPC/panel测试，真实OS只验证权限/注册及截图启动取消清理；全局触发、AX正文和原生PNG正向链路未确认。最终打包和实际OS验证见[RESULTS](../reports/RESULTS.md)。
 
 没有复刻被动选区监听/浮动toolbar、Fn、OS视频/音频录制或Ego所有native backing；原版只有bounded shipped-static证据，Vek的独立本地成功不算Ego运行对标。权限、TCC归属、跨平台、多显示器及应用兼容边界见[desktop-tools](desktop-tools.md)。P2/P3与全量parity仍false。
+
+
+## 0.15：P3执行模式和显式closed-app worker
+
+heartbeat继续原thread，standalone每次干净thread，dedicated持久绑定一个automation-owned thread；仅新会话复制project/provider/model/effort，不复制源历史/附件/native身份或Space authority。Memory可明确附加到所有模式。专属会话拒绝独立写入，删除定义停止其实际run并释放保留会话；模式更换/取消/重启/导入权限分别验证。
+
+新增默认关闭的普通CLI一次性worker，浏览器关闭后可显式tick已到期任务；复用预约、锁、workspace和turn checkpoint。锁存在即skip，不清陈旧锁；signal/timeout等待实际退出。CLI子上下文禁止自动启动浏览器，只读user instructions，不加载网页Profile或MCP。Native provider/审批UI、OS作业安装与睡眠唤醒、自动前台handoff未实现。
+
+新增27项，完整/专项/打包/SDK结果见[RESULTS](../reports/RESULTS.md)。Ego modes依据匹配身份shipped-static dispatch语义，没有runtime对测；busy/cooldown延期、iteration重开与completion工具契约仍不等价。设计与精确证据见[automation-execution](automation-execution.md)。P2/P3和全量parity仍false，P1不同Agent集成继续暂缓。

@@ -131,7 +131,7 @@
     });
   }
   function modelEditor(t) {
-    if (['opencode-acp','codex-app-server','claude-stream-json'].includes(provider(t.providerId)?.protocol)) {
+    if (!automationOwned(t)&&['opencode-acp','codex-app-server','claude-stream-json'].includes(provider(t.providerId)?.protocol)) {
       if (!t.nativeCatalog) return action('agents:threads:discover-models', { id: t.id });
       const codex=provider(t.providerId)?.protocol==='codex-app-server',claude=provider(t.providerId)?.protocol==='claude-stream-json',efforts=codex||claude;
       const effortOptions=model=>[['','Agent default'],...(t.nativeCatalog.models.find(m=>m.id===(model||(claude?'default':''))||(claude&&m.resolvedModel===model)||(!model&&codex&&m.isDefault))?.reasoningEfforts||[]).map(e=>[e,e])];
@@ -204,7 +204,8 @@
     };
     openEditor(item ? 'Edit automation' : 'New automation', [
       { key: 'name', label: 'Name', placeholder: 'Daily project check' },
-      { key: 'threadId', label: 'Conversation', type: 'select', options: snapshot.threads.map(t => [t.id, `${t.title} · ${project(t.projectId)?.name || 'Project'}`]), value: selectedId || snapshot.threads[0].id },
+      { key: 'threadId', label: 'Conversation / settings template', type: 'select', options: snapshot.threads.map(t => [t.id, `${t.title} · ${project(t.projectId)?.name || 'Project'}`]), value: selectedId || snapshot.threads[0].id },
+      { key: 'executionMode', label: 'Execution mode', type:'select',options:[['heartbeat','Heartbeat · continue this conversation'],['standalone','Standalone · new conversation every run'],['dedicated','Dedicated · one automation-owned conversation']],value:'heartbeat' },
       { key: 'prompt', label: 'Prompt', type: 'textarea', required: true, placeholder: 'What should the agent do?' },
       { key: 'kind', label: 'Schedule', type: 'select', options: [['at', 'Once at a date and time'], ['interval', 'Repeat at an interval'], ['cron', 'Cron expression · timezone'], ['heartbeat', 'Heartbeat with local memory']], value: 'at' },
       { key: 'at', label: 'Date and time (your local timezone)', type: 'datetime-local', value: localTime(), show: values => values.kind === 'at' },
@@ -212,13 +213,14 @@
       { key: 'cron', label: 'Five-field cron (minute hour day month weekday)', value: '0 9 * * 1-5', show: values => values.kind === 'cron' },
       { key: 'timeZone', label: 'Cron timezone (IANA)', type: 'select', options: cronTimeZones(item?.timeZone || 'UTC'), value: 'UTC', show: values => values.kind === 'cron' },
       { key: 'dstNotice', type: 'notice', label: 'Missing clock minutes are skipped. Repeated clock minutes run once at their first occurrence. Vek must be open.', show: values => values.kind === 'cron' },
-      { key: 'memory', label: 'Heartbeat memory (added to its prompt)', type: 'textarea', show: values => values.kind === 'heartbeat' },
+      { key: 'memory', label: 'Automation memory (explicit local notes added to its prompt)', type: 'textarea' },
       { key: 'maxRuns', label: 'Maximum started runs (optional)', type: 'number', min: '1', step: '1' },
       { key: 'stopAfter', label: 'Stop after (optional, local timezone)', type: 'datetime-local' },
       { key: 'stopOnFailure', label: 'On provider failure', type: 'select', options: [['false', 'Keep the schedule'], ['true', 'Pause the schedule']], value: 'false' },
-      { key: 'notice', type: 'notice', label: 'Automations run while Vek Browser is open and use the conversation’s configured local agent.' },
+      {key:'closedAppAllowed',label:'Allow a closed-app worker tick',type:'select',options:[['false','Off · browser only'],['true','On · explicit CLI worker tick']],value:'false'},
+      { key: 'notice', type: 'notice', label: 'Standalone/dedicated copy only project, provider and model settings, never the source messages or attachments. Closed-app ticks support plain CLI providers only. This does not install a system wake-up job.' },
     ], values => {
-      const payload = { name: values.name, threadId: values.threadId, prompt: values.prompt, kind: values.kind };
+      const payload = { name: values.name, threadId: values.threadId, prompt: values.prompt, kind: values.kind,executionMode:values.executionMode,closedAppAllowed:values.closedAppAllowed==='true' };
       if (values.kind === 'at') {
         const timestamp = new Date(values.at); if (!Number.isFinite(timestamp.getTime())) throw new Error('Choose a valid date and time.'); payload.at = timestamp.toISOString();
       } else if (values.kind === 'cron') { payload.cron = values.cron; payload.timeZone = values.timeZone || 'UTC'; }
@@ -228,8 +230,9 @@
       }
       payload.memory = values.memory || ''; payload.maxRuns = values.maxRuns ? Number(values.maxRuns) : null; payload.stopAfter = values.stopAfter ? new Date(values.stopAfter).toISOString() : null; payload.stopOnFailure = values.stopOnFailure === 'true';
       return action(item ? 'agents:automations:update' : 'agents:automations:create', { ...(item ? { id: item.id } : {}), ...payload }, true);
-    }, item ? { ...item, at: localTime(item.at), stopAfter: item.stopAfter ? localTime(item.stopAfter) : '', maxRuns: item.maxRuns || '', stopOnFailure: String(!!item.stopOnFailure), minutes: String((item.intervalMs || 3600000) / 60000) } : {});
+    }, item ? { ...item,executionMode:item.executionMode||'heartbeat',closedAppAllowed:String(!!item.closedAppAllowed), at: localTime(item.at), stopAfter: item.stopAfter ? localTime(item.stopAfter) : '', maxRuns: item.maxRuns || '', stopOnFailure: String(!!item.stopOnFailure), minutes: String((item.intervalMs || 3600000) / 60000) } : {});
   }
+  const automationOwned=t=>t?.automationMode==='dedicated'&&snapshot.automations.some(a=>a.id===t.automationOwnerId);
   function messageList(t) {
     const list = make('div', '', 'va-messages'); list.dataset.scroll = 'messages'; list.setAttribute('aria-live', 'polite'); list.setAttribute('aria-label', 'Conversation messages');
     if (!t.messages?.length) {
@@ -239,7 +242,7 @@
       const row = make('article', '', `va-message va-message-${['user', 'assistant', 'system'].includes(message.role) ? message.role : 'system'}`);
       const meta = make('div', '', 'va-message-meta'); meta.append(make('strong', message.role === 'user' ? 'You' : message.role === 'assistant' ? provider(t.providerId)?.name || 'Agent' : 'System'), make('time', date(message.createdAt)));
       const tools = make('div', '', 'va-message-tools');
-      if (t.status !== 'running') {
+      if (t.status !== 'running'&&!automationOwned(t)) {
         if (message.role === 'user') tools.append(button('Edit', () => editMessage(t, message, false)), button('Edit & resend', () => editMessage(t, message, true)));
         tools.append(button('Rollback here', () => askDelete('Rollback transcript', 'Keep messages through this point and save the current transcript as a revision? Files, browser actions, and external effects remain unchanged.', () => action('agents:threads:rollback', { id: t.id, messageId: message.id }, true))));
       }
@@ -301,9 +304,9 @@
     }
     const toolbar = make('div', '', 'va-conversation-heading');
     const title = make('div'); title.append(make('h2', t.title), make('p', `${provider(t.providerId)?.name || t.providerId} · ${project(t.projectId)?.path || 'Project unavailable'}`));
-    const actions = make('div', '', 'va-actions'); actions.append(make('span', t.status, `va-status va-status-${t.status}`), button('Rename', () => openEditor('Rename conversation', [{ key: 'title', label: 'Title', required: true }], values => action('agents:threads:rename', { id: t.id, title: values.title }, true), { title: t.title })), button('Delete', () => askDelete('Delete conversation', `Delete “${t.title}”, its stored messages, and linked automations?`, () => action('agents:threads:delete', { id: t.id }, true)), 'va-danger'));
+    const actions = make('div', '', 'va-actions'); actions.append(make('span', t.status, `va-status va-status-${t.status}`), button('Rename', () => openEditor('Rename conversation', [{ key: 'title', label: 'Title', required: true }], values => action('agents:threads:rename', { id: t.id, title: values.title }, true), { title: t.title })));if(!automationOwned(t))actions.append(button('Delete', () => askDelete('Delete conversation', `Delete “${t.title}”, its stored messages, and linked automations?`, () => action('agents:threads:delete', { id: t.id }, true)), 'va-danger'));
     const more = make('details', '', 'va-thread-more'); more.append(make('summary', 'Conversation tools'));
-    const extras = make('div', '', 'va-actions'); extras.append(button(t.pinned ? 'Unpin' : 'Pin', () => action(t.pinned ? 'agents:threads:unpin' : 'agents:threads:pin', { id: t.id })), button(t.archived ? 'Unarchive' : 'Archive', () => action(t.archived ? 'agents:threads:unarchive' : 'agents:threads:archive', { id: t.id })), button('Notes & goal', () => notesEditor(t)), button('Fork', () => branch(t, 'fork')), button('Sidechat', () => branch(t, 'sidechat')), button('Model', () => modelEditor(t)));
+    const extras = make('div', '', 'va-actions'); extras.append(button(t.pinned ? 'Unpin' : 'Pin', () => action(t.pinned ? 'agents:threads:unpin' : 'agents:threads:pin', { id: t.id })), button(t.archived ? 'Unarchive' : 'Archive', () => action(t.archived ? 'agents:threads:unarchive' : 'agents:threads:archive', { id: t.id })), button('Notes & goal', () => notesEditor(t)), button('Fork', () => branch(t, 'fork')), button('Sidechat', () => branch(t, 'sidechat')));if(!automationOwned(t))extras.append(button('Model',()=>modelEditor(t)));
     if (['opencode-acp','codex-app-server','claude-stream-json'].includes(provider(t.providerId)?.protocol)) { const refresh = button('Discover models', () => action('agents:threads:discover-models', { id: t.id })); refresh.disabled = pending || ['running', 'discovering'].includes(t.status); extras.append(refresh); }
     extras.append(button('Child agent', () => childAgentEditor(t)), button('Hand off', () => childAgentEditor(t, true)),button('Conversation file diff',()=>showFileChanges(t))); more.append(extras); toolbar.append(title, actions); main.append(toolbar, more);
     if (t.goal) main.append(make('p', `Goal · ${t.goal.status}: ${t.goal.text}`, 'va-goal'));
@@ -340,6 +343,7 @@
       if (latest.usage?.sessionCostUsd !== undefined) details.append(make('p', `Provider session cost estimate: $${latest.usage.sessionCostUsd.toFixed(6)} · cumulative, not a per-turn bill`));
       if (!latest.stdout && !latest.stderr) details.append(make('pre', 'No process output recorded.')); main.append(details);
     }
+    if(automationOwned(t)){main.append(make('p','This conversation belongs to an automation. Use its Run now and Stop controls; delete the automation to release the conversation.','va-hint'));body.append(main);return;}
     const composer = make('form', '', 'va-composer');
     const attachments = make('details', '', 'va-attachment-manager'); attachments.append(make('summary', `Attachments · ${(t.attachments || []).filter(file => !file.detachedAt).length}/10 active`));
     for (const file of t.attachments || []) {
@@ -380,13 +384,13 @@
   }
   function schedulesView(body) {
     const section = make('section', '', 'va-wide-section'); const heading = make('div', '', 'va-section-heading'); heading.append(make('h2', 'Automations'), button('New automation', () => scheduleEditor(), 'va-primary')); section.append(heading);
-    section.append(make('p', 'Schedule a prompt once, by interval, by cron in an IANA timezone, or as a heartbeat with local memory. Vek must remain open. Proposed tasks run only after you choose Approve & run.', 'va-hint'));
+    section.append(make('p', 'Schedule a prompt once, by interval, by cron in an IANA timezone, or as a heartbeat with local memory. Normal scheduling runs while Vek is open. Opted-in plain CLI tasks can also run through an explicit closed-app worker tick; no system wake-up job is installed. Proposed tasks run only after you choose Approve & run.', 'va-hint'));
     if (!snapshot.automations.length) section.append(make('div', 'No automations yet. Choose a conversation and schedule its next prompt.', 'va-empty-card'));
     for (const item of snapshot.automations) {
       const card = make('article', '', 'va-automation-card'); const heading = make('div', '', 'va-section-heading'); heading.append(make('h3', item.name || 'Automation'), make('span', item.status, `va-status va-status-${item.status}`)); card.append(heading);
       card.append(make('p', item.prompt, 'va-automation-prompt'));
       const meta = make('dl', '', 'va-schedule-meta');
-      for (const [key, value] of [ ['Conversation', snapshot.threads.find(t => t.id === item.threadId)?.title || 'Conversation unavailable'], ['Schedule', item.kind === 'at' ? `Once · ${date(item.at)}` : item.kind === 'cron' ? `${item.cron} · ${item.timeZone || 'UTC'}` : `${item.kind === 'heartbeat' ? 'Heartbeat · ' : ''}Every ${Number(item.intervalMs) / 60000} minutes`], ...(item.kind === 'cron' ? [['DST policy', 'Skip missing minutes · first occurrence only']] : []), ['Next run', item.kind === 'cron' ? dateInZone(item.nextRunAt, item.timeZone) : date(item.nextRunAt)], ['Last run', date(item.lastRunAt)], ['Last outcome', stringify(item.lastOutcome)], ['Started runs', `${item.runCount || 0}${item.maxRuns ? ` / ${item.maxRuns} maximum` : ''}`], ['Stop date', date(item.stopAfter)], ['Stop reason', item.stopReason || '—'], ['Memory', item.memory || '—'], ['Last error', item.lastError || '—'], ...(item.lastScheduleError ? [['Schedule error', item.lastScheduleError]] : []) ]) meta.append(make('dt', key), make('dd', value));
+      for (const [key, value] of [ ['Conversation / template', snapshot.threads.find(t => t.id === item.threadId)?.title || 'Conversation unavailable'],['Execution mode',item.executionMode||'heartbeat'],['Dedicated conversation',snapshot.threads.find(t=>t.id===item.ownedThreadId)?.title||'—'],['Last run conversation',snapshot.threads.find(t=>t.id===item.lastRunThreadId)?.title||'—'],['Closed-app worker',item.closedAppAllowed?'Explicit CLI tick allowed':'Off'], ['Schedule', item.kind === 'at' ? `Once · ${date(item.at)}` : item.kind === 'cron' ? `${item.cron} · ${item.timeZone || 'UTC'}` : `${item.kind === 'heartbeat' ? 'Heartbeat · ' : ''}Every ${Number(item.intervalMs) / 60000} minutes`], ...(item.kind === 'cron' ? [['DST policy', 'Skip missing minutes · first occurrence only']] : []), ['Next run', item.kind === 'cron' ? dateInZone(item.nextRunAt, item.timeZone) : date(item.nextRunAt)], ['Last run', date(item.lastRunAt)], ['Last outcome', stringify(item.lastOutcome)], ['Started runs', `${item.runCount || 0}${item.maxRuns ? ` / ${item.maxRuns} maximum` : ''}`], ['Stop date', date(item.stopAfter)], ['Stop reason', item.stopReason || '—'], ['Memory', item.memory || '—'], ['Last error', item.lastError || '—'], ...(item.lastScheduleError ? [['Schedule error', item.lastScheduleError]] : []) ]) meta.append(make('dt', key), make('dd', value));
       card.append(meta); const actions = make('div', '', 'va-actions'); actions.append(button('Edit', () => scheduleEditor(item)), button(item.status === 'active' ? 'Pause' : 'Resume', () => action(item.status === 'active' ? 'agents:automations:pause' : 'agents:automations:resume', { id: item.id })), button('Run now', () => action('agents:automations:run', { id: item.id })), button('Stop run', () => action('agents:automations:stop', { id: item.id })), button('Propose task', () => openEditor('Add a proposed task', [{ key: 'title', label: 'Title', required: true }, { key: 'prompt', label: 'Proposed prompt (manual local draft)', type: 'textarea', required: true }], values => action('agents:proposals:create', { automationId: item.id, ...values }, true))), button('Delete', () => askDelete('Delete automation', `Delete “${item.name || 'Automation'}”?`, () => action('agents:automations:delete', { id: item.id }, true)), 'va-danger')); card.append(actions); section.append(card);
     }
     if (snapshot.proposals?.length) {
@@ -444,6 +448,6 @@
   window.VekAgentPanel = {
     mount(target, dispatch) { root = target; invoke = dispatch; render(); },
     update(next) { apply(next); render(); },
-    appendDraft(text) { if (typeof text !== 'string' || !text.trim() || !thread()) return false; drafts.set(selectedId, [drafts.get(selectedId) || '', text.trim()].filter(Boolean).join('\n')); render(); return true; },
+    appendDraft(text) { if (typeof text !== 'string' || !text.trim() || !thread() || automationOwned(thread())) return false; drafts.set(selectedId, [drafts.get(selectedId) || '', text.trim()].filter(Boolean).join('\n')); render(); return true; },
   };
 })();

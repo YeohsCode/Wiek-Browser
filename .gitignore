@@ -54,3 +54,7 @@ __pycache__/
 !/.github/workflows/
 /.github/workflows/*
 !/.github/workflows/wiek-ci.yml
+
+# Wiek agent documentation is source, not a downloaded reference checkout.
+!/skills/wiek-browser/references/
+!/skills/wiek-browser/references/*.md

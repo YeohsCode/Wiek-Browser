@@ -8,12 +8,13 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const packaged=path.resolve(process.argv[2]||path.join(root,'dist/mac-arm64/Wiek Browser.app/Contents/Resources/app'));
 const digest=async file=>createHash('sha256').update(await fs.readFile(file)).digest('hex');
 const exists=async file=>fs.access(file).then(()=>true,()=>false);
-async function files(directory){const output=[];for(const entry of await fs.readdir(path.join(root,directory),{withFileTypes:true})){if(entry.name==='.DS_Store')continue;const relative=path.join(directory,entry.name);if(entry.isDirectory())output.push(...await files(relative));else if(entry.isFile())output.push(relative);}return output;}
+async function files(directory){const output=[];for(const entry of await fs.readdir(path.join(root,directory),{withFileTypes:true})){if(entry.name==='.DS_Store'||entry.name==='__pycache__'||entry.name.endsWith('.pyc'))continue;const relative=path.join(directory,entry.name);if(entry.isDirectory())output.push(...await files(relative));else if(entry.isFile())output.push(relative);}return output;}
 const sources=[...(await files('app')),...(await files('cli')),...(await files('skills')),...(await files('models')),...(await files('packages/sdk/dist')),...(await files('packages/sdk/skill-body')),'packages/sdk/LICENSE','NOTICE.md'];
 const records=[];
 for(const file of [...new Set(sources)].sort()){const sha256=await digest(path.join(root,file));records.push({file,sha256,matches:await exists(path.join(packaged,file))&&sha256===await digest(path.join(packaged,file))});}
 const integrity=JSON.parse(await fs.readFile(path.join(root,'reports/upstream-test-integrity.json'),'utf8'));
-for(const entry of integrity.records){const own=await digest(path.join(root,'packages/sdk',entry.file));const upstream=await digest(path.join(root,'references/ego-lite/package/ego-browser',entry.file));entry.unchanged=own===upstream&&own===entry.sha256;}
+integrity.referenceMode='pinned-manifest';
+for(const entry of integrity.records){const own=await digest(path.join(root,'packages/sdk',entry.file));const reference=path.join(root,'references/ego-lite/package/ego-browser',entry.file);const available=await exists(reference);const upstream=available?await digest(reference):entry.sha256;if(available)integrity.referenceMode='local-reference-and-pinned-manifest';entry.unchanged=own===upstream&&own===entry.sha256;}
 integrity.allUnchanged=integrity.records.every(entry=>entry.unchanged);integrity.verifiedAt=new Date().toISOString();
 const excluded=['downloads','references','analysis','reports','data','tests','tools'];
 const audit={excluded,unexpected:[],modelSha256:await digest(path.join(packaged,'models/ggml-tiny.bin')),whisperSha256:await digest(path.join(packaged,'app/bin/whisper-cli'))};

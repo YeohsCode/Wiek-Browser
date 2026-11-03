@@ -48,7 +48,7 @@ node cli/wiek-browser.mjs stop
 - 自动化调度、执行模式、明确启用的 macOS login job、忙碌延期、运行记忆/结果、停止条件评估和保守的崩溃恢复。
 - Library/Collections、截图标注、网页操作录制、本地语音转写，以及需要用户启用的桌面工具。
 
-**本检查点尚待完成的 P3 验收：** 被动桌面选区与按应用录制、真实离线翻译、睡眠/登录/权限撤销，以及完整打包回归。远程 Git 使用一次性本地 bare 仓库验证；GitHub PR 使用合成协议进程测试，没有操作真实账号。其余 Agent 集成继续暂缓。完整浏览器资料迁移、部分 MCP 能力、语义 memory、签名/公证和 31 项线上模型基准仍在后续计划中。
+**本检查点尚待完成的 P3 验收：** 被动桌面选区与按应用录制、翻译界面与更多语言、睡眠/登录/权限撤销，以及完整打包回归。远程 Git 使用一次性本地 bare 仓库验证；GitHub PR 使用合成协议进程测试，没有操作真实账号。其余 Agent 集成继续暂缓。完整浏览器资料迁移、部分 MCP 能力、语义 memory、签名/公证和 31 项线上模型基准仍在后续计划中。
 
 ## 让 Agent 操作网页
 
@@ -73,7 +73,7 @@ JS
 node cli/wiek-browser.mjs translation install --python /absolute/path/to/python3.12
 ```
 
-安装步骤会下载依赖和模型到选定数据目录；推理设计为离线运行。目前仍在修复与验证真实模型兼容性，Python 和 Argos 模型不包含在应用包中。
+安装步骤会下载依赖和模型到选定数据目录；推理设计为离线运行。已修复模型分句兼容问题，中英双向真实样例已通过服务层验证，推理期间禁止 socket 连接；这不是通用翻译质量分数。Python 和 Argos 模型不包含在应用包中。
 
 ## 测试与打包
 
@@ -83,6 +83,8 @@ npm run test:upstream
 npm run test:workbench
 npm run dist
 ```
+
+新增 [Wiek CI](.github/workflows/wiek-ci.yml) 负责锁定依赖、恢复固定语音模型，以及 macOS ARM64 的 SDK/本地/打包验收。远端结果单独记录，不能把写好工作流等同于已通过。`npm run test:upstream` 会恢复两份固定上游 workflow 作为测试资料，不启用它们的发布流程。
 
 macOS 产物为 `dist/mac-arm64/Wiek Browser.app`。当前为本地未签名构建，签名、公证和正式发布仍待配置。
 

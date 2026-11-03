@@ -47,3 +47,10 @@ dist/
 # Generated Python bytecode is never an application source input.
 __pycache__/
 *.pyc
+
+# Publish only Wiek-owned CI; upstream repository automation stays excluded.
+!/.github/
+/.github/*
+!/.github/workflows/
+/.github/workflows/*
+!/.github/workflows/wiek-ci.yml

@@ -1,0 +1,65 @@
+name: Wiek validation
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: wiek-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  macos-arm64:
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            packages/sdk/package-lock.json
+      - name: Install locked dependencies
+        run: |
+          npm ci
+          npm --prefix packages/sdk ci --ignore-scripts
+      - name: SDK tests and build
+        run: npm run test:upstream > reports/ci-sdk.log 2>&1
+      - name: Build owned native helpers
+        run: npm run build:desktop-native > reports/ci-native-build.log 2>&1
+      - name: Local services and actual Electron fixture panels
+        run: node --test --test-concurrency=2 tests/*.test.mjs > reports/ci-source-tests.log 2>&1
+      - name: Restore pinned optional speech model
+        run: node tools/fetch-speech-model.mjs
+      - name: Build unsigned macOS application
+        run: npm run dist > reports/ci-build.log 2>&1
+      - name: Packaged host integration
+        env:
+          VEK_DATA_DIR: ${{ github.workspace }}/data/ci-workbench
+          VEK_WORKBENCH_CLI: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs
+        run: node tests/workbench-integration.mjs > reports/ci-workbench.log 2>&1
+      - name: Shared SDK browser suite on Wiek
+        env:
+          VEK_DATA_DIR: ${{ github.workspace }}/data/ci-sdk
+          VEK_COMPARISON_VEK_CLI: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs
+        run: node tests/run-comparison.mjs --browser vek > reports/ci-browser-suite.log 2>&1
+      - name: Verify package and pinned upstream inputs
+        run: node tools/verify-release.mjs > reports/ci-package-identity.log 2>&1
+      - name: Upload validation evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wiek-validation-${{ github.sha }}
+          retention-days: 7
+          path: |
+            reports/ci-*.log
+            reports/vek-e2e*.json
+            reports/vek-e2e*.log
+            reports/package-source-verification.json
+            reports/package-content-audit.json
+            reports/upstream-test-integrity.json

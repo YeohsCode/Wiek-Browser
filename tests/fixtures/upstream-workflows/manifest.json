@@ -1,0 +1,15 @@
+{
+  "source": "citrolabs/ego-lite",
+  "commit": "aecc5831fc5a9ea01a078b632185992a3a7ac448",
+  "license": "MIT",
+  "files": [
+    {
+      "name": "ci.yml",
+      "sha256": "d398298d77c4eeb63b7218f168dc88914795ae7b332dc34c5e02dd276f0a3165"
+    },
+    {
+      "name": "main-pr-source.yml",
+      "sha256": "f72df68421c62143240ce4583196db97cfe38112102b4c8a3cc6fa0a87fb33ee"
+    }
+  ]
+}

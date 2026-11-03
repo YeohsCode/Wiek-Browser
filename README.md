@@ -48,7 +48,7 @@ Use `WIEK_DATA_DIR=/absolute/path` for an isolated instance. `VEK_DATA_DIR` and 
 - Scheduled automations, execution modes, opt-in macOS login jobs, busy deferral, run memory/results, stop evaluation, and conservative crash recovery.
 - Library/collections, screenshot annotation, webpage recording, local speech transcription, and opt-in desktop tools.
 
-**P3 work in this checkpoint still needs final acceptance:** passive desktop selection and application recording, actual offline translation, system sleep/login/revocation behavior, and complete packaged regression. Remote Git is tested against disposable local bare repositories; GitHub PR tests use synthetic protocol processes, with no real account writes. Other agent integrations remain deferred. Full browser-data migration, some MCP features, semantic memory, signing/notarization, and the 31-task live-site benchmark remain open.
+**P3 work in this checkpoint still needs final acceptance:** passive desktop selection and application recording, translation UI and additional languages, system sleep/login/revocation behavior, and complete packaged regression. Remote Git is tested against disposable local bare repositories; GitHub PR tests use synthetic protocol processes, with no real account writes. Other agent integrations remain deferred. Full browser-data migration, some MCP features, semantic memory, signing/notarization, and the 31-task live-site benchmark remain open.
 
 ## Browser automation
 
@@ -73,7 +73,7 @@ The experimental translation adapter uses an explicitly installed Python/Argos r
 node cli/wiek-browser.mjs translation install --python /absolute/path/to/python3.12
 ```
 
-Installation downloads dependencies/models into the selected data directory; inference is intended to remain offline. This adapter is still undergoing real-model acceptance. Python and Argos models are not bundled in the application.
+Installation downloads dependencies/models into the selected data directory; inference is intended to remain offline. Two real English/Chinese examples have passed through the service with socket connections blocked during inference; this is a bounded acceptance result, not a general translation-quality score. Python and Argos models are not bundled in the application.
 
 ## Validation and packaging
 
@@ -83,6 +83,9 @@ npm run test:upstream
 npm run test:workbench
 npm run dist
 ```
+
+The Wiek-owned [CI workflow](.github/workflows/wiek-ci.yml) installs locked dependencies, restores pinned speech weights, and runs SDK/local/packaged tests on macOS ARM64. Its first remote result is tracked separately; a workflow definition alone does not prove a pass. `npm run test:upstream` restores two exact upstream workflow files as inactive test fixtures; it does not enable their publishing automation.
+
 
 The macOS artifact is `dist/mac-arm64/Wiek Browser.app`. It is a local unsigned build until signing/notarization is configured.
 

@@ -1,0 +1,42 @@
+{
+  "generatedAt": "2026-11-03T17:52:04.514Z",
+  "benchmarkRun": false,
+  "modelCalls": 0,
+  "accountActions": 0,
+  "reference": {
+    "present": true,
+    "commit": "f566ac293e4e6bd80c4e9b062b5699f04eac41f4",
+    "datasetSha256": "e1495bef65b83c7bcb4cf3bf7a6e515239c6763c620efe1d31749ad6d54f6200",
+    "adapterSha256": "baa7e1133eadb79fbcf0065ea9814a7a69cc9cb2cb9af84680271012282150cc"
+  },
+  "tasks": {
+    "count": 31,
+    "unique": 31,
+    "sameOrderedIds": true,
+    "requiresLogin": 5,
+    "loginPlatforms": [
+      "Cars.com",
+      "Expedia",
+      "OpenTable",
+      "Redfin",
+      "X",
+      "Yelp"
+    ],
+    "attachments": [
+      {
+        "name": "resume-cloud-infra.pdf",
+        "present": true
+      }
+    ]
+  },
+  "adapter": {
+    "canonicalSdkV2Present": false,
+    "legacyOrFacadeProbePresent": true
+  },
+  "blockers": [
+    "Reference adapter probes legacy/taskSpaces facade; shared canonical SDK V2 taskSpace contract still needs implementation and validation",
+    "No dedicated Stage A/Judge model and thinking/limits configuration has been approved for a paid run",
+    "Dedicated test-account/login readiness is not recorded; personal browsing sessions are not benchmark fixtures",
+    "Equivalent pinned SDK, task, model, limits, account state and adapter behavior must be recorded for both browsers"
+  ]
+}

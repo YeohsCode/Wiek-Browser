@@ -1,0 +1,12 @@
+✔ branch pushes and pull requests do not package or publish releases (1.401917ms)
+✔ beta and stable tag pushes retain both release guards (0.13975ms)
+✔ main source guard allows dev and rejects other branches (4.17225ms)
+✔ main source guard treats shell syntax in branch names as data (1.763292ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 72.50725

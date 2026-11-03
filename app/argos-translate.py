@@ -5,11 +5,16 @@ import os
 from pathlib import Path
 import sys
 
-model_dir = os.environ.get("VEK_TRANSLATION_DATA")
+model_dir = os.environ.get("WIEK_TRANSLATION_DATA") or os.environ.get("VEK_TRANSLATION_DATA")
+if not model_dir:
+    raise RuntimeError("Set WIEK_TRANSLATION_DATA to an installed local model directory")
 if model_dir:
     Path(model_dir).mkdir(parents=True, exist_ok=True)
     os.environ["ARGOS_PACKAGES_DIR"] = model_dir
     os.environ["ARGOS_DEVICE_TYPE"] = "cpu"
+    # Argos 1.9 archives contain Stanza weights incompatible with modern
+    # Stanza. Use the current MiniSBD segmenter and warm it at install time.
+    os.environ["ARGOS_CHUNK_TYPE"] = "MINISBD"
     for variable, folder in [("XDG_DATA_HOME", "data"), ("XDG_CACHE_HOME", "cache"), ("XDG_CONFIG_HOME", "config")]:
         os.environ[variable] = str(Path(model_dir).parent / folder)
 
@@ -25,9 +30,6 @@ if len(sys.argv) > 1 and sys.argv[1] == "install":
         record = {"installed": f"{source}-{target}", "version": package.package_version, "sha256": hashlib.file_digest(open(downloaded, "rb"), "sha256").hexdigest()}
         manifest.append(record)
         print(json.dumps(record), flush=True)
-    import stanza
-    original_pipeline = stanza.Pipeline
-    stanza.Pipeline = lambda *args, **kwargs: original_pipeline(*args, **{**kwargs, "download_method": None})
     import argostranslate.translate
     for source, target, text in [("en", "zh", "Hello world."), ("zh", "en", "你好世界。")]:
         argostranslate.translate.translate(text, source, target)
@@ -41,9 +43,6 @@ else:
     socket.socket.connect = offline
     socket.create_connection = offline
     request = json.loads(sys.stdin.buffer.read(131072))
-    import stanza
-    original_pipeline = stanza.Pipeline
-    stanza.Pipeline = lambda *args, **kwargs: original_pipeline(*args, **{**kwargs, "download_method": None})
     import argostranslate.translate
     languages = argostranslate.translate.get_installed_languages()
     source = next((v for v in languages if v.code == request["source"]), None)

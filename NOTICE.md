@@ -13,3 +13,5 @@ The bundled CPU transcription executable is built from ggml-org/whisper.cpp v1.9
 The optional translation adapter uses separately installed Argos Translate (MIT) and its language packages. Python dependencies and translation models are not committed or bundled. The installer records downloaded model identities; each package retains its upstream license.
 
 Wiek Browser was previously named Vek Browser. Persistent archive identifiers, internal IPC, selected environment names, and historical evidence retain legacy names for compatibility.
+
+Two unmodified upstream GitHub workflow files are stored as `.fixture` test data with SHA-256 identities under `tests/fixtures/upstream-workflows/`; their source is the same pinned MIT ego-lite commit. They are restored only as test inputs and are not published as active repository workflows.

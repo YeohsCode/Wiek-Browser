@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+// Restore exact public upstream test data without enabling upstream workflows
+// in this repository. The SDK assertions and relative-path semantics are intact.
+import{mkdir,readFile,writeFile,lstat}from'node:fs/promises';import{createHash}from'node:crypto';import{resolve,join}from'node:path';import{fileURLToPath}from'node:url';
+const root=resolve(fileURLToPath(new URL('..',import.meta.url))),fixtures=join(root,'tests/fixtures/upstream-workflows'),manifest=JSON.parse(await readFile(join(fixtures,'manifest.json'),'utf8')),sha=b=>createHash('sha256').update(b).digest('hex');
+for(const name of ['.github','.github/workflows']){const target=join(root,name);try{const st=await lstat(target);if(st.isSymbolicLink()||!st.isDirectory())throw Error('SDK fixture directory is not an owned ordinary directory');}catch(error){if(error.code!=='ENOENT')throw error;await mkdir(target);}}
+for(const row of manifest.files){if(!['ci.yml','main-pr-source.yml'].includes(row.name))throw Error('Unknown upstream fixture');const bytes=await readFile(join(fixtures,row.name+'.fixture'));if(sha(bytes)!==row.sha256)throw Error('Pinned SDK workflow fixture changed');const target=join(root,'.github/workflows',row.name);try{const stat=await lstat(target);if(stat.isSymbolicLink()||!stat.isFile()||sha(await readFile(target))!==row.sha256)throw Error('Existing SDK workflow fixture differs; it was not overwritten');}catch(error){if(error.code!=='ENOENT')throw error;await writeFile(target,bytes,{flag:'wx',mode:0o600});}}
+console.log('Verified/restored 2 exact upstream workflow test fixtures; Wiek CI remains separate');

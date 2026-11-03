@@ -8,7 +8,7 @@
 - [x] canonical CLI 为 `cli/wiek-browser.mjs`，旧命令入口兼容；`WIEK_*` 配置优先，旧 `VEK_*` 与归档格式兼容。
 - [x] 新安装使用 Wiek 数据目录；原目录存在时原地复用，不自动移动个人资料。
 - [x] 提供 English README 与 `README.zh-CN.md`；历史 0.19 README 保存在 `docs/history/`。
-- [x] 本轮源码 498/498、打包宿主 197/197、190 个发行文件匹配，准备提交并推送到 `https://github.com/YeohsCode/Wiek-Browser.git`。
+- [x] 本轮源码 498/498、打包宿主 197/197、190 个发行文件匹配，已提交 `d2d588e` 并推送到 `https://github.com/YeohsCode/Wiek-Browser.git`。
 - [ ] 推送后继续 P3 真实桌面监听/翻译/系统边界，以及 P4 CI、可恢复构建和基准准备。
 
 ## 当前执行优先级
@@ -171,3 +171,12 @@
 0.18设计见 [mcp-input-continuations.md](analysis/mcp-input-continuations.md)。新增17项（16协议/服务、1实际Electron面板含13检查），宿主新增11检查。仅本地现代HTTP工具表单续传；资源/URL/sampling仍缺。下一步核对现代OAuth CIMD/身份机制，并推进明确来源迁移和P3剩余边界，P1暂缓。
 
 0.19设计见 [mcp-client-identity.md](analysis/mcp-client-identity.md)。新增20项（19协议/服务、1实际Electron面板含20检查），OAuth专项38/38。显式CIMD要求自行托管HTTPS文档及固定callback；没有自动托管/注册回退。下一步P3 busy延期/completion，来源迁移和OAuth其余范围保留；P1暂缓。
+
+## 推送后的 P3 / P4 推进（2026-11-04）
+
+- [x] P3 翻译：切换为安装时预热的 MiniSBD；真实中英双向样例经服务/子进程通过，推理阻止 socket 连接。保留最初 Stanza 失败日志；界面与更多语种继续验收。
+- [x] P4：新增独立 macOS ARM64 CI（固定 action SHA、只读权限、锁定依赖、SDK/本地/打包/同集用例）。远端首次执行结果待记录。
+- [x] P4 干净检出：固定两份 SDK 依赖的上游 workflow 资料，自动恢复为忽略的测试输入；测试断言未改，独立临时树的 4 项上游断言通过。
+- [x] P4 模型恢复：固定 Whisper URL/大小/SHA-256 的恢复命令；不将权重放入 Git。
+- [x] P4 静态就绪检查：31 个任务 ID 与当前参考 checkout 顺序一致，5 项需登录、6 个平台、1 个附件；不是 benchmark 成功率。
+- [ ] P4 adapter 仍需适配 canonical SDK V2；需要固定两侧模型/思考/限额/任务/账户状态后才可跑线上对比。没有执行付费模型或真实账号任务。

@@ -1,0 +1,29 @@
+✖ clean checkout restores exact inactive workflow fixtures and runs all unchanged upstream workflow assertions (118.969583ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 185.87325
+
+✖ failing tests:
+
+test at tests/sdk-workflow-fixtures.test.mjs:3:1
+✖ clean checkout restores exact inactive workflow fixtures and runs all unchanged upstream workflow assertions (118.969583ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /pass 4/. Input:
+  
+  ''
+  
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/sdk-workflow-fixtures.test.mjs:3:844)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '',
+    expected: /pass 4/,
+    operator: 'match',
+    diff: 'simple'
+  }

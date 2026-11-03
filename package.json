@@ -13,7 +13,7 @@
   "scripts": {
     "start": "electron .",
     "build:sdk": "npm --prefix packages/sdk run build",
-    "test:upstream": "npm --prefix packages/sdk test",
+    "test:upstream": "node tools/prepare-sdk-test-fixtures.mjs && npm --prefix packages/sdk test",
     "test": "node --test tests/*.test.mjs",
     "test:e2e": "node tests/run-comparison.mjs",
     "dist": "electron-builder --mac dir",
@@ -43,7 +43,9 @@
       "package.json",
       "models/**",
       "skills/wiek-browser/**",
-      "skills/vek-browser/**"
+      "skills/vek-browser/**",
+      "!app/**/__pycache__/**",
+      "!app/**/*.pyc"
     ],
     "mac": {
       "category": "public.app-category.productivity",

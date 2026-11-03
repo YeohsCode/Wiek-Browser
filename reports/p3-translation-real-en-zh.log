@@ -1,0 +1,38 @@
+Traceback (most recent call last):
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/argos-translate.py", line 53, in <module>
+    print(json.dumps({"text": source.get_translation(target).translate(request["text"])}, ensure_ascii=False))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/argostranslate/translate.py", line 64, in translate
+    return self.hypotheses(input_text, num_hypotheses=1)[0].value
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/argostranslate/translate.py", line 328, in hypotheses
+    translated_paragraph = self.underlying.hypotheses(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/argostranslate/translate.py", line 201, in hypotheses
+    apply_packaged_translation(
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/argostranslate/translate.py", line 451, in apply_packaged_translation
+    sentences = sentencizer.split_sentences(input_text)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/argostranslate/sbd.py", line 160, in split_sentences
+    doc = self.lazy_pipeline()(text)
+          ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/argostranslate/sbd.py", line 149, in lazy_pipeline
+    self.stanza_pipeline = stanza.Pipeline(
+                           ^^^^^^^^^^^^^^^^
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/translation_resources.py", line 42, in pipeline
+    return original(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/stanza/pipeline/core.py", line 308, in __init__
+    self.processors[processor_name] = NAME_TO_PROCESSOR_CLASS[processor_name](config=curr_processor_config,
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/stanza/pipeline/processor.py", line 193, in __init__
+    self._set_up_model(config, pipeline, device)
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/stanza/pipeline/tokenize_processor.py", line 44, in _set_up_model
+    self._trainer = Trainer(model_file=config['model_path'], device=device)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/stanza/models/tokenization/trainer.py", line 20, in __init__
+    self.load(model_file)
+  File "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/translation-runtime/lib/python3.12/site-packages/stanza/models/tokenization/trainer.py", line 93, in load
+    self.model = Tokenizer(self.args, self.args['vocab_size'], self.args['emb_dim'], self.args['hidden_dim'], dropout=self.args['dropout'], feat_dropout=self.args['feat_dropout'])
+                                                                                                                                                         ~~~~~~~~~^^^^^^^^^^^^^^^^
+KeyError: 'feat_dropout'

@@ -1,0 +1,25 @@
+[main 7dcd4a3] ci: validate clean Wiek checkouts and fix offline translation
+ 31 files changed, 1244 insertions(+), 16 deletions(-)
+ create mode 100644 .github/workflows/wiek-ci.yml
+ create mode 100644 reports/p3-translation-minisbd-install.log
+ create mode 100644 reports/p3-translation-offline-en-zh.log
+ create mode 100644 reports/p3-translation-offline-zh-en.log
+ create mode 100644 reports/p3-translation-real-en-zh.log
+ create mode 100644 reports/p3-translation-real-service.json
+ create mode 100644 reports/p3-translation-real-service.log
+ create mode 100644 reports/p4-benchmark-readiness.json
+ create mode 100644 reports/p4-benchmark-readiness.log
+ create mode 100644 reports/p4-clean-checkout-fixtures-final.log
+ create mode 100644 reports/p4-clean-checkout-fixtures.log
+ create mode 100644 reports/p4-upstream-workflow-fixtures.log
+ create mode 100644 reports/v200-commit.log
+ create mode 100644 reports/v201-sdk-tests.log
+ create mode 100644 reports/v201-translation-brand-tests.log
+ create mode 100644 tests/fixtures/upstream-workflows/ci.yml.fixture
+ create mode 100644 tests/fixtures/upstream-workflows/main-pr-source.yml.fixture
+ create mode 100644 tests/fixtures/upstream-workflows/manifest.json
+ create mode 100644 tests/sdk-workflow-fixtures.test.mjs
+ create mode 100644 tools/benchmark-readiness.mjs
+ create mode 100644 tools/fetch-speech-model.mjs
+ create mode 100644 tools/prepare-sdk-test-fixtures.mjs
+ create mode 100644 tools/verify-translation.mjs

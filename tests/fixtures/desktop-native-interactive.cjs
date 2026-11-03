@@ -1,0 +1,8 @@
+'use strict';
+// A public, disposable native application. The explicit Focus button handles
+// CUA's app-targeted events that otherwise do not change NSWorkspace frontmost.
+const {app,BrowserWindow,ipcMain}=require('electron'),path=require('node:path');
+app.setPath('userData',path.resolve(process.argv[2]||path.join(__dirname,'../../data/desktop-native-fixture-profile')));
+app.whenReady().then(async()=>{app.accessibilitySupportEnabled=true;const window=new BrowserWindow({width:1000,height:700,title:'Wiek public desktop QA fixture',webPreferences:{preload:path.join(__dirname,'desktop-native-interactive-preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false}});
+ipcMain.on('fixture:focus',event=>{if(event.sender===window.webContents){app.focus({steal:true});window.show();window.focus();}});
+await window.loadURL('data:text/html;charset=utf-8,'+encodeURIComponent(`<!doctype html><title>Wiek public desktop QA fixture</title><style>body{font:22px system-ui;background:#e9f3ff;color:#20304d;padding:35px}textarea{width:90%;height:120px;font:24px system-ui}button{font:22px system-ui;padding:12px}section{height:1100px}</style><h1>Public desktop QA fixture</h1><button onclick="fixture.focus()">Focus public fixture</button><p>Only synthetic text. No accounts, messages or private files.</p><textarea aria-label="Public fixture selection">Wiek native selection fixture 你好</textarea><p><button onclick="this.textContent='Clicked synthetic fixture'">Synthetic click target</button></p><p>Protected fixture <input aria-label="Protected synthetic input" type="password" value="synthetic-only"></p><section>Scroll fixture content</section>`));window.show();window.focus();});app.on('window-all-closed',()=>app.quit());

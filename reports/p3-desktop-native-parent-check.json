@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "syntheticOnly": true,
+  "allRunningApplicationsExcluded": true,
+  "existingPermissions": {
+    "screen": true,
+    "inputMonitoring": true,
+    "accessibility": true
+  },
+  "parentExit": true,
+  "helperExited": true,
+  "exitWithinMs": 1025,
+  "permissionChanges": 0,
+  "modelCalls": 0
+}

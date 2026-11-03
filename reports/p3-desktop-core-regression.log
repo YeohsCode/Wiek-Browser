@@ -1,0 +1,24 @@
+✔ desktop monitor defaults off, token callers cannot enable/read/record and state is private (12.919542ms)
+✔ passive selection opt-in emits metadata, holds only a bounded expiring draft and never persists text (11.859458ms)
+✔ excluded/own app/protected/malformed/oversize selections cannot open a toolbar (10.287916ms)
+✔ policy reconfiguration closes old streams, rejects late results and explicit retry follows permission loss (22.364708ms)
+✔ persisted opt-in resumes selection only; recording never resumes across restart (45.734458ms)
+✔ application recording requires an explicitly selected running allowed app and enforces fixed pid scope (42.442375ms)
+✔ native recording drops printable input, bounds pending events and preserves export/delete/restore (65.526334ms)
+✔ stop and app exclusion discard a capture that finishes late; permission loss stops without reconnect (41.07975ms)
+✔ app inventory removes own pid/exclusions and startup error remains off (12.018541ms)
+✔ native JSONL stream enforces ready ordering, bounds malformed output, and awaits actual cancellation (189.139625ms)
+✔ native adapter uses fixed helper commands and fixed window capture with foreground rechecks (9.40775ms)
+✔ native capture uses fixed interactive argv, reads bounded private PNG and always removes temporary pixels (6.108ms)
+✔ native capture distinguishes permission refusal/cancel and rejects symlinked output or data directories (4.708ms)
+✔ selected-text adapter passes exclusions on stdin, maps explicit failures and never runs a shell (6.214125ms)
+✔ native subprocess cancellation/timeout waits for actual exit, bounds output and suppresses stderr (134.667542ms)
+✔ clean checkout restores exact inactive workflow fixtures and runs all unchanged upstream workflow assertions (259.454458ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 536.36325

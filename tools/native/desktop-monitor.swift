@@ -5,6 +5,7 @@ import Foundation
 // Owned opt-in stream. It never reads AXValue, clipboard, titles, or printable
 // input text. Selection mode reads AXSelectedText only after a user input event.
 let mode = CommandLine.arguments.dropFirst().first ?? ""
+let ownerPid = getppid()
 func emit(_ value: [String: Any]) {
     guard let bytes = try? JSONSerialization.data(withJSONObject: value), bytes.count <= 280000 else { return }
     FileHandle.standardOutput.write(bytes); FileHandle.standardOutput.write(Data([10]))
@@ -66,8 +67,25 @@ func selection() {
     let identity = String(application.processIdentifier) + ":" + text
     guard identity != lastSelection else { return }; lastSelection = identity
     var value: [String:Any] = ["type":"selection", "text":text, "source":info]
-    if let b = bounds(element) { value["bounds"] = b }
-    let p = CGEvent(source:nil)?.location ?? .zero; value["point"] = ["x":p.x,"y":p.y]
+    if let b = bounds(element) {
+        value["bounds"] = b
+        // Keyboard and AX-targeted input need not move the physical pointer.
+        // Anchor to the selected range when available, otherwise the control.
+        var anchor = CGPoint(x:b["x"]!,y:b["y"]!+b["height"]!)
+        if let range = attr(element,kAXSelectedTextRangeAttribute) {
+            var raw: CFTypeRef?
+            if AXUIElementCopyParameterizedAttributeValue(element,kAXBoundsForRangeParameterizedAttribute as CFString,range,&raw) == .success,
+               let value = axValue(raw,.cgRect) {
+                var rect = CGRect.zero
+                if AXValueGetValue(value,.cgRect,&rect), rect.width.isFinite, rect.height.isFinite {
+                    anchor = CGPoint(x:rect.minX,y:rect.maxY)
+                }
+            }
+        }
+        value["point"] = ["x":anchor.x,"y":anchor.y]
+    } else {
+        let p = CGEvent(source:nil)?.location ?? .zero; value["point"] = ["x":p.x,"y":p.y]
+    }
     emit(value)
 }
 let navigation: [UInt16:String] = [48:"Tab",36:"Enter",53:"Escape",123:"ArrowLeft",124:"ArrowRight",125:"ArrowDown",126:"ArrowUp",115:"Home",119:"End",116:"PageUp",121:"PageDown",51:"Backspace",117:"Delete",122:"F1",120:"F2",99:"F3",118:"F4",96:"F5",97:"F6",98:"F7",100:"F8",101:"F9",109:"F10",103:"F11",111:"F12"]
@@ -114,18 +132,45 @@ func record(_ event: NSEvent) {
     action["type"] = "action"; action["source"] = info; action["windowId"] = windowId; action["windowBounds"] = b
     guard NSWorkspace.shared.frontmostApplication?.processIdentifier == app.processIdentifier else { return }; emit(action)
 }
-let mask: NSEvent.EventTypeMask = mode == "--selection-watch" ? [.leftMouseUp,.keyUp] : [.leftMouseUp,.rightMouseUp,.otherMouseUp,.keyDown,.scrollWheel]
-let handler: (NSEvent) -> Void = { event in
-    if mode == "--record" { record(event) }
-    else if event.type == .leftMouseUp || (event.type == .keyUp && event.modifierFlags.contains(.shift)) {
-        selectionWork?.cancel(); let work = DispatchWorkItem { selection() }; selectionWork = work; DispatchQueue.main.asyncAfter(deadline:.now()+0.16,execute:work)
+// A listen-only annotated-session event tap observes metadata without suppressing or
+// changing input. The session tap and NSEvent global monitors did not receive the native
+// QA host; the tap's enabled state is checked, and interruption stops the stream.
+let types: [CGEventType] = mode == "--selection-watch" ? [.leftMouseUp,.keyUp] : [.leftMouseUp,.rightMouseUp,.otherMouseUp,.keyDown,.scrollWheel]
+let eventMask = types.reduce(CGEventMask(0)) { $0 | (CGEventMask(1) << $1.rawValue) }
+final class EventSink {
+    let handler: (CGEventType,CGEvent) -> Void
+    init(_ handler: @escaping (CGEventType,CGEvent) -> Void) { self.handler = handler }
+}
+let sink = EventSink { type, event in
+    if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+        emit(["type":"error","code":"monitor_interrupted"]); exit(0)
+    }
+    if let nativeEvent = NSEvent(cgEvent:event) {
+        if mode == "--record" { DispatchQueue.main.async { record(nativeEvent) } }
+        else if type == .leftMouseUp || type == .keyUp {
+            // AXSelectedText is the sole text source. Keyboard metadata does not
+            // expose characters. A key-up can select text via Command+A as well
+            // as Shift navigation; empty selections only clear the preview.
+            selectionWork?.cancel(); let work = DispatchWorkItem { selection() }; selectionWork = work
+            DispatchQueue.main.asyncAfter(deadline:.now()+0.16,execute:work)
+        }
     }
 }
-guard let monitor = NSEvent.addGlobalMonitorForEvents(matching: mask, handler:handler) else { emit(["type":"error","code":"monitor_unavailable"]); exit(0) }
+let sinkPointer = Unmanaged.passUnretained(sink).toOpaque()
+guard let monitor = CGEvent.tapCreate(tap:.cgAnnotatedSessionEventTap, place:.tailAppendEventTap, options:.listenOnly, eventsOfInterest:eventMask, callback:{ _,type,event,context in
+          if let context = context { Unmanaged<EventSink>.fromOpaque(context).takeUnretainedValue().handler(type,event) }
+          return Unmanaged.passUnretained(event)
+      }, userInfo:sinkPointer),
+      let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault,monitor,0) else {
+    emit(["type":"error","code":"monitor_unavailable"]); exit(0)
+}
+CFRunLoopAddSource(CFRunLoopGetMain(),source,.commonModes)
+CGEvent.tapEnable(tap:monitor,enable:true)
 let timer = Timer.scheduledTimer(withTimeInterval:1,repeats:true) { _ in
-    if !AXIsProcessTrusted() || (mode == "--record" && (!CGPreflightListenEventAccess() || !CGPreflightScreenCaptureAccess())) {
-        emit(["type":"error","code":"permission_revoked"]); NSEvent.removeMonitor(monitor); exit(0)
+    if getppid() != ownerPid { CFMachPortInvalidate(monitor); exit(0) }
+    if !AXIsProcessTrusted() || !CGEvent.tapIsEnabled(tap:monitor) || (mode == "--record" && (!CGPreflightListenEventAccess() || !CGPreflightScreenCaptureAccess())) {
+        emit(["type":"error","code":"permission_revoked"]); CFMachPortInvalidate(monitor); exit(0)
     }
 }
 emit(["type":"ready","mode":mode])
-withExtendedLifetime(timer) { monitorApplication.run() }
+withExtendedLifetime((timer,sink)) { monitorApplication.run() }

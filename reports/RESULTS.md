@@ -1,3 +1,25 @@
+# Wiek Browser 0.20.1（2026-11-04）
+
+已补齐真实桌面/翻译的有界证据，以及独立 CI 与干净检出的测试资料。**全量复刻、P3 系统矩阵和 P4 线上基准仍未完成**。
+
+| 最终验证 | 结果 | 证据 |
+|---|---|---|
+| 本地服务/协议/组件 | 500/500；0失败/跳过 | [source](v201-source-tests.log) |
+| SDK单测/构建/typecheck | 新一轮532/532；81既有输入未改 | [SDK](v201-sdk-tests.log) |
+| 打包宿主 | 197/197；无付费模型或真实账号写操作 | [host](v201-package-workbench.log) |
+| 同集浏览器 | Wiek69/69、1,248断言；保留同SDK/fixture/index的Ego68/69；两侧0跳过/未运行 | [suite](v201-browser-suite.log)、[compare](comparison.md) |
+| 发行身份 | 192文件匹配，SDK hash不变，81上游输入未改 | [identity](v201-release-verification.log) |
+| 桌面原生 | 源码host真实选区/工具栏Copy/应用click录制/65,846-byte PNG；最终helper父进程退出1,025ms自停 | [acceptance](../analysis/p3-desktop-acceptance.md) |
+| 翻译 | 真实中英服务样例，推理阻止socket连接；Electron面板8检查 | [service](p3-translation-real-service.json)、[panel](v201-translation-panel.log) |
+| 干净检出 | 恢复2份精确inactive workflow fixtures，临时树运行4项原始断言通过 | [fixtures](p4-clean-checkout-fixtures-final.log) |
+| 远端CI | 已触发，最近观察queued；未宣称远端通过 | [Actions](https://github.com/YeohsCode/Wiek-Browser/actions) |
+
+原生正向使用源码host和一次性公开fixture，不代替最终包TCC/所有应用兼容。物理多显示器、权限撤销、睡眠/登录未验收。翻译仅中英两例，Python/翻译模型不打包。完整suite后只重打包API说明，app/CLI/SDK执行源码不变。目录兼容不代表OS绑定密文迁移，见[改名范围](../analysis/wiek-rebrand.md)。
+
+[基准就绪报告](p4-benchmark-readiness.json)核对31项任务、5项需登录/6平台/1附件；SDK V2 adapter、专用模型/限额和测试账号仍待准备，无线上分数。此前检查点保留如下。
+
+---
+
 # Wiek Browser 0.20.0 检查点（2026-11-04）
 
 产品名由 Vek 改为 Wiek；canonical CLI 为 `cli/wiek-browser.mjs`，旧命令、环境变量和既有数据/归档兼容。包含本轮 P3 自动化、桌面工具、翻译、远程 Git/PR 的集成代码；**P3 未全部验收，P4 线上基准未运行**。

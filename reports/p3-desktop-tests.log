@@ -1,0 +1,40 @@
+{"ok":true,"checks":17,"realElectronIPC":true,"fixtureCaptureOnly":true,"actualOSCapture":false,"modelCalls":0}
+✔ actual Electron desktop controls require opt-in and app scope, show native action preview, stop and recover deletion (474.913334ms)
+✔ desktop monitor defaults off, token callers cannot enable/read/record and state is private (16.080417ms)
+✔ passive selection opt-in emits metadata, holds only a bounded expiring draft and never persists text (16.485333ms)
+✔ excluded/own app/protected/malformed/oversize selections cannot open a toolbar (20.758875ms)
+✔ policy reconfiguration closes old streams, rejects late results and explicit retry follows permission loss (39.088625ms)
+✔ persisted opt-in resumes selection only; recording never resumes across restart (88.434375ms)
+✔ application recording requires an explicitly selected running allowed app and enforces fixed pid scope (93.768833ms)
+✔ native recording drops printable input, bounds pending events and preserves export/delete/restore (160.731917ms)
+✔ stop and app exclusion discard a capture that finishes late; permission loss stops without reconnect (44.237792ms)
+✔ app inventory removes own pid/exclusions and startup error remains off (10.665416ms)
+✔ native JSONL stream enforces ready ordering, bounds malformed output, and awaits actual cancellation (182.633958ms)
+✔ native adapter uses fixed helper commands and fixed window capture with foreground rechecks (8.430792ms)
+✔ native capture uses fixed interactive argv, reads bounded private PNG and always removes temporary pixels (5.991875ms)
+✔ native capture distinguishes permission refusal/cancel and rejects symlinked output or data directories (14.470833ms)
+✔ selected-text adapter passes exclusions on stdin, maps explicit failures and never runs a shell (11.019042ms)
+✔ native subprocess cancellation/timeout waits for actual exit, bounds output and suppresses stderr (140.36575ms)
+{"ok":true,"checks":20,"realElectronIPC":true,"fixtureCaptureOnly":true,"actualOSCapture":false,"modelCalls":0}
+✔ actual Electron desktop panel previews before copy/save and transfers PNG to the real Library editor (442.654708ms)
+✔ desktop defaults register/read/capture nothing and snapshots contain no draft content (21.704667ms)
+✔ token API access cannot collect/read/configure/copy desktop data or open a draft (10.954958ms)
+✔ global shortcut replacement is transactional and OS failure preserves the old binding (39.704792ms)
+✔ saved shortcut startup reports unavailable and explicit retry registers without pretending success (38.884709ms)
+✔ one-time selection is opt-in, carries provenance, and requires explicit copy/save (19.116417ms)
+✔ secure/excluded/oversized/malformed selections are refused and policy cannot smuggle settings (38.237334ms)
+✔ disabling/excluding clears a selection draft and invalidates an in-flight result (34.67025ms)
+✔ capture cancellation and close prevent late drafts and retain busy state until provider exits (18.014042ms)
+✔ draft replacement/expiry and malformed PNGs never become permanent Library assets (31.719292ms)
+✔ browser shortcut validation includes dynamic desktop reservations in both directions (25.868375ms)
+✔ Desktop reset unregisters only its own keys and restores opt-in privacy defaults (59.998291ms)
+✔ a cancelled or failed replacement preserves the previous unexpired draft (27.421334ms)
+✔ native abort rejection is a normal cancellation and preserves the previous draft (21.1145ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 751.765458

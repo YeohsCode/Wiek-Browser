@@ -4,9 +4,9 @@
 
 A local Chromium browser and agent workspace, previously named **Vek Browser**. Wiek implements its own Electron host, browser UI, profiles, task spaces, and local services, and reuses the MIT-licensed public SDK from [citrolabs/ego-lite](https://github.com/citrolabs/ego-lite).
 
-**Development checkpoint: 0.20.0.** The repository includes ongoing P3 work; full Ego feature parity and the P4 live-site benchmark are **not complete**. See [PLAN.md](PLAN.md), [feature coverage](analysis/feature-parity.md), and [validation](reports/RESULTS.md). Historical reports retain the former project name and describe their original builds.
+**Development checkpoint: 0.20.1.** The repository includes ongoing P3 work; full Ego feature parity and the P4 live-site benchmark are **not complete**. See [PLAN.md](PLAN.md), [feature coverage](analysis/feature-parity.md), and [validation](reports/RESULTS.md). Historical reports retain the former project name and describe their original builds.
 
-This checkpoint passed **498/498 local tests**, **197/197 packaged host checks**, and **190 packaged-file identity checks**. This validates the recorded scope; native P3 acceptance and the model benchmark remain open.
+This checkpoint passed **500/500 local tests**, **197/197 packaged host checks**, and the packaged-file identity checks. This validates the recorded scope; native P3 acceptance and the model benchmark remain open.
 
 ## Quick start
 
@@ -38,6 +38,8 @@ node cli/wiek-browser.mjs stop
 
 Use `WIEK_DATA_DIR=/absolute/path` for an isolated instance. `VEK_DATA_DIR` and `cli/vek-browser.mjs` remain compatibility aliases. Development data defaults to `data/`; packaged builds use `~/Library/Application Support/Wiek Browser/`. If only the former `Vek Browser` directory exists, Wiek reuses it without moving or deleting it. An existing Wiek directory takes precedence. Changes to the app identifier can require renewed macOS permissions and login-job review.
 
+Data-directory reuse covers stored files; OS-bound encrypted credential migration remains separately unverified. See [rename compatibility](analysis/wiek-rebrand.md).
+
 ## Features and scope
 
 - Multi-tab browsing, task spaces, isolated profiles, bookmarks/history/downloads, website permissions, and user/agent handoff.
@@ -48,7 +50,7 @@ Use `WIEK_DATA_DIR=/absolute/path` for an isolated instance. `VEK_DATA_DIR` and 
 - Scheduled automations, execution modes, opt-in macOS login jobs, busy deferral, run memory/results, stop evaluation, and conservative crash recovery.
 - Library/collections, screenshot annotation, webpage recording, local speech transcription, and opt-in desktop tools.
 
-**P3 work in this checkpoint still needs final acceptance:** passive desktop selection and application recording, translation UI and additional languages, system sleep/login/revocation behavior, and complete packaged regression. Remote Git is tested against disposable local bare repositories; GitHub PR tests use synthetic protocol processes, with no real account writes. Other agent integrations remain deferred. Full browser-data migration, some MCP features, semantic memory, signing/notarization, and the 31-task live-site benchmark remain open.
+**P3 work in this checkpoint still needs final acceptance:** physical multi-display/permission-revocation coverage and additional translation languages, system sleep/login/revocation behavior, and complete packaged regression. Remote Git is tested against disposable local bare repositories; GitHub PR tests use synthetic protocol processes, with no real account writes. Other agent integrations remain deferred. Full browser-data migration, some MCP features, semantic memory, signing/notarization, and the 31-task live-site benchmark remain open.
 
 ## Browser automation
 
@@ -89,7 +91,7 @@ The Wiek-owned [CI workflow](.github/workflows/wiek-ci.yml) installs locked depe
 
 The macOS artifact is `dist/mac-arm64/Wiek Browser.app`. It is a local unsigned build until signing/notarization is configured.
 
-The last fully validated **0.19.0 Vek** baseline passed 436 local tests, 197 packaged host checks, and 69/69 shared browser cases; the retained Ego run passed 68/69 with the same SDK hash. These figures do **not** certify this 0.20.0 working tree. Current evidence and remaining failures belong in [reports/RESULTS.md](reports/RESULTS.md). SDK tests/fixture semantics stay unchanged. The local 69-case suite is separate from the unrun 31-task model benchmark.
+The last fully validated **0.19.0 Vek** baseline passed 436 local tests, 197 packaged host checks, and 69/69 shared browser cases; the retained Ego run passed 68/69 with the same SDK hash. These figures do **not** certify this 0.20.1 working tree. Current evidence and remaining failures belong in [reports/RESULTS.md](reports/RESULTS.md). SDK tests/fixture semantics stay unchanged. The local 69-case suite is separate from the unrun 31-task model benchmark.
 
 Ego reference comparisons require separately obtained reference artifacts under ignored `references/` and `downloads/`; ordinary Wiek-only development does not. Do not rebuild the SDK concurrently with reference E2E.
 

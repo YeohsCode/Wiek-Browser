@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-03T17:46:40.364Z",
-  "version": "0.20.0",
+  "generatedAt": "2026-11-03T18:04:31.960Z",
+  "version": "0.20.1",
   "versionMatches": true,
-  "checkedFiles": 190,
+  "checkedFiles": 192,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
   "files": [
     {
       "file": "NOTICE.md",
-      "sha256": "509a7324828dadb4ff7cc4766a06e10e6f0c0500e0f1f8d5a76433f5d7dcedcf",
+      "sha256": "68737798ab5bf11153f1ecc67c5599c92c119f45de19bd872e2934b118907ace",
       "matches": true
     },
     {
@@ -39,7 +39,7 @@
     },
     {
       "file": "app/argos-translate.py",
-      "sha256": "368c0aea3e1933c2b28939727e44c0ff9457a6028efc66673905cdeabe014844",
+      "sha256": "82b24f4bebb96f3e126cf71c9c9c88c096f821814e15620152b50c58d217665c",
       "matches": true
     },
     {
@@ -49,7 +49,7 @@
     },
     {
       "file": "app/bin/vek-desktop-monitor",
-      "sha256": "1f381a2dcc5e1aa4b68d8c4afeceb548af62b29986f3266dddb06093c904e70d",
+      "sha256": "5486d87149b31202ce8fc9ae75711ab584ad6cfe0a72640703eac034972d3bb4",
       "matches": true
     },
     {
@@ -139,7 +139,7 @@
     },
     {
       "file": "app/desktop-monitor-service.cjs",
-      "sha256": "e1de7df19e8d53474a09c2a06eaad0f83418d62a49db405d66363195c5dea698",
+      "sha256": "31640845640aefc3139502f241a991d4d992644bc31eb35727a4694de83e73fe",
       "matches": true
     },
     {
@@ -949,12 +949,22 @@
     },
     {
       "file": "skills/wiek-browser/API.md",
-      "sha256": "26b755179f48bcd50be0291e438e2293718072823ba7b84b959fd3eb28445ca9",
+      "sha256": "7074956f3078c00996177d32d77e501dbb75cde856a8e6bf1114b3c5c84e3974",
       "matches": true
     },
     {
       "file": "skills/wiek-browser/SKILL.md",
       "sha256": "cdcf7f11f758b245c31dfe14fd6f3398801bcecdaaf1d1200f5afce391816507",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/references/clearing-state.md",
+      "sha256": "6f1ee9ab9b0ba7e4f73261ce5d6d32226a84bac4c88b0faeece8a867adc8d74e",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/references/install.md",
+      "sha256": "9a5805c42898378eef4261787403a961faf4b0cb4c563559c5d66e7fbc8485ab",
       "matches": true
     }
   ]

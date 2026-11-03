@@ -1,13 +1,16 @@
 {
-  "generatedAt": "2026-11-02T16:11:12.321737+00:00",
-  "version": "0.19.0",
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-03T18:06:01.119582+00:00",
+  "project": "Wiek Browser",
+  "version": "0.20.1",
+  "repository": "https://github.com/YeohsCode/Wiek-Browser",
+  "fullParity": false,
   "localBrowserComparison": {
     "comparable": true,
     "runs": [
       {
         "browser": "ego",
         "startedAt": "2026-10-30T01:37:12.876Z",
-        "wallTimeMs": 297598,
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
         "counts": {
@@ -22,9 +25,8 @@
       },
       {
         "browser": "vek",
-        "startedAt": "2026-11-02T16:06:33.655Z",
-        "wallTimeMs": 167739,
-        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Vek Browser.app/Contents/Resources/app/cli/vek-browser.mjs",
+        "startedAt": "2026-11-03T18:01:02.404Z",
+        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
         "counts": {
           "total": 69,
@@ -36,677 +38,71 @@
           "assertions": 1248
         }
       }
-    ],
-    "note": "Final 0.19 packaged run and retained complete Ego run; same SDK/fixture/index hashes, no skips or unrun cases."
+    ]
   },
   "sdkUnitTests": {
     "pass": 532,
     "fail": 0,
-    "log": "sdk-unit-tests.log",
-    "note": "Retained unchanged SDK version; source and bundle identities still match."
+    "rerun": true,
+    "log": "v201-sdk-tests.log"
   },
   "localServiceAndParser": {
-    "pass": 436,
+    "pass": 500,
     "fail": 0,
-    "log": "v190-service-tests.log"
+    "log": "v201-source-tests.log"
   },
   "packagedWorkbenchIntegration": {
-    "pass": 197,
-    "fail": 0,
-    "log": "v190-package-workbench.log"
-  },
-  "cdpValueProbe": {
-    "pass": 22,
-    "mismatch": 0,
-    "log": "cdp-transport-probe.log"
-  },
-  "upstreamIntegrity": {
-    "files": 81,
-    "unchanged": true
+    "checks": 197,
+    "passed": true,
+    "version": "0.20.1",
+    "log": "v201-package-workbench.log"
   },
   "package": {
-    "path": "dist/mac-arm64/Vek Browser.app",
+    "path": "dist/mac-arm64/Wiek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 171,
-    "packageSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
-    "sdkMatchesTested": true,
-    "versions": {
-      "electron": "42.11.18",
-      "chromium": "148.0.7778.280",
-      "node": "24.19.0",
-      "arch": "arm64",
-      "platform": "darwin"
+    "sourceFilesChecked": 192,
+    "upstreamInputsUnchanged": 81,
+    "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+    "signed": false,
+    "notarized": false,
+    "note": "Only workbench API documentation changed in the final repack after E2E; app/CLI/SDK executable sources are unchanged."
+  },
+  "p3": {
+    "complete": false,
+    "desktop": {
+      "sourceHostNativePositive": true,
+      "finalPackageNativePermissionsVerified": false,
+      "evidence": "p3-desktop-native-check.json",
+      "parentExitEvidence": "p3-desktop-native-parent-check.json",
+      "scope": "Disposable public fixture; no physical multi-display or permission revocation."
     },
-    "sourceFilesCheckedIncludesAllSdkAndSkills": true
-  },
-  "rea": {
-    "daemon": "ev_0a7bdc68255ac1adb7db5fd967eaa355b6bbd1830efb7f12c750d8540dcbbee3",
-    "clientResources": "ev_c746b1b63234454354fe180d624d455e35d018a7b6219d016262de3385d93883",
-    "boundedCoverage": true
-  },
-  "online31TaskBenchmark": {
-    "status": "not_run",
-    "reason": "No task-specific model credentials or required third-party test logins were supplied; local E2E is distinct."
-  },
-  "completeProductParity": false,
-  "newCapabilities": [
-    "Claude native initialize model discovery without user frames, Vek runs or owned session identity",
-    "Observed aliases/canonical IDs and optional effort/adaptive fields; absence remains unknown",
-    "Fresh capability validation before user input and explicit effort control acknowledgement",
-    "Default model reset on resumed process; canonical selection retained in UI",
-    "Discovery cancellation/concurrency/project leases and archive authority boundaries",
-    "Session MCP resources/templates/read/subscribe/unsubscribe, scoped revision and stale handling, no automatic fetching or resubscription",
-    "Explicit Profile-scoped local webpage/project UTF-8 memory corpus with literal Chinese/English search, cancellation, partial failures, and delete-on-disable",
-    "Explicit HTTP MCP OAuth for pre-registered public clients: protected metadata/OIDC, S256 PKCE and fixed loopback callback, issuer/resource/scope review, bound encrypted credentials, serialized rotating refresh, no tool/code/refresh POST replay",
-    "Explicit encrypted Profile archive v2: top-level open-tab localStorage, independent current-origin tab sessionStorage, exact UTF-16 encoding, v1 decode, no-network bootstrap before site load, new-profile isolation, CHIPS omission, cancellation/conflict/partial-write cleanup",
-    "Explicit macOS one-shot interactive screen capture and AX selected-text adapter, opt-in/exclusions, temporary preview and Library handoff, transactional OS global shortcuts with browser conflict checks; native positive content paths remain unverified",
-    "Heartbeat/standalone/dedicated execution ownership, clean generated conversations, explicit memory, cancellation/deletion/restart/import authority boundaries",
-    "Explicit opt-in plain CLI closed-app one-shot tick with cutoff, shared writer lease, no stale Agent-lock reaping, real workspace/turn checkpoints and signal/timeout settlement",
-    "Default-off reviewed macOS login job lifecycle: private launcher, executable/Node/app-JS receipt, minute calendar, disabled-on-change, unload/remove with graceful worker settlement",
-    "Foreground gate and authenticated loopback stop-only endpoint; actual provider exit/checkpoint/lease release before foreground Agent state opens; no force-kill on timeout",
-    "Modern 2026-07-28 HTTP resources/templates/read, explicit POST subscriptions/listen for tool/resource list changes and resource URI updates, first-ack/exact-ID/accepted-subset validation, visible stream loss and manual retry, bounded frames with long-lived streams, no automatic fetch/replay/reconnect",
-    "Modern HTTP local tool form MRTR with explicit review, typed input validation, scoped single-use review IDs, exact opaque state echo and fresh JSON-RPC request IDs",
-    "Awaiting input counts toward original task deadline; cancel/disconnect/shutdown abort waiting or in-flight continuation; no automatic POST replay or restart resume",
-    "Input schemas/values/state and interactive results excluded from MCP disk history; current-session results marked resultRetained:false",
-    "Explicit HTTPS CIMD public-client configuration and offline metadata template; advertised AS capability, exact ID/native callback and bounded credential-free document checks",
-    "Read-only client identity review before external authorization; optional exact issuer pin, encrypted pre-registered issuer binding and explicitly portable CIMD identity",
-    "No automatic hosting, DCR fallback, attached metadata URL fetching, browser opening or tool POST replay"
-  ],
-  "remainingGaps": [
-    "Five other native provider protocols, source native session/history migration and paid generation validation",
-    "Codex encrypted-only/unknown history edits, exact native token/window context replay, cross-file child history and native source resume/fork remain unsupported",
-    "Claude multi-file child history and post-result background task lifecycle",
-    "OpenCode external history/native fork/background children and Vek MCP injection",
-    "Complete Chrome/Safari profile/web storage/extensions migration",
-    "Custom Chromium engine equivalence",
-    "Linked worktrees, checkpoint retention and remote PR workflow",
-    "Managed Vek client metadata hosting, MCP OAuth DCR/full step-up; resource/URL MRTR, sampling/roots, modern stdio, prompt notifications and task extensions",
-    "Positive native screenshot/AX content and background key trigger validation, passive selection toolbar, OS recording and translation",
-    "Physical sleep/wake, logout/login, OS background-item revocation, additional runtime layouts and CLI authentication environments; busy defer/completion contract and hard-kill recovery",
-    "Semantic/all-disk/multiformat memory index and Ego proprietary services",
-    "31 live-site model benchmark not run",
-    "Scheduler/Agent foreground writer gate is implemented; application-wide independent CLI startup election and all recovery paths are not established"
-  ],
-  "turnCheckpointTests": {
-    "pass": 11,
-    "fail": 0,
-    "log": "v040-turn-checkpoints.log",
-    "actualHostHardStop": true,
-    "includedInCurrentFullSuite": true
-  },
-  "previousTurnUiQa": {
-    "log": "v040-native-ui-qa.md",
-    "realProviderFileAndIndexDiff": true,
-    "wrongNameBlocked": true,
-    "realConfirmedRestore": true,
-    "protectionCheckpoint": true,
-    "defaultUserDataAppVersion": "0.4.0",
-    "note": "Historical 0.4 native restore UI; current full suite still exercises turn snapshots."
-  },
-  "claudeProtocolTests": {
-    "pass": 15,
-    "fail": 0,
-    "log": "v060-service-tests.log",
-    "modelCalls": 0,
-    "fixtureOnly": true
-  },
-  "claudeReadiness": {
-    "cliVersion": "2.1.31",
-    "initialize": true,
-    "isolatedHome": true,
-    "inheritedAuthentication": false,
-    "userMessages": 0,
-    "modelCalls": 0,
-    "report": "v060-claude-readiness.json",
-    "latestNativeRuntimeTested": false,
-    "forwardSubagentTextInitializeAccepted": true
-  },
-  "previousClaudeUiQa": {
-    "log": "v050-native-ui-qa.md",
-    "realNativeApprovalUi": true,
-    "noAutomaticApproval": true,
-    "exactlyOneDeclineResponse": true,
-    "realToolsAndUsage": true,
-    "defaultUserDataAppVersion": "0.5.0",
-    "note": "Historical 0.5 protocol approval UI; same service remains covered by current tests."
-  },
-  "claudeFocusedTests": {
-    "pass": 29,
-    "fail": 0,
-    "log": "v060-claude-tests.log",
-    "includedInCurrentFullSuite": true
-  },
-  "previousClaudeHistoryUiQa": {
-    "log": "v060-native-ui-qa.md",
-    "realNativeFilePicker": true,
-    "selectedBranchPreviewUpdates": true,
-    "noExecutionOnImport": true,
-    "newOwnedSessionOnContinuation": true,
-    "realToolsChildMessagesAndRestartPersistence": true,
-    "composerReachableWithActivityExpanded": true,
-    "defaultUserDataAppVersion": "0.6.0"
-  },
-  "acpProtocolTests": {
-    "pass": 18,
-    "fail": 0,
-    "log": "v070-service-tests.log",
-    "fixtureOnly": true,
-    "modelCalls": 0
-  },
-  "acpAndPanelFocusedTests": {
-    "pass": 19,
-    "fail": 0,
-    "log": "v070-acp-panel-tests.log"
-  },
-  "opencodeReadiness": {
-    "version": "1.19.5",
-    "sha256": "feaafead8cd563af0c2dcb386b0757e4355e327ebb6bd1aaad5440fe2f83596c",
-    "isolatedHome": true,
-    "inheritedAuthentication": false,
-    "userMessagesSent": 0,
-    "modelCalls": 0,
-    "sessionNew": true,
-    "discoveryCompleted": true,
-    "modelCount": 9,
-    "modelSelector": "model",
-    "report": "v070-opencode-readiness.json"
-  },
-  "previousOpenCodeUiQa": {
-    "log": "v070-native-ui-qa.md",
-    "modelDiscoveryWithoutPrompt": true,
-    "nativeObservedModelPicker": true,
-    "realSingleUseApprovalAndDecline": true,
-    "noPersistentGrantAndUnsupportedAcceptDisabled": true,
-    "realNativeCancel": true,
-    "toolsChildMessagesAndComposerReachable": true,
-    "defaultUserDataAppVersion": "0.7.0",
-    "wireCheck": "v070-native-ui-check.json"
-  },
-  "codexCapabilitiesHistoryTests": {
-    "pass": 21,
-    "fail": 0,
-    "fixtureOnly": true,
-    "modelCalls": 0,
-    "log": "v080-service-tests.log"
-  },
-  "codexFocusedTests": {
-    "pass": 47,
-    "fail": 0,
-    "log": "v090-codex-tests.log"
-  },
-  "codexReadiness": {
-    "version": "codex-cli 0.142.0",
-    "sha256": "b60ad82e66720a84830460b77e00b207536c38e536f64fb5a6af86bcae3a3bff",
-    "isolatedHome": true,
-    "inheritedAuthentication": false,
-    "turnStartRequests": 0,
-    "modelCalls": 0,
-    "historyItemsInjected": 2,
-    "modelDiscovery": true,
-    "modelCount": 5,
-    "historyFormatParsed": true,
-    "visibleImportedTexts": [
-      "Synthetic offline user",
-      "Synthetic offline answer"
-    ],
-    "report": "v080-codex-readiness.json",
-    "schemaIdentities": "v080-codex-schema-identities.json"
-  },
-  "previousObservedFailures": [
-    {
-      "log": "v070-service-concurrent-watch-failure.log",
-      "test": "project watchers report changes and close without leaking handles",
-      "result": "One timeout while full SDK suite was also running; cause not proven. Isolated check and final full 202-test run passed without changing assertions or watcher implementation."
+    "translation": {
+      "realEnglishChineseServiceExamples": true,
+      "socketConnectionsBlockedDuringInference": true,
+      "evidence": "p3-translation-real-service.json",
+      "electronPanelChecks": 8,
+      "modelBundled": false
     },
-    {
-      "report": "v110-package-workbench-attempt1.log",
-      "status": "fixed-and-regressed",
-      "description": "System /var vs /private/var alias with a canonical project root rejected a legitimate explicit memory file selection; final suite preserves boundary checks."
-    },
-    {
-      "report": "v110-native-ui-attempt1.png",
-      "status": "fixed-and-regressed",
-      "description": "Preferences memory boolean settings were mistaken for a corpus response; fixed documents-array discrimination with actual Electron checkbox regression. MCP dark-theme contrast also fixed and visually verified."
-    },
-    {
-      "report": "v130-service-attempt1.log",
-      "status": "fixed-and-regressed",
-      "description": "Application fixture inspected imported tabs before dispatched navigations committed; now waits for real destination documents to finish loading without changing data assertions."
-    },
-    {
-      "report": "v130-service-attempt2.log",
-      "status": "fixed-and-regressed",
-      "description": "Export fixture started capture before both source documents settled. Added explicit two-session preconditions and loading waits; storage omission remains a real reported boundary."
-    },
-    {
-      "report": "v130-service-native-interrupt-attempt.log",
-      "status": "passed-on-final-serial-rerun",
-      "description": "An existing native interrupt test did not observe turn/interrupt in the fixture audit while full tests/build overlapped. Cause not proven; no Agent implementation/assertion changes; final serial validation recorded separately. Final full 313/313 passed with no concurrent build; root cause remains unproven."
-    },
-    {
-      "report": "v130-native-before-result-fix.png",
-      "status": "fixed-and-regressed",
-      "description": "Native import succeeded but transient Space creation hid Settings, leaving the welcome panel. Explicitly reopen Settings with verified import counts; actual renderer regression added."
-    },
-    {
-      "report": "v140-native-ui-qa.md",
-      "status": "fixed-and-regressed",
-      "description": "Native capture cancellation surfaced an Electron IPC error prefix. Abort rejection now settles normally; panel sanitizes IPC wrappers. Final native cancellation, service and panel tests pass."
-    },
-    {
-      "report": "v150-initial-fixture-failure.log",
-      "status": "fixture-corrected",
-      "description": "Initial mode fixture selected model without provider modelArgs and left imported provider disabled. Corrected fixture setup without weakening product assertions."
-    },
-    {
-      "report": "v150-native-ui-qa.md",
-      "status": "fixed-and-regressed",
-      "description": "Dedicated view still displayed edit/rollback/delete/model controls rejected by backend ownership guard. Removed with actual Electron regression and final native UI check."
-    },
-    {
-      "report": "v160-control-cleanup-attempt.log",
-      "status": "fixture-corrected",
-      "description": "Initial fixture removed its directory before service.close. Cleanup now waits for actual service settlement before removing test files."
-    },
-    {
-      "report": "v160-service-parallel-attempt.log",
-      "status": "fixture-readiness-corrected",
-      "description": "Native interrupt test saw request audit before acknowledged nativeTurnId. Added client ACK readiness wait; original interrupt assertion retained. Focused and final full suite pass. Other historical timeout causes are not established."
-    },
-    {
-      "report": "v160-native-launchd-attempt1.json",
-      "status": "fixture-idle-precondition-corrected",
-      "description": "First packaged real-OS fixture kickstarted before previous process was idle and timed out waiting for final no-op. Unreached false markers are not observed duplication/unload failures; finally cleanup independently confirmed. Wait for OS no-pid before kickstart, preserve no-duplicate assertion; final packaged run success and cleanupConfirmed."
-    },
-    {
-      "report": "v180-sdk-attempt1.log",
-      "cases": "v180-initial-vek-e2e.json",
-      "pass": 19,
-      "fail": 50,
-      "skip": 0,
-      "notRun": 0,
-      "status": "final isolated packaged full run passed 69/69; root cause of first overlap remains unproven",
-      "description": "Initial SDK run overlapped newly started native QA instance. Earliest label-ref and keyboard-space failures cascaded into page-budget failures. Focus/window interference suspected, single root cause unproven. No SDK assertions or fixture semantics changed."
-    },
-    {
-      "report": "v180-native-ui-qa.md",
-      "status": "fixed and visually rechecked",
-      "description": "Native QA found compact select sizing and low dark-result contrast. Added select layout/focus and dark result colors; final package MCP 38/38 and SDK 69/69 passed."
-    }
-  ],
-  "observedFailures": [],
-  "validationOrderNote": "Final empty-CIMD-URL validation source 436/436, OAuth focused 38/38, packaged MCP 58/58 (new actual Electron panel 20 checks), packaged host 197/197, then isolated final package SDK 69/69 with 1248 assertions. Source identity 171 files; 81 upstream inputs unchanged. Native CUA metadata/review/cancel before the final empty-URL guard; final Electron covers that guard. Test CA files removed and temporary native host/peer stopped. Normal data app restored to 0.19.0, fixture integration absent, default job off/uninstalled. Historical 0.16 OS job proof not rerun. P1 deferred and complete product parity false.",
-  "codexReplayActivityTests": {
-    "newTests": 21,
-    "fixtureOnly": true,
-    "modelCalls": 0,
-    "log": "v090-service-tests.log"
+    "automation": "Busy/cooldown/contract/stop evaluator/SIGKILL recovery locally tested; physical sleep/login pending.",
+    "remoteGit": "Real local bare repositories and synthetic GitHub protocol/panel; no actual PR account writes."
   },
-  "codexReplayReadiness": {
-    "version": "codex-cli 0.142.0",
-    "modelCalls": 0,
-    "turnStartRequests": 0,
-    "inheritedAuthentication": false,
-    "report": "v090-history-oracle.json",
-    "sourceIdentities": "v090-codex-source-identities.json",
-    "semanticOracle": false,
-    "note": "Actual rollback marker and synthetic decoder acceptance only; source-matched semantics and fixture tests are separate evidence."
+  "p4": {
+    "complete": false,
+    "workflow": ".github/workflows/wiek-ci.yml",
+    "remoteResult": "not-yet-verified",
+    "lastObservedRun": 41689129523,
+    "lastObservedStatus": "queued",
+    "benchmarkRun": false,
+    "benchmarkReadiness": "p4-benchmark-readiness.json",
+    "blockers": [
+      "Canonical SDK V2 benchmark adapter",
+      "Dedicated Stage A/Judge model and limits",
+      "Dedicated account/login readiness",
+      "Signing/notarization and release process"
+    ]
   },
-  "codexReplayNativeUi": {
-    "report": "v090-native-ui-qa.md",
-    "wireCheck": "v090-native-ui-check.json",
-    "realFilePicker": true,
-    "fixtureOnly": true,
-    "modelCalls": 0,
-    "copiedEffectiveTextContinued": true,
-    "normalAppVersion": "0.9.0"
-  },
-  "cliLifecycleTests": {
-    "sourcePass": 4,
-    "packagedPass": 4,
-    "fail": 0,
-    "fullSuiteIncluded": true,
-    "actualElectron": true,
-    "restarts": 3,
-    "delayedProviderTerminationAndFinalCheckpoint": true,
-    "noForceKillOnTimeout": true,
-    "sourceLog": "v091-service-tests.log",
-    "packagedLog": "v091-package-lifecycle-tests.log",
-    "normalAppStatus": "v091-normal-app-status.json"
-  },
-  "claudeModelTests": {
-    "newTests": 16,
-    "focusedPass": 45,
-    "fail": 0,
-    "fixtureOnly": true,
-    "log": "v100-claude-tests.log",
-    "fullSuiteLog": "v100-service-tests.log"
-  },
-  "claudeModelReadiness": {
-    "version": "2.1.31",
-    "models": 3,
-    "effortFieldsPresent": false,
-    "isolatedHome": true,
-    "inheritedAuthentication": false,
-    "userMessagesSent": 0,
-    "modelCalls": 0,
-    "report": "v100-claude-model-readiness.json",
-    "protocolIdentity": "v100-claude-protocol-identities.json",
-    "note": "Bundled/cached metadata only, no current entitlement, pricing or effective reasoning validation."
-  },
-  "claudeModelNativeUi": {
-    "report": "v100-native-ui-qa.md",
-    "wireCheck": "v100-native-ui-check.json",
-    "fixtureOnly": true,
-    "discoveryUserFrames": 0,
-    "effortAcknowledgementBeforeUser": true,
-    "normalAppStatus": "v100-normal-app-status.json"
-  },
-  "executionPriority": {
-    "asOf": "2026-11-02 Asia/Shanghai",
-    "active": [
-      "P2",
-      "P3"
-    ],
-    "deferred": "P1 integrations with other Agents, including provider gateway injection",
-    "localCursorStash": "31764915635554521270725e0d0c38e178eea3cf",
-    "cursorShipped": false,
-    "next": "P2 reviewed/cancellable MRTR input continuations with uncertainty boundaries; modern OAuth CIMD/DCR and source-complete migration retained; remaining P3 OS/mode gaps retained; P1 integrations deferred."
-  },
-  "p2P3Tests": {
-    "newTests": 21,
-    "pass": 21,
-    "fail": 0,
-    "log": "v110-p2-p3-tests.log",
-    "modelCalls": 0,
-    "externalAccountActions": 0,
-    "mcpResourceTests": 11,
-    "memoryTests": 9,
-    "actualElectronPanelTests": 1,
-    "packagedAdditionalChecks": 14
-  },
-  "previousV080UiQa": {
-    "log": "v080-native-ui-qa.md",
-    "nativeModelAndEffortMenus": true,
-    "nativeFilePickerWithOfficialSyntheticRollout": true,
-    "noExecutionOnImport": true,
-    "newOwnedSessionOnContinuation": true,
-    "sourceBytesUnchanged": true,
-    "defaultUserDataAppVersion": "0.8.0",
-    "wireCheck": "v080-native-ui-check.json"
-  },
-  "previousV110UiQa": {
-    "log": "v110-native-ui-qa.md",
-    "fixtureOnly": true,
-    "nativeFilePicker": true,
-    "pageAndFileChineseSearch": true,
-    "resourceSubscriptionReadAndUnsubscribe": true,
-    "finalDarkThemeReviewed": true,
-    "wireCheck": "v110-native-ui-check.json",
-    "normalAppStatus": "v110-normal-app-status.json"
-  },
-  "oauthTests": {
-    "newTests": 18,
-    "pass": 18,
-    "fail": 0,
-    "log": "v120-oauth-tests.log",
-    "httpCryptoServiceTests": 17,
-    "actualElectronPanelTests": 1,
-    "injectedEncryption": "AES-GCM fixture",
-    "actualSystemBrowserInAutomatedTests": false,
-    "packagedAdditionalChecks": 9,
-    "packagedFlow": "prepare/cancel only",
-    "realAccounts": false,
-    "realKeychainTokenWrite": false,
-    "modelCalls": 0,
-    "externalAccountActions": 0
-  },
-  "profileStorageTests": {
-    "newTests": 10,
-    "focusedPass": 17,
-    "fail": 0,
-    "log": "v130-profile-storage-tests.log",
-    "packagedSourceModuleElectronTests": 2,
-    "packagedSourceModuleChecks": 67,
-    "packagedLog": "v130-package-profile-storage.log",
-    "actualApplicationIPC": true,
-    "automatedNativeDialogs": "injected file and confirmation responses; real renderer passphrase modal",
-    "fixtureOnly": true,
-    "modelCalls": 0,
-    "externalAccountActions": 0,
-    "bootstrapNetworkRequests": 0,
-    "v1BackwardDecode": true,
-    "fullChromeSessionMigration": false
-  },
-  "previousV120UiQa": {
-    "log": "v120-native-ui-qa.md",
-    "fixtureOnly": true,
-    "nativePrepareReviewCancel": true,
-    "externalBrowserOpened": false,
-    "codeExchange": false,
-    "keychainTokenWrite": false,
-    "wireCheck": "v120-native-ui-check.json",
-    "normalAppStatus": "v120-normal-app-status.json"
-  },
-  "previousV130UiQa": {
-    "log": "v130-native-ui-qa.md",
-    "fixtureOnly": true,
-    "nativeSaveAndOpenDialogs": true,
-    "nativePassphraseAndRestoreConfirmation": true,
-    "localOrigins": 1,
-    "independentTabSessions": 2,
-    "realSiteLogins": false,
-    "wireCheck": "v130-native-ui-check.json",
-    "normalAppStatus": "v130-normal-app-status.json"
-  },
-  "desktopToolsTests": {
-    "newTests": 18,
-    "focusedPass": 23,
-    "fail": 0,
-    "log": "v140-desktop-tests.log",
-    "actualElectronPanelTests": 1,
-    "packagedPanelChecks": 20,
-    "packagedLog": "v140-package-desktop-panel.log",
-    "fixtureOSRegistryAndCapture": true,
-    "nativeQA": "v140-native-ui-qa.md",
-    "nativePositiveCaptureOrSelectionVerified": false,
-    "modelCalls": 0,
-    "externalAccountActions": 0
-  },
-  "previousV140UiQa": {
-    "log": "v140-native-ui-qa.md",
-    "fixtureOnly": true,
-    "newOSPermissionGrants": 0,
-    "nativeShortcutRegistration": true,
-    "nativeScreenshotStartCancelCleanup": true,
-    "nativeGlobalKeyCallback": false,
-    "nativeSelectedTextRead": false,
-    "nativePositiveScreenshot": false,
-    "normalAppStatus": "v140-normal-app-status.json",
-    "wireCheck": "v140-native-ui-check.json"
-  },
-  "automationExecutionTests": {
-    "newTests": 27,
-    "focusedPass": 38,
-    "fail": 0,
-    "log": "v150-scheduler-tests.log",
-    "modeTests": 15,
-    "actualWorkerTests": 11,
-    "actualElectronPanelTests": 1,
-    "panelChecks": 10,
-    "packagedTests": 12,
-    "packagedLog": "v150-package-scheduler.log",
-    "modelCalls": 0,
-    "externalAccountActions": 0,
-    "osJobInstalled": false,
-    "automaticWakeupVerified": false,
-    "note": "Historical 0.15 scope; 0.16 adds reviewed temporary OS-job verification, without installing a persistent default-user job."
-  },
-  "previousV150UiQa": {
-    "log": "v150-native-ui-qa.md",
-    "fixtureOnly": true,
-    "nativeModeAndConsentMenus": true,
-    "sameDedicatedThreadAcrossUIAndClosedWorker": true,
-    "runs": 2,
-    "runningBrowserLockRespected": true,
-    "nativeOwnedComposerAndUnsupportedActionsAbsent": true,
-    "systemWakeJobInstalled": false,
-    "wireCheck": "v150-native-ui-check.json",
-    "normalAppStatus": "v150-normal-app-status.json"
-  },
-  "backgroundSchedulingTests": {
-    "newTests": 20,
-    "controlTests": 8,
-    "jobLauncherTests": 11,
-    "actualElectronPanelTests": 1,
-    "panelChecks": 11,
-    "focusedPass": 31,
-    "focusedLog": "v160-scheduler-tests.log",
-    "packagedPass": 32,
-    "packagedPanelChecks": 21,
-    "packagedLog": "v160-package-scheduler.log",
-    "actualPackagedHostForegroundHandoff": true,
-    "packagedControlJobLauncherModules": true,
-    "actualLaunchd": "v160-native-launchd-check.json",
-    "sourceNodeLaunchd": "v160-native-launchd-source-check.json",
-    "actualOSRunAtLoad": true,
-    "actualOSBootout": true,
-    "cleanupConfirmed": true,
-    "userLibraryPlistWrittenByFixture": false,
-    "physicalSleepWakeTested": false,
-    "logoutLoginTested": false,
-    "modelCalls": 0,
-    "externalAccountActions": 0,
-    "cleanupRecheck": "v160-launchd-cleanup-check.json"
-  },
-  "previousV160UiQa": {
-    "log": "v160-native-ui-qa.md",
-    "fixtureOnly": true,
-    "nativeReviewCancelRefresh": true,
-    "reviewedRuntime": "final packaged Vek executable",
-    "reviewedNodeVersion": "24.19.0",
-    "setupAbsentAfterCancel": true,
-    "temporaryRealOSJobTested": true,
-    "persistentDefaultJobInstalled": false,
-    "wireCheck": "v160-native-ui-check.json",
-    "normalAppStatus": "v160-normal-app-status.json",
-    "darkNativeLayoutReviewed": false,
-    "normalDefaultConsentOff": true,
-    "normalDefaultSetupAbsent": true
-  },
-  "modernMcpTests": {
-    "newTests": 21,
-    "httpProtocolAndServiceTests": 20,
-    "actualElectronIPCPanelTests": 1,
-    "panelChecks": 14,
-    "focusedPass": 73,
-    "focusedLog": "v170-mcp-focused.log",
-    "fullSuiteLog": "v170-service-tests.log",
-    "packagedModulePass": 21,
-    "packagedModuleLog": "v170-package-modern.log",
-    "packagedAdditionalWorkbenchChecks": 15,
-    "packagedWorkbenchLog": "v170-package-workbench.log",
-    "actualLoopbackSSE": true,
-    "capacityAndReadAt16ActiveStreams": true,
-    "automaticResourceReads": 0,
-    "automaticRelisten": false,
-    "MRTRContinuationImplemented": false,
-    "modelCalls": 0,
-    "externalAccountActions": 0,
-    "currentPackagedRegressionLog": "v180-package-mcp.log",
-    "version": "0.17.0 historical new-feature suite; rerun as part of final 0.18 packaged MCP 38/38"
-  },
-  "previousV170UiQa": {
-    "log": "v170-native-ui-qa.md",
-    "fixtureOnly": true,
-    "nativeModernConnectListWatchSubscribeReadStop": true,
-    "wireCheck": "v170-native-ui-check.json",
-    "normalAppStatus": "v170-normal-app-status.json",
-    "resourceReadsBeforeExplicitRead": 0,
-    "resourceReadsAfterExplicitRead": 1,
-    "streamsAfterStop": 0,
-    "nativeStreamLossRetried": false,
-    "automatedElectronStreamLossRetried": true,
-    "darkNativeLayoutReviewed": false,
-    "normalDefaultJobConsentOff": true,
-    "normalDefaultJobSetupAbsent": true
-  },
-  "mcpInputTests": {
-    "newTests": 17,
-    "protocolAndServiceTests": 16,
-    "actualElectronIPCPanelTests": 1,
-    "panelChecks": 13,
-    "fullSuitePass": 416,
-    "fullSuiteLog": "v180-service-tests.log",
-    "finalPackagedMcpPass": 38,
-    "packagedLog": "v180-package-mcp.log",
-    "additionalWorkbenchChecks": 11,
-    "packagedWorkbenchPass": 184,
-    "packagedWorkbenchLog": "v180-package-workbench.log",
-    "modelCalls": 0,
-    "externalAccountActions": 0,
-    "resourceReadContinuation": false,
-    "urlElicitation": false,
-    "sampling": false,
-    "pairedClientContinuation": false,
-    "diskInputRetention": false,
-    "automaticReplay": false,
-    "MRTRFormContinuationImplemented": true
-  },
-  "previousV180UiQa": {
-    "log": "v180-native-ui-qa.md",
-    "wireCheck": "v180-native-ui-check.json",
-    "fixtureOnly": true,
-    "nativeCUAFormSubmit": true,
-    "nativeCUACancelTask": true,
-    "finalDarkContrastReviewed": true,
-    "finalContrastResultPreparedThroughOwnAPI": true,
-    "allSizesOrLightThemeReviewed": false,
-    "normalAppStatus": "v180-normal-app-status.json",
-    "normalDefaultJobConsentOff": true,
-    "normalDefaultJobSetupAbsent": true
-  },
-  "uiQa": {
-    "log": "v190-native-ui-qa.md",
-    "wireCheck": "v190-native-ui-check.json",
-    "fixtureOnly": true,
-    "nativeCUAPublicDocument": true,
-    "nativeCUAIdentityReview": true,
-    "nativeCUACancelSignIn": true,
-    "externalBrowserOpened": false,
-    "codeExchangePerformed": false,
-    "tokenStoreCreated": false,
-    "testCAInstalledInOS": false,
-    "darkNativeLayoutReviewed": true,
-    "allSizesOrLightThemeReviewed": false,
-    "normalAppStatus": "v190-normal-app-status.json",
-    "note": "Native snapshots precede only the final empty-CIMD-URL save guard; final packaged actual Electron tests validate that guard and valid configuration flow.",
-    "normalDefaultJobConsentOff": true,
-    "normalDefaultJobSetupAbsent": true,
-    "normalFixtureIntegrationAbsent": true
-  },
-  "clientIdentityTests": {
-    "newTests": 20,
-    "protocolAndServiceTests": 19,
-    "actualElectronIPCPanelTests": 1,
-    "panelChecks": 20,
-    "focusedPass": 38,
-    "focusedLog": "v190-oauth-focused.log",
-    "fullSuitePass": 436,
-    "fullSuiteLog": "v190-service-tests.log",
-    "packagedModulePass": 58,
-    "packagedLog": "v190-package-mcp.log",
-    "additionalWorkbenchChecks": 13,
-    "packagedWorkbenchPass": 197,
-    "packagedWorkbenchLog": "v190-package-workbench.log",
-    "realTrustedFixtureTLS": true,
-    "testCAInstalledInOS": false,
-    "publicMetadataHostedForUsers": false,
-    "DCRImplemented": false,
-    "completeStepUpImplemented": false,
-    "realAccountAuthorization": false,
-    "nativeTokenStoreWritten": false,
-    "modelCalls": 0,
-    "externalAccountActions": 0
-  }
+  "history": [
+    "v190-delivery-summary.json",
+    "wiek-v0.20-checkpoint.json"
+  ]
 }

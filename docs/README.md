@@ -1,6 +1,6 @@
 # 文档索引
 
-当前开发检查点 **Wiek Browser 0.20.0**（原 Vek Browser）。P3 新增实现正在统一验收；P1 其他 Agent 集成继续暂缓，P2 剩余项与 P4 线上模型基准仍未完成。进度见 [PLAN.md](../PLAN.md)，分版本验收见 [RESULTS.md](../reports/RESULTS.md)。历史调查和报告保留其原有名称及版本证据。
+当前开发检查点 **Wiek Browser 0.20.1**（原 Vek Browser）。P3 桌面正向/翻译已补齐有界证据，最终同集回归与系统边界继续验收；P1 其他 Agent 集成继续暂缓，P2 剩余项与 P4 线上模型基准仍未完成。进度见 [PLAN.md](../PLAN.md)，分版本验收见 [RESULTS.md](../reports/RESULTS.md)。历史调查和报告保留其原有名称及版本证据。
 
 | 用途 | 文档 |
 |---|---|
@@ -31,6 +31,8 @@
 | 自动化执行模式与单次worker | [automation-execution.md](../analysis/automation-execution.md) |
 | 时区与调度恢复 | [scheduler-timezone.md](../analysis/scheduler-timezone.md) |
 | 权限与 Profile 归属 | [site-permissions.md](../analysis/site-permissions.md)、[browser-shell-v030.md](../analysis/browser-shell-v030.md) |
+| 桌面选区/录制真实验收 | [p3-desktop-acceptance.md](../analysis/p3-desktop-acceptance.md) |
+| 改名与兼容范围 | [wiek-rebrand.md](../analysis/wiek-rebrand.md) |
 | OS单次采集与全局快捷键 | [desktop-tools.md](../analysis/desktop-tools.md) |
 | 资料 archive | [profile-archive-design.md](../analysis/profile-archive-design.md)、[web storage v2](../analysis/profile-web-storage.md) |
 | 语音构建与模型来源 | [whisper-static-build.md](../reports/whisper-static-build.md)、[MODEL-NOTICE.md](../models/MODEL-NOTICE.md) |

@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-11-04",
+  "timezone": "Asia/Shanghai",
+  "sourceHostVersion": "0.20.0",
+  "sourceHost": true,
+  "syntheticOnly": true,
+  "referenceBrowserRuntimeParity": false,
+  "existingPermissions": {
+    "screen": true,
+    "inputMonitoring": true,
+    "accessibility": true
+  },
+  "permissionChanges": 0,
+  "modelCalls": 0,
+  "paidCalls": 0,
+  "actual": {
+    "oneShotAxSelectedText": true,
+    "annotatedSessionEventTap": true,
+    "integratedSelectionAccepted": 1,
+    "selectionSnapshotContainsBody": false,
+    "floatingToolbarShown": true,
+    "copyExactPublicFixture": true,
+    "nativeRecording": {
+      "appScope": "native:app.vek.native.fixture:82218",
+      "events": 1,
+      "screenshotStatus": "captured",
+      "pngBytes": 65846,
+      "targetOutline": {
+        "x": 35,
+        "y": 454,
+        "width": 256,
+        "height": 55
+      },
+      "protectedInputEventsAdded": 0
+    },
+    "explicitStop": true,
+    "allQaProcessesStopped": true
+  },
+  "screenshots": [
+    {
+      "file": "reports/p3-desktop-native-toolbar.png",
+      "sha256": "7821631b85884b83979f9cf62f9a8f6f9600314ae9bf48c49a36ae87bd917693"
+    },
+    {
+      "file": "reports/p3-desktop-native-recording.png",
+      "sha256": "274bcd7cca5e209d399f1503b31513f922928e4268fc6c5ff23945c106bc2cd7"
+    }
+  ],
+  "finalHelper": {
+    "file": "app/bin/vek-desktop-monitor",
+    "sha256": "5486d87149b31202ce8fc9ae75711ab584ad6cfe0a72640703eac034972d3bb4",
+    "parentExitGuardTest": "reports/p3-desktop-native-parent-check.json"
+  },
+  "coverageLimits": [
+    "Native UI proof used the source Electron host, not the final release package.",
+    "The final helper adds a parent-PID shutdown guard after positive UI QA; this final binary separately passed native parent-exit testing.",
+    "No physical multiple-display arrangement was changed or exhaustively tested.",
+    "OS permission revocation was not performed; deterministic injected loss tests and the native permission timer cover handling.",
+    "Translate and Ask buttons were observed in the actual native toolbar; native callback proof here exercised Copy."
+  ],
+  "observedFailures": [
+    "NSEvent global monitor and a session event tap registered but did not observe the app-targeted CUA input; annotated-session tap fixed this.",
+    "CUA app-targeted input did not by itself change NSWorkspace frontmost. The public fixture therefore exposes an explicit Focus button; foreground checks were retained.",
+    "CUA observation timed out after successful Copy hid the only toolbar window. The exact callback result confirms Copy completed."
+  ]
+}

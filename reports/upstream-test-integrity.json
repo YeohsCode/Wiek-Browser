@@ -409,5 +409,6 @@
       "unchanged": true
     }
   ],
-  "verifiedAt": "2026-11-03T17:46:40.324Z"
+  "verifiedAt": "2026-11-03T18:04:31.923Z",
+  "referenceMode": "local-reference-and-pinned-manifest"
 }

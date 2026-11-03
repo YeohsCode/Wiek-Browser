@@ -1,6 +1,6 @@
 # Wiek Browser 复刻计划与进度
 
-更新：2026-11-04（Asia/Shanghai）。当前源码检查点：**0.20.0（Wiek 改名与 P3 集成）**；最近完整交付基线：**0.19.0（原 Vek）**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
+更新：2026-11-04（Asia/Shanghai）。当前源码检查点：**0.20.1（Wiek 改名与 P3 集成）**；原品牌历史基线：**0.19.0（Vek）**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
 
 ## Wiek 改名与首个远程检查点
 
@@ -9,7 +9,7 @@
 - [x] 新安装使用 Wiek 数据目录；原目录存在时原地复用，不自动移动个人资料。
 - [x] 提供 English README 与 `README.zh-CN.md`；历史 0.19 README 保存在 `docs/history/`。
 - [x] 本轮源码 498/498、打包宿主 197/197、190 个发行文件匹配，已提交 `d2d588e` 并推送到 `https://github.com/YeohsCode/Wiek-Browser.git`。
-- [ ] 推送后继续 P3 真实桌面监听/翻译/系统边界，以及 P4 CI、可恢复构建和基准准备。
+- [x] 已推送改名与 CI/翻译修复；继续完成桌面正向链路、P4 干净检出与基准准备。
 
 ## 当前执行优先级
 
@@ -23,10 +23,10 @@
 
 | P3 工作项 | 当前进展 | 下一步验收 |
 |---|---|---|
-| 自动化忙碌延期、完成条件、运行记忆/结果与崩溃恢复 | 核心、CLI 与编辑器已实现；最新 lifecycle/evaluator 日志 18/18，独立 process 检查日志 62/62；这些集合可能重叠，不相加当作总数 | 主窗口生命周期集成、完整回归与打包验证；保留前台 Electron 与 closed-app Node 的 OS 事件边界 |
-| 被动选区工具栏、按应用原生录制 | 服务、Swift helper、界面与主窗口接线已实现；一次性 AX 选区已获得正向合成内容；真实全局监听未收到事件，仍待修复 | 修复原生事件监听，再验收工具栏、录制截图、应用切换、排除、权限丢失与多显示器 |
-| 翻译 | 本地 JSON CLI、界面、Argos 适配与安装命令已实现；中英双向模型安装完成；服务/工具栏专项 4/4；首次真实翻译暴露模型内 Stanza metadata 与当前 runtime 不兼容（KeyError: packages） | 先修复分句资源兼容，再跑真实离线双向翻译、界面与发行包验收；模型与 Python runtime 不包含在当前应用包内 |
-| 远程 Git / PR | 显式审核的 fetch/pull/push/lease 与 GitHub PR 流程已实现；初轮 35/35 包含真实本地 bare remote 与协议 fixture | 补关闭等待实际进程退出、diff 截断提示、界面与打包验收；真实 GitHub 写操作未执行 |
+| 自动化忙碌延期、完成条件、运行记忆/结果与崩溃恢复 | 核心、CLI 与编辑器已实现；最新 lifecycle/evaluator 日志 18/18，独立 process 检查日志 62/62；这些集合可能重叠，不相加当作总数 | 已接前台 Electron powerMonitor 并通过整体回归；继续真实系统切换与 closed-app Node 的 OS 事件边界验收 |
+| 被动选区工具栏、按应用原生录制 | 服务、Swift helper、界面与主窗口接线已实现；一次性 AX 选区已获得正向合成内容；已修复 annotated-session 事件监听；源码 host 的实际选区、工具栏 Copy、应用录制截图与安全输入边界通过 | 补物理权限撤销、多显示器以及更广泛应用矩阵；源码 host 的正向证据不代替最终包的 OS 权限验收 |
+| 翻译 | 本地 JSON CLI、界面、Argos 适配与安装命令已实现；中英双向模型安装完成；服务/工具栏专项 4/4；首次 Stanza 兼容失败已修复，MiniSBD 预热后真实中英双向服务样例通过 | 继续更多语种与发行包场景验收；模型与 Python runtime 不包含在当前应用包内 |
+| 远程 Git / PR | 显式审核的 fetch/pull/push/lease 与 GitHub PR 流程已实现；初轮 35/35 包含真实本地 bare remote 与协议 fixture | 关闭等待、diff 截断和 Electron 面板已补并回归；PR 仍仅合成 gh 协议，未执行真实账号写操作 |
 | 系统边界与终端证据 | 睡眠/登录切换未执行；独立交互终端只有静态图标/协议线索 | 单列真实系统验收，不用模拟测试冒充；没有充分证据前不宣称 Ego 存在完整独立终端 |
 
 完成顺序：修复原生监听和剩余边界 → 真实翻译与桌面 QA → 全量本地/打包回归与同集 SDK 对标 → 更新文档、发布记录与 commit。P2 的 OAuth 剩余项和完整来源迁移在 P3 收尾后继续；P4 线上模型基准与签名发布仍未开展。
@@ -36,16 +36,16 @@
 | 项目 | 已完成的验收 | 当前状态 |
 |---|---|---|
 | 参考制品与调查 | ego-lite MIT 源码、Ego 0.6.1.13 安装包、31 任务 benchmark 已下载；REA daemon/client 证据及覆盖限制保留 | 已完成有界调查；全部 native/client 路径仍未覆盖 |
-| 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Vek 69/69、Ego 68/69 | 0.19最终同集验收完成，非引擎全面等价 |
+| 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Wiek 69/69、保留Ego 68/69 | 0.20.1同集验收完成，非引擎全面等价 |
 | 本地 Agent 工作台 | 通用 CLI、opt-in Codex app-server/Claude stream-json/OpenCode ACP、多 Agent 控制、对话分支/附件/审批、Claude选定历史分支、Codex有效rollout压缩/回滚导入及实时工具/子活动、Codex/Claude模型与effort目录 | 部分完成；其他5种原生 provider、源CLI原生会话迁移/后台任务和真实付费 turn 未验证 |
-| 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，linked worktree 和 PR 流程仍缺失 |
+| 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，linked worktree 仍缺；已补有审核的远程 Git/PR 流程，真实 PR 账号验收待执行 |
 | MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；已补 session 资源/模板/订阅；已补预注册public OAuth/PKCE与加密绑定；现代HTTP资源/列表与更新订阅已补；已补本地工具form MRTR；已补有界CIMD/身份审核；托管身份/DCR/step-up/sampling/URL与资源MRTR仍缺失 |
-| 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 0.16新增明确审核的macOS login job/前台接管；三种mode和closed-app tick可用，物理sleep/login撤销未实测，busy延期/completion contract仍缺 |
-| 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；新增显式网页/项目文本 memory 索引；0.14增加显式OS单次采集；正向native内容仍待验收，无被动监听/跨应用录制/翻译等价 |
+| 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 0.16新增明确审核的macOS login job/前台接管；三种mode和closed-app tick可用，物理sleep/login撤销未实测，0.20 已补 busy 延期、turn contract、completion evaluator 与 SIGKILL 恢复守护 |
+| 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；新增显式网页/项目文本 memory 索引；0.14增加显式OS单次采集；0.20.1 有界源码 host 的被动选区/工具栏 Copy/指定应用录制正向通过，真实中英翻译通过；物理系统兼容矩阵仍待验收 |
 | 浏览器界面/权限/资料 | 主题/标签布局/快捷键、独立窗口/托盘；权限隔离；Profile 数据归属；Chromium 选择导入和v2显式web storage加密archive | 部分完成；完整迁移/扩展/OS 设备能力仍有缺口 |
-| 交付与基准 | macOS ARM64 应用；436/436 本地测试、197/197 打包宿主集成、81 个上游文件未改 | 0.19有界检查点完成，171个发行文件匹配，31 项线上模型任务未运行 |
+| 交付与基准 | macOS ARM64 应用；500/500 本地测试、532/532新一轮SDK、197/197 打包宿主集成、81 个上游文件未改 | 0.20.1有界检查点完成，192个发行文件匹配，31 项线上模型任务未运行 |
 
-证据入口：[当前结果](reports/RESULTS.md)、[同集对比](reports/comparison.md)、[逐项功能清单](analysis/feature-parity.md)、[机器可读结果](reports/delivery-summary.json)。532 项 SDK 单测沿用未改版结果；不描述为本轮重新运行。
+证据入口：[当前结果](reports/RESULTS.md)、[同集对比](reports/comparison.md)、[逐项功能清单](analysis/feature-parity.md)、[机器可读结果](reports/delivery-summary.json)。532 项 SDK 单测在本轮重新运行通过；历史版本数据仍保留。
 
 ## 版本进度
 
@@ -114,19 +114,23 @@
 ### P3：OS 能力、执行模式与剩余本地功能
 
 - [x] 0.14有界实现：单次OS截图与AX选区读取、默认关闭/按应用排除、全局快捷键、预览与明确使用；权限由真实OS流程授予，不伪造成功。
-- [ ] 被动选区浮动工具栏、OS跨应用录制、多显示器/权限撤销和所有应用兼容仍待验证；0.14不代表这些完成。
+- [x] 0.20.1：明确启用的被动选区工具栏、指定应用录制、目标框/真实PNG、安全输入过滤与孤儿监听自停；源码 host 的正向结果见桌面验收。
+- [ ] 物理多显示器、实际权限撤销、最终包的 OS 权限和更广泛应用矩阵仍待验收。
 - [x] 0.15：heartbeat/standalone/dedicated线程生命周期；显式closed-app单次CLI tick，默认关闭、非native provider、预约去重、锁互斥、signal/timeout/真实快照。
 - [x] 0.16：明确opt-in的macOS login job安装/停用卸载、runtime变更阻止执行、foreground等待真实收尾；真实一次性launchd fixture完成bootstrap/运行/卸载。
-- [ ] 物理sleep/wake、logout/login/OS后台项撤销和更多安装布局仍需验收；busy延期、Ego completion contract与hard-kill恢复仍有缺口。
+- [x] 0.20：busy/input/approval 延期、cooldown、32KiB memory/8KiB提示尾部、notify/silent contract、独立受限停止评估、真实 SIGKILL/no-replay/孤儿PID阻塞已实现并测试。
+- [ ] 物理sleep/wake、logout/login/OS后台项撤销和更多安装布局仍需验收；前台 Electron 与 closed-app Node 的 OS 事件感知范围不同。
 - [x] 0.11：显式网页/项目UTF-8文本memory内容索引；Profile隔离、中文/英文literal搜索、保存副本/重建、删除与取消/开关清除。非语义/全磁盘索引，不自动注入Agent。
-- [ ] 真实翻译适配和远程 Git/PR 流程逐项验收；独立交互终端须先确认 Ego 实际功能证据。
+- [x] 0.20.1：Argos/MiniSBD 真实中英双向服务样例（推理阻止socket连接）、实际 Electron 翻译控件；远程 Git 的真实本地 bare repo、PR 合成 gh 协议与面板验收。
+- [ ] 更多翻译语种及真实 PR 账号路径仍需明确配置；独立交互终端静态证据不足，保留 unknown，不以图标推断完整功能。
 
 ### P4：同条件线上基准与发布
 
 - [ ] 修复或固定 benchmark adapter 与 SDK V2 的版本漂移，对 Ego/Vek 同等应用。
 - [ ] 获得专用 Stage A/Judge 模型配置与必要站点测试账号后，执行同 commit/task/model/thinking/limits/login 条件的 31 任务基准。
 - [ ] 分别统计成功、失败、未运行和确实依赖 Ego 专有服务的跳过；不套用营销成功率。
-- [ ] 建立 Vek 自己的 CI、可恢复构建、签名/公证及版本发布流程；当前仅本地构建，无远程发布。
+- [x] 建立 Wiek 独立 CI、固定 action SHA/依赖/模型身份、干净检出的上游测试资料恢复；已推送并触发远端队列。
+- [ ] 远端 CI 成功、SDK V2 benchmark adapter、签名/公证及正式版本发布仍待完成；代码推送不等于发布签名安装包。
 
 ## 提交与验证约定
 
@@ -180,3 +184,11 @@
 - [x] P4 模型恢复：固定 Whisper URL/大小/SHA-256 的恢复命令；不将权重放入 Git。
 - [x] P4 静态就绪检查：31 个任务 ID 与当前参考 checkout 顺序一致，5 项需登录、6 个平台、1 个附件；不是 benchmark 成功率。
 - [ ] P4 adapter 仍需适配 canonical SDK V2；需要固定两侧模型/思考/限额/任务/账户状态后才可跑线上对比。没有执行付费模型或真实账号任务。
+
+## 0.20.1 最终验收
+
+- [x] 桌面原生源码host正向链路及parent-exit守护；真实中英翻译服务、实际Electron翻译面板。
+- [x] 完整本地500/500、SDK532/532、打包宿主197/197、同集69/69与1,248断言；192个发行文件匹配。
+- [x] 原始失败日志保留；源码host结果不代替最终包OS验收。
+- [ ] 继续P3物理系统边界/多显示器/实际权限撤销；OS绑定加密凭据迁移仍是P2缺口。
+- [ ] 继续P4远端CI验收、共享SDK V2 adapter与专用模型/账号就绪、签名/正式发布。

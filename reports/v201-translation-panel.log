@@ -1,0 +1,10 @@
+{"passed":true,"checks":8,"actualElectronIPC":true,"syntheticTranslation":true,"modelCalls":0}
+✔ translation panel sends text only after explicit submit, renders literal results, and cancels actual child (331.292625ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 394.602292

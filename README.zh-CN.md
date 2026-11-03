@@ -4,9 +4,9 @@
 
 本地 Chromium 浏览器与 Agent 工作区，原名 **Vek Browser**。项目独立实现 Electron 宿主、浏览器界面、Profile、任务 Space 和本地服务，复用 [citrolabs/ego-lite](https://github.com/citrolabs/ego-lite) 以 MIT 许可开放的 SDK。
 
-**当前开发检查点为 0.20.0。P3 仍在集成验收，尚未完成 Ego 全量功能复刻，P4 线上基准也未完成。** 实际进展见 [计划](PLAN.md)、[功能对照](analysis/feature-parity.md) 和 [验证结果](reports/RESULTS.md)。历史报告保留原 Vek 名称及其对应版本的测试结论。
+**当前开发检查点为 0.20.1。P3 仍在集成验收，尚未完成 Ego 全量功能复刻，P4 线上基准也未完成。** 实际进展见 [计划](PLAN.md)、[功能对照](analysis/feature-parity.md) 和 [验证结果](reports/RESULTS.md)。历史报告保留原 Vek 名称及其对应版本的测试结论。
 
-本检查点已通过 **498/498 本地测试**、**197/197 打包宿主检查**，并核对 **190 个发行文件**与源码匹配。这些结果覆盖已记录的范围，原生 P3 验收与线上模型基准仍未完成。
+本检查点已通过 **500/500 本地测试**、**197/197 打包宿主检查**，并核对发行文件与源码匹配。这些结果覆盖已记录的范围，原生 P3 验收与线上模型基准仍未完成。
 
 ## 从源码启动
 
@@ -38,6 +38,8 @@ node cli/wiek-browser.mjs stop
 
 `WIEK_DATA_DIR=/absolute/path` 用于启动独立实例；原 `VEK_DATA_DIR` 与 `cli/vek-browser.mjs` 保留为兼容入口。开发版默认数据目录为 `data/`；打包版默认使用 `~/Library/Application Support/Wiek Browser/`。如果只有原来的 `Vek Browser` 数据目录，程序直接复用，不自动移动或删除；新目录已存在时优先使用新目录。应用标识改变后，macOS 权限及后台任务可能需要重新审核。
 
+目录复用覆盖已有文件；OS 绑定的加密凭据迁移仍需单独验收，详见[改名兼容范围](analysis/wiek-rebrand.md)。
+
 ## 功能与当前范围
 
 - 多标签、任务 Space、独立 Profile、书签/历史/下载、网站权限以及用户与 Agent 的控制移交。
@@ -48,7 +50,7 @@ node cli/wiek-browser.mjs stop
 - 自动化调度、执行模式、明确启用的 macOS login job、忙碌延期、运行记忆/结果、停止条件评估和保守的崩溃恢复。
 - Library/Collections、截图标注、网页操作录制、本地语音转写，以及需要用户启用的桌面工具。
 
-**本检查点尚待完成的 P3 验收：** 被动桌面选区与按应用录制、翻译界面与更多语言、睡眠/登录/权限撤销，以及完整打包回归。远程 Git 使用一次性本地 bare 仓库验证；GitHub PR 使用合成协议进程测试，没有操作真实账号。其余 Agent 集成继续暂缓。完整浏览器资料迁移、部分 MCP 能力、语义 memory、签名/公证和 31 项线上模型基准仍在后续计划中。
+**本检查点尚待完成的 P3 验收：** 物理多显示器/权限撤销及更多翻译语言、睡眠/登录/权限撤销，以及完整打包回归。远程 Git 使用一次性本地 bare 仓库验证；GitHub PR 使用合成协议进程测试，没有操作真实账号。其余 Agent 集成继续暂缓。完整浏览器资料迁移、部分 MCP 能力、语义 memory、签名/公证和 31 项线上模型基准仍在后续计划中。
 
 ## 让 Agent 操作网页
 
@@ -88,7 +90,7 @@ npm run dist
 
 macOS 产物为 `dist/mac-arm64/Wiek Browser.app`。当前为本地未签名构建，签名、公证和正式发布仍待配置。
 
-最近一次完整验收的 **0.19.0 Vek 基线**：436 项本地测试、197 项打包宿主检查、69/69 项同集浏览器测试通过；相同 SDK hash 的 Ego 保留结果为 68/69。**这些数字不代表当前 0.20.0 工作树已通过验收。** 当前日志与缺口见 [reports/RESULTS.md](reports/RESULTS.md)。公开 SDK 测试和 fixture 语义保持不变；本地 69 项用例不能替代尚未运行的 31 项线上模型基准。
+最近一次完整验收的 **0.19.0 Vek 基线**：436 项本地测试、197 项打包宿主检查、69/69 项同集浏览器测试通过；相同 SDK hash 的 Ego 保留结果为 68/69。**这些数字不代表当前 0.20.1 工作树已通过验收。** 当前日志与缺口见 [reports/RESULTS.md](reports/RESULTS.md)。公开 SDK 测试和 fixture 语义保持不变；本地 69 项用例不能替代尚未运行的 31 项线上模型基准。
 
 与 Ego 对标需要另外准备参考制品，放入被 Git 忽略的 `references/`、`downloads/`。仅开发和测试 Wiek 不要求持有 Ego 安装包。运行参考 E2E 时不要同时重建 SDK。
 

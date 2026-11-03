@@ -1,20 +1,20 @@
 {
-  "generatedAt": "2026-11-02T16:10:10.057Z",
-  "version": "0.19.0",
+  "generatedAt": "2026-11-03T17:46:40.364Z",
+  "version": "0.20.0",
   "versionMatches": true,
-  "checkedFiles": 171,
+  "checkedFiles": 190,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
   "files": [
     {
       "file": "NOTICE.md",
-      "sha256": "57318d9dde819e9799428fdbe84e2253b9634396a0d80881e2dcca48c5252f78",
+      "sha256": "509a7324828dadb4ff7cc4766a06e10e6f0c0500e0f1f8d5a76433f5d7dcedcf",
       "matches": true
     },
     {
       "file": "app/acp-session.cjs",
-      "sha256": "cf766d940afda7cd09fa4ec64dd93745348af7148c32296668324a02c734e16f",
+      "sha256": "a2410e42cf8a4f395ab2d47cac8b10da9c202a13cf5a276895327ad2cc0df916",
       "matches": true
     },
     {
@@ -29,12 +29,27 @@
     },
     {
       "file": "app/agent-panel.js",
-      "sha256": "f616790e7929db0684d3e07b8e25f2042ab06ba6d9e38281ef4b381fb85fda30",
+      "sha256": "7af6edcd7810acd99575abf26799a8e19ff552580cf320a5bdbd8112075ad846",
       "matches": true
     },
     {
       "file": "app/agent-service.cjs",
-      "sha256": "b10514a9bd93f20315214f8696ee6b35a4679a7b9ccc67986d523e415624722d",
+      "sha256": "fad2b78bc410f6ff92dfd9f24ea8556dc055161eebb094b3ec0fb72a0ab1968f",
+      "matches": true
+    },
+    {
+      "file": "app/argos-translate.py",
+      "sha256": "368c0aea3e1933c2b28939727e44c0ff9457a6028efc66673905cdeabe014844",
+      "matches": true
+    },
+    {
+      "file": "app/automation-runtime.cjs",
+      "sha256": "273ae04470b83dd18973093c97081369d9d28d30b45e4f7f216d57b36718a71d",
+      "matches": true
+    },
+    {
+      "file": "app/bin/vek-desktop-monitor",
+      "sha256": "1f381a2dcc5e1aa4b68d8c4afeceb548af62b29986f3266dddb06093c904e70d",
       "matches": true
     },
     {
@@ -60,6 +75,11 @@
     {
       "file": "app/bin/whisper-cli",
       "sha256": "507deaba45dea03ea06abe61c4e5536e77c9ac7f6f17f0b4cf662b5d3b84c740",
+      "matches": true
+    },
+    {
+      "file": "app/brand.cjs",
+      "sha256": "81a3b23c1ac5847a8eb6f1f525be76f0c32809efef198808b4ff1c4812e4b24d",
       "matches": true
     },
     {
@@ -89,7 +109,7 @@
     },
     {
       "file": "app/claude-session.cjs",
-      "sha256": "4b558a2f62f5e4d773ba1f225a038b8093aee276d30afccf02d0c81a67178016",
+      "sha256": "85f1f94d7e2bf9cf9805e3147b133a9132425d02044d34117e0ad2ed32d76de0",
       "matches": true
     },
     {
@@ -99,12 +119,12 @@
     },
     {
       "file": "app/codex-history.cjs",
-      "sha256": "ed78cebfedab6c069fb7c453c49ee7cededb4f448c868a69884b4b010acb00e2",
+      "sha256": "2dfccb2b4526a499890b1cd83fd4b4231d712c8b3a27c2e17a47933b4d2d5dce",
       "matches": true
     },
     {
       "file": "app/codex-protocol.cjs",
-      "sha256": "fffe57f4be67f3d05fab57ad9d5cc6dcca31a32505078a3eeb120d75f67e3308",
+      "sha256": "d7024a90a3b6a5aa505cd753e0ae524144ed26a9f87129e84ad3fb64ec06bc5b",
       "matches": true
     },
     {
@@ -113,28 +133,38 @@
       "matches": true
     },
     {
+      "file": "app/desktop-monitor-native.cjs",
+      "sha256": "e26f644a6dcf9e0be78dde36d3e9299dc915ced903979a784282b28660cb3f06",
+      "matches": true
+    },
+    {
+      "file": "app/desktop-monitor-service.cjs",
+      "sha256": "e1de7df19e8d53474a09c2a06eaad0f83418d62a49db405d66363195c5dea698",
+      "matches": true
+    },
+    {
       "file": "app/desktop-native.cjs",
-      "sha256": "ac83a070b0b0820aac4fa7fbe748bc47b7fcea5533ce447fc29d79d7f97731e6",
+      "sha256": "0fb10a77239e3924b3510c7dc4f79d8f1b286f195e6f13411f921aa8c4149f11",
       "matches": true
     },
     {
       "file": "app/desktop-panel.css",
-      "sha256": "4c3b050036e2bf02b82a822910d822642c39326a8beff5a97f49b7e3d22980b9",
+      "sha256": "6ea2a7c74a2375818ef85a32d39bcc654ed28604298b208850c78e98df1d08c3",
       "matches": true
     },
     {
       "file": "app/desktop-panel.js",
-      "sha256": "95683439a4db624bf253380ff857aaf99c100b844d33350467a35da901ea2d90",
+      "sha256": "db82d843b703447a4cdae3f4a0847189ecd4261b254dd160c2567ea12ea9f796",
       "matches": true
     },
     {
       "file": "app/desktop-service.cjs",
-      "sha256": "c2cf4b703f755f0fe97693688881fbb118d288acafb8a1488410378b455e7984",
+      "sha256": "6a8d2e9bfff65cdf0c88421db67eb4694fb3acc675879f049081d86db18fa229",
       "matches": true
     },
     {
       "file": "app/index.html",
-      "sha256": "b6e40e62e49042eb02d24de20dd19dc76d6c012fa020a17f88eee1bb2542674d",
+      "sha256": "68cb0d0b7f21f5c1239bd7e08ddc765e0da8a79be8d3b244df939d214f579788",
       "matches": true
     },
     {
@@ -144,7 +174,7 @@
     },
     {
       "file": "app/library-panel.js",
-      "sha256": "d4884857d7011240cf257f67a0a724629d0198061c1b04331fd45abcf59c139d",
+      "sha256": "dc9a8a8930f46d77026665aa2d0fe46e20662f707db6756e37f336a6c858594b",
       "matches": true
     },
     {
@@ -154,17 +184,17 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "464a370e614085e45e1cb5ed6d58913eb182a8d8b0f7eba0ca200bc4669cf631",
+      "sha256": "8f5943ae827f24e1043b816256d9073fe651b679806d83819fc28b95f6cfda01",
       "matches": true
     },
     {
       "file": "app/mcp-client-identity.cjs",
-      "sha256": "3fdb762d2b45d741f5eb284361ecd701757a1ff1c5a970088cc3cc86667e40b3",
+      "sha256": "cda8cd363c280751894cc4dc6db8a1a2c133cfef33edbd445a4832dd9fa5718a",
       "matches": true
     },
     {
       "file": "app/mcp-http-client.cjs",
-      "sha256": "b13a325775ea8268c337cda9cd47d01ec252817a23986f6cb8d12046f3f40ca8",
+      "sha256": "55708b34c1eab896d9b0f27eb96f15147d721c43b5a67c8be3c4fbd68265c917",
       "matches": true
     },
     {
@@ -174,7 +204,7 @@
     },
     {
       "file": "app/mcp-oauth.cjs",
-      "sha256": "9e5ce294c171c03b3c0d74b2a6d70d4ec0f0d53800d8e64cc4dcb9ea01950b57",
+      "sha256": "8e93b5f49b817e09fcd275a96546d353ec2f31bd69c32d70662012fbf9c801ea",
       "matches": true
     },
     {
@@ -184,7 +214,7 @@
     },
     {
       "file": "app/mcp-panel.js",
-      "sha256": "cc075ff23fca9d4d00e2acae8b33348420e86c6085688b35471335181c1776d6",
+      "sha256": "c8eee218fa39427aaabe3141903d6e23d533d75689b349a0a7fc44f7db676766",
       "matches": true
     },
     {
@@ -194,7 +224,7 @@
     },
     {
       "file": "app/mcp-service.cjs",
-      "sha256": "66f90e59fe19ef115580b963f7e30ea04cf8d3490eee6111a5d78393fac35688",
+      "sha256": "ad0626a27383d404c99cbbd95879848e9ddac898c36fb4cb72c4a8b52683f789",
       "matches": true
     },
     {
@@ -209,7 +239,7 @@
     },
     {
       "file": "app/page-preload.cjs",
-      "sha256": "9dfe9b2ca626de1c33a7948cfa4cd79453301df79caa402b4f3b29d3de63e17e",
+      "sha256": "e4ab6c043b265527ca31d7878c3ced2d3f3df73fa9769b3946b0a7f985d68dfe",
       "matches": true
     },
     {
@@ -219,7 +249,7 @@
     },
     {
       "file": "app/preferences-panel.js",
-      "sha256": "a00ee5624498f04e9776a12a906695815a0932b0bc36868d9ccd6dffc2a01ead",
+      "sha256": "f43866f1997a12bbbf4edfa5077bf827a01785aa7a8d8eee49c271b28e9c7b4f",
       "matches": true
     },
     {
@@ -229,12 +259,12 @@
     },
     {
       "file": "app/preload.cjs",
-      "sha256": "cb0214f1f29c7a9ebfe354b3ae2b05a7eb81a7da2f96ecce48f9557f4bcfd24b",
+      "sha256": "1df414f65ea94b2d3fcf3f6b955741b547e5a23a818bf9fdff307c2adf368961",
       "matches": true
     },
     {
       "file": "app/profile-archive.cjs",
-      "sha256": "d6a50dc15be62c877936e699e9a617bcbb20cbd35c0de096e106eafb8375e0b8",
+      "sha256": "298728edfe2dc80ad94bb512f313bf5768fb0dd78919c438b390fcf2fba6bb5a",
       "matches": true
     },
     {
@@ -259,27 +289,27 @@
     },
     {
       "file": "app/recorder-panel.js",
-      "sha256": "00b91d490b061636968ecd6e54a6bcd9fcfb26d036d2674ea87bdbf10a48e0e7",
+      "sha256": "94c83ea8b92a75bc52d63626a2275b2315ac76291128daf0f80ea30e1958e2ac",
       "matches": true
     },
     {
       "file": "app/renderer.js",
-      "sha256": "2b7896a58aaabb25928d184fe4e550c473bb6bd4262862cde65b466ef00590f6",
+      "sha256": "0a28c6458124fcdaff7fe8390726576f81d8f87a50e49f913ed081cf40f87385",
       "matches": true
     },
     {
       "file": "app/scheduler-control.cjs",
-      "sha256": "ba8532edfe9fcf8d9bb9377209b64e53726df2cc41f22a8510a0b4c586c2018a",
+      "sha256": "3d5aace889ac85a87f7d05baa295a02f7f9ea89653963da98f63111cac018542",
       "matches": true
     },
     {
       "file": "app/scheduler-job.cjs",
-      "sha256": "d7849991e1ef8e5e59f99ec472a0da1382e6ff268611bfb4bf631238f317e39e",
+      "sha256": "8842f22cf3edf209572d414b5eade22a22cab537cf1bd59e40f63e47723f7fae",
       "matches": true
     },
     {
       "file": "app/scheduler-launch.cjs",
-      "sha256": "fd1ec53bd2ef12cf2b4e2cff160434faf6f63c8dbe7238f8446c98ab4ae90b04",
+      "sha256": "235c5ba4753e867e252bc40fb49bfbc10503c117bd81392c0867434e55219983",
       "matches": true
     },
     {
@@ -289,12 +319,37 @@
     },
     {
       "file": "app/scheduler-panel.js",
-      "sha256": "4699a84e8d710377b569bb0d565afe4314a3bc909c7953524ca8dc04fa62e705",
+      "sha256": "89c0275358f5d597e551a88355383425221bbd0af8242c4517e9646a08cb50b8",
       "matches": true
     },
     {
       "file": "app/scheduler-worker.cjs",
-      "sha256": "961d76722a02f3f2d71ea6e89db327a34ccce61eed9b826e458d930d8e0ab269",
+      "sha256": "641021266d40effaaeb0bc35313ac6df194561cc0e726e668f49321e8d41b6ed",
+      "matches": true
+    },
+    {
+      "file": "app/selection-toolbar-preload.cjs",
+      "sha256": "9d9110ff7438be96d277126a7bdf576f4acd6cdfdfeb7bdd8a21c0811b95ca7e",
+      "matches": true
+    },
+    {
+      "file": "app/selection-toolbar.cjs",
+      "sha256": "04b8e441157f5700ace3a42da02a5bcc3ce103a5cc2d3cf10fde697af8ae9b72",
+      "matches": true
+    },
+    {
+      "file": "app/selection-toolbar.css",
+      "sha256": "26fd7a2207235c54f26879bc2b6a1f760cfc155e0efcbedfa35f1791728d1ee8",
+      "matches": true
+    },
+    {
+      "file": "app/selection-toolbar.html",
+      "sha256": "0179cac889839593f7987148cbf4aa08f2c8b23d05e0df6135c1d337c556b7d6",
+      "matches": true
+    },
+    {
+      "file": "app/selection-toolbar.js",
+      "sha256": "1cb6ab43fb03552e42b6cce9f5fb051b1547cf1e697536bd0052736f52682f1b",
       "matches": true
     },
     {
@@ -314,12 +369,12 @@
     },
     {
       "file": "app/space-window.html",
-      "sha256": "65da19c7f9facceaa4cd4c5f43804c57c8eb8e939233cfb6ea8007cc94011367",
+      "sha256": "bf9272e07a4e89ceed06214bc04b39beaa3fa8ad60f767ad576cb274ae37193f",
       "matches": true
     },
     {
       "file": "app/space-window.js",
-      "sha256": "bfc0579f4ca25fdc562a02b3bb1489b432f39ef945013505cbe86197db4c5e8d",
+      "sha256": "d62edffe67a4b2950d27a3c2b5545c037c0b6cec15a2b2f99ff4848cfc0d8b27",
       "matches": true
     },
     {
@@ -334,7 +389,17 @@
     },
     {
       "file": "app/tools-panel.js",
-      "sha256": "2ef9c61c242520ff75ab094db5d810c99b0c5bde2438c321518b33d0f2d9ab71",
+      "sha256": "cb1782771e605cde623ee062f9367c85b7c75539cc6698c64b1200053161aa0f",
+      "matches": true
+    },
+    {
+      "file": "app/translation-panel.js",
+      "sha256": "63ec90846988960dee43f029cfcc607dfda9d4f493a64c13388abab38a906292",
+      "matches": true
+    },
+    {
+      "file": "app/translation-service.cjs",
+      "sha256": "d4c731ce14f7d7fb02831066bb753658c68c59149e86dbec57c71aa91c2c8db1",
       "matches": true
     },
     {
@@ -349,27 +414,47 @@
     },
     {
       "file": "app/workspace-panel.css",
-      "sha256": "a6003b6fc0f5b277e965208feccee36b883d7882788bcf4109c16c60387a7dbb",
+      "sha256": "40d5c4aae41aa8874368f050f782bf7184611323f616eefefb80744601b30ec2",
       "matches": true
     },
     {
       "file": "app/workspace-panel.js",
-      "sha256": "c56ddee044e50949f9a39f2ba9d15fb9f1cf0fb40fd065a9f331919d02809d40",
+      "sha256": "2d1ee8ca6eab665d606b16b74941025605af9ab3376c019a7f4e2e7d4f4d9424",
+      "matches": true
+    },
+    {
+      "file": "app/workspace-remote-git.cjs",
+      "sha256": "99b988a2c1548415c55b634f8f9ab669cfb80b3c4fe76592ee741a315259e981",
       "matches": true
     },
     {
       "file": "app/workspace-service.cjs",
-      "sha256": "5c9b35d470884b227d83b19eb6e6677f6e5e49bc8790e4a51733895efd5664b2",
+      "sha256": "0b1fbfdb23bf01d7f2b7e4c8a8c633f7ccaa0120e03048033c4b85d3f3cb9c5d",
+      "matches": true
+    },
+    {
+      "file": "cli/automation-contract.mjs",
+      "sha256": "f2809b4e5607937fedfde0c478643aca1576a1389433fc7021d8c1363cfa0d14",
       "matches": true
     },
     {
       "file": "cli/host-lifecycle.mjs",
-      "sha256": "3632df5d663ae2b9235da60fc302b8c5732529014fef060d0fb1a2a889669605",
+      "sha256": "692e7d11cca8b92bbbc3001c4960e5ded8c4e9b04eca5e9e6932c2cd28e0a9ad",
+      "matches": true
+    },
+    {
+      "file": "cli/translation-install.mjs",
+      "sha256": "0c9a155d694207183b998ffb5f392a4532fd5d1124700db380452d9833cc0471",
       "matches": true
     },
     {
       "file": "cli/vek-browser.mjs",
-      "sha256": "cbede4388534d8dd8f39d107c396c87ff2b7cb79fdf844939d31be74ccac7268",
+      "sha256": "14c73477d9199c58ea197f620e29aebeb62c87b4d6a99ff03064e08799988d2c",
+      "matches": true
+    },
+    {
+      "file": "cli/wiek-browser.mjs",
+      "sha256": "8113b0f74c69e90d81f06cd1e80cc6077cf065c7396c9a946d394e19c277d7ff",
       "matches": true
     },
     {
@@ -854,12 +939,22 @@
     },
     {
       "file": "skills/vek-browser/API.md",
-      "sha256": "c18a17a695ded52dc438b0d3f02fadd84537145131f48679cf85c854d89e554e",
+      "sha256": "cc8406ccb6fcc8953b80696fd39db5037d16f488938ebe34f3b3c4c780c8a9d3",
       "matches": true
     },
     {
       "file": "skills/vek-browser/SKILL.md",
-      "sha256": "63c01ac0ec9368c883556532853eafd5d34e07405fb9c7caf4d63675bd4b2c95",
+      "sha256": "9f89afd132843e09aff893fa2e12d1e94a8417bb58382927fdbf4bfd94f2683b",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/API.md",
+      "sha256": "26b755179f48bcd50be0291e438e2293718072823ba7b84b959fd3eb28445ca9",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/SKILL.md",
+      "sha256": "cdcf7f11f758b245c31dfe14fd6f3398801bcecdaaf1d1200f5afce391816507",
       "matches": true
     }
   ]

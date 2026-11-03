@@ -12,6 +12,7 @@ const { connectAcp, acpAttachments } = require('./acp-session.cjs');
 const {connectCodexDiscovery,validateCodexModel} = require('./codex-protocol.cjs');
 const {parseCodexHistory,copyCodexReplay} = require('./codex-history.cjs');
 const {connectCodexSession}=require('./codex-session.cjs');
+const automationRuntime=require('./automation-runtime.cjs');
 
 const now = () => new Date().toISOString();
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -170,15 +171,21 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   const waiters = new Set();
   let closed = false;
   let scheduleTimer;
+  let lifecycleBlocked=false;
+  state.schedulerLifecycle ||= {suspended:false,locked:false,events:[]};
+  state.schedulerLifecycle.suspended=false;state.schedulerLifecycle.locked=false;
+  const completionQueue=[];let completionWorkers=0;
+  const evaluationControllers=new Map(),evaluationTasks=new Set();
   let publishTimer;
   state.proposals ||= [];
   for (const thread of state.threads) {
     thread.archived ||= false; thread.pinned ||= false; thread.notes ||= ''; thread.markers ||= []; thread.revisions ||= [];
     thread.attachments ||= [];
+    for(const run of thread.runs||[])if(['pending','running'].includes(run.completionEvaluation?.status)){if(Number.isSafeInteger(run.completionEvaluation?.pid))run.recoveredEvaluationProcess={pid:run.completionEvaluation.pid,observedAt:now(),reason:'Host stopped before evaluator exit was observed'};run.completionEvaluation={...run.completionEvaluation,status:'interrupted',reason:'Browser stopped during stop evaluation; no automatic evaluator replay'};}
   }
 
   function snapshot() {
-    return clone({ ...state, providers: state.providers.map((provider) => ({ ...provider, available: !!executable(provider.command) })), runningCount: running.size, maxConcurrentRuns });
+    return clone({ ...state, providers: state.providers.map((provider) => ({ ...provider, available: !!executable(provider.command) })), runningCount: running.size, maxConcurrentRuns, recoveryBlocks: recoveryBlocks(), pendingCompletionEvaluations:completionQueue.length+completionWorkers });
   }
   function persist() {
     const temporary = path.join(directory, `.state-${process.pid}-${randomUUID()}.tmp`);
@@ -207,7 +214,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   const message = (role, content, runId) => ({ id: randomUUID(), role, content, createdAt: now(), ...(runId ? { runId } : {}) });
   for (const thread of state.threads) {
     let recovered = false;
-    for (const run of thread.runs || []) if (run.status === 'running') { for (const item of [...(run.toolEvents || []), ...(run.subagents || [])]) if (['running','observed'].includes(item.status)) { item.status='interrupted'; item.endReason='Browser stopped before activity finalization'; } run.status = 'interrupted'; run.phase = 'settled'; run.completedAt = now(); if (run.fileChanges) { run.fileChanges.status = 'interrupted'; run.fileChanges.error = 'Browser stopped before snapshot finalization. No after state was inferred.'; } for (const approval of run.approvals || []) if (approval.status === 'pending') approval.status = 'expired'; recovered = true; }
+    for (const run of thread.runs || []) if (run.status === 'running') { for (const item of [...(run.toolEvents || []), ...(run.subagents || [])]) if (['running','observed'].includes(item.status)) { item.status='interrupted'; item.endReason='Browser stopped before activity finalization'; } run.status = 'interrupted'; if(Number.isSafeInteger(run.providerPid))run.recoveredProcess={pid:run.providerPid,observedAt:now(),reason:'Host stopped before provider exit was observed'}; run.phase = 'settled'; run.completedAt = now(); if (run.fileChanges) { run.fileChanges.status = 'interrupted'; run.fileChanges.error = 'Browser stopped before snapshot finalization. No after state was inferred.'; } for (const approval of run.approvals || []) if (approval.status === 'pending') approval.status = 'expired'; recovered = true; }
     if (thread.status === 'discovering') { thread.status = ['idle','completed','failed','stopped','interrupted'].includes(thread.modelDiscovery?.previousStatus) ? thread.modelDiscovery.previousStatus : 'idle'; thread.modelDiscovery = { ...thread.modelDiscovery, status: 'interrupted', error: 'Browser stopped during model discovery; no prompt was sent' }; }
     if (thread.status === 'running' || recovered) {
       thread.status = 'interrupted'; delete thread.activeRunId;
@@ -294,8 +301,9 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     const context = runContext?.({ thread: clone(thread), project: clone(project), provider: clone(provider) }) || {};
     if (context?.then) throw fail('runContext must be synchronous');
     const contextEnv = context.env || (context.promptPrefix !== undefined ? {} : context);
-    if (contextEnv && (typeof contextEnv !== 'object' || Object.entries(contextEnv).some(([key, value]) => !/^VEK_[A-Z0-9_]+$/.test(key) || typeof value !== 'string' || value.includes('\0')))) throw fail('runContext must return only VEK_* environment strings');
+    if (contextEnv && (typeof contextEnv !== 'object' || Object.entries(contextEnv).some(([key, value]) => !/^(?:VEK|WIEK)_[A-Z0-9_]+$/.test(key) || typeof value !== 'string' || value.includes('\0')))) throw fail('runContext must return only WIEK_* or VEK_* environment strings');
     if (context.promptPrefix !== undefined && (typeof context.promptPrefix !== 'string' || context.promptPrefix.length > 32768)) throw fail('runContext promptPrefix must be text up to 32768 characters');
+    require('./brand.cjs').normalizeEnvironment(contextEnv);
     return { context, contextEnv };
   }
   function startModelDiscovery(thread) {
@@ -327,6 +335,8 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     } catch (error) { finish(error); }
     publish();
   }
+  function recoveryBlocks(){return state.threads.flatMap(thread=>(thread.runs||[]).flatMap(run=>[run.recoveredProcess,run.recoveredEvaluationProcess].filter(item=>item&&processAlive(item.pid)).map(item=>({projectId:thread.projectId,threadId:thread.id,runId:run.id,pid:item.pid,reason:'A provider or stop evaluator from an interrupted host may still be running. No signal or replay was sent.'}))));}
+  function processAlive(pid){if(!Number.isSafeInteger(pid)||pid<=0)return false;try{process.kill(pid,0);return true;}catch(e){return e.code!=='ESRCH';}}
   function startRun(thread, prompt, automationId, automationReservationId) {
     if (closed) throw fail('Agent service is closed');
     automationAccess(thread, automationId);
@@ -334,6 +344,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     if (running.size >= maxConcurrentRuns) throw fail('Agent concurrency limit reached', 'VEK_AGENT_CAPACITY');
     prompt = nonempty(prompt, 'prompt');
     const project = locate('projects', thread.projectId);
+    if(recoveryBlocks().some(block=>block.projectId===project.id))throw fail('An interrupted provider may still be running in this project; wait for it to exit and refresh recovery status. No automatic replay or force-kill is permitted.','VEK_AGENT_PROJECT_BUSY');
     const checkpointed = project.checkpointsEnabled === true;
     if (turnCheckpoints?.locked?.(project.id)) throw fail('File restore is active in this project', 'VEK_AGENT_PROJECT_BUSY');
     if (checkpointed && !turnCheckpoints) throw fail('Automatic checkpoint support is unavailable');
@@ -363,11 +374,13 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     const done = new Promise((resolve) => { resolveDone = resolve; });
     let child;
     const active = { child:null, projectPath:project.path, checkpointed, run, thread, done, stopReason:null, bytes:0, resolveDone };
+    if(automationId){const definition=locate('automations',automationId);run.completionPolicy=clone(definition.completionPolicy||{type:'none'});run.completionPolicyVersion=definition.completionPolicyVersion||1;}
     running.set(thread.id,active);
     run.phase = checkpointed ? 'preparing' : 'executing';
     async function finalize(code,signal,launchError) {
       if(active.finalizing)return;active.finalizing=true;active.child=null;
       clearTimeout(active.killTimer);
+      await active.contract?.close();
       if(launchError)run.error=launchError.message;
       if (active.native && !active.native.completed && !active.stopReason && !run.error) run.error = 'Native provider disconnected before turn completed';
       const outcome = active.stopReason || (run.error || (code !== 0 && !active.native?.completed) ? 'failed' : 'completed');
@@ -377,11 +390,12 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       run.status=outcome;run.phase='settled';run.completedAt=now();run.exitCode=code;run.signal=signal;
       completeRun(code);
     }
-    function launch() {
+    async function launch() {
+    if(automationId){try{active.contract=await automationRuntime.startContract({active:()=>running.get(thread.id)===active&&!active.finalizing&&!active.stopReason&&!closed,onMemory:value=>{const definition=locate('automations',automationId);definition.memory=value;definition.memoryUpdatedAt=now();publish();},onResult:value=>{run.result={...value,reportedAt:now(),unread:false};publish();}});}catch(error){void finalize(null,null,error);return;}}
     if(active.stopReason||closed){void finalize(null,null);return;}
-    try { child = spawn(command, args, { cwd: project.path, env: { ...process.env, ...contextEnv }, shell: false, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] }); }
+    try { child = spawn(command, args, { cwd: project.path, env: { ...process.env, ...contextEnv, ...(active.contract?.env||{}) }, shell: false, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] }); }
     catch (error) { void finalize(null,null,error); return; }
-    active.child=child;run.executedAt=now();run.phase='executing';
+    active.child=child;run.providerPid=child.pid;run.executedAt=now();run.phase='executing';
     const consume = (key, chunk) => {
       const remaining = Math.max(0, maxOutputBytes - active.bytes);
       if (chunk.length > remaining) run.truncated = true;
@@ -421,6 +435,13 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       const automation = state.automations.find((item) => item.id === run.automationId && item.lastRunId === run.id);
       if (automation) {
         automation.lastOutcome = run.status; automation.updatedAt = now(); if (run.error) automation.lastError = run.error;
+        automation.consecutiveFailures=run.status==='failed'?(automation.consecutiveFailures||0)+1:run.status==='completed'?0:(automation.consecutiveFailures||0);
+        run.result={...(run.result||{}),decision:run.status==='completed'?(run.result?.decision||'notify'):'notify',unread:run.status!=='completed'||run.result?.decision!=='silent',summary:run.result?.summary||((run.status==='completed')?'Run completed without a structured result':run.error||'Run '+run.status)};
+        automation.lastResult=clone(run.result);
+        if(automation.stopAfterConsecutiveFailures&&automation.consecutiveFailures>=automation.stopAfterConsecutiveFailures){automation.status='paused';automation.stopReason='Consecutive failure limit reached';}
+        if(automation.status==='active'&&automation.maxRuns&&(automation.runCount||0)>=automation.maxRuns){automation.status='completed';automation.nextRunAt=null;automation.stopReason='Run limit reached';}
+        if(run.status==='completed'&&run.completionPolicy?.type==='ai-evaluated')queueCompletion(automation,thread,run);
+
         if (automation.stopOnFailure && run.status === 'failed') { automation.status = 'paused'; automation.stopReason = 'Provider run failed'; }
       }
       if (run.stdout) thread.messages.push(message('assistant', run.stdout, run.id));
@@ -482,7 +503,14 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       if (!Number.isFinite(intervalMs) || intervalMs < 25 || intervalMs > 365 * 86400000) throw fail('intervalMs must be between 25 milliseconds and one year');
       result.intervalMs = intervalMs; delete result.at;
     }
-    result.memory = String(input.memory ?? previous.memory ?? '').slice(0, 65536);
+    result.memory = automationRuntime.memory(input.memory ?? previous.memory ?? '');
+    result.heartbeatCooldownSeconds=Number(input.heartbeatCooldownSeconds??previous.heartbeatCooldownSeconds??60);
+    if(!Number.isFinite(result.heartbeatCooldownSeconds)||result.heartbeatCooldownSeconds<0||result.heartbeatCooldownSeconds>86400)throw fail('Activity cooldown must be between 0 and 86400 seconds');
+    result.stopAfterConsecutiveFailures=input.stopAfterConsecutiveFailures??previous.stopAfterConsecutiveFailures??null;
+    if(result.stopAfterConsecutiveFailures!==null&&(!Number.isSafeInteger(result.stopAfterConsecutiveFailures)||result.stopAfterConsecutiveFailures<1||result.stopAfterConsecutiveFailures>10000))throw fail('Consecutive failure limit must be null or an integer from 1 to 10000');
+    result.completionPolicy=automationRuntime.policy(input.completionPolicy??previous.completionPolicy??{type:'none'});
+    result.completionPolicyVersion=(previous.completionPolicyVersion||1)+(JSON.stringify(result.completionPolicy)!==JSON.stringify(previous.completionPolicy||{type:'none'})?1:0);
+
     result.maxRuns = input.maxRuns === '' || input.maxRuns === null ? null : input.maxRuns ?? previous.maxRuns ?? null;
     if (result.maxRuns !== null && (!Number.isSafeInteger(Number(result.maxRuns)) || Number(result.maxRuns) < 1)) throw fail('maxRuns must be a positive integer');
     if (result.maxRuns !== null) result.maxRuns = Number(result.maxRuns);
@@ -501,6 +529,8 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     delete automation.ownedThreadId;
   }
   async function stopAutomation(automation) {
+    for(const thread of state.threads)for(const run of thread.runs||[])if(run.automationId===automation.id)evaluationControllers.get(run.id)?.abort();
+    for(let i=completionQueue.length-1;i>=0;i--)if(completionQueue[i].automationId===automation.id){completionQueue[i].run.completionEvaluation={status:'cancelled',reason:'Automation was stopped'};completionQueue.splice(i,1);}
     await Promise.all([...running.values()].filter(active=>active.run.automationId===automation.id).map(active=>stopThread(active.thread.id)));
   }
   function automationThread(automation) {
@@ -515,10 +545,17 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     if ((automation.maxRuns && (automation.runCount || 0) >= automation.maxRuns) || (automation.stopAfter && timestamp >= Date.parse(automation.stopAfter))) {
       automation.status = 'completed'; automation.nextRunAt = null; automation.stopReason = automation.maxRuns && (automation.runCount || 0) >= automation.maxRuns ? 'Run limit reached' : 'Stop date reached'; return;
     }
+    const deferredScheduledFor=automation.deferred?.scheduledFor;
+    const block=automationEligibility(automation,timestamp,scheduled);
+    if(block){
+      if(scheduled){const scheduledFor=deferredScheduledFor||automation.nextRunAt,deadline=Date.parse(scheduledFor)+600000;if(timestamp<deadline){automation.deferred={scheduledFor,reason:block,until:new Date(Math.min(timestamp+15000,deadline)).toISOString(),deadline:new Date(deadline).toISOString()};automation.lastOutcome='deferred';automation.updatedAt=now();return;}automation.lastOutcome='skipped-defer-expired';automation.lastError=block;delete automation.deferred;advanceSchedule(automation,timestamp,scheduledFor);automation.updatedAt=now();return;}
+      automation.lastOutcome=block.includes('capacity')?'skipped-capacity':'skipped-overlap';automation.lastError=block;automation.updatedAt=now();return;
+    }
+    delete automation.deferred;
     automation.lastRunAt = new Date(timestamp).toISOString();
     let reservationId;
     if (scheduled) {
-      const scheduledFor = automation.nextRunAt;
+      const scheduledFor = deferredScheduledFor||automation.nextRunAt;
       const minuteKey = automation.kind === 'cron' ? scheduledMinuteKey(Date.parse(scheduledFor), automation.timeZone || 'UTC') : null;
       // Advance and persist before spawning. Previously startRun published the
       // still-due nextRunAt, leaving a crash window that replayed a scheduled
@@ -538,7 +575,8 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       if (minuteKey) automation.lastScheduledMinute = minuteKey;
       automation.lastScheduledFor = scheduledFor; automation.lastReservationId = reservationId = randomUUID(); automation.lastOutcome = 'reserved'; automation.updatedAt = now(); publish();
     }
-    const prompt = automation.memory ? `${automation.prompt}\n\nAutomation memory (local notes):\n${automation.memory}` : automation.prompt;
+    const envelope='This message is an automation-dispatched turn. Only this active turn can update its automation memory or report notify/silent using POST /memory {memory} or POST /result {decision,title?,summary?} at VEK_AUTOMATION_URL with Authorization: Bearer VEK_AUTOMATION_TOKEN. Tokens are environment values; never print or store them. These privileges end with this turn; a later manual follow-up is not an automation run.';
+    const prompt = `${automation.prompt}\n\n${envelope}`+(automation.memory?`\n\nAutomation memory (local notes):\n${automationRuntime.utf8Tail(automation.memory)}`:'');
     let target;
     try {
       if([...running.values()].some(active=>active.run.automationId===automation.id))throw fail('This automation already has an active run','VEK_AGENT_OVERLAP');
@@ -552,15 +590,61 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     }
     automation.updatedAt = now();
   }
+  function advanceSchedule(automation,timestamp,scheduledFor){
+    if(automation.kind==='at'){automation.status='completed';automation.nextRunAt=null;}
+    else if(automation.kind==='cron'){try{automation.nextRunAt=nextCronAt(automation.cron,timestamp,automation.timeZone||'UTC');}catch(error){automation.status='paused';automation.nextRunAt=null;automation.lastScheduleError=error.message;}}
+    else{const previous=Date.parse(scheduledFor)||timestamp;automation.nextRunAt=new Date(previous+Math.max(1,Math.floor((timestamp-previous)/automation.intervalMs)+1)*automation.intervalMs).toISOString();}
+  }
+  function automationEligibility(automation,timestamp,scheduled){
+    if(lifecycleBlocked)return 'The OS session is suspended or locked';
+    if([...running.values()].some(active=>active.run.automationId===automation.id))return 'This automation has an active run';
+    if(running.size>=maxConcurrentRuns)return 'Agent capacity is busy';
+    let template=locate('threads',automation.threadId),thread=(automation.executionMode||'heartbeat')==='heartbeat'?template:automation.executionMode==='dedicated'&&automation.ownedThreadId?state.threads.find(t=>t.id===automation.ownedThreadId):null;
+    if(recoveryBlocks().some(block=>block.projectId===template.projectId))return 'An interrupted provider may still be running';
+    if(turnCheckpoints?.locked?.(template.projectId))return 'File restore is active in this project';
+    if([...running.values()].some(active=>active.projectPath===locate('projects',template.projectId).path&&(active.checkpointed||locate('projects',template.projectId).checkpointsEnabled)))return 'A protected project turn is running';
+    if(!thread)return null;
+    const run=thread.runs?.at(-1);
+    if(run?.approvals?.some(item=>item.status==='pending'))return 'Target conversation has a pending approval';
+    if(run?.userInputs?.some(item=>item.status==='pending')||thread.hasPendingUserInput)return 'Target conversation has pending user input';
+    if(running.has(thread.id)||['running','discovering'].includes(thread.status))return 'Target conversation has an active turn';
+    if(run?.completionEvaluation?.status==='pending'||run?.completionEvaluation?.status==='running')return 'Target conversation has a pending stop evaluation';
+    if(scheduled&&run?.automationId!==automation.id&&run?.completedAt&&timestamp-Date.parse(run.completedAt)<(automation.heartbeatCooldownSeconds??60)*1000)return 'Target conversation is inside its activity cooldown';
+    return null;
+  }
+  function queueCompletion(automation,thread,run){
+    if(completionQueue.length>=100){run.completionEvaluation={status:'failed',reason:'Stop evaluation queue is full'};run.result={...(run.result||{}),decision:'notify',unread:true};automation.lastResult=clone(run.result);return;}
+    run.completionEvaluation={status:'pending',policyVersion:run.completionPolicyVersion};completionQueue.push({automationId:automation.id,threadId:thread.id,run});drainCompletions();
+  }
+  function drainCompletions(){
+    while(!closed&&completionWorkers<2&&completionQueue.length){const job=completionQueue.shift(),controller=new AbortController();completionWorkers++;evaluationControllers.set(job.run.id,controller);job.run.completionEvaluation={status:'running',policyVersion:job.run.completionPolicyVersion};
+      const thread=state.threads.find(t=>t.id===job.threadId),project=state.projects.find(p=>p.id===thread?.projectId);
+      const task=Promise.resolve().then(()=>automationRuntime.evaluate({policy:job.run.completionPolicy,run:clone(job.run),projectPath:project?.path,signal:controller.signal,onStart:pid=>{job.run.completionEvaluation.pid=pid;publish();}})).then(result=>{
+        const definition=state.automations.find(a=>a.id===job.automationId);job.run.completionEvaluation={...result,policyVersion:job.run.completionPolicyVersion,evaluatedAt:now()};
+        if(definition&&definition.completionPolicyVersion===job.run.completionPolicyVersion&&JSON.stringify(definition.completionPolicy)===JSON.stringify(job.run.completionPolicy)&&result.status==='completed'&&result.matched){definition.status='completed';definition.nextRunAt=null;delete definition.deferred;definition.stopReason='Stop condition matched: '+result.reason;}
+        else if(result.status==='completed'&&result.matched)job.run.completionEvaluation.stalePolicy=true;
+        if(result.status==='failed'){job.run.result={...(job.run.result||{}),decision:'notify',unread:true};if(definition?.lastRunId===job.run.id)definition.lastResult=clone(job.run.result);}
+      }).catch(()=>{job.run.completionEvaluation={status:'failed',reason:'Stop evaluation failed'};}).finally(()=>{evaluationControllers.delete(job.run.id);completionWorkers--;evaluationTasks.delete(task);publish();armScheduler();drainCompletions();});evaluationTasks.add(task);
+    }
+  }
+  async function lifecycle(event){
+    if(!['suspend','resume','lock-screen','unlock-screen','session-resigned','session-active'].includes(event))throw fail('Unknown scheduler lifecycle event');
+    state.schedulerLifecycle.events.push({event,at:now()});state.schedulerLifecycle.events=state.schedulerLifecycle.events.slice(-32);
+    if(event==='suspend'||event==='resume')state.schedulerLifecycle.suspended=event==='suspend';
+    if(['lock-screen','unlock-screen','session-resigned','session-active'].includes(event))state.schedulerLifecycle.locked=['lock-screen','session-resigned'].includes(event);
+    lifecycleBlocked=state.schedulerLifecycle.suspended||state.schedulerLifecycle.locked;
+    if(lifecycleBlocked){clearTimeout(scheduleTimer);await Promise.all([...running.values()].filter(active=>active.run.automationId).map(active=>stopThread(active.thread.id,'interrupted')));for(const controller of evaluationControllers.values())controller.abort();}
+    else runDueOnce();publish();armScheduler();return snapshot();
+  }
   function armScheduler() {
     clearTimeout(scheduleTimer); scheduleTimer = undefined;
-    if (closed || !autoSchedule) return;
+    if (closed || !autoSchedule || lifecycleBlocked) return;
     const due = state.automations.filter((automation) => automation.status === 'active' && automation.nextRunAt);
     if (!due.length) return;
-    const wait = Math.max(1, Math.min(2147483647, Math.min(...due.map((automation) => Date.parse(automation.nextRunAt))) - Date.now()));
+    const wait = Math.max(1, Math.min(2147483647, Math.min(...due.map((automation) => Date.parse(automation.deferred?.until||automation.nextRunAt))) - Date.now()));
     scheduleTimer = setTimeout(() => {
       if (closed) return;
-      for (const automation of state.automations) if (automation.status === 'active' && automation.nextRunAt && Date.parse(automation.nextRunAt) <= Date.now()) runAutomation(automation, true);
+      for (const automation of state.automations) if (automation.status === 'active' && automation.nextRunAt && Date.parse(automation.deferred?.until||automation.nextRunAt) <= Date.now()) runAutomation(automation, true);
       publish(); armScheduler();
     }, wait);
     scheduleTimer.unref?.();
@@ -569,7 +653,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   function runDueOnce({accept=()=>true,through=Date.now()}={}) {
     if(closed)throw fail('Agent service is closed');
     const attempted=[],skipped=[];
-    for(const automation of state.automations)if(automation.status==='active'&&automation.nextRunAt&&Date.parse(automation.nextRunAt)<=through){
+    for(const automation of state.automations)if(automation.status==='active'&&automation.nextRunAt&&Date.parse(automation.deferred?.until||automation.nextRunAt)<=through){
       const reason=accept(clone(automation),clone(locate('threads',automation.threadId)));
       if(reason!==true){skipped.push({automationId:automation.id,reason:typeof reason==='string'?reason:'not-selected'});continue;}
       runAutomation(automation,true);attempted.push({automationId:automation.id,outcome:automation.lastOutcome,runId:automation.lastRunId||null,threadId:automation.lastRunThreadId||null});
@@ -662,7 +746,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       }
       for (const item of data.automations) {
         if (!item || !threadIds.has(item.threadId)) throw fail('Invalid imported automation thread');
-        const automation = validateAutomation({ ...item, threadId: threadIds.get(item.threadId),closedAppAllowed:false });
+        const automation = validateAutomation({ ...item, threadId: threadIds.get(item.threadId),closedAppAllowed:false,completionPolicy:{type:'none'} });
         state.automations.push({ ...automation, id: randomUUID(), status: 'paused', nextRunAt: nextTime(automation), createdAt: now(), updatedAt: now(), runCount: 0 });
       }
       if (Array.isArray(data.proposals)) for (const proposal of data.proposals) {
@@ -882,13 +966,15 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
       case 'agents:threads:delete': {const thread=locate('threads',id);automationAccess(thread);for(const a of state.automations.filter(a=>a.threadId===id)){a.status='paused';await stopAutomation(a);releaseAutomationThreads(a);}await stopThread(id);state.threads=state.threads.filter(t=>t.id!==id);state.automations=state.automations.filter(a=>a.threadId!==id);state.proposals=state.proposals.filter(p=>p.threadId!==id);break;}
       case 'agents:threads:prompt': startRun(locate('threads', id), payload.prompt); break;
       case 'agents:threads:stop': locate('threads', id); await stopThread(id); break;
+      case 'agents:recovery:refresh': break;
+      case 'agents:automations:mark-read': {const a=locate('automations',id);if(a.lastResult)a.lastResult.unread=false;const run=state.threads.flatMap(t=>t.runs||[]).find(r=>r.id===a.lastRunId);if(run?.result)run.result.unread=false;break;}
       case 'agents:automations:create': { const automation = validateAutomation(payload); state.automations.push({ ...automation, id: randomUUID(), status: payload.status === 'paused' ? 'paused' : 'active', nextRunAt: nextTime(automation), createdAt: now(), updatedAt: now() }); break; }
-      case 'agents:automations:update': { const previous = locate('automations', id), candidate = validateAutomation(payload, previous), next = nextTime(candidate); if(candidate.executionMode!==(previous.executionMode||'heartbeat')||candidate.threadId!==previous.threadId){if([...running.values()].some(active=>active.run.automationId===id))throw fail('Stop the automation run before changing its mode or template');releaseAutomationThreads(previous);delete candidate.ownedThreadId;} Object.assign(previous, candidate, { updatedAt: now() }); if (previous.kind !== 'at') delete previous.at; if (!['interval', 'heartbeat'].includes(previous.kind)) delete previous.intervalMs; if (previous.kind !== 'cron') { delete previous.cron; delete previous.timeZone; delete previous.dstPolicy; } delete previous.lastScheduleError; if (previous.stopReason === 'Cannot calculate next cron occurrence') delete previous.stopReason; previous.nextRunAt = next; if (previous.status === 'completed') previous.status = 'paused'; break; }
+      case 'agents:automations:update': { const previous = locate('automations', id), candidate = validateAutomation(payload, previous), next = nextTime(candidate); if(candidate.executionMode!==(previous.executionMode||'heartbeat')||candidate.threadId!==previous.threadId){if([...running.values()].some(active=>active.run.automationId===id))throw fail('Stop the automation run before changing its mode or template');releaseAutomationThreads(previous);delete candidate.ownedThreadId;} Object.assign(previous, candidate, { updatedAt: now() }); if (previous.kind !== 'at') delete previous.at; if (!['interval', 'heartbeat'].includes(previous.kind)) delete previous.intervalMs; if (previous.kind !== 'cron') { delete previous.cron; delete previous.timeZone; delete previous.dstPolicy; } delete previous.lastScheduleError; if (previous.stopReason === 'Cannot calculate next cron occurrence') delete previous.stopReason; delete previous.deferred; previous.nextRunAt = next; if (previous.status === 'completed') previous.status = 'paused'; break; }
       case 'agents:automations:delete': {const a=locate('automations',id);a.status='paused';await stopAutomation(a);releaseAutomationThreads(a);state.automations=state.automations.filter(item=>item.id!==id);break;}
-      case 'agents:automations:pause': { const automation = locate('automations', id); automation.status = 'paused'; automation.updatedAt = now(); break; }
-      case 'agents:automations:resume': { const automation = locate('automations', id), next = nextTime(automation); automation.status = 'active'; automation.nextRunAt = next; delete automation.lastScheduleError; if (automation.stopReason === 'Cannot calculate next cron occurrence') delete automation.stopReason; automation.updatedAt = now(); break; }
+      case 'agents:automations:pause': { const automation = locate('automations', id); automation.status = 'paused'; delete automation.deferred; automation.updatedAt = now(); break; }
+      case 'agents:automations:resume': { const automation = locate('automations', id), next = nextTime(automation); automation.status = 'active'; delete automation.deferred; automation.nextRunAt = next; delete automation.lastScheduleError; if (automation.stopReason === 'Cannot calculate next cron occurrence') delete automation.stopReason; automation.updatedAt = now(); break; }
       case 'agents:automations:run': runAutomation(locate('automations', id), false); break;
-      case 'agents:automations:stop': { const automation = locate('automations', id); automation.status = 'paused'; automation.updatedAt = now(); await stopAutomation(automation); break; }
+      case 'agents:automations:stop': { const automation = locate('automations', id); automation.status = 'paused'; delete automation.deferred; automation.updatedAt = now(); await stopAutomation(automation); break; }
       case 'agents:proposals:create': {
         const automation = payload.automationId ? locate('automations', payload.automationId) : null;
         const thread = locate('threads', payload.threadId || automation?.threadId);
@@ -906,18 +992,19 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
   async function close() {
     claudePreviews.clear(); codexPreviews.clear();
     if (closed) return;
-    closed = true; clearTimeout(scheduleTimer); clearTimeout(publishTimer);
+    closed = true;for(const controller of evaluationControllers.values())controller.abort();for(const job of completionQueue.splice(0))job.run.completionEvaluation={status:'cancelled',reason:'Browser stopped before stop evaluation'}; clearTimeout(scheduleTimer); clearTimeout(publishTimer);
     for (const check of [...waiters]) check('closed');
     await Promise.all([...running.keys()].map((threadId) => stopThread(threadId, 'interrupted')));
+    await Promise.all([...evaluationTasks]);
     persist();
     try { if (JSON.parse(fs.readFileSync(lockPath, 'utf8')).token === lockToken) fs.unlinkSync(lockPath); } catch {}
   }
   for (const automation of state.automations) {
     const runs = state.threads.flatMap((thread) => thread.runs || []).filter((run) => run.automationId === automation.id);
     if (runs.length) automation.runCount = Math.max(automation.runCount || 0, runs.length);
-    if (automation.lastOutcome === 'reserved') {
-      const run = runs.find((item) => item.automationReservationId === automation.lastReservationId);
-      automation.lastOutcome = run?.status || 'interrupted-before-start'; if (run) automation.lastRunId = run.id;
+    if (['reserved','started'].includes(automation.lastOutcome)) {
+      const run = runs.find(item=>item.id===automation.lastRunId)||(automation.lastReservationId?runs.find(item=>item.automationReservationId===automation.lastReservationId):null);
+      automation.lastOutcome = run?.status || 'interrupted-before-start'; if (run) {automation.lastRunId = run.id;if(run.status==='interrupted'){run.result={...(run.result||{}),decision:'notify',unread:true,summary:'Host stopped before provider exit was observed. This run was not replayed.'};automation.lastResult=clone(run.result);}}
     }
     if (automation.kind === 'cron') {
       try { automation.timeZone = normalizedTimeZone(automation.timeZone || 'UTC'); cronFields(automation.cron); nextCronAt(automation.cron, Date.now(), automation.timeZone); automation.dstPolicy = 'skip-missing-first-occurrence'; }
@@ -931,7 +1018,7 @@ function createAgentService({ dataDir, onChange = () => {}, runContext, turnChec
     for(const record of records){const thread=state.threads.find(t=>t.id===record.threadId&&t.projectId===record.projectId),run=thread?.runs.find(r=>r.id===record.runId);if(run)run.fileChanges=clone(record);}
     persist();
   }
-  return { dispatch, snapshot, close, recoverFileChanges,runDueOnce };
+  return { dispatch, snapshot, close, recoverFileChanges,runDueOnce,lifecycle };
 }
 
 module.exports = { createAgentService, nextCronAt };

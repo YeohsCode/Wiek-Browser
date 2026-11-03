@@ -43,3 +43,7 @@ dist/
 # Test evidence is intentionally versioned, including failures and baseline logs.
 !/reports/*.log
 !/reports/**/*.log
+
+# Generated Python bytecode is never an application source input.
+__pycache__/
+*.pyc

@@ -1,0 +1,11 @@
+✔ translation CLI receives literal JSON stdin, persists provider only, bounds text and enforces trusted controls (90.725708ms)
+✔ translation cancellation waits for actual child exit; overlap and reconfiguration are rejected (44.038083ms)
+✔ translation rejects broken, oversized and failing providers and enforces deadline (639.152875ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 840.191667

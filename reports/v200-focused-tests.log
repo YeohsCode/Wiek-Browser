@@ -1,0 +1,81 @@
+✔ real child stdout/stderr, literal input, conversation and private atomic persistence (319.06175ms)
+✔ argv template passes one literal argument and never invokes a shell (198.839625ms)
+✔ stop, concurrency and overlap checks operate on actual provider processes (264.209ms)
+✔ bounded output and failure status retain real diagnostics without invented replies (347.120375ms)
+✔ at schedule survives restart and executes exactly once while service is active (777.891375ms)
+✔ interval pause/resume/update/stop defers overlap without queuing duplicate work (2496.718209ms)
+✔ uncleanly persisted running state becomes interrupted and is never silently resumed (239.896084ms)
+✔ archive/pin/notes/markers/goals persist and branches have independent honest transcripts (403.509667ms)
+✔ edit/resend/rollback preserve revisions and never claim to undo project files (281.008541ms)
+✔ native JSON import is transactional, remaps ids, and cannot activate imported commands or schedules (255.84975ms)
+✔ UTC cron validates real calendar dates, weekday ranges and day/weekday OR semantics (11.000625ms)
+✔ heartbeat memory, run/stop limits, and proposals require explicit real-process execution (435.606542ms)
+✔ root-owned runContext injects only VEK namespace and a transient prompt prefix (544.778208ms)
+✔ model catalogue is user configured and usage comes only from actual structured output (198.197084ms)
+✔ multi-agent create/read/list/wait expose real parent/child process state with bounded waiting (172.892666ms)
+✔ plain CLI steering queues a next turn and stop cancels queued work honestly (553.315458ms)
+✔ handoff creates a destination with copied real context and does not pretend to transfer a native session (236.953334ms)
+✔ closing the service releases outstanding waiters and interrupts owned running children (152.036875ms)
+✔ selected text/image files are copied privately, attached to actual prompts, detached recoverably and restored after restart (324.9915ms)
+✔ attachment type, 20 MiB size, ten-active count and transactional batch limits are real (222.970833ms)
+✔ native archives carry real attachment bytes, remap owned paths, and reject forged external attachment imports (167.40475ms)
+✔ archive total limits fail explicitly and metadata-only fallback never pretends omitted files exist (188.021958ms)
+✔ CLI helper sends raw bounded UTF-8 memory and structured result using active turn authority only (12.61075ms)
+✖ CLI helper rejects remote/credentialed endpoints, absent authority and malformed/big input without network effects (3.183083ms)
+✔ CLI helper sends no retries after a timeout or uncertain disconnected POST and never exposes token in errors (32.525375ms)
+✔ actual CLI command uses the active contract without browser auto-start or provider-output leakage (90.478875ms)
+✔ scheduled busy continuation persists its occurrence and resumes once without consuming an iteration (673.205791ms)
+✔ pending approval/user input and cooldown defer; own latest automation turn is exempt (289.605083ms)
+✔ expired busy occurrence advances once and never spawns a burst after wake (173.0615ms)
+✔ capacity deferral retains standalone template without empty threads and pause clears pending retry (319.801291ms)
+✔ memory and result contract is exact active-run scoped, UTF-8 bounded, and revoked after exit (304.187416ms)
+✔ contract rejects origins, wrong tokens, extra fields and unrecognized routes without mutation (10.550125ms)
+✔ memory editor rejects oversized UTF-8 atomically and prompt injects bounded tail with truncation marker (143.328875ms)
+✔ provider failure overrides silent result and consecutive failures pause visibly; read marking persists (337.299542ms)
+✔ explicit evaluator receives current run only and threshold-qualified completion stops future scheduling (214.796917ms)
+✔ low-confidence and malformed evaluator responses cannot stop the schedule or hide an evaluation failure (336.623375ms)
+✔ changing the stop policy during evaluation invalidates its matched result (386.583333ms)
+✔ evaluator timeout/cancellation/output bounds await actual fixture exit (132.621667ms)
+✔ suspend/lock interrupts automation only, wake coalesces old intervals once and exposes bounded session events (2008.063792ms)
+✔ imported automation never inherits evaluator executable authority (66.37825ms)
+✔ a real hard-killed host leaves an observed orphan blocker, reconciles interrupted run, and never replays its occurrence (256.171875ms)
+✔ stop evaluations use at most two real workers and leave the next completed run queued (473.624792ms)
+✔ oversized evaluator output and nonzero exits remain failed without trusting partial JSON (180.076541ms)
+✔ persisted pending stop evaluations are interrupted on recovery without launching the configured evaluator (113.606625ms)
+✔ manual-run recovery reconciles the recorded latest run rather than an older unreserved run (171.39825ms)
+✔ Wiek environment overrides legacy aliases and retains legacy-only integrations (0.594209ms)
+✔ packaged data selection reuses an existing legacy directory without moving it (0.176ms)
+✔ canonical and compatibility CLI commands print the same Wiek guide (137.968584ms)
+✔ actual Electron CLI stop waits for provider termination and checkpoints, then immediately restarts the same profile repeatedly (7512.710708ms)
+✔ CLI shutdown timeout is explicit, leaves a live host and its metadata intact, and never force-kills (246.956792ms)
+✔ CLI shutdown refuses mismatched live host identity before sending shutdown (141.601333ms)
+✔ CLI invalid shutdown options fail before connecting or creating a browser profile (389.987625ms)
+✔ v2 ciphertext roundtrip preserves exact UTF-16 storage keys and independent tab sessions (652.563667ms)
+✔ v1 archived fixture from 0.12 decodes without inventing web storage (213.479792ms)
+✔ storage schema refuses origin widening, ambiguous duplicate keys/origins and unbounded code units (10.435875ms)
+✔ aggregate storage budget covers both local origins and per-tab sessions (32.618083ms)
+ℹ tests 56
+ℹ suites 0
+ℹ pass 55
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8872.102958
+
+✖ failing tests:
+
+test at tests/automation-contract-cli.test.mjs:10:1
+✖ CLI helper rejects remote/credentialed endpoints, absent authority and malformed/big input without network effects (3.183083ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/automation-contract-cli.test.mjs:10:406)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /endpoint/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

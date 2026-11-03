@@ -14,7 +14,7 @@ const {createFixture:createModernPeer}=createRequire(import.meta.url)('./fixture
 const {createTestTLS,createCimdPeer}=createRequire(import.meta.url)('./fixtures/cimd-peer.cjs');
 const {createOAuthPeer}=createRequire(import.meta.url)('./fixtures/oauth-mcp-server.cjs');
 const dataDir = path.resolve(process.env.VEK_DATA_DIR || 'data/workbench-e2e');
-const cli = path.resolve(process.env.VEK_WORKBENCH_CLI || 'cli/vek-browser.mjs');
+const cli = path.resolve(process.env.VEK_WORKBENCH_CLI || 'cli/wiek-browser.mjs');
 const cimdTLS=await createTestTLS();
 execFileSync(process.execPath,[cli,'start'],{env:{...process.env,VEK_DATA_DIR:dataDir,NODE_EXTRA_CA_CERTS:cimdTLS.certFile},stdio:'pipe'});
 const runtime = JSON.parse(await fs.readFile(path.join(dataDir,'runtime.json'),'utf8'));
@@ -47,7 +47,7 @@ try {
   check((await fs.readFile(path.join(directory,'note.txt'),'utf8'))==='after\n','workspace writes real file');
   await assert.rejects(action('workspace:write',{projectId,path:'note.txt',content:'stale\n',expectedHash:before.hash}),/conflict|changed/i);checks++;
   await assert.rejects(action('workspace:read',{projectId,path:'../outside'}));checks++;
-  execFileSync('git',['init','-q',directory]);execFileSync('git',['-C',directory,'config','user.name','Vek fixture']);execFileSync('git',['-C',directory,'config','user.email','fixture@localhost']);execFileSync('git',['-C',directory,'add','--','note.txt']);execFileSync('git',['-C',directory,'commit','-qm','Local fixture']);
+  execFileSync('git',['init','-q',directory]);execFileSync('git',['-C',directory,'config','user.name','Wiek fixture']);execFileSync('git',['-C',directory,'config','user.email','fixture@localhost']);execFileSync('git',['-C',directory,'add','--','note.txt']);execFileSync('git',['-C',directory,'commit','-qm','Local fixture']);
   const checkpoint=(await action('workspace:git:checkpoint:create',{projectId,name:'Host fixture'})).checkpoint;
   const note=await action('workspace:read',{projectId,path:'note.txt'});await action('workspace:write',{projectId,path:'note.txt',content:'changed after checkpoint\n',expectedHash:note.hash});
   const checkpointPreview=await action('workspace:git:checkpoint:preview',{projectId,id:checkpoint.id});check(checkpointPreview.changes.some(row=>row.path==='note.txt'),'host checkpoint preview describes actual local file change');
@@ -55,12 +55,12 @@ try {
   check(await fs.readFile(path.join(directory,'note.txt'),'utf8')==='after\n','host checkpoint restores real worktree bytes');
   check((await action('workspace:git:checkpoint:list',{projectId})).checkpoints.length===2,'host checkpoint preserves the pre-restore protection snapshot');
   const fake=path.join(directory,'provider.cjs');
-  await fs.writeFile(fake,`const {spawnSync}=require('node:child_process');let input='';process.stdin.on('data',c=>input+=c);process.stdin.on('end',()=>{if(!input.includes('Vek Browser with a local browser automation CLI'))process.exit(8);require('fs').writeFileSync('note.txt',${JSON.stringify('provider turn edit\n')});const source="const task=await taskSpace('agent-"+process.env.VEK_THREAD_ID+"');const page=task.page('p1');await page.goto("+JSON.stringify(${JSON.stringify(url)})+");await page.fill('input[aria-label=Name]','Vek');await page.click('button');console.log(await page.evaluate(()=>document.querySelector('h1').textContent));";const r=spawnSync(${JSON.stringify(process.execPath)},[process.env.VEK_BROWSER_CLI,'nodejs','-e',source],{env:process.env,encoding:'utf8',timeout:15000});if(r.status!==0){process.stderr.write(r.stderr||'CLI failed');process.exit(9);}console.log(r.stdout.trim());});`);
+  await fs.writeFile(fake,`const {spawnSync}=require('node:child_process');let input='';process.stdin.on('data',c=>input+=c);process.stdin.on('end',()=>{if(!input.includes('Wiek Browser with a local browser automation CLI'))process.exit(8);require('fs').writeFileSync('note.txt',${JSON.stringify('provider turn edit\n')});const source="const task=await taskSpace('agent-"+process.env.VEK_THREAD_ID+"');const page=task.page('p1');await page.goto("+JSON.stringify(${JSON.stringify(url)})+");await page.fill('input[aria-label=Name]','Wiek');await page.click('button');console.log(await page.evaluate(()=>document.querySelector('h1').textContent));";const r=spawnSync(${JSON.stringify(process.execPath)},[process.env.VEK_BROWSER_CLI,'nodejs','-e',source],{env:process.env,encoding:'utf8',timeout:15000});if(r.status!==0){process.stderr.write(r.stderr||'CLI failed');process.exit(9);}console.log(r.stdout.trim());});`);
   snapshot=await action('agents:providers:configure',{name:'Fixture CLI',command:process.execPath,args:[fake],inputMode:'stdin'});providerId=snapshot.providers.at(-1).id;
   snapshot=await action('agents:threads:create',{projectId,providerId,title:'Fixture conversation'});const threadId=snapshot.threads.at(-1).id;
   snapshot=await action('agents:projects:checkpoints',{id:projectId,enabled:true});check(snapshot.projects.find(p=>p.id===projectId).checkpointsEnabled,'host enables project turn snapshots');
   await action('agents:threads:prompt',{id:threadId,prompt:'Run the synthetic browser test.'});
-  let thread=await waitThread(threadId);check(thread.status==='completed','provider completes');check(thread.messages.some(m=>m.role==='assistant'&&m.content.includes('Hi Vek')),'provider actually calls Vek SDK using injected context');
+  let thread=await waitThread(threadId);check(thread.status==='completed','provider completes');check(thread.messages.some(m=>m.role==='assistant'&&m.content.includes('Hi Wiek')),'provider actually calls Wiek SDK using injected context');
   const turn=thread.runs.at(-1);check(turn.fileChanges?.status==='complete'&&turn.fileChanges.before&&turn.fileChanges.after,'host binds actual provider run to both snapshots');
   const turnDiff=await action('agents:changes:diff',{id:threadId,runId:turn.id});check(turnDiff.changes.some(row=>row.path==='note.txt')&&turnDiff.worktreeDiff.includes('provider turn edit'),'host exposes immutable turn file diff');
   const turnPreview=await action('agents:changes:preview',{id:threadId,runId:turn.id});const restoredTurn=await action('agents:changes:restore',{id:threadId,runId:turn.id,expectedState:turnPreview.expectedState,confirm:true});check(await fs.readFile(path.join(directory,'note.txt'),'utf8')==='after\n','host turn restore actually restores pre-provider files');check(Boolean(restoredTurn.backupCheckpoint.id),'host turn restore returns a protection checkpoint');
@@ -191,7 +191,7 @@ try {
   await assert.rejects(action('mcp:oauth:open',{integrationId:cimdId,scope:cimdScope,flowId:secondCimd.id}),/outside/);checks++;
   await assert.rejects(action('mcp:oauth:prepare',{integrationId:cimdId,scope:cimdScope}),/expected issuer/);checks++;
   check(!cimdPeer.requests.some(r=>['/register','/authorize','/token'].includes(r.path)),'host identity review never registers, opens authorization or exchanges tokens implicitly');
-  check(!(await fs.readFile(path.join(dataDir,'mcp/state.json'),'utf8')).includes('Vek fixture <script>'),'fetched client metadata body is not saved to MCP history');
+  check(!(await fs.readFile(path.join(dataDir,'mcp/state.json'),'utf8')).includes('Wiek fixture <script>'),'fetched client metadata body is not saved to MCP history');
 
   await action('mcp:integrations:remove',{id:oauthId});
   const pairing=await action('mcp:pairing:create',{name:'Browser integration fixture',scope:{projectId,threadId},browserMethods:['listTabs','createTab','navigate','snapshot']});

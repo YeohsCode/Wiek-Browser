@@ -52,17 +52,17 @@ test('voice enforces overlap, cancellation and timeout without a fake successful
   assert.deepEqual(await fs.readdir(path.join(root,'voice-tmp')),[]);
 });
 test('voice dictionary, language, retained audio, soft deletion and retention apply to actual subprocess output',async t=>{
-  const root=await fixture(t), script=path.join(root,'voice.cjs');await fs.writeFile(script,`console.log('Vek fixture '+process.argv[3]);`);
+  const root=await fixture(t), script=path.join(root,'voice.cjs');await fs.writeFile(script,`console.log('Wiek fixture '+process.argv[3]);`);
   let service=createVoiceService({dataDir:root});t.after(()=>service.close());
   await service.dispatch('voice:configure',{command:process.execPath,args:[script,'{audio}','{language}']});
   await service.dispatch('voice:settings:update',{language:'zh',keepAudio:true,historyRetentionDays:30,dictionary:[{from:'fixture',to:'词典'}]});
   const input={base64:Buffer.from('audio fixture').toString('base64'),mime:'audio/wav'};
-  const result=await service.dispatch('voice:transcribe',input);assert.equal(result.text,'Vek 词典 zh');
+  const result=await service.dispatch('voice:transcribe',input);assert.equal(result.text,'Wiek 词典 zh');
   let state=service.snapshot();assert.equal(state.history.length,1);assert.equal(state.history[0].hasAudio,true);
   assert.equal((await service.dispatch('voice:history:audio',{id:result.historyId})).base64,input.base64);
   await service.dispatch('voice:history:delete',{id:result.historyId});assert.equal(service.snapshot().history[0].trashed,true);
   await service.dispatch('voice:history:restore',{id:result.historyId});assert.equal(service.snapshot().history[0].trashed,false);
-  await service.close();service=createVoiceService({dataDir:root});assert.equal(service.snapshot().settings.language,'zh');assert.equal(service.snapshot().history[0].text,'Vek 词典 zh');
+  await service.close();service=createVoiceService({dataDir:root});assert.equal(service.snapshot().settings.language,'zh');assert.equal(service.snapshot().history[0].text,'Wiek 词典 zh');
   await service.dispatch('voice:settings:update',{historyRetentionDays:0});assert.equal(service.snapshot().history.length,0);assert.deepEqual(await fs.readdir(path.join(root,'voice-recordings')),[]);
   await service.dispatch('voice:transcribe',input);assert.equal(service.snapshot().history.length,0);
   const oldConfig=service.snapshot().config;await assert.rejects(service.dispatch('voice:configure',{command:process.execPath,args:[script,'{audio}'],output:'file'}),/output/);assert.deepEqual(service.snapshot().config,oldConfig);

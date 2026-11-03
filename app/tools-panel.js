@@ -16,7 +16,7 @@
   }
   function renderCatalog() {
     const projects = appState.agents?.projects || [], threads = appState.agents?.threads || [];
-    const controls = card('Skills, commands & agents', 'Discover local instruction files. Read a file before selecting it for a conversation; selected files are included in the next provider turn. Disable affects Vek’s catalog only.');
+    const controls = card('Skills, commands & agents', 'Discover local instruction files. Read a file before selecting it for a conversation; selected files are included in the next provider turn. Disable affects Wiek’s catalog only.');
     controls.append(selector('Project', [['','User catalog'], ...projects.map(p => [p.id,p.name])], projectId, async id => { projectId = id; detail = null; await refresh(); }));
     controls.append(selector('Conversation', [['','Choose a conversation'], ...threads.filter(t => !projectId || t.projectId === projectId).map(t => [t.id,t.title])], threadId, async id => { threadId = id; const thread = threads.find(t => t.id === id); if (thread) projectId = thread.projectId; await refresh(); }));
     controls.append(button('Refresh', refresh));
@@ -43,7 +43,7 @@
     intro.append(button(recording ? 'Stop recording & transcribe' : 'Record microphone', async () => { if (recording) { await stopRecording(); return; } await startRecording(); }));
     if (busy) { const stop = button('Stop transcription', async () => { await invoke('voice:stop'); }); stop.disabled=false; intro.append(stop); }
     if (recording) intro.append(node('p', 'Recording on this device… stop within 2 minutes.'));
-    if (transcript) { const c = card('Transcript', 'Review this text before sending.'); const text = node('textarea'); text.value = transcript; text.rows = 6; text.setAttribute('aria-label','Voice transcript'); text.oninput = () => transcript = text.value; c.append(text); c.append(button('Add to selected conversation draft', () => { if (!window.VekAgentPanel.appendDraft(transcript)) throw new Error('Open a conversation in Agents first, then return here.'); window.dispatchEvent(new CustomEvent('vek:show-panel', { detail: 'agents' })); })); }
+    if (transcript) { const c = card('Transcript', 'Review this text before sending.'); const text = node('textarea'); text.value = transcript; text.rows = 6; text.setAttribute('aria-label','Voice transcript'); text.oninput = () => transcript = text.value; c.append(text); c.append(button('Add to selected conversation draft', () => { if (!window.WiekAgentPanel.appendDraft(transcript)) throw new Error('Open a conversation in Agents first, then return here.'); window.dispatchEvent(new CustomEvent('vek:show-panel', { detail: 'agents' })); })); }
     const settings = card('Transcription provider', 'Arguments run without a shell. Use {audio} for the temporary recording path; file-output tools can use {output}. Whisper example: ["-m","/path/ggml-tiny.bin","-f","{audio}","-l","auto","-nt","-np"].');
     const form = node('form'), command = node('input'), args = node('textarea'); command.placeholder = '/absolute/path/to/transcriber'; command.value = voice.config?.command || ''; command.setAttribute('aria-label','Transcriber executable'); args.rows = 4; args.value = JSON.stringify(voice.config?.args || []); args.setAttribute('aria-label','Transcriber arguments JSON');
     const output = document.createElement('select'); for (const [id, name] of [['stdout','Text on standard output'],['file','Text at {output} path']]) { const option = node('option',name); option.value=id; output.append(option); } output.value = voice.config?.output || 'stdout';
@@ -84,7 +84,7 @@
     let offset = 44; for (const chunk of r.chunks) for (const sample of chunk) { view.setInt16(offset,Math.round(Math.max(-1,Math.min(1,sample))*32767),true); offset+=2; }
     await transcribe(new Uint8Array(buffer),'audio/wav');
   }
-  window.VekToolsPanel = {
+  window.WiekToolsPanel = {
     mount(target, dispatch, state, selectedMode) { root=target; invoke=dispatch; appState=state; mode=selectedMode; error=''; detail=null; catalog=null; voice=null; render(); void execute(refresh); },
     update(state) { appState=state; },
     dispose() { if (recording) { clearTimeout(recording.timer); recording.processor.disconnect();recording.source.disconnect();recording.mute.disconnect();recording.stream.getTracks().forEach(t=>t.stop());void recording.context.close();void invoke('voice:recording',{active:false});recording=null; } },

@@ -1,6 +1,6 @@
-# Vek Browser
+# Wiek Browser
 
-Keep the public SDK's upstream test assertions and fixture semantics intact. SDK-specific conventions remain in references/ego-lite/AGENTS.md. Vek's app/ files are independent implementations; do not copy closed-source shipped code into them.
+Keep the public SDK's upstream test assertions and fixture semantics intact. SDK-specific conventions remain in references/ego-lite/AGENTS.md. Wiek's app/ files are independent implementations; do not copy closed-source shipped code into them.
 
 Use REA evidence for claims about the reference browser and distinguish source presence, static inference, and runtime proof. Keep analysis/feature-parity.md and reports/comparison.md honest about missing, skipped, failed and unrun behavior. Do not equate the 69 local deterministic cases with the 31 live-site model benchmark.
 

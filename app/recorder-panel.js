@@ -69,5 +69,5 @@
     }
     layout.append(main); root.append(layout);
   }
-  window.VekRecorderPanel = { mount(target, dispatch) { root = target; invoke = dispatch; render(); }, update(next) { apply(next); render(); } };
+  window.WiekRecorderPanel = { mount(target, dispatch) { root = target; invoke = dispatch; render(); }, update(next) { apply(next); render(); } };
 })();

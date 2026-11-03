@@ -1,0 +1,10 @@
+{"ok":true,"checks":13,"actualElectronIPC":true,"realLocalBareGit":true,"syntheticGh":true,"remoteAccountWrites":0,"modelCalls":0}
+✔ remote workspace review, confirmation and PR text operate through actual isolated Electron IPC (5116.083583ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5184.304625

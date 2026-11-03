@@ -1,0 +1,44 @@
+✖ remote workspace review, confirmation and PR text operate through actual isolated Electron IPC (4554.115875ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4617.320084
+
+✖ failing tests:
+
+test at tests/workspace-remote-panel.test.mjs:11:1
+✖ remote workspace review, confirmation and PR text operate through actual isolated Electron IPC (4554.115875ms)
+  AssertionError [ERR_ASSERTION]: RENDERER %cElectron Security Warning (Insecure Content-Security-Policy) font-weight: bold; This renderer process has either no Content Security
+    Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+    this app to unnecessary security risks.
+  
+  For more information and help, consult
+  https://electronjs.org/docs/tutorial/security.
+  This warning will not show up
+  once the app is packaged.
+  RENDERER Uncaught SyntaxError: Invalid or unexpected token
+  PANEL_CODE const field=document.querySelector(".vw-dialog textarea");field.value="line one
+  $(touch must-not-exist) <script>inert</script>";field.dispatchEvent(new Event("input"));click("Prepare review");undefined
+  Error: Script failed to execute, this normally means an error was thrown. Check the renderer console for the error.
+      at node:electron/js2c/sandbox_bundle:2:105042
+      at IpcRendererInternal.<anonymous> (node:electron/js2c/sandbox_bundle:2:99546)
+      at IpcRendererInternal.emit (node:electron/js2c/sandbox_bundle:2:37399)
+      at Object.onMessage (node:electron/js2c/sandbox_bundle:2:98612)
+  
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/workspace-remote-panel.test.mjs:36:162)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

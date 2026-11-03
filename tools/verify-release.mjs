@@ -5,7 +5,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const packaged=path.resolve(process.argv[2]||path.join(root,'dist/mac-arm64/Vek Browser.app/Contents/Resources/app'));
+const packaged=path.resolve(process.argv[2]||path.join(root,'dist/mac-arm64/Wiek Browser.app/Contents/Resources/app'));
 const digest=async file=>createHash('sha256').update(await fs.readFile(file)).digest('hex');
 const exists=async file=>fs.access(file).then(()=>true,()=>false);
 async function files(directory){const output=[];for(const entry of await fs.readdir(path.join(root,directory),{withFileTypes:true})){if(entry.name==='.DS_Store')continue;const relative=path.join(directory,entry.name);if(entry.isDirectory())output.push(...await files(relative));else if(entry.isFile())output.push(relative);}return output;}

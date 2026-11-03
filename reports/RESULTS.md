@@ -1,3 +1,20 @@
+# Wiek Browser 0.20.0 检查点（2026-11-04）
+
+产品名由 Vek 改为 Wiek；canonical CLI 为 `cli/wiek-browser.mjs`，旧命令、环境变量和既有数据/归档兼容。包含本轮 P3 自动化、桌面工具、翻译、远程 Git/PR 的集成代码；**P3 未全部验收，P4 线上基准未运行**。
+
+| 本轮验证 | 结果 | 日志 |
+|---|---|---|
+| 完整本地服务/协议/组件测试 | 498/498；0 失败、0 跳过 | [最终回归](v200-source-tests-final.log) |
+| macOS ARM64 打包与宿主集成 | 构建成功；197/197；无付费模型/真实账户操作 | [build](v200-build.log)、[host](v200-package-workbench.log) |
+| 发行身份 | 190 文件匹配；81 上游输入未改；SDK hash 与保留比较相同 | [verification](v200-release-verification.log) |
+| 改名与旧入口兼容 | canonical/legacy CLI、环境优先级、旧目录复用已测 | `tests/brand.test.mjs` |
+| 远程 Git/PR 界面 | 真实 Electron IPC、本地 bare Git 与合成 gh；通过 | [panel](v200-remote-panel-final.log) |
+| 初轮发现与修复 | 保留真实失败日志；旧归档 format、环境前缀、延期语义断言和新增面板测试转义已修复 | [initial](v200-source-tests-initial.log)、[intermediate](v200-source-tests.log) |
+
+新增原生被动监听/录制尚未完成真实正向验收；离线翻译首次真实运行暴露 Stanza 元数据兼容问题，待修；物理 sleep/login/revocation 与多显示器未运行。终端只有静态线索，未认定为完整 Ego 功能。本轮尚未重新执行 69-case 浏览器 E2E，下面 0.19 结果是历史基线。
+
+---
+
 # Vek Browser 0.19.0 当前结果
 
 更新：2026-11-03（Asia/Shanghai）。本轮实现P2显式CIMD与客户端身份审核；P1不同Agent集成继续暂缓。**Vek托管身份、DCR/完整step-up及其他P2/P3缺口仍在，全量复刻未完成**。

@@ -1,7 +1,7 @@
 'use strict';
 
 // Independent client of Claude Code's public stream-json/control protocol.
-// One Vek run owns one CLI process and one prompt. Follow-ups use --resume.
+// One Wiek run owns one CLI process and one prompt. Follow-ups use --resume.
 const fs = require('node:fs');
 const {readClaudeCatalogue,validateClaudeModel}=require('./claude-models.cjs');
 const { randomUUID, createHash } = require('node:crypto');
@@ -93,7 +93,7 @@ function connectClaude({ child, launch, active, run, thread, project, text, cons
       seen.add(`request:${id}`);
       if (!sent || data?.subtype !== 'can_use_tool') { response(id, null, 'Unsupported Claude control request'); return; }
       if (typeof data.tool_name !== 'string' || !data.input || typeof data.input !== 'object' || Array.isArray(data.input)) throw error('Claude permission request is malformed');
-      if ((run.approvals?.length || 0) >= 64) { response(id, { behavior: 'deny', message: 'Vek per-turn approval limit reached' }); return; }
+      if ((run.approvals?.length || 0) >= 64) { response(id, { behavior: 'deny', message: 'Wiek per-turn approval limit reached' }); return; }
       const approval = { id: randomUUID(), kind: 'tool', title: bounded(data.title || data.tool_name, 2048),
         command: bounded(JSON.stringify(data.input), 8192), cwd: project.path, toolName: bounded(data.tool_name, 256), status: 'pending', createdAt: stamp() };
       run.approvals ||= []; run.approvals.push(approval);
@@ -163,7 +163,7 @@ function connectClaude({ child, launch, active, run, thread, project, text, cons
       if (terminal || closed || active.stopReason) throw error('Claude turn is no longer accepting approval');
       const record = permissions.get(id); if (!record || record.approval.status !== 'pending') throw error('Claude approval is unavailable or expired');
       response(record.requestId, decision === 'accept' ? { behavior: 'allow', updatedInput: record.input }
-        : { behavior: 'deny', message: 'Declined by the Vek user', ...(decision === 'cancel' ? { interrupt: true } : {}) });
+        : { behavior: 'deny', message: 'Declined by the Wiek user', ...(decision === 'cancel' ? { interrupt: true } : {}) });
       record.approval.status = decision === 'accept' ? 'accepted' : decision === 'decline' ? 'declined' : 'cancelled';
       record.approval.decidedAt = stamp(); permissions.delete(id);
     },

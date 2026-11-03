@@ -1,0 +1,12 @@
+✔ floating toolbar clamps on negative-coordinate displays, rejects forged/stale actions and never focuses source (1.618917ms)
+✔ translation CLI receives literal JSON stdin, persists provider only, bounds text and enforces trusted controls (93.468416ms)
+✔ translation cancellation waits for actual child exit; overlap and reconfiguration are rejected (47.233333ms)
+✔ translation rejects broken, oversized and failing providers and enforces deadline (639.59675ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 851.476167

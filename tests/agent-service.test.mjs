@@ -118,14 +118,14 @@ test('at schedule survives restart and executes exactly once while service is ac
   assert.equal(currentThread(f).runs.length, 1);
 });
 
-test('interval pause/resume/update/stop and overlap skipping do not queue duplicate work', async (t) => {
+test('interval pause/resume/update/stop defers overlap without queuing duplicate work', async (t) => {
   const f = await fixture(t);
   await f.service.dispatch('agents:automations:create', { name: 'Repeating', threadId: f.threadId, prompt: '[slow]', kind: 'interval', intervalMs: 50, status: 'paused' });
   const id = f.service.snapshot().automations[0].id;
   await new Promise(resolve => setTimeout(resolve, 75));
   assert.equal(currentThread(f).runs.length, 0);
   await f.service.dispatch('agents:automations:resume', { id });
-  await waitFor(() => f.service.snapshot().automations[0], automation => automation.lastOutcome === 'skipped-overlap');
+  await waitFor(() => f.service.snapshot().automations[0], automation => automation.deferred?.reason === 'This automation has an active run');
   assert.equal(currentThread(f).runs.length, 1);
   await f.service.dispatch('agents:automations:stop', { id });
   assert.equal(currentThread(f).status, 'stopped');

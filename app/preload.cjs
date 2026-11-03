@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('vek', {
   onDialog: callback => ipcRenderer.on('vek:dialog', (_, data) => callback(data)),
   onHighlight: callback => ipcRenderer.on('vek:highlight', (_, point) => callback(point)),
   onOpenPanel: callback => ipcRenderer.on('vek:open-panel', (_, data) => callback(data)),
+  onTranslation: callback => ipcRenderer.on('vek:translation', (_, text) => callback(text)),
   onDraft: callback => ipcRenderer.on('vek:draft', (_, text) => callback(text)),
   onError: callback => ipcRenderer.on('vek:error', (_, text) => callback(text)),
   onSecretRequest: callback => ipcRenderer.on('vek:secret-request', (_, data) => callback(data)),

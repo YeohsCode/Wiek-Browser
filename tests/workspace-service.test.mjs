@@ -15,7 +15,7 @@ async function fixture(t, git = false) {
   t.after(async () => { await service.close(); await fs.rm(parent, { recursive: true, force: true }); });
   const call = (action, payload = {}) => service.dispatch(`workspace:${action}`, { projectId: 'p', ...payload });
   const gitRun = (...args) => execute('git', ['-C', root, ...args]);
-  if (git) { await gitRun('init'); await gitRun('config', 'user.name', 'Vek Fixture'); await gitRun('config', 'user.email', 'fixture@example.test'); await gitRun('config', 'commit.gpgSign', 'false'); await fs.mkdir(path.join(parent, 'empty-hooks')); await gitRun('config', 'core.hooksPath', path.join(parent, 'empty-hooks')); }
+  if (git) { await gitRun('init'); await gitRun('config', 'user.name', 'Wiek Fixture'); await gitRun('config', 'user.email', 'fixture@example.test'); await gitRun('config', 'commit.gpgSign', 'false'); await fs.mkdir(path.join(parent, 'empty-hooks')); await gitRun('config', 'core.hooksPath', path.join(parent, 'empty-hooks')); }
   return { root, parent, service, call, gitRun, projects, events };
 }
 

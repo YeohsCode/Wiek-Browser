@@ -1,0 +1,15 @@
+✔ CLI helper sends raw bounded UTF-8 memory and structured result using active turn authority only (12.329958ms)
+✔ CLI helper rejects remote/credentialed endpoints, absent authority and malformed/big input without network effects (2.507334ms)
+✔ CLI helper sends no retries after a timeout or uncertain disconnected POST and never exposes token in errors (31.378166ms)
+✔ actual CLI command uses the active contract without browser auto-start or provider-output leakage (86.435416ms)
+✔ Wiek environment overrides legacy aliases and retains legacy-only integrations (0.598666ms)
+✔ packaged data selection reuses an existing legacy directory without moving it (0.116709ms)
+✔ canonical and compatibility CLI commands print the same Wiek guide (133.624333ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 215.832375

@@ -1,0 +1,6 @@
+#!/bin/sh
+VEK_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+if [ -x "$VEK_ROOT/dist/mac-arm64/Wiek Browser.app/Contents/MacOS/Wiek Browser" ]; then
+  exec "$VEK_ROOT/dist/mac-arm64/Wiek Browser.app/Contents/MacOS/Wiek Browser" "$@"
+fi
+exec "$VEK_ROOT/node_modules/.bin/electron" "$VEK_ROOT" "$@"

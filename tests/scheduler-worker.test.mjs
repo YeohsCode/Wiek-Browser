@@ -6,7 +6,7 @@ import {join,resolve} from 'node:path';
 import {spawn,execFileSync} from 'node:child_process';
 import {createRequire} from 'node:module';
 const require=createRequire(import.meta.url),{createAgentService}=require('../app/agent-service.cjs'),{runSchedulerTick}=require('../app/scheduler-worker.cjs');
-const root=process.env.VEK_SCHEDULER_APP_ROOT||resolve(import.meta.dirname,'..'),cli=join(root,'cli/vek-browser.mjs');
+const root=process.env.VEK_SCHEDULER_APP_ROOT||resolve(import.meta.dirname,'..'),cli=join(root,'cli/wiek-browser.mjs');
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 async function until(read,match){for(let i=0;i<400;i++){let value;try{value=await read();}catch{}if(value&&match(value))return value;await delay(10);}throw Error('Worker fixture timed out');}
 async function fixture(t,{body="console.log(text)",mode='standalone',closedAppAllowed=true,prompt='WORKER_FIXTURE',kind='at',extra={}}={}){
@@ -56,4 +56,8 @@ test('a real failing provider records failure and stop-on-failure without replay
 });
 test('worker setup failures release the Agent lock and never run a provider',async t=>{
  const f=await fixture(t);await f.close();const fs=require('node:fs');fs.mkdirSync(join(f.dir,'turn-checkpoints'));await writeFile(join(f.dir,'turn-checkpoints/state.json'),'invalid fixture');const attempt=await f.tick().done;assert.equal(attempt.code,1);assert.equal(fs.existsSync(join(f.dir,'agents/service.lock')),false);assert.equal(fs.existsSync(f.audit),false);
+});
+
+test('revoking the reviewed execution guard interrupts an already running fixture and waits for its exit',async t=>{
+ const f=await fixture(t,{body:"console.log('READY');setTimeout(()=>console.log('TOO_LATE'),5000)"});await f.close();let allowed=true;const pending=runSchedulerTick({dataDir:f.dir,guard:()=>allowed,timeoutMs:10000});await until(()=>readFile(f.audit,'utf8'),v=>v.includes('START:'));allowed=false;const result=await pending;assert.equal(result.status,'disabled');assert.equal(f.state().threads.at(-1).runs[0].status,'interrupted');const pid=Number((await readFile(f.audit,'utf8')).match(/START:(\d+)/)[1]);assert.throws(()=>process.kill(pid,0),e=>e.code==='ESRCH');assert.equal(f.state().threads.at(-1).runs[0].stdout.includes('TOO_LATE'),false);
 });

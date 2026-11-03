@@ -3,7 +3,7 @@ import {readFile,writeFile,mkdir} from 'node:fs/promises';
 import {resolve,dirname,join} from 'node:path';
 import WebSocket from 'ws';
 const data=resolve(process.argv[2]||'data');
-const out=resolve(process.argv[3]||'reports/vek-browser.png');
+const out=resolve(process.argv[3]||'reports/wiek-browser.png');
 const runtime=JSON.parse(await readFile(join(data,'runtime.json'),'utf8'));
 const socket=new WebSocket(`ws://127.0.0.1:${runtime.port}/rpc?token=${encodeURIComponent(runtime.token)}`);
 try {

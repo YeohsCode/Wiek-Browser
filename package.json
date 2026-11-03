@@ -1,12 +1,13 @@
 {
-  "name": "vek-browser",
-  "version": "0.19.0",
+  "name": "wiek-browser",
+  "version": "0.20.0",
   "private": true,
   "license": "MIT",
   "description": "A local Chromium browser with task spaces and an MIT-compatible agent runtime",
   "type": "module",
   "main": "app/main.cjs",
   "bin": {
+    "wiek-browser": "cli/wiek-browser.mjs",
     "vek-browser": "cli/vek-browser.mjs"
   },
   "scripts": {
@@ -27,8 +28,8 @@
     "electron-builder": "^26.0.0"
   },
   "build": {
-    "appId": "app.vek.browser",
-    "productName": "Vek Browser",
+    "appId": "app.wiek.browser",
+    "productName": "Wiek Browser",
     "electronDist": "node_modules/electron/dist",
     "asar": false,
     "files": [
@@ -41,12 +42,13 @@
       "NOTICE.md",
       "package.json",
       "models/**",
+      "skills/wiek-browser/**",
       "skills/vek-browser/**"
     ],
     "mac": {
       "category": "public.app-category.productivity",
       "extendInfo": {
-        "NSMicrophoneUsageDescription": "Record audio when you choose Voice input in Vek Browser. Audio is transcribed locally."
+        "NSMicrophoneUsageDescription": "Record audio when you choose Voice input in Wiek Browser. Audio is transcribed locally."
       }
     }
   }

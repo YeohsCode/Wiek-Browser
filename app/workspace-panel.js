@@ -3,6 +3,7 @@
   let root, invoke, state = { projects: [], watches: [], capabilities: {} }, projectId = '', tab = 'files', busy = 0, error = '';
   let tree = null, directory = '', file = null, preview = null, dirty = false, changed = false, search = null, artifacts = null, git = {}, gitError = '', staged = false, dialog = null, lastEvent = 0;
   let checkpointPreview = null, checkpointNotice = '';
+  let remoteName = '', remoteBranch = '', remoteReview = null, remoteResult = null, remoteRunning = '', prList = null, prDetail = null;
   let query = '', contentSearch = true, commitMessage = '', generation = 0;
   const node = (tag, text, cls) => { const item = document.createElement(tag); if (text !== undefined) item.textContent = String(text); if (cls) item.className = cls; return item; };
   const button = (label, run, cls = '') => { const item = node('button', label, `vw-button ${cls}`); item.type = 'button'; item.disabled = busy > 0; item.onclick = run; return item; };
@@ -30,7 +31,7 @@
   }
   async function loadGit() {
     const mine = generation;
-    const actions = ['status', 'branches', 'log', 'stash:list', 'diff', 'checkpoint:list'];
+    const actions = ['status', 'branches', 'log', 'stash:list', 'diff', 'checkpoint:list', 'remote:list'];
     const results = await Promise.allSettled(actions.map(action => request(`workspace:git:${action}`, action === 'diff' ? { staged } : {})));
     if (mine !== generation) return;
     git = {}; gitError = '';
@@ -38,10 +39,13 @@
       if (results[i].status === 'fulfilled') git[actions[i]] = results[i].value;
       else if (!gitError) gitError = results[i].reason.message || String(results[i].reason);
     }
+    if (!git['remote:list']?.remotes?.some(item => item.name === remoteName)) remoteName = git['remote:list']?.remotes?.[0]?.name || '';
+    if (!remoteBranch) remoteBranch = git.status?.branch || '';
   }
   async function selectProject(next) {
     if (dirty) return confirmAction('Switch project', 'Discard the unsaved editor changes before switching?', () => { dirty = false; return perform(() => selectProject(next), true); });
     const previous = projectId; projectId = next; generation++; directory = ''; tree = file = preview = search = artifacts = null; git = {}; checkpointPreview = null; checkpointNotice = ''; changed = false;
+    remoteName = remoteBranch = remoteRunning = ''; remoteReview = remoteResult = prList = prDetail = null;
     if (previous && previous !== next) await invoke('workspace:watch', { projectId: previous, enabled: false }).catch(() => {});
     if (!next) { render(); return; }
     await Promise.all([loadTree(), loadGit(), request('workspace:watch', { enabled: true }).then(result => { state = { ...state, watches: result.watches || [] }; })]); render();
@@ -74,7 +78,7 @@
   }
   async function gitMutation(operation, payload = {}) { return perform(async () => { await request(`workspace:git:${operation}`, payload); await Promise.all([loadGit(), loadTree()]); }, Boolean(dialog)); }
   function header() {
-    const heading = node('div', '', 'vw-header'), title = node('div'); title.append(node('h1', 'Workspace'), node('p', 'Files and local Git, in your project folder.')); heading.append(title);
+    const heading = node('div', '', 'vw-header'), title = node('div'); title.append(node('h1', 'Workspace'), node('p', 'Project files, Git and reviewed remote operations.')); heading.append(title);
     const chooser = node('select'); chooser.setAttribute('aria-label', 'Workspace project'); chooser.disabled = busy > 0;
     if (!state.projects.length) chooser.append(node('option', 'Add a project in Agent workspace first'));
     for (const project of state.projects) { const option = node('option', project.name); option.value = project.id; chooser.append(option); } chooser.value = projectId;
@@ -124,11 +128,66 @@
     if (artifacts?.truncated) section.append(node('p', 'Artifact listing limit reached.', 'vw-hint'));
     if (preview) section.append(previewNode(preview)); body.append(section);
   }
+  async function prepareRemote(operation, extra = {}, pr = false) {
+    const mine = generation;
+    return perform(async () => {
+      const result = await request(pr ? 'workspace:git:pr:prepare' : 'workspace:git:remote:prepare', { remote: remoteName, branch: remoteBranch, operation, ...extra });
+      if (mine === generation) { remoteReview = result; remoteResult = null; dialog = null; }
+    });
+  }
+  async function runRemoteReview() {
+    const selected = remoteReview, mine = generation;
+    if (!selected) return;
+    remoteRunning = selected.reviewId; remoteReview = null;
+    return perform(async () => {
+      const result = await request('workspace:git:remote:run', { reviewId: selected.reviewId, confirm: true });
+      if (mine === generation) { remoteResult = result; remoteRunning = ''; await Promise.all([loadGit(), loadTree()]); }
+    }).finally(() => { if (mine === generation) { remoteRunning = ''; render(); } });
+  }
+  function remoteView(section) {
+    const heading = node('div', '', 'vw-section-heading'); heading.append(node('h3', 'Remote Git and pull requests')); section.append(heading);
+    const remotes = git['remote:list']?.remotes || [];
+    if (!remotes.length) { section.append(node('p', 'No configured remote. Add one with your Git client, then refresh.', 'vw-hint')); return; }
+    const actions = node('div', '', 'vw-actions'), chooser = node('select'); chooser.setAttribute('aria-label', 'Git remote');
+    for (const item of remotes) { const option = node('option', item.name); option.value = item.name; chooser.append(option); } chooser.value = remoteName; chooser.disabled = busy > 0;
+    chooser.onchange = () => { remoteName = chooser.value; remoteReview = remoteResult = prList = prDetail = null; render(); };
+    const branch = node('input'); branch.value = remoteBranch; branch.placeholder = 'Remote branch'; branch.setAttribute('aria-label', 'Remote Git branch'); branch.dataset.focus = 'remote-branch'; branch.disabled = busy > 0; branch.oninput = () => { remoteBranch = branch.value; };
+    actions.append(chooser, branch);
+    for (const [operation, label] of [['fetch', 'Review fetch'], ['pull', 'Review pull'], ['push', 'Review push']]) actions.append(button(label, () => prepareRemote(operation)));
+    actions.append(button('Review branch rewrite', () => prepareRemote('push', { force: true }), 'vw-danger'));
+    section.append(actions);
+    const chosen = remotes.find(item => item.name === remoteName);
+    section.append(node('p', chosen?.error || `Fetch: ${chosen?.fetch || '—'} · Push: ${chosen?.push || '—'}`, 'vw-hint'));
+    section.append(node('p', 'Fetch selects one branch. Pull fast-forwards a clean current branch. Push uses an exact remote-object lease. Credentials stay with Git/gh; no login form is stored here.', 'vw-hint'));
+    if (remoteRunning) {
+      const pending = node('div', '', 'vw-remote-review'); pending.append(node('p', 'Remote operation is running. Cancellation cannot undo a server write already received.', 'vw-hint'));
+      const cancel = button('Cancel remote operation', () => { invoke('workspace:git:remote:cancel', { projectId, id: remoteRunning }).catch(failure => { error = failure.message; render(); }); }, 'vw-danger'); cancel.disabled = false; pending.append(cancel); section.append(pending);
+    }
+    if (remoteReview) {
+      const review = remoteReview, panel = node('div', '', 'vw-remote-review'); panel.append(node('h3', 'Review remote operation'), node('pre', JSON.stringify(review.review, null, 2), 'vw-diff'), node('p', 'Review expires ' + formatDate(review.expiresAt) + '. Confirming may change the remote repository or publish text.', 'vw-hint'));
+      panel.append(button('Confirm reviewed operation', runRemoteReview, 'vw-primary'), button('Discard remote review', () => perform(async () => { await request('workspace:git:remote:cancel', { id: review.reviewId }); remoteReview = null; })));
+      section.append(panel);
+    }
+    if (remoteResult) { const result = node('div', '', 'vw-remote-result'); result.append(node('strong', remoteResult.state), node('p', remoteResult.message, 'vw-hint')); if (remoteResult.result?.url) result.append(node('code', remoteResult.result.url)); section.append(result); }
+    if (!chosen?.github) { section.append(node('p', 'Pull requests require a configured github.com HTTPS/SSH remote and an authenticated GitHub CLI.', 'vw-hint')); return; }
+    const prActions = node('div', '', 'vw-actions'); prActions.append(button('List pull requests', () => perform(async () => { prList = await request('workspace:git:pr:list', { remote: remoteName }); prDetail = null; })), button('Create pull request', () => ask('Prepare pull request', [{ key: 'base', label: 'Base branch', required: true }, { key: 'title', label: 'Title', required: true }, { key: 'body', label: 'Description', type: 'textarea' }, { key: 'draft', label: 'Initial state', type: 'select', options: [['true', 'Draft'], ['false', 'Ready for review']], value: 'true' }, { type: 'notice', label: 'Push this exact local branch first. This prepares a review; publishing requires confirmation.' }], values => prepareRemote('create', { ...values, draft: values.draft === 'true' }, true), 'Prepare review'))); section.append(prActions);
+    if (prList) for (const item of prList.pullRequests) section.append(button(`#${item.number} · ${item.state} · ${item.title}`, () => perform(async () => { prDetail = await request('workspace:git:pr:detail', { remote: remoteName, number: item.number }); }), 'vw-artifact-row'));
+    if (prDetail) {
+      const pr = prDetail.pullRequest, panel = node('section', '', 'vw-pr-detail'); panel.append(node('h3', `#${pr.number} · ${pr.title}`), node('code', pr.url), node('p', `${pr.state}${pr.draft ? ' · draft' : ''}${pr.merged ? ' · merged' : ''} · ${pr.head} → ${pr.base}`, 'vw-hint'), node('pre', pr.body, 'vw-diff'), node('pre', prDetail.diff, 'vw-diff'));
+      if (pr.bodyTruncated) panel.append(node('p', 'Description truncated at 50,000 characters.', 'vw-notice'));
+      if (prDetail.diffTruncated) panel.append(node('p', 'Diff preview truncated at ' + prDetail.diffLimitBytes.toLocaleString() + ' bytes. Review the full diff with your Git client before merging.', 'vw-notice'));
+      const toolbar = node('div', '', 'vw-actions'); toolbar.append(button('Review comment', () => ask('Prepare PR comment', [{ key: 'body', label: 'Comment', type: 'textarea', required: true }], values => prepareRemote('comment', { number: pr.number, body: values.body }, true), 'Prepare review')));
+      if (!pr.merged) toolbar.append(button(pr.state === 'open' ? 'Review close' : 'Review reopen', () => prepareRemote(pr.state === 'open' ? 'close' : 'reopen', { number: pr.number }, true)));
+      if (pr.state === 'open' && !pr.draft) toolbar.append(button('Review merge', () => ask('Prepare PR merge', [{ key: 'method', label: 'Merge method', type: 'select', options: [['merge', 'Merge commit'], ['squash', 'Squash'], ['rebase', 'Rebase']], value: 'merge' }, { type: 'notice', label: 'Review the exact PR head commit before confirming. Server branch protection still applies.' }], values => prepareRemote('merge', { number: pr.number, method: values.method }, true), 'Prepare review'), 'vw-danger'));
+      panel.append(toolbar); section.append(panel);
+    }
+  }
   function gitView(body) {
     const section = node('section', '', 'vw-wide'); const heading = node('div', '', 'vw-section-heading'); heading.append(node('h2', git.status ? `Git · ${git.status.branch}` : 'Local Git'), button('Refresh', () => perform(loadGit))); section.append(heading);
-    section.append(node('p', 'Local repository operations only. Remote push, pull requests, and remote comments are not available here.', 'vw-hint'));
+    section.append(node('p', 'Local operations use your Git configuration. Remote writes require a fresh review and explicit confirmation.', 'vw-hint'));
     if (gitError) section.append(node('div', gitError, 'vw-error'));
     if (!git.status) { body.append(section); return; }
+    remoteView(section);
     const branchActions = node('div', '', 'vw-actions');
     const branches = node('select'); branches.setAttribute('aria-label', 'Local Git branch'); for (const branch of git.branches?.branches || []) { const option = node('option', branch.name); option.value = branch.name; branches.append(option); } branches.value = git.status.branch;
     branchActions.append(branches, button('Switch branch', () => confirmAction('Switch branch', `Switch to “${branches.value}”? Git will reject conflicting local changes.`, () => gitMutation('branch:switch', { name: branches.value }))), button('New branch', () => ask('Create branch', [{ key: 'name', label: 'Branch name', required: true }], values => gitMutation('branch:create', { name: values.name, checkout: true })))); section.append(branchActions);
@@ -144,7 +203,7 @@
     const commit = node('form', '', 'vw-commit-form'), message = node('textarea'); message.placeholder = 'Commit message for staged changes'; message.value = commitMessage; message.dataset.focus = 'commit'; message.required = true; message.setAttribute('aria-label', 'Commit message'); message.oninput = () => commitMessage = message.value;
     const submit = node('button', 'Commit staged changes', 'vw-button vw-primary'); submit.disabled = busy > 0; commit.append(message, submit); commit.onsubmit = event => { event.preventDefault(); confirmAction('Commit staged changes', 'Create a local commit with the staged files? Repository hooks and signing follow your Git configuration.', async () => { const result = await gitMutation('commit', { message: commitMessage }); if (result !== undefined || !error) commitMessage = ''; }); }; section.append(commit);
     const diffHead = node('div', '', 'vw-section-heading'); diffHead.append(node('h3', staged ? 'Staged diff' : 'Working tree diff'), button(staged ? 'Show unstaged' : 'Show staged', () => perform(async () => { staged = !staged; git.diff = await request('workspace:git:diff', { staged }); }))); section.append(diffHead, node('pre', git.diff?.stdout || 'No diff in this view.', 'vw-diff'));
-    const stashHead = node('div', '', 'vw-section-heading'); stashHead.append(node('h3', 'Stashes'), button('Stash changes', () => ask('Stash local changes', [{ key: 'message', label: 'Description', value: 'Vek workspace stash' }, { key: 'includeUntracked', label: 'Include untracked files', type: 'select', options: [['false', 'Tracked changes only'], ['true', 'Include untracked files']], value: 'false' }], values => gitMutation('stash:push', { message: values.message, includeUntracked: values.includeUntracked === 'true' })))); section.append(stashHead);
+    const stashHead = node('div', '', 'vw-section-heading'); stashHead.append(node('h3', 'Stashes'), button('Stash changes', () => ask('Stash local changes', [{ key: 'message', label: 'Description', value: 'Wiek workspace stash' }, { key: 'includeUntracked', label: 'Include untracked files', type: 'select', options: [['false', 'Tracked changes only'], ['true', 'Include untracked files']], value: 'false' }], values => gitMutation('stash:push', { message: values.message, includeUntracked: values.includeUntracked === 'true' })))); section.append(stashHead);
     for (const stash of git['stash:list']?.stashes || []) { const row = node('div', '', 'vw-stash-row'); row.append(node('span', `${stash.id} · ${stash.description}`)); for (const operation of ['apply', 'pop', 'drop']) row.append(button(operation, () => confirmAction(`${operation} stash`, `${operation} ${stash.id}? ${operation === 'drop' ? 'This permanently removes that saved stash.' : 'Git will report any conflicts.'}`, () => gitMutation(`stash:${operation}`, { stash: stash.id })), operation === 'drop' ? 'vw-danger' : '')); section.append(row); }
     const checkpointHead = node('div', '', 'vw-section-heading'); checkpointHead.append(node('h3', 'Named checkpoints'), button('Create checkpoint', () => ask('Create named checkpoint', [{key:'name',label:'Checkpoint name',required:true}, {type:'notice',label:'Saves the real staged index, unstaged files and nonignored untracked files. The index and working files stay in place.'}], values => perform(async () => { const saved = await request('workspace:git:checkpoint:create', {name:values.name}); checkpointNotice = 'Saved checkpoint “' + saved.checkpoint.name + '”.'; await loadGit(); }, true), 'Create checkpoint'))); section.append(checkpointHead);
     section.append(node('p', 'Restore requires a fresh preview and confirmation. It preserves a safety checkpoint of your current state. Checkpoints apply on their original HEAD commit; ignored files, symlinks and submodules are excluded or refused.', 'vw-hint'));
@@ -169,7 +228,7 @@
   }
   function dialogNode() {
     const backdrop = node('div', '', 'vw-modal'), form = node('form', '', 'vw-dialog'); form.setAttribute('role', 'dialog'); form.setAttribute('aria-modal', 'true'); form.setAttribute('aria-label', dialog.title); form.append(node('h2', dialog.title));
-    for (const field of dialog.fields) { if (field.type === 'notice') { form.append(node('p', field.label, 'vw-hint')); continue; } const label = node('label', field.label), input = node(field.type === 'select' ? 'select' : 'input'); if (field.type === 'select') for (const [value, name] of field.options) { const option = node('option', name); option.value = value; input.append(option); } input.value = dialog.values[field.key]; input.required = Boolean(field.required); input.placeholder = field.placeholder || ''; input.dataset.focus = `dialog-${field.key}`; input.oninput = () => dialog.values[field.key] = input.value; input.disabled = busy > 0; label.append(input); form.append(label); }
+    for (const field of dialog.fields) { if (field.type === 'notice') { form.append(node('p', field.label, 'vw-hint')); continue; } const label = node('label', field.label), input = node(field.type === 'select' ? 'select' : field.type === 'textarea' ? 'textarea' : 'input'); if (field.type === 'select') for (const [value, name] of field.options) { const option = node('option', name); option.value = value; input.append(option); } input.value = dialog.values[field.key]; input.required = Boolean(field.required); input.placeholder = field.placeholder || ''; input.dataset.focus = `dialog-${field.key}`; input.oninput = () => dialog.values[field.key] = input.value; input.disabled = busy > 0; label.append(input); form.append(label); }
     const actions = node('div', '', 'vw-actions'); actions.append(button('Cancel', () => { dialog = null; error = ''; render(); })); const save = node('button', dialog.submitLabel, 'vw-button vw-primary'); save.disabled = busy > 0; actions.append(save); form.append(actions);
     if (error) form.append(node('div', error, 'vw-error')); form.onsubmit = async event => { event.preventDefault(); try { await dialog.submit({ ...dialog.values }); } catch (failure) { error = failure.message; render(); } }; backdrop.append(form); return backdrop;
   }
@@ -200,7 +259,7 @@
     }
     render();
   }
-  window.VekWorkspacePanel = {
+  window.WiekWorkspacePanel = {
     mount(target, dispatch) { root = target; invoke = dispatch; render(); invoke('workspace:snapshot', {}).then(update).catch(failure => { error = failure.message; render(); }); },
     update,
   };

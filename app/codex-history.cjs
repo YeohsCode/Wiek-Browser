@@ -44,7 +44,7 @@ function parseCodexHistory(bytes){
     // prompts plus a user-role summary. Reject oversized legacy tails rather
     // than guessing native token-truncation across unsupported old formats.
     const users=effective.filter(e=>e.payload.type==='message'&&e.payload.role==='user'&&!contextual(e.payload)&&!e.summary);
-    if(users.reduce((n,e)=>n+Buffer.byteLength(JSON.stringify(e.payload.content)),0)>80000)throw Error("Legacy Codex compaction user tail exceeds Vek's conservative 80 KiB replay limit; use replacement_history");
+    if(users.reduce((n,e)=>n+Buffer.byteLength(JSON.stringify(e.payload.content)),0)>80000)throw Error("Legacy Codex compaction user tail exceeds Wiek's conservative 80 KiB replay limit; use replacement_history");
     effective=users;resetIds();append({type:'message',role:'user',content:[{type:'input_text',text:p.message||'(no summary available)'}]},e.timestamp,true);
    }
    continue;

@@ -13,7 +13,7 @@ function codexClient(child,{onNotification=()=>{},onServerRequest,onFailure=()=>
   else onNotification(v);
  }if(Buffer.byteLength(buffer)>4*1024*1024)throw Error('Codex frame exceeds 4 MiB')}catch(e){onFailure(e)}});
  child.once('close',()=>{closed=true;for(const p of pending.values()){clearTimeout(p.timer);p.reject(Error('Codex provider disconnected'))}pending.clear()});
- return {write,request,initialize:async()=>{await request('initialize',{clientInfo:{name:'vek_browser',title:'Vek Browser',version:require('../package.json').version},capabilities:{experimentalApi:false}});write({method:'initialized',params:{}})}};
+ return {write,request,initialize:async()=>{await request('initialize',{clientInfo:{name:'vek_browser',title:'Wiek Browser',version:require('../package.json').version},capabilities:{experimentalApi:false}});write({method:'initialized',params:{}})}};
 }
 async function readCodexCatalogue(request){
  const models=[],seen=new Set(),ids=new Set();let cursor=null,truncated=false;

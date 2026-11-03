@@ -1,10 +1,11 @@
 'use strict';
-// Portable Vek profile data only. This module performs no filesystem/network I/O.
+// Portable Wiek profile data only. This module performs no filesystem/network I/O.
 const { randomBytes, scrypt, createCipheriv, createDecipheriv } = require('node:crypto');
 const { promisify } = require('node:util');
 const { TextDecoder } = require('node:util');
 const derive = promisify(scrypt);
 const { ENCODING, LIMITS: STORAGE_LIMITS, validateArea } = require('./profile-storage-data.cjs');
+// The on-disk identifier is retained so existing encrypted archives still decode.
 const FORMAT = 'vek-browser-profile', MIME_TYPE = 'application/vnd.vek.profile+json', VERSION = 2;
 const KDF = 'scrypt-131072-8-1', CIPHER = 'aes-256-gcm';
 const DEFAULT_MAX_BYTES = 32 * 1024 * 1024;
@@ -154,8 +155,8 @@ function createProfileArchive({maxBytes=DEFAULT_MAX_BYTES}={}) {
       try {const text=typeof input==='string'?input:new TextDecoder('utf-8',{fatal:true}).decode(input);envelope=JSON.parse(text);}catch{throw error('Archive is not valid UTF-8 JSON');}
       envelope=plainClone(envelope,maxBytes);
       object(envelope,[...headerFields,'tag','data'],'archive envelope',[...headerFields,'tag','data']);
-      if(envelope.format!==FORMAT||envelope.mimeType!==MIME_TYPE)throw error('Unrecognized Vek profile archive format or MIME type');
-      if(![1,VERSION].includes(envelope.version))throw error('Unsupported Vek profile archive version','VEK_PROFILE_ARCHIVE_VERSION');
+      if(envelope.format!==FORMAT||envelope.mimeType!==MIME_TYPE)throw error('Unrecognized Wiek profile archive format or MIME type');
+      if(![1,VERSION].includes(envelope.version))throw error('Unsupported Wiek profile archive version','VEK_PROFILE_ARCHIVE_VERSION');
       if(envelope.kdf!==KDF||envelope.cipher!==CIPHER)throw error('Unsupported archive encryption parameters');
       date(envelope.createdAt,'archive creation date');if(envelope.expiresAt!==null)date(envelope.expiresAt,'archive expiry');
       const salt=base64(envelope.salt,'salt',16,16),iv=base64(envelope.iv,'IV',12,12),tag=base64(envelope.tag,'tag',16,16),data=base64(envelope.data,'ciphertext',null,maxBytes);

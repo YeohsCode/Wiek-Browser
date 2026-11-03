@@ -24,12 +24,14 @@ function createNativeDesktop({dataDir,platform=process.platform,helper=path.join
   // Only directories created by this adapter, after the host's Library lock was
   // acquired. Never traverse external symlinks or inspect unrelated files.
   for(const name of fs.readdirSync(directory))if(/^capture-[A-Za-z0-9_-]+$/.test(name)){const target=path.join(directory,name);if(fs.lstatSync(target).isDirectory()&&!fs.lstatSync(target).isSymbolicLink())fs.rmSync(target,{recursive:true,force:true});}
-  async function screenshot({signal}={}){
+  async function screenshot({signal,windowId}={}){
     if(platform!=='darwin')throw fail('Native region capture currently supports macOS');
     if(['denied','restricted'].includes(screenPermission()))throw fail('Screen Recording permission is not granted. Open macOS settings to enable capture.');
     const scratch=await fsp.mkdtemp(path.join(directory,'capture-')),file=path.join(scratch,'region.png');
     try{
-      const result=await execute('/usr/sbin/screencapture',['-i','-x','-t','png',file],{signal,timeoutMs:120000,maxBytes:4096});
+      if(windowId!==undefined&&(!Number.isSafeInteger(windowId)||windowId<=0))throw fail('Invalid capture window');
+      const args=windowId===undefined?['-i','-x','-t','png',file]:['-l',String(windowId),'-o','-x','-t','png',file];
+      const result=await execute('/usr/sbin/screencapture',args,{signal,timeoutMs:120000,maxBytes:4096});
       if(signal?.aborted)throw fail('Desktop operation cancelled');
       let stat;try{stat=await fsp.lstat(file)}catch(e){if(['denied','restricted'].includes(screenPermission()))throw fail('Screen Recording permission is not granted.');if(e.code==='ENOENT'&&(result.code===0||result.code===1))return null;throw fail('The screenshot was not created. Check Screen Recording permission.');}
       if(result.code!==0||stat.isSymbolicLink()||!stat.isFile()||stat.size>20*1024*1024)throw fail('The screenshot could not be read safely');
@@ -40,7 +42,7 @@ function createNativeDesktop({dataDir,platform=process.platform,helper=path.join
     if(platform!=='darwin'||!fs.existsSync(helper))throw fail('Native selected-text helper is unavailable');
     const result=await execute(helper,[],{signal,input:JSON.stringify({excludedApps}),timeoutMs:3000,maxBytes:280000});
     if(result.code!==0)throw fail('Selected text could not be read');let value;try{value=JSON.parse(result.stdout)}catch{throw fail('Selected-text helper returned invalid data');}
-    if(value.ok!==true){const errors={accessibility_denied:'Accessibility permission is not granted. Enable Vek in macOS settings before reading another application.',excluded:'Selected application is excluded.',secure:'Protected text controls are not captured.',no_selection:'No selected text is available in this control.',unsupported:'The application does not expose a supported text selection.',too_large:'Selected text exceeds 128 KiB.'};throw fail(errors[value.code]||'Selected text is unavailable');}
+    if(value.ok!==true){const errors={accessibility_denied:'Accessibility permission is not granted. Enable Wiek in macOS settings before reading another application.',excluded:'Selected application is excluded.',secure:'Protected text controls are not captured.',no_selection:'No selected text is available in this control.',unsupported:'The application does not expose a supported text selection.',too_large:'Selected text exceeds 128 KiB.'};throw fail(errors[value.code]||'Selected text is unavailable');}
     return {text:value.text,appName:value.appName,bundleId:value.bundleId,secure:false};
   }
   return {screenshot:platform==='darwin'?screenshot:undefined,selection:platform==='darwin'&&fs.existsSync(helper)?selectedText:undefined};

@@ -62,7 +62,7 @@
       const selectionCard = section('Selected text', 'Choose the quick actions offered when you select text on a page.');
       toggle(selectionCard, 'Show quick actions', 'Offer a small toolbar beside your selected text.', data.selectionToolbar.enabled, enabled => action('preferences:update', {selectionToolbar:{enabled}}));
       for (const [id,label,description] of [['copy','Copy','Copy selected text.'],['ask','Ask agent','Start a question with selected text.'],['save','Save to Library','Keep selected text in your local Library.']]) toggle(selectionCard,label,description,data.selectionToolbar[id],value=>action('preferences:update',{selectionToolbar:{[id]:value}}));
-      toggle(selectionCard, 'Translate', 'Unavailable: no translation provider is configured.', false, ()=>{}, true);
+      toggle(selectionCard, 'Translate', 'Open selected text in Translation. Configure a local provider in that panel.', data.selectionToolbar.translate, value=>action('preferences:update',{selectionToolbar:{translate:value}}));
       const memory = section('Context and instructions', 'Control which scoped context can be used by your agents.');
       toggle(memory,'Browser activity','Use task Space activity as context and allow explicit page text indexing.',data.memory.browserActivity,browserActivity=>action('preferences:update',{memory:{browserActivity}}));
       toggle(memory,'Project file context','Use project file names as context and allow explicit text file indexing inside a chosen project.',data.memory.localFiles,localFiles=>action('preferences:update',{memory:{localFiles}}));
@@ -80,5 +80,5 @@
     const onTheme=()=>render();media.addEventListener?.('change',onTheme);render();
     return {update,destroy(){destroyed=true;media.removeEventListener?.('change',onTheme);editor=null;root.replaceChildren();root.classList.remove('vek-preferences-panel')}};
   }
-  let mounted;window.createVekPreferencesPanel=createPanel;window.VekPreferencesPanel={mount(root,invoke){mounted?.destroy();mounted=createPanel(root,invoke);return mounted},update(value){mounted?.update(value)},destroy(){mounted?.destroy();mounted=null}};
+  let mounted;window.createWiekPreferencesPanel=createPanel;window.WiekPreferencesPanel={mount(root,invoke){mounted?.destroy();mounted=createPanel(root,invoke);return mounted},update(value){mounted?.update(value)},destroy(){mounted?.destroy();mounted=null}};
 })();

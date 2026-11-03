@@ -213,7 +213,14 @@
       { key: 'cron', label: 'Five-field cron (minute hour day month weekday)', value: '0 9 * * 1-5', show: values => values.kind === 'cron' },
       { key: 'timeZone', label: 'Cron timezone (IANA)', type: 'select', options: cronTimeZones(item?.timeZone || 'UTC'), value: 'UTC', show: values => values.kind === 'cron' },
       { key: 'dstNotice', type: 'notice', label: 'Missing clock minutes are skipped. Repeated clock minutes run once at their first occurrence. Closed-app runs need a reviewed login job or an explicit worker tick.', show: values => values.kind === 'cron' },
-      { key: 'memory', label: 'Automation memory (explicit local notes added to its prompt)', type: 'textarea' },
+      { key: 'memory', label: 'Automation memory (32 KiB UTF-8; latest 8 KiB injected)', type: 'textarea' },
+      { key:'heartbeatCooldownSeconds',label:'Activity cooldown in seconds (scheduled continuation after manual activity)',type:'number',min:'0',step:'any',value:'60'},
+      { key:'completionType',label:'Stop condition evaluation',type:'select',options:[['none','Off'],['ai-evaluated','Explicit local CLI evaluator']],value:'none'},
+      { key:'stopWhen',label:'Stop when (sent with this run to your chosen evaluator)',type:'textarea',show:v=>v.completionType==='ai-evaluated'},
+      { key:'completionCommand',label:'Evaluator executable (runs with project access; no shell)',show:v=>v.completionType==='ai-evaluated'},
+      { key:'completionArgs',label:'Evaluator arguments (JSON array)',value:'[]',show:v=>v.completionType==='ai-evaluated'},
+      { key:'confidenceThreshold',label:'Required confidence (0 to 1)',type:'number',min:'0',max:'1',step:'any',value:'0.9',show:v=>v.completionType==='ai-evaluated'},
+      { key:'stopAfterConsecutiveFailures',label:'Pause after consecutive provider failures (optional)',type:'number',min:'1',step:'1'},
       { key: 'maxRuns', label: 'Maximum started runs (optional)', type: 'number', min: '1', step: '1' },
       { key: 'stopAfter', label: 'Stop after (optional, local timezone)', type: 'datetime-local' },
       { key: 'stopOnFailure', label: 'On provider failure', type: 'select', options: [['false', 'Keep the schedule'], ['true', 'Pause the schedule']], value: 'false' },
@@ -228,9 +235,9 @@
         payload.intervalMs = Math.round(Number(values.minutes) * 60000);
         if (!Number.isFinite(payload.intervalMs) || payload.intervalMs <= 0) throw new Error('Enter a positive interval.');
       }
-      payload.memory = values.memory || ''; payload.maxRuns = values.maxRuns ? Number(values.maxRuns) : null; payload.stopAfter = values.stopAfter ? new Date(values.stopAfter).toISOString() : null; payload.stopOnFailure = values.stopOnFailure === 'true';
+      payload.heartbeatCooldownSeconds=Number(values.heartbeatCooldownSeconds??60);payload.stopAfterConsecutiveFailures=values.stopAfterConsecutiveFailures?Number(values.stopAfterConsecutiveFailures):null;payload.completionPolicy=values.completionType==='ai-evaluated'?{type:'ai-evaluated',stopWhen:values.stopWhen,command:values.completionCommand,args:JSON.parse(values.completionArgs||'[]'),confidenceThreshold:Number(values.confidenceThreshold)}:{type:'none'};payload.memory = values.memory || ''; payload.maxRuns = values.maxRuns ? Number(values.maxRuns) : null; payload.stopAfter = values.stopAfter ? new Date(values.stopAfter).toISOString() : null; payload.stopOnFailure = values.stopOnFailure === 'true';
       return action(item ? 'agents:automations:update' : 'agents:automations:create', { ...(item ? { id: item.id } : {}), ...payload }, true);
-    }, item ? { ...item,executionMode:item.executionMode||'heartbeat',closedAppAllowed:String(!!item.closedAppAllowed), at: localTime(item.at), stopAfter: item.stopAfter ? localTime(item.stopAfter) : '', maxRuns: item.maxRuns || '', stopOnFailure: String(!!item.stopOnFailure), minutes: String((item.intervalMs || 3600000) / 60000) } : {});
+    }, item ? { ...item,completionType:item.completionPolicy?.type||'none',stopWhen:item.completionPolicy?.stopWhen||'',completionCommand:item.completionPolicy?.command||'',completionArgs:JSON.stringify(item.completionPolicy?.args||[]),confidenceThreshold:String(item.completionPolicy?.confidenceThreshold??0.9),heartbeatCooldownSeconds:String(item.heartbeatCooldownSeconds??60),stopAfterConsecutiveFailures:item.stopAfterConsecutiveFailures||'',executionMode:item.executionMode||'heartbeat',closedAppAllowed:String(!!item.closedAppAllowed), at: localTime(item.at), stopAfter: item.stopAfter ? localTime(item.stopAfter) : '', maxRuns: item.maxRuns || '', stopOnFailure: String(!!item.stopOnFailure), minutes: String((item.intervalMs || 3600000) / 60000) } : {});
   }
   const automationOwned=t=>t?.automationMode==='dedicated'&&snapshot.automations.some(a=>a.id===t.automationOwnerId);
   function messageList(t) {
@@ -287,7 +294,7 @@
     const projectHead = make('div', '', 'va-section-label'); projectHead.append(make('span', 'PROJECTS'), button('+', newProject, 'va-icon-button')); projects.append(projectHead);
     for (const item of snapshot.projects) {
       const row = make('div', '', 'va-project-row'); row.append(make('span', item.name)); row.title = item.path;
-      row.append(button(item.checkpointsEnabled?'Snapshots on':'Snapshots off',()=>configureCheckpoints(item),'va-snapshot-setting'),button('×', () => askDelete('Remove project', `Remove “${item.name}” from Vek? Files on disk are not deleted.`, () => action('agents:projects:delete', { id: item.id }, true)), 'va-icon-button')); projects.append(row);
+      row.append(button(item.checkpointsEnabled?'Snapshots on':'Snapshots off',()=>configureCheckpoints(item),'va-snapshot-setting'),button('×', () => askDelete('Remove project', `Remove “${item.name}” from Wiek? Files on disk are not deleted.`, () => action('agents:projects:delete', { id: item.id }, true)), 'va-icon-button')); projects.append(row);
     }
     if (!snapshot.projects.length) projects.append(make('p', 'Add a folder to give your agent a working directory.', 'va-hint'));
     rail.append(projects);
@@ -374,7 +381,7 @@
   function providersView(body) {
     const section = make('section', '', 'va-wide-section'); const heading = make('div', '', 'va-section-heading');
     heading.append(make('h2', 'Local agents'), button('Refresh availability', () => action('agents:providers:discover', {})), button('Add agent', () => configureProvider(), 'va-primary')); section.append(heading);
-    section.append(make('p', 'Vek runs the agents installed on this computer. Install and sign in to the CLI separately, then refresh its availability.', 'va-hint'));
+    section.append(make('p', 'Wiek runs the agents installed on this computer. Install and sign in to the CLI separately, then refresh its availability.', 'va-hint'));
     if (!snapshot.providers.length) section.append(make('div', 'No local agents configured. Add an installed CLI to begin. No generated reply will appear until a real agent runs.', 'va-empty-card'));
     for (const item of snapshot.providers) {
       const card = make('div', '', 'va-provider-card'); const info = make('div'); info.append(make('h3', item.name), make('code', `${item.command} ${(item.args || []).join(' ')}`), make('p', item.available ? item.enabled === false ? 'Installed · disabled' : 'Installed · ready' : 'Not installed or executable not found', 'va-hint'));
@@ -384,14 +391,15 @@
   }
   function schedulesView(body) {
     const section = make('section', '', 'va-wide-section'); const heading = make('div', '', 'va-section-heading'); heading.append(make('h2', 'Automations'), button('New automation', () => scheduleEditor(), 'va-primary')); section.append(heading);
-    section.append(make('p', 'Schedule a prompt once, by interval, by cron in an IANA timezone, or as a heartbeat with local memory. Normal scheduling runs while Vek is open. Opted-in plain CLI tasks can also run through an explicit closed-app worker tick; review a macOS login job in Settings → Background scheduling. Proposed tasks run only after you choose Approve & run.', 'va-hint'));
+    section.append(make('p', 'Schedule a prompt once, by interval, by cron in an IANA timezone, or as a heartbeat with local memory. Normal scheduling runs while Wiek is open. Opted-in plain CLI tasks can also run through an explicit closed-app worker tick; review a macOS login job in Settings → Background scheduling. Proposed tasks run only after you choose Approve & run.', 'va-hint'));
+    if(snapshot.recoveryBlocks?.length){for(const block of snapshot.recoveryBlocks)section.append(make('p',`Interrupted provider · PID ${block.pid} · ${block.reason}`,'va-hint'));section.append(button('Refresh recovery status',()=>action('agents:recovery:refresh')));}
     if (!snapshot.automations.length) section.append(make('div', 'No automations yet. Choose a conversation and schedule its next prompt.', 'va-empty-card'));
     for (const item of snapshot.automations) {
       const card = make('article', '', 'va-automation-card'); const heading = make('div', '', 'va-section-heading'); heading.append(make('h3', item.name || 'Automation'), make('span', item.status, `va-status va-status-${item.status}`)); card.append(heading);
       card.append(make('p', item.prompt, 'va-automation-prompt'));
       const meta = make('dl', '', 'va-schedule-meta');
-      for (const [key, value] of [ ['Conversation / template', snapshot.threads.find(t => t.id === item.threadId)?.title || 'Conversation unavailable'],['Execution mode',item.executionMode||'heartbeat'],['Dedicated conversation',snapshot.threads.find(t=>t.id===item.ownedThreadId)?.title||'—'],['Last run conversation',snapshot.threads.find(t=>t.id===item.lastRunThreadId)?.title||'—'],['Closed-app worker',item.closedAppAllowed?'CLI tick / reviewed login job allowed':'Off'], ['Schedule', item.kind === 'at' ? `Once · ${date(item.at)}` : item.kind === 'cron' ? `${item.cron} · ${item.timeZone || 'UTC'}` : `${item.kind === 'heartbeat' ? 'Heartbeat · ' : ''}Every ${Number(item.intervalMs) / 60000} minutes`], ...(item.kind === 'cron' ? [['DST policy', 'Skip missing minutes · first occurrence only']] : []), ['Next run', item.kind === 'cron' ? dateInZone(item.nextRunAt, item.timeZone) : date(item.nextRunAt)], ['Last run', date(item.lastRunAt)], ['Last outcome', stringify(item.lastOutcome)], ['Started runs', `${item.runCount || 0}${item.maxRuns ? ` / ${item.maxRuns} maximum` : ''}`], ['Stop date', date(item.stopAfter)], ['Stop reason', item.stopReason || '—'], ['Memory', item.memory || '—'], ['Last error', item.lastError || '—'], ...(item.lastScheduleError ? [['Schedule error', item.lastScheduleError]] : []) ]) meta.append(make('dt', key), make('dd', value));
-      card.append(meta); const actions = make('div', '', 'va-actions'); actions.append(button('Edit', () => scheduleEditor(item)), button(item.status === 'active' ? 'Pause' : 'Resume', () => action(item.status === 'active' ? 'agents:automations:pause' : 'agents:automations:resume', { id: item.id })), button('Run now', () => action('agents:automations:run', { id: item.id })), button('Stop run', () => action('agents:automations:stop', { id: item.id })), button('Propose task', () => openEditor('Add a proposed task', [{ key: 'title', label: 'Title', required: true }, { key: 'prompt', label: 'Proposed prompt (manual local draft)', type: 'textarea', required: true }], values => action('agents:proposals:create', { automationId: item.id, ...values }, true))), button('Delete', () => askDelete('Delete automation', `Delete “${item.name || 'Automation'}”?`, () => action('agents:automations:delete', { id: item.id }, true)), 'va-danger')); card.append(actions); section.append(card);
+      for (const [key, value] of [ ['Conversation / template', snapshot.threads.find(t => t.id === item.threadId)?.title || 'Conversation unavailable'],['Execution mode',item.executionMode||'heartbeat'],['Dedicated conversation',snapshot.threads.find(t=>t.id===item.ownedThreadId)?.title||'—'],['Last run conversation',snapshot.threads.find(t=>t.id===item.lastRunThreadId)?.title||'—'],['Closed-app worker',item.closedAppAllowed?'CLI tick / reviewed login job allowed':'Off'], ['Schedule', item.kind === 'at' ? `Once · ${date(item.at)}` : item.kind === 'cron' ? `${item.cron} · ${item.timeZone || 'UTC'}` : `${item.kind === 'heartbeat' ? 'Heartbeat · ' : ''}Every ${Number(item.intervalMs) / 60000} minutes`], ...(item.kind === 'cron' ? [['DST policy', 'Skip missing minutes · first occurrence only']] : []), ['Next run', item.kind === 'cron' ? dateInZone(item.nextRunAt, item.timeZone) : date(item.nextRunAt)], ['Last run', date(item.lastRunAt)], ['Last outcome', stringify(item.lastOutcome)], ['Started runs', `${item.runCount || 0}${item.maxRuns ? ` / ${item.maxRuns} maximum` : ''}`], ['Stop date', date(item.stopAfter)], ['Stop reason', item.stopReason || '—'], ['Memory', item.memory || '—'], ['Last error', item.lastError || '—'],['Deferral',item.deferred?`${item.deferred.reason} · retry ${date(item.deferred.until)} · expires ${date(item.deferred.deadline)}`:'—'],['Activity cooldown',`${item.heartbeatCooldownSeconds??60} seconds`],['Stop condition',item.completionPolicy?.type==='ai-evaluated'?item.completionPolicy.stopWhen:'Off'],['Result',item.lastResult?`${item.lastResult.decision} · ${item.lastResult.unread?'unread':'read'} · ${item.lastResult.summary||''}`:'—'], ...(item.lastScheduleError ? [['Schedule error', item.lastScheduleError]] : []) ]) meta.append(make('dt', key), make('dd', value));
+      card.append(meta); const evaluated=snapshot.threads.flatMap(t=>t.runs||[]).find(r=>r.id===item.lastRunId)?.completionEvaluation;if(evaluated)card.append(make('p',`Stop evaluation: ${evaluated.status}${evaluated.reason?' · '+evaluated.reason:''}${evaluated.stalePolicy?' · policy changed; result not applied':''}`,'va-hint')); const actions = make('div', '', 'va-actions');if(item.lastResult?.unread)actions.append(button('Mark result read',()=>action('agents:automations:mark-read',{id:item.id}))); actions.append(button('Edit', () => scheduleEditor(item)), button(item.status === 'active' ? 'Pause' : 'Resume', () => action(item.status === 'active' ? 'agents:automations:pause' : 'agents:automations:resume', { id: item.id })), button('Run now', () => action('agents:automations:run', { id: item.id })), button('Stop run', () => action('agents:automations:stop', { id: item.id })), button('Propose task', () => openEditor('Add a proposed task', [{ key: 'title', label: 'Title', required: true }, { key: 'prompt', label: 'Proposed prompt (manual local draft)', type: 'textarea', required: true }], values => action('agents:proposals:create', { automationId: item.id, ...values }, true))), button('Delete', () => askDelete('Delete automation', `Delete “${item.name || 'Automation'}”?`, () => action('agents:automations:delete', { id: item.id }, true)), 'va-danger')); card.append(actions); section.append(card);
     }
     if (snapshot.proposals?.length) {
       section.append(make('h2', 'Proposed tasks', 'va-proposal-heading'));
@@ -414,10 +422,10 @@
       if (!['select', 'textarea'].includes(field.type)) input.type = field.type || 'text';
       input.value = editor.values[field.key]; input.dataset.focus = `editor-${field.key}`; input.required = Boolean(field.required); input.disabled = pending;
       if (field.placeholder) input.placeholder = field.placeholder;
-      if (field.min) input.min = field.min; if (field.step) input.step = field.step;
+      if (field.min) input.min = field.min; if(field.max)input.max=field.max; if (field.step) input.step = field.step;
       input.oninput = () => { editor.values[field.key] = input.value; };
       if (field.onChange) input.onchange = () => { editor.values[field.key] = input.value; void field.onChange(input.value); };
-      if (field.key === 'kind') input.onchange = () => { editor.values.kind = input.value; render(); };
+      if (['kind','completionType'].includes(field.key)) input.onchange = () => { editor.values[field.key] = input.value; render(); };
       label.append(input); form.append(label);
     }
     const actions = make('div', '', 'va-dialog-actions'); const cancel = button('Cancel', () => { editor.onCancel?.(); editor = null; error = ''; render(); });
@@ -445,7 +453,7 @@
     const messages = root.querySelector('[data-scroll="messages"]'); if (messages) messages.scrollTop = atEnd ? messages.scrollHeight : oldScroll;
     if (focus) { const input = [...root.querySelectorAll('[data-focus]')].find(item => item.dataset.focus === focus); input?.focus({ preventScroll: true }); if (input && selection && typeof input.setSelectionRange === 'function') { try { input.setSelectionRange(...selection); } catch {} } }
   }
-  window.VekAgentPanel = {
+  window.WiekAgentPanel = {
     mount(target, dispatch) { root = target; invoke = dispatch; render(); },
     update(next) { apply(next); render(); },
     appendDraft(text) { if (typeof text !== 'string' || !text.trim() || !thread() || automationOwned(thread())) return false; drafts.set(selectedId, [drafts.get(selectedId) || '', text.trim()].filter(Boolean).join('\n')); render(); return true; },

@@ -123,7 +123,7 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
         if (flow.status !== 'authorizing') return reply(409, 'Authorization is not pending');
         if(flow.meta.requireIssuer&&!callback.searchParams.has('iss'))return reply(400,'Issuer parameter is required');
         if (callback.searchParams.has('iss') && callback.searchParams.get('iss') !== flow.meta.issuer) return reply(400, 'Issuer mismatch');
-        if (callback.searchParams.has('error')) { reply(400, 'Authorization declined or failed. Return to Vek.'); finish(flow, 'failed', 'Authorization was declined or failed'); return; }
+        if (callback.searchParams.has('error')) { reply(400, 'Authorization declined or failed. Return to Wiek.'); finish(flow, 'failed', 'Authorization was declined or failed'); return; }
         const code = callback.searchParams.get('code'); if (!code || code.length > 4096 || /[\x00-\x1f\x7f]/.test(code)) return reply(400, 'Invalid authorization code');
         flow.status = 'exchanging'; publish();
         try {
@@ -131,8 +131,8 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
           const token = await fetchBounded(url(flow.meta.tokenEndpoint, config), { method: 'POST', body, signal: flow.controller.signal });
           if (token.status !== 200) throw fail(`OAuth token exchange failed (HTTP ${token.status}); no automatic retry`);
           if (flow.controller.signal.aborted || closed || flow.fingerprint !== binding(config, scope)) throw fail('OAuth configuration changed or sign-in cancelled');
-          save(config, scope, tokenData(token.data, null, flow.meta)); reply(200, 'Authorization complete. Return to Vek.'); finish(flow, 'authorized');
-        } catch { reply(400, 'Authorization failed. Return to Vek and start again.'); if (!['cancelled','expired'].includes(flow.status)) finish(flow, 'failed', 'Token exchange failed; start a new sign-in. The code was not replayed.'); }
+          save(config, scope, tokenData(token.data, null, flow.meta)); reply(200, 'Authorization complete. Return to Wiek.'); finish(flow, 'authorized');
+        } catch { reply(400, 'Authorization failed. Return to Wiek and start again.'); if (!['cancelled','expired'].includes(flow.status)) finish(flow, 'failed', 'Token exchange failed; start a new sign-in. The code was not replayed.'); }
       });
       flow.server.maxConnections = 16; flow.server.requestTimeout = 5000; flow.server.headersTimeout = 5000;
       await new Promise((resolve, reject) => { flow.server.once('error', reject); flow.server.listen(config.oauth.redirectPort||0, '127.0.0.1', resolve); });

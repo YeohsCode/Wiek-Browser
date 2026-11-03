@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-11-03T17:47:35.742147+00:00",
+  "project": "Wiek Browser",
+  "version": "0.20.0",
+  "sourceTests": {
+    "pass": 498,
+    "fail": 0,
+    "skip": 0,
+    "log": "v200-source-tests-final.log"
+  },
+  "packagedHost": {
+    "checks": 197,
+    "passed": true,
+    "log": "v200-package-workbench.log"
+  },
+  "package": {
+    "filesMatched": 190,
+    "upstreamInputsUnchanged": 81,
+    "log": "v200-release-verification.log"
+  },
+  "fullParity": false,
+  "p3Complete": false,
+  "p4BenchmarkRun": false,
+  "remaining": [
+    "native selection/recording positive runtime acceptance",
+    "offline translation model metadata compatibility",
+    "physical sleep/login/revocation and multi-display acceptance",
+    "P4 CI, reproducible build, model/account readiness and benchmark"
+  ]
+}

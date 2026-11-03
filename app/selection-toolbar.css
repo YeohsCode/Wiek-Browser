@@ -1,0 +1,1 @@
+html,body{margin:0;background:#25314c;color:white;font:13px system-ui}body{display:flex;align-items:center;justify-content:center;gap:4px;height:48px}button{border:0;border-radius:5px;color:inherit;background:transparent;padding:8px;cursor:pointer}button:hover,button:focus-visible{background:#455676;outline:1px solid #a7c6ff}

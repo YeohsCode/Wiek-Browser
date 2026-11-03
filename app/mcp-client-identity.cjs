@@ -26,7 +26,7 @@ const callbackUri = oauth => `http://127.0.0.1:${oauth.redirectPort}/oauth/callb
 function createClientDocument(oauth) {
   if (oauth?.registration !== 'metadata') throw fail('Choose metadata registration before preparing a client document');
   normalizeIdentity(oauth);
-  return { client_id: oauth.clientId, client_name: 'Vek Browser', redirect_uris: [callbackUri(oauth)], grant_types: ['authorization_code', 'refresh_token'], response_types: ['code'], token_endpoint_auth_method: 'none', application_type: 'native' };
+  return { client_id: oauth.clientId, client_name: 'Wiek Browser', redirect_uris: [callbackUri(oauth)], grant_types: ['authorization_code', 'refresh_token'], response_types: ['code'], token_endpoint_auth_method: 'none', application_type: 'native' };
 }
 function validateClientDocument(data, oauth) {
   if (!data || typeof data !== 'object' || Array.isArray(data) || Buffer.byteLength(JSON.stringify(data)) > 5120) throw fail('CIMD document must be a JSON object of at most 5 KiB');

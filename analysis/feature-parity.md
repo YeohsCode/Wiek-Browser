@@ -2,7 +2,7 @@
 
 本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前版本 **0.19.0**，更新于 2026-11-03；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以历次版本增量和当前报告为准。
+当前源码检查点 **Wiek Browser 0.20.0**（原 Vek Browser），更新于 2026-11-03；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以历次版本增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
@@ -389,3 +389,7 @@ Foreground取得gate，认证请求worker停止，实际provider/checkpoint收�
 HTTP OAuth新增HTTPS client metadata URL、无网络模板、固定callback、只读客户端身份审核、精确issuer与已有密文预注册身份绑定。只在AS声明支持后无凭据获取5KiB有界文档，验证ID/公共auth/code/redirect；失败不自动注册、开浏览器或重放工具。CIMD不等于Vek托管身份或真实公网AS等价。
 
 新增20项（19协议/服务和实际Electron面板20内部检查），本地436/436；其余最终数字见[RESULTS](../reports/RESULTS.md)。DCR/完整step-up、托管publisher、来源迁移、其余MRTR和P3范围保留；全量parity=false，P1不同Agent集成暂缓。细节见[mcp-client-identity](mcp-client-identity.md)。
+
+## Wiek 0.20：改名与 P3 集成检查点
+
+Wiek 品牌、CLI/旧数据兼容、中英文 README 已实现。本轮源码 498/498、打包宿主 197/197、190 个发行文件匹配；SDK/81 上游输入未改。P3 新增忙碌延期、运行 contract/停止评估、崩溃恢复、被动选区/应用录制和远程 Git/PR 集成；原生正向、离线翻译模型兼容与物理系统边界仍待验收。完整清单见 PLAN，不能将本次回归当作全量对齐。

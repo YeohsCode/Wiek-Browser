@@ -13,7 +13,7 @@ const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function fixture(t,source,{git=true,protocol='cli',enabled=true}={}){
   const base=await fs.mkdtemp(path.join(os.tmpdir(),'vek-turn-')),repo=path.join(base,'project'),dataDir=path.join(base,'state');await fs.mkdir(repo);await fs.writeFile(path.join(repo,'note.txt'),'base\n');
   const gitRun=(...args)=>execFileSync('git',['-C',repo,'-c','core.hooksPath=/dev/null','-c','commit.gpgsign=false',...args],{encoding:'utf8',env:{...process.env,GIT_CONFIG_NOSYSTEM:'1',GIT_CONFIG_GLOBAL:'/dev/null'}});
-  if(git){gitRun('init','-q');gitRun('config','user.name','Vek fixture');gitRun('config','user.email','fixture@localhost');gitRun('config','core.hooksPath','/dev/null');gitRun('add','--','note.txt');gitRun('commit','-qm','fixture');}
+  if(git){gitRun('init','-q');gitRun('config','user.name','Wiek fixture');gitRun('config','user.email','fixture@localhost');gitRun('config','core.hooksPath','/dev/null');gitRun('add','--','note.txt');gitRun('commit','-qm','fixture');}
   const script=path.join(base,'provider.cjs');await fs.writeFile(script,source);
   let agent,workspace,coordinator;
   const open=()=>{

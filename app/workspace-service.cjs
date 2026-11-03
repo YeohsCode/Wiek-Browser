@@ -5,6 +5,7 @@ const path = require('node:path');
 const crypto = require('node:crypto');
 const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
+const { createRemoteGit } = require('./workspace-remote-git.cjs');
 const execute = promisify(execFile);
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const IGNORED = new Set(['.git', 'node_modules', '.next', '.cache', 'dist', 'build']);
@@ -14,10 +15,11 @@ const inside = (parent, child) => child === parent || child.startsWith(parent + 
 const clone = value => JSON.parse(JSON.stringify(value));
 const cap = (value, fallback, max) => Math.max(1, Math.min(max, Math.floor(Number(value) || fallback)));
 
-function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'git' } = {}) {
+function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'git', ghCommand = 'gh', remoteTimeoutMs } = {}) {
   if (typeof projects !== 'function') throw new TypeError('projects must return the registered project list');
   let closed = false, sequence = 0, lastEvent = null;
   const watches = new Map(), mutations = new Map();
+  const remoteGit = createRemoteGit({ gitCommand, ghCommand, timeoutMs: remoteTimeoutMs, publish });
   async function serialized(key, fn) {
     const previous = mutations.get(key) || Promise.resolve();
     const current = previous.catch(() => {}).then(fn); mutations.set(key, current);
@@ -179,7 +181,7 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
     try { onChange(snapshot()); } catch {}
   }
   function snapshot() {
-    return { version: 1, projects: clone(projects()), watches: [...watches.values()].map(({ projectId, recursive }) => ({ projectId, recursive })), lastEvent: clone(lastEvent), capabilities: { fileLimitBytes: MAX_FILE_BYTES, git: true, checkpoints: true, remotePullRequests: false, executablePreview: false } };
+    return { version: 1, projects: clone(projects()), watches: [...watches.values()].map(({ projectId, recursive }) => ({ projectId, recursive })), lastEvent: clone(lastEvent), remoteGit: remoteGit.snapshot(), capabilities: { fileLimitBytes: MAX_FILE_BYTES, git: true, checkpoints: true, remoteGit: true, remotePullRequests: true, executablePreview: false } };
   }
   async function watch(ctx, payload) {
     if (payload.enabled === false) { const existing = watches.get(payload.projectId); existing?.handle.close(); clearTimeout(existing?.timer); watches.delete(payload.projectId); return snapshot(); }
@@ -278,7 +280,7 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
     const manifest={version:1,id,name:name.trim(),createdAt,head:current.head,indexBlob,indexMode:current.indexMode,indexTree,worktreeTree,files:current.files.map(({path,blob,mode,sha256})=>({path,blob,mode,sha256})),bytes:current.total};
     const manifestBlob=await blob(Buffer.from(JSON.stringify(manifest)));
     const tree=(await git(ctx,['mktree'],{input:`100644 blob ${manifestBlob}\tmanifest.json\n${indexBlob?`100644 blob ${indexBlob}\tindex.bin\n`:''}040000 tree ${indexTree}\tindex-tree\n040000 tree ${worktreeTree}\tworktree\n`})).stdout.trim();
-    const commit=(await git(ctx,['commit-tree',tree,'-p',current.head,'-m','Vek checkpoint: '+name.trim()],{env:{GIT_AUTHOR_NAME:'Vek Checkpoint',GIT_AUTHOR_EMAIL:'checkpoint@localhost',GIT_COMMITTER_NAME:'Vek Checkpoint',GIT_COMMITTER_EMAIL:'checkpoint@localhost'}})).stdout.trim();
+    const commit=(await git(ctx,['commit-tree',tree,'-p',current.head,'-m','Wiek checkpoint: '+name.trim()],{env:{GIT_AUTHOR_NAME:'Wiek Checkpoint',GIT_AUTHOR_EMAIL:'checkpoint@localhost',GIT_COMMITTER_NAME:'Wiek Checkpoint',GIT_COMMITTER_EMAIL:'checkpoint@localhost'}})).stdout.trim();
     if((await checkpointState(ctx,info)).signature!==current.signature)throw fail('Files or index changed while creating the checkpoint. Retry after changes settle.','VEK_CHECKPOINT_CONFLICT');
     await git(ctx,['update-ref',checkpointPrefix+id,commit,'0'.repeat(commit.length)]);return manifest;
   }
@@ -394,7 +396,7 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
     else if (operation === 'stash:list') {
       const raw = (await git(ctx, ['stash', 'list', '--format=%gd%x00%gs'])).stdout;
       result = { stashes: raw.trim().split('\n').filter(Boolean).map(line => { const [id, description] = line.split('\0'); return { id, description }; }) };
-    } else if (operation === 'stash:push') result = await git(ctx, ['stash', 'push', ...(payload.includeUntracked ? ['--include-untracked'] : []), '-m', String(payload.message || 'Vek workspace stash').slice(0, 1000)]);
+    } else if (operation === 'stash:push') result = await git(ctx, ['stash', 'push', ...(payload.includeUntracked ? ['--include-untracked'] : []), '-m', String(payload.message || 'Wiek workspace stash').slice(0, 1000)]);
     else if (['stash:apply', 'stash:pop', 'stash:drop'].includes(operation)) {
       const id = payload.stash || 'stash@{0}'; if (!/^stash@\{\d+\}$/.test(id)) throw fail('Choose a stash from the local stash list'); result = await git(ctx, ['stash', operation.split(':')[1], id]);
     } else throw fail('Unsupported Git operation');
@@ -404,6 +406,12 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
   async function dispatch(action, payload = {}) {
     if (action === 'workspace:snapshot') return snapshot();
     const ctx = await context(payload);
+    if (action.startsWith('workspace:git:remote:') || action.startsWith('workspace:git:pr:')) {
+      await repository(ctx);
+      const operation = action.slice('workspace:git:'.length);
+      if (operation === 'remote:cancel' || operation === 'remote:status') return remoteGit.dispatch(ctx, payload, operation);
+      return serialized(ctx.root, () => remoteGit.dispatch(ctx, payload, operation));
+    }
     if (action.startsWith('workspace:git:')) {
       const operation = action.slice('workspace:git:'.length);
       return mutating.has(operation) ? serialized(ctx.root, () => gitAction(ctx, payload, operation)) : gitAction(ctx, payload, operation);
@@ -419,7 +427,7 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
       default: throw fail('Unknown workspace action');
     }
   }
-  async function close() { closed = true; await Promise.allSettled([...mutations.values()]); for (const record of watches.values()) { record.handle.close(); clearTimeout(record.timer); } watches.clear(); }
+  async function close() { closed = true; await remoteGit.close(); await Promise.allSettled([...mutations.values()]); for (const record of watches.values()) { record.handle.close(); clearTimeout(record.timer); } watches.clear(); }
   return { dispatch, snapshot, close };
 }
 module.exports = { createWorkspaceService };

@@ -39,7 +39,7 @@ async function requestWorkerStop(dataDir,{reason='foreground',timeoutMs=15000}={
 async function claimForeground(dataDir,{timeoutMs=15000}={}){
  const dir=directory(dataDir),file=path.join(dir,'foreground.lock'),token=randomUUID(),reaper=file+'.recovery';let fd;
  try{fd=fs.openSync(file,'wx',0o600);}catch(e){
-  if(e.code!=='EEXIST')throw e;const old=read(file);if(!old||alive(old.pid))throw new Error('Another Vek foreground host is starting or running');
+  if(e.code!=='EEXIST')throw e;const old=read(file);if(!old||alive(old.pid))throw new Error('Another Wiek foreground host is starting or running');
   let recovery;try{recovery=fs.openSync(reaper,'wx',0o600);fs.writeFileSync(recovery,JSON.stringify({pid:process.pid,token}));const current=read(file);if(JSON.stringify(current)!==JSON.stringify(old)||alive(current.pid))throw new Error('Foreground identity changed during recovery');fs.unlinkSync(file);fd=fs.openSync(file,'wx',0o600);}finally{if(recovery!==undefined){fs.closeSync(recovery);ownedRemove(reaper,token);}}
  }
  try{fs.writeFileSync(fd,JSON.stringify({pid:process.pid,token}));fs.fsyncSync(fd);}finally{fs.closeSync(fd);}

@@ -1,0 +1,6 @@
+
+> wiek-browser@0.20.0 build:desktop-native
+> node tools/build-selection-helper.mjs
+
+/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/bin/vek-selection
+/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/bin/vek-desktop-monitor

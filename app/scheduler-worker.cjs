@@ -23,7 +23,7 @@ async function runSchedulerTick({dataDir,timeoutMs=60000,signal,guard=()=>true}=
   try{
     try{service=createAgentService({dataDir,autoSchedule:false,discoverProviders:false,recoverLock:false,lockRole:'scheduler',
       turnCheckpoints:{before:args=>checkpoints.before(args),after:args=>checkpoints.after(args),locked:id=>checkpoints?.locked(id)||false},
-      runContext:({thread})=>({env:{VEK_DATA_DIR:path.resolve(dataDir),VEK_THREAD_ID:thread.id,VEK_PROJECT_ID:thread.projectId,VEK_BROWSER_AUTOSTART:'0'},promptPrefix:'This is an explicitly enabled Vek closed-app automation tick. The browser UI, browser SDK, MCP gateway, voice and approval UI are unavailable. Do not assume access to a browser session. No conversation or attachment is inherited for a new automation thread.'+(instructions?'\nUser instructions:\n'+instructions:'')})
+      runContext:({thread})=>({env:{VEK_DATA_DIR:path.resolve(dataDir),VEK_THREAD_ID:thread.id,VEK_PROJECT_ID:thread.projectId,VEK_BROWSER_AUTOSTART:'0'},promptPrefix:'This is an explicitly enabled Wiek closed-app automation tick. The browser UI, browser SDK, MCP gateway, voice and approval UI are unavailable. Do not assume access to a browser session. No conversation or attachment is inherited for a new automation thread.'+(instructions?'\nUser instructions:\n'+instructions:'')})
     });}catch(error){if(error.error_code==='VEK_AGENT_DATA_LOCKED')return {status:'skipped-locked',attempted:[],skipped:[],reason:'Agent directory is locked. A browser/worker may be active; open the browser to recover a stale lock.'};throw error;}
     endpoint=await control.startControl(dataDir,reason=>{if(!controller.signal.aborted){stopReason=reason;controller.abort();}});
     if(control.foregroundPresent(dataDir)||!guard())return {status:'skipped-locked',attempted:[],skipped:[],reason:'Foreground or disabled-job gate is active'};
@@ -38,7 +38,9 @@ async function runSchedulerTick({dataDir,timeoutMs=60000,signal,guard=()=>true}=
       if(provider?.protocol && provider.protocol!=='cli')return 'native provider requires the browser approval UI';
       return true;
     }});
-    while(service.snapshot().runningCount){
+    while(service.snapshot().runningCount||service.snapshot().pendingCompletionEvaluations){
+      if(!guard()){stopReason='disabled';controller.abort();}
+      else if(control.foregroundPresent(dataDir)){stopReason='foreground';controller.abort();}
       if(controller.signal.aborted){cancelled=true;break;}
       if(Date.now()-started>=timeoutMs){timedOut=true;break;}
       await new Promise(resolve=>setTimeout(resolve,20));

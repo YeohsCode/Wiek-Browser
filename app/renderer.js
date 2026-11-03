@@ -2,15 +2,16 @@
 let state, currentPanel = null, addressEditing = false;
 const $ = id => document.getElementById(id);
 const text = (tag, content, cls) => { const e = document.createElement(tag); e.textContent = content; if (cls) e.className = cls; return e; };
-async function act(name, value) { try { if(['navigate','space:select','tab:new','tab:select','tab:close'].includes(name))window.VekToolsPanel.dispose();const next = await window.vek.action(name, value); if (next) render(next); return next; } catch (e) { toast(e.message); } }
+async function act(name, value) { try { if(['navigate','space:select','tab:new','tab:select','tab:close'].includes(name))window.WiekToolsPanel.dispose();const next = await window.vek.action(name, value); if (next) render(next); return next; } catch (e) { toast(e.message); } }
 let toastTimer;
 function toast(message) { $('toast').textContent = message; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').hidden = true, 3500); }
 function activeSpace() { return state?.spaces.find(s => s.id === state.selectedSpaceId); }
 function render(next) {
   state = next;
-  if(next.panelOpen===false&&currentPanel){if(currentPanel==='voice')window.VekToolsPanel.dispose();currentPanel=null;}
-  if(currentPanel!=='desktop')window.VekDesktopPanel?.dispose();
-  if(currentPanel!=='scheduler')window.VekSchedulerPanel?.dispose();
+  if(next.panelOpen===false&&currentPanel){if(currentPanel==='voice')window.WiekToolsPanel.dispose();currentPanel=null;}
+  if(currentPanel!=='translation')window.WiekTranslationPanel?.dispose();
+  if(currentPanel!=='desktop')window.WiekDesktopPanel?.dispose();
+  if(currentPanel!=='scheduler')window.WiekSchedulerPanel?.dispose();
   document.documentElement.dataset.theme=next.darkMode?'dark':'light';document.body.dataset.tabLayout=next.preferences?.tabLayout||'horizontal';
   $('version').textContent = next.version;
   const spaces = $('spaces'); spaces.replaceChildren();
@@ -49,7 +50,7 @@ function render(next) {
   $('panel-content').hidden = !currentPanel;
   if (currentPanel) renderPanel();
 }
-async function showPanel(name) { if (currentPanel === 'voice' && name !== 'voice') window.VekToolsPanel.dispose(); currentPanel = name; await act('panel', true); renderPanel(); }
+async function showPanel(name) { if (currentPanel === 'voice' && name !== 'voice') window.WiekToolsPanel.dispose(); currentPanel = name; await act('panel', true); renderPanel(); }
 function renderPanel() {
   const p = $('panel-content'); p.hidden = false; $('empty').hidden = true;
   if (['workspace','mcp','catalog','voice','preferences','library','recorder','desktop','scheduler'].includes(currentPanel)) {
@@ -57,28 +58,29 @@ function renderPanel() {
     let root = document.getElementById(`workbench-${name}`);
     if (!root) {
       p.replaceChildren(); const header = text('div','','panel-heading'); header.append(text('h1',titles[name]));
-      const close = text('button','Back to browser','subtle-button'); close.onclick = () => { window.VekToolsPanel.dispose(); currentPanel=null; p.hidden=true; $('empty').hidden=false; act('panel',false); }; header.append(close); p.append(header);
+      const close = text('button','Back to browser','subtle-button'); close.onclick = () => { window.WiekToolsPanel.dispose(); currentPanel=null; p.hidden=true; $('empty').hidden=false; act('panel',false); }; header.append(close); p.append(header);
       root=text('div','','tools-root'); root.id=`workbench-${name}`; p.append(root);
       const dispatch=(action,payload)=>window.vek.action(action,payload);
-      if (name==='workspace') window.VekWorkspacePanel.mount(root,dispatch);
-      else if (name==='mcp') window.VekMcpPanel.mount(root,dispatch,state.agents || {});
-      else if (name==='desktop') window.VekDesktopPanel.mount(root,dispatch);
-      else if(name==='scheduler')window.VekSchedulerPanel.mount(root,dispatch);
-      else if (name==='preferences') window.VekPreferencesPanel.mount(root,dispatch);
-      else if (name==='library') window.VekLibraryPanel.mount(root,dispatch);
-      else if (name==='recorder') window.VekRecorderPanel.mount(root,dispatch);
-      else window.VekToolsPanel.mount(root,dispatch,state,name);
+      if (name==='workspace') window.WiekWorkspacePanel.mount(root,dispatch);
+      else if (name==='mcp') window.WiekMcpPanel.mount(root,dispatch,state.agents || {});
+      else if (name==='desktop') window.WiekDesktopPanel.mount(root,dispatch);
+      else if(name==='scheduler')window.WiekSchedulerPanel.mount(root,dispatch);
+      else if (name==='preferences') window.WiekPreferencesPanel.mount(root,dispatch);
+      else if (name==='library') window.WiekLibraryPanel.mount(root,dispatch);
+      else if (name==='recorder') window.WiekRecorderPanel.mount(root,dispatch);
+      else window.WiekToolsPanel.mount(root,dispatch,state,name);
     }
-    if (name==='workspace') window.VekWorkspacePanel.update(state);
-    else if (name==='mcp') window.VekMcpPanel.update(state);
-    else if (name==='desktop') window.VekDesktopPanel.update(state);
-    else if(name==='scheduler')window.VekSchedulerPanel.update(state);
-    else if (name==='preferences') window.VekPreferencesPanel.update(state);
-    else if (name==='library') window.VekLibraryPanel.update(state.library);
-    else if (name==='recorder') window.VekRecorderPanel.update(state.recorder);
-    else window.VekToolsPanel.update(state);
+    if (name==='workspace') window.WiekWorkspacePanel.update(state);
+    else if (name==='mcp') window.WiekMcpPanel.update(state);
+    else if (name==='desktop') window.WiekDesktopPanel.update(state);
+    else if(name==='scheduler')window.WiekSchedulerPanel.update(state);
+    else if (name==='preferences') window.WiekPreferencesPanel.update(state);
+    else if (name==='library') window.WiekLibraryPanel.update(state.library);
+    else if (name==='recorder') window.WiekRecorderPanel.update(state.recorder);
+    else window.WiekToolsPanel.update(state);
     return;
   }
+  if(currentPanel==='translation'){if(!document.getElementById('translation-root')){p.replaceChildren();const root=text('div','','tools-root');root.id='translation-root';p.append(root);window.WiekTranslationPanel.mount(root,(name,payload)=>window.vek.action(name,payload));}window.WiekTranslationPanel.update(state.translation);return;}
   if(currentPanel==='spaces')return spacesPanel(p);
   if (currentPanel === 'agents') {
     let root = document.getElementById('agent-root');
@@ -90,9 +92,9 @@ function renderPanel() {
       back.onclick = () => { currentPanel = null; p.hidden = true; $('empty').hidden = false; act('panel', false); };
       header.append(back); p.append(header);
       root = text('div', ''); root.id = 'agent-root'; p.append(root);
-      window.VekAgentPanel.mount(root, (name, payload) => window.vek.action(name, payload));
+      window.WiekAgentPanel.mount(root, (name, payload) => window.vek.action(name, payload));
     }
-    window.VekAgentPanel.update(state.agents || {});
+    window.WiekAgentPanel.update(state.agents || {});
     return;
   }
   p.replaceChildren();
@@ -118,7 +120,7 @@ function renderPanel() {
 }
 function settingsPanel(p) {
   function card(title, description) { const c = text('div', '', 'card'); c.append(text('h3', title), text('p', description)); p.append(c); return c; }
-  const preferences=card('Make Vek yours','Appearance, tab layout, shortcuts, background tasks, local context, and selection actions.');const openPreferences=text('button','Appearance & shortcuts…','subtle-button');openPreferences.onclick=()=>showPanel('preferences');preferences.append(openPreferences);
+  const preferences=card('Make Wiek yours','Appearance, tab layout, shortcuts, background tasks, local context, and selection actions.');const openPreferences=text('button','Appearance & shortcuts…','subtle-button');openPreferences.onclick=()=>showPanel('preferences');preferences.append(openPreferences);
   const profiles = card('Browser profiles', 'Each profile keeps its own cookies, sessions, cache, and local storage. Spaces using the same profile share login state.');
   for (const profile of state.profiles) { const row = text('div', '', 'row'); row.append(text('div', profile.name, 'row-main')); if (profile.isDefault) row.append(text('span', 'DEFAULT', 'badge')); else { const button = text('button', 'Make default'); button.onclick = () => act('profile:default', profile.id); row.append(button); } profiles.append(row); }
   const add = text('button', '＋ Add profile', 'subtle-button'); add.onclick = async () => { const name = await askText('Profile name'); if (name) act('profile:create', name); }; profiles.append(add);
@@ -135,7 +137,7 @@ function settingsPanel(p) {
   const imp = text('button', 'Import cookie JSON'); imp.onclick = () => act('cookies:import');
   const clear = text('button', 'Clear profile site data'); clear.onclick = () => { if (confirm('Clear cookies and site data for the current profile?')) act('data:clear'); };
   actions.append(imp, clear); data.append(actions);
-  const scheduler=card('Background scheduling','Review a macOS login job for opted-in plain CLI automations. Default off; foreground Vek takes priority.');const schedulerButton=text('button','Background scheduling…');schedulerButton.onclick=()=>showPanel('scheduler');scheduler.append(schedulerButton);
+  const scheduler=card('Background scheduling','Review a macOS login job for opted-in plain CLI automations. Default off; foreground Wiek takes priority.');const schedulerButton=text('button','Background scheduling…');schedulerButton.onclick=()=>showPanel('scheduler');scheduler.append(schedulerButton);
   const desktop=card('Desktop tools','Choose a screen region or read selected text once with a global shortcut. OS permissions and explicit selected-text enablement are required; captures are previewed before use.');const desktopButton=text('button','Desktop capture & global shortcuts…');desktopButton.onclick=()=>showPanel('desktop');desktop.append(desktopButton);
   const archive=card('Encrypted profile archive','Export tabs, bookmarks, history and cookies from this profile. Saved logins and web storage are optional. Web storage covers current top-level origins in open tabs, with separate tab sessions; it can contain login tokens. Archives require a passphrase and restore into a new profile. IndexedDB, iframe storage, permissions and extension binaries are excluded.');
   const archiveOptions=text('div','','settings-actions'),includeLabel=text('label','Include saved logins'),include=document.createElement('input');include.type='checkbox';includeLabel.prepend(include);const storageLabel=text('label','Include web storage from open tabs'),storage=document.createElement('input');storage.type='checkbox';storageLabel.prepend(storage);const exportProfile=text('button','Export encrypted profile…');exportProfile.onclick=()=>act('profile:file:export',{includePasswords:include.checked,includeWebStorage:storage.checked});const restoreLabel=text('label','Open restored tabs'),restore=document.createElement('input');restore.type='checkbox';restore.checked=true;restoreLabel.prepend(restore);const importProfile=text('button','Import encrypted profile…');importProfile.onclick=()=>act('profile:file:import',{restoreTabs:restore.checked});archiveOptions.append(includeLabel,storageLabel,exportProfile,restoreLabel,importProfile);archive.append(archiveOptions);
@@ -154,7 +156,7 @@ function settingsPanel(p) {
   for (const ext of state.extensions) { const row = text('div', '', 'row'); row.append(text('div', `${ext.name} · ${ext.version}${ext.error ? ` · ${ext.error}` : ''}`, 'row-main')); const toggle = text('button', ext.enabled === false ? 'Enable' : 'Disable'); toggle.onclick = () => act('extensions:toggle', ext.id); const del = text('button', 'Remove'); del.onclick = () => act('extensions:remove', ext.id); row.append(toggle, del); extensions.append(row); }
   const load = text('button', 'Load unpacked extension', 'subtle-button'); load.onclick = () => act('extensions:load'); extensions.append(load);
   card('Agent connection', 'Agent scripts connect to a token protected loopback bridge. Browser pages cannot read its token or access the browser’s Node.js environment.');
-  card('About Vek Browser', `Version ${state.version}. Built with Electron and Chromium. The agent SDK is based on citrolabs/ego-lite under the MIT license.`);
+  card('About Wiek Browser', `Version ${state.version}. Built with Electron and Chromium. The agent SDK is based on citrolabs/ego-lite under the MIT license.`);
 }
 function spacesPanel(p){
   p.replaceChildren();const heading=text('div','','panel-heading');heading.append(text('h1','Manage Spaces'));const back=text('button','Back to browser','subtle-button');back.onclick=()=>{currentPanel=null;act('panel',false);};heading.append(back);p.append(heading);
@@ -185,11 +187,12 @@ function closeMenu() { $('space-menu').hidden = true; act('panel', Boolean(curre
 for (const b of document.querySelectorAll('[data-panel]')) b.onclick = () => showPanel(b.dataset.panel);
 window.addEventListener('vek:show-panel', event => { if (['agents','voice','catalog','workspace','mcp','preferences','library','recorder','spaces','desktop','scheduler'].includes(event.detail)) void showPanel(event.detail); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('space-modal').hidden) $('cancel-space').click(); closeMenu(); } });
-window.VekDesktopActions={openImage:async value=>{await showPanel('library');if(window.VekLibraryPanel.hasDraft()&&!confirm('Replace your unsaved screenshot edits with this desktop capture?'))return false;await window.VekLibraryPanel.openCapture(value);return true;}};
-window.addEventListener('vek:desktop-text',async event=>{await showPanel('agents');if(!window.VekAgentPanel.appendDraft(event.detail))toast('Select a conversation first, then use the selection again.');});
+window.WiekDesktopActions={openImage:async value=>{await showPanel('library');if(window.WiekLibraryPanel.hasDraft()&&!confirm('Replace your unsaved screenshot edits with this desktop capture?'))return false;await window.WiekLibraryPanel.openCapture(value);return true;}};
+window.addEventListener('vek:desktop-text',async event=>{await showPanel('agents');if(!window.WiekAgentPanel.appendDraft(event.detail))toast('Select a conversation first, then use the selection again.');});
 window.vek.onState(render); window.vek.onHighlight(({ x,y }) => { const mark = $('highlight'); mark.style.left = `${x + (state.chromeBounds?.x||230)}px`; mark.style.top = `${y + (state.chromeBounds?.y||116)}px`; mark.hidden = false; setTimeout(() => mark.hidden = true, 700); });
-window.vek.onOpenPanel(async({name,intent})=>{await showPanel(name);if(name==='library'&&intent==='capture')try{await window.VekLibraryPanel.capture();}catch(error){toast(error.message);}});
-window.vek.onDraft(async text=>{await showPanel('agents');if(!window.VekAgentPanel.appendDraft(text))toast('Select a conversation first, then use Ask again.');});
+window.vek.onOpenPanel(async({name,intent})=>{await showPanel(name);if(name==='library'&&intent==='capture')try{await window.WiekLibraryPanel.capture();}catch(error){toast(error.message);}});
+window.vek.onTranslation(async text=>{await showPanel('translation');window.WiekTranslationPanel.setText(text);});
+window.vek.onDraft(async text=>{await showPanel('agents');if(!window.WiekAgentPanel.appendDraft(text))toast('Select a conversation first, then use Ask again.');});
 window.vek.onError(toast);
 window.vek.onSecretRequest(({id,title,confirm})=>{
   const modal=text('div','','modal'),form=text('form','','dialog');form.append(text('h2',title));const first=document.createElement('input');first.type='password';first.autocomplete='new-password';first.required=true;first.minLength=8;first.setAttribute('aria-label','Profile archive passphrase');const label=text('label','Passphrase (at least 8 characters)');label.append(first);form.append(label);

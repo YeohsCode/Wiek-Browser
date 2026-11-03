@@ -1,5 +1,6 @@
 'use strict';
-const { app, BrowserWindow, WebContentsView, ipcMain, session, dialog, shell, Menu, safeStorage, nativeTheme, nativeImage, Tray, clipboard, globalShortcut, systemPreferences } = require('electron');
+const {normalizeEnvironment,packagedDataDirectory}=require('./brand.cjs');normalizeEnvironment();
+const { app, BrowserWindow, WebContentsView, ipcMain, session, dialog, shell, Menu, safeStorage, nativeTheme, nativeImage, Tray, clipboard, globalShortcut, systemPreferences, powerMonitor, screen } = require('electron');
 const { WebSocketServer } = require('ws');
 const http = require('node:http');
 const fs = require('node:fs');
@@ -22,6 +23,11 @@ const {claimForeground}=require('./scheduler-control.cjs');
 let foregroundLease;
 const {createSchedulerJob}=require('./scheduler-job.cjs');
 let schedulerJobService;
+const {createTranslationService}=require('./translation-service.cjs');
+const {createDesktopMonitorService}=require('./desktop-monitor-service.cjs');
+const {createDesktopMonitorNative}=require('./desktop-monitor-native.cjs');
+const {createSelectionToolbar}=require('./selection-toolbar.cjs');
+let translationService,desktopMonitorService,selectionToolbar;
 const { createDesktopService } = require('./desktop-service.cjs');
 const { createNativeDesktop } = require('./desktop-native.cjs');
 const { physicalChord } = require('./preferences-service.cjs');
@@ -32,8 +38,8 @@ const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 const execFileAsync = promisify(execFile);
 
-app.setName('Vek Browser');
-if (app.isPackaged) app.setPath('userData', path.join(app.getPath('appData'), 'Vek Browser'));
+app.setName('Wiek Browser');
+if (app.isPackaged) app.setPath('userData', packagedDataDirectory(app.getPath('appData')));
 const ROOT = path.resolve(__dirname, '..');
 const DATA = path.resolve(process.env.VEK_DATA_DIR || process.env.VEK_BROWSER_DATA_DIR || (app.isPackaged ? app.getPath('userData') : path.join(ROOT, 'data')));
 fs.mkdirSync(DATA, { recursive: true, mode: 0o700 });
@@ -103,7 +109,7 @@ function tabDescriptor(t, index = 0) { return { targetId: t.id, ...(t.openerId ?
 function uiState(selectedSpaceId = store.selected) {
   const s = store.spaces.find(s => s.id === selectedSpaceId);
   const active = s && tabs.get(s.activeTab);
-  return { schedulerJob:schedulerJobService?.snapshot(),agents: agentService?.snapshot(), desktop:desktopService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
+  return { translation:translationService?.snapshot(),desktopMonitor:desktopMonitorService?.snapshot(),schedulerJob:schedulerJobService?.snapshot(),agents: agentService?.snapshot(), desktop:desktopService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
 }
 function publish() { if (window && !window.isDestroyed()) window.webContents.send('vek:state', uiState());for(const [id,record]of spaceWindows)if(!record.window.isDestroyed())record.window.webContents.send('vek:state',uiState(id)); }
 let panelOpen = false;
@@ -253,7 +259,7 @@ function attachSpaceWindow(id) {
 }
 async function openSpaceWindow(space) {
   if(spaceWindows.has(space.id)){spaceWindows.get(space.id).window.show();spaceWindows.get(space.id).window.focus();return;}
-  const secondary=new BrowserWindow({width:1100,height:800,minWidth:600,minHeight:400,title:`${space.name} — Vek Browser`,backgroundColor:'#f6f7fb',webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,sandbox:true,nodeIntegration:false}});
+  const secondary=new BrowserWindow({width:1100,height:800,minWidth:600,minHeight:400,title:`${space.name} — Wiek Browser`,backgroundColor:'#f6f7fb',webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,sandbox:true,nodeIntegration:false}});
   spaceWindows.set(space.id,{window:secondary});
   for(const id of space.tabs){const t=tabs.get(id);if(t){window.contentView.removeChildView(t.view);secondary.contentView.addChildView(t.view);}}
   secondary.on('resize',layout);secondary.on('close',event=>{if(!closing){event.preventDefault();attachSpaceWindow(space.id);}});
@@ -375,7 +381,7 @@ function resolvePrompt(t, accept, promptText) {
 async function startRPC() {
   const token = crypto.randomBytes(32).toString('hex');
   server = http.createServer((req, res) => {
-    if (req.url === '/health') { res.writeHead(200, { 'content-type': 'application/json' }); res.end(JSON.stringify({ name: 'vek-browser', version: app.getVersion() })); return; }
+    if (req.url === '/health') { res.writeHead(200, { 'content-type': 'application/json' }); res.end(JSON.stringify({ name: 'wiek-browser', version: app.getVersion() })); return; }
     res.writeHead(404); res.end();
   });
   wss = new WebSocketServer({ noServer: true, maxPayload: 32 * 1024 * 1024 });
@@ -397,7 +403,7 @@ async function startRPC() {
   runtimeFile = path.join(DATA, 'runtime.json');
   const runtime = { port: server.address().port, token, pid: process.pid, browserInstanceId: INSTANCE, version: app.getVersion(), wsUrl: `ws://127.0.0.1:${server.address().port}/rpc?token=${token}` };
   fs.writeFileSync(runtimeFile, JSON.stringify(runtime, null, 2), { mode: 0o600 }); fs.chmodSync(runtimeFile, 0o600);
-  console.log(`Vek Browser ready on 127.0.0.1:${runtime.port}`);
+  console.log(`Wiek Browser ready on 127.0.0.1:${runtime.port}`);
 }
 function visibleTab() { const focused=BrowserWindow.getFocusedWindow(),secondary=[...spaceWindows].find(([,record])=>record.window===focused);const s = store.spaces.find(s => s.id === (secondary?secondary[0]:store.selected)); return s && tabs.get(s.activeTab); }
 function userControl(s) { if (s?.ownership === 'agent') { s.ownership = 'agentDelegatedToUser'; s.controlReason = 'manual_takeover'; publish(); persist(); } }
@@ -433,7 +439,7 @@ function zoomPage(delta) { const t = visibleTab(); if (t) { userControl(getSpace
 function browserMenu() {
   const shortcuts=preferencesService?.snapshot().shortcuts || {};
   const shortcut=(action,fallback)=>Object.hasOwn(shortcuts,action)?shortcuts[action]||undefined:fallback;
-  return [{ label: 'Vek Browser', submenu: [{ role: 'about' }, { type: 'separator' }, { role: 'quit' }] },
+  return [{ label: 'Wiek Browser', submenu: [{ role: 'about' }, { type: 'separator' }, { role: 'quit' }] },
     { label: 'File', submenu: [
       { label: 'New Tab', accelerator: shortcut('newTab','CmdOrCtrl+T'), click: () => menuAction('tab:new') },
       { label: 'Close Tab', accelerator: shortcut('closeTab','CmdOrCtrl+W'), click: () => { const t = visibleTab(); if (t) menuAction('tab:close', t.id); else window.close(); } },
@@ -463,7 +469,7 @@ function configureTray(enabled) {
   if (tray) return;
   const pixels=Buffer.alloc(18*18*4);
   for(let y=3;y<15;y++)for(let x=3;x<15;x++)if(Math.abs(x-(5+(y-3)/3))<1.3||Math.abs(x-(13-(y-3)/3))<1.3){const at=(y*18+x)*4;pixels[at+3]=255;}
-  const icon=nativeImage.createFromBitmap(pixels,{width:18,height:18});icon.setTemplateImage(true);tray=new Tray(icon);tray.setToolTip('Vek Browser');tray.setContextMenu(Menu.buildFromTemplate([{label:'Show Vek Browser',click:()=>{window.show();window.focus();}},{label:'Agents & automations',click:()=>openPanel('agents')},{type:'separator'},{label:'Quit Vek Browser',click:()=>app.quit()}]));tray.on('click',()=>{window.show();window.focus();});
+  const icon=nativeImage.createFromBitmap(pixels,{width:18,height:18});icon.setTemplateImage(true);tray=new Tray(icon);tray.setToolTip('Wiek Browser');tray.setContextMenu(Menu.buildFromTemplate([{label:'Show Wiek Browser',click:()=>{window.show();window.focus();}},{label:'Agents & automations',click:()=>openPanel('agents')},{type:'separator'},{label:'Quit Wiek Browser',click:()=>app.quit()}]));tray.on('click',()=>{window.show();window.focus();});
 }
 function applyPreferences() {
   if(!preferencesService)return;const settings=preferencesService.snapshot();nativeTheme.themeSource=settings.theme;
@@ -494,6 +500,9 @@ async function captureTabImage(t) {
 }
 async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false) {
   if(action.startsWith('scheduler:'))return schedulerJobService.dispatch(action,value,{interactive:interactiveDesktop});
+  if(['translation:copy','translation:save'].includes(action)){if(!interactiveDesktop||typeof value?.text!=='string'||Buffer.byteLength(value.text)>131072)throw new Error('Use the translation panel');if(action==='translation:copy'){clipboard.writeText(value.text);return {copied:true};}return libraryService.dispatch('library:items:create',{kind:'text',title:String(value.title||'Translation').slice(0,200),text:value.text});}
+  if(action.startsWith('translation:'))return translationService.dispatch(action,value,{interactive:interactiveDesktop});
+  if(action.startsWith('desktop:monitor:')||action.startsWith('desktop:recording:'))return desktopMonitorService.dispatch(action,value,{interactive:interactiveDesktop});
   if(action.startsWith('desktop:')){
     if(action==='desktop:permissions:open'){
       if(!interactiveDesktop)throw new Error('Open Desktop tools to change OS permissions');
@@ -530,7 +539,7 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
   if (action === 'voice:history:save-audio') {
     const audio=await voiceService.dispatch('voice:history:audio',value);
     const extension=({'audio/wav':'wav','audio/webm':'webm','audio/ogg':'ogg','audio/mp4':'m4a','audio/mpeg':'mp3'})[audio.mime]||'audio';
-    const pick=await dialog.showSaveDialog(window,{defaultPath:`Vek recording.${extension}`});if(!pick.canceled&&pick.filePath)fs.writeFileSync(pick.filePath,Buffer.from(audio.base64,'base64'),{mode:0o600});
+    const pick=await dialog.showSaveDialog(window,{defaultPath:`Wiek recording.${extension}`});if(!pick.canceled&&pick.filePath)fs.writeFileSync(pick.filePath,Buffer.from(audio.base64,'base64'),{mode:0o600});
     return voiceService.snapshot();
   }
   if (action==='workspace:git:checkpoint:restore')return turnCheckpointService.withRestoreLease(value.projectId,()=>workspaceService.dispatch(action,value));
@@ -547,12 +556,12 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
     const result = await agentService.dispatch('agents:export', value || {});
     const data = result.exportData;
     if (!data) throw new Error('Agent export did not produce an archive');
-    const pick = await dialog.showSaveDialog(window, { defaultPath: data.filename || 'vek-agents.json' });
+    const pick = await dialog.showSaveDialog(window, { defaultPath: data.filename || 'wiek-agents.json' });
     if (!pick.canceled && pick.filePath) writePrivateFile(pick.filePath,data.content);
     return uiState();
   }
   if (action === 'agents:file:import') {
-    const pick = await dialog.showOpenDialog(window, { properties: ['openFile'], filters: [{ name: 'Vek agent archive', extensions: ['json'] }] });
+    const pick = await dialog.showOpenDialog(window, { properties: ['openFile'], filters: [{ name: 'Wiek agent archive', extensions: ['json'] }] });
     if (pick.filePaths[0]) { if (fs.statSync(pick.filePaths[0]).size > 32 * 1024 * 1024) throw new Error('Agent archive exceeds 32 MiB'); await agentService.dispatch('agents:import', { data: JSON.parse(fs.readFileSync(pick.filePaths[0], 'utf8')) }); }
     return uiState();
   }
@@ -604,7 +613,7 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
     case 'profile:default': for (const p of store.profiles) p.isDefault = p.id === value; break;
     case 'data:clear': if (s) await sessionFor(s.profileId).clearStorageData(); break;
     case 'profile:file:export': if(!s)break;return profileArchiveOperation(async()=>{
-      const pick=await dialog.showSaveDialog(window,{defaultPath:`${profile(s.profileId).name}.vek-profile.json`,filters:[{name:'Encrypted Vek profile',extensions:['json']}]});if(pick.canceled||!pick.filePath)return;
+      const pick=await dialog.showSaveDialog(window,{defaultPath:`${profile(s.profileId).name}.wiek-profile.json`,filters:[{name:'Encrypted Wiek profile',extensions:['json']}]});if(pick.canceled||!pick.filePath)return;
       const passphrase=await requestSecret('Protect this exported profile with a passphrase',true);if(passphrase===null)return;
       const captured=await captureProfileTabs(store.spaces.filter(space=>space.profileId===s.profileId).map(space=>({...space,tabs:space.tabs.map(id=>tabs.get(id)).filter(Boolean).map(t=>({id:t.id,url:t.url,webContents:t.view.webContents}))})),{includeWebStorage:value?.includeWebStorage===true}),spaces=captured.spaces;
       const cookieTab=store.spaces.filter(space=>space.profileId===s.profileId).flatMap(space=>space.tabs).map(id=>tabs.get(id)?.view.webContents).find(wc=>wc&&!wc.isDestroyed()),cookieCapture=await captureProfileCookies(sessionFor(s.profileId),cookieTab),cookies=cookieCapture.cookies;
@@ -614,8 +623,8 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       profileArchiveResult={message:'Encrypted profile exported.',counts:{spaces:spaces.length,cookies:cookies.length,passwords:passwords.length,...captured.counts},warnings:[...captured.warnings,...(cookieCapture.skipped?[`${cookieCapture.skipped} partitioned cookies were omitted; they are not converted to unpartitioned cookies.`]:[]),'Web storage covers only current top-level HTTP(S) origins in open tabs. IndexedDB, iframe/previous-origin storage, service workers, permissions and extension binaries are not included.']};
     });
     case 'profile:file:import': return profileArchiveOperation(async()=>{
-      const pick=await dialog.showOpenDialog(window,{properties:['openFile'],filters:[{name:'Encrypted Vek profile',extensions:['json']}]});if(!pick.filePaths[0])return;if(fs.statSync(pick.filePaths[0]).size>32*1024*1024)throw new Error('Profile archive exceeds 32 MiB');
-      const passphrase=await requestSecret('Unlock the selected Vek profile archive');if(passphrase===null)return;
+      const pick=await dialog.showOpenDialog(window,{properties:['openFile'],filters:[{name:'Encrypted Wiek profile',extensions:['json']}]});if(!pick.filePaths[0])return;if(fs.statSync(pick.filePaths[0]).size>32*1024*1024)throw new Error('Profile archive exceeds 32 MiB');
+      const passphrase=await requestSecret('Unlock the selected Wiek profile archive');if(passphrase===null)return;
       const {payload}=await createProfileArchive().decode(fs.readFileSync(pick.filePaths[0]),passphrase);
       const sessionCount=payload.spaces.reduce((n,space)=>n+space.tabs.filter(tab=>tab.sessionStorage).length,0),localAreas=payload.webStorage?.localStorage||[];
       const answer=await dialog.showMessageBox(window,{type:'question',title:'Restore profile',message:`Create a profile “${payload.profile.name}” with ${payload.cookies.length} cookies, ${payload.passwords.length} saved logins and ${payload.spaces.length} Spaces?`,detail:`${localAreas.length} local storage origins and ${sessionCount} tab sessions are in this archive. `+(value?.restoreTabs===false?'Tabs stay closed; tab session storage will be skipped.':'Restored HTTP(S) tabs will open after storage restoration. Current-origin tab sessions are restored separately.')+' Existing profiles remain available. Extension metadata does not install extensions.',buttons:['Cancel','Restore'],defaultId:0,cancelId:0});if(answer.response!==1)return;
@@ -640,7 +649,7 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       const source = await inspectProfile(pick.filePaths[0]);
       const options = { bookmarks: value?.bookmarks !== false, history: value?.history !== false, cookies: value?.cookies === true, passwords: value?.passwords === true };
       if (options.cookies || options.passwords) {
-        const answer = await dialog.showMessageBox(window, { type: 'question', title: 'Import protected browser data', message: 'Import selected login data into this Vek profile?', detail: `Source: ${source.path}\nCookies and saved passwords will be decrypted using the selected browser’s macOS Safe Storage key. macOS may request Keychain access. Passwords are encrypted again in Vek’s local vault. Unsupported records will be reported.`, buttons: ['Cancel', 'Import'], defaultId: 0, cancelId: 0 });
+        const answer = await dialog.showMessageBox(window, { type: 'question', title: 'Import protected browser data', message: 'Import selected login data into this Wiek profile?', detail: `Source: ${source.path}\nCookies and saved passwords will be decrypted using the selected browser’s macOS Safe Storage key. macOS may request Keychain access. Passwords are encrypted again in Wiek’s local vault. Unsupported records will be reported.`, buttons: ['Cancel', 'Import'], defaultId: 0, cancelId: 0 });
         if (answer.response !== 1) break;
       }
       const services = { chrome: 'Chrome Safe Storage', chromium: 'Chromium Safe Storage', edge: 'Microsoft Edge Safe Storage', brave: 'Brave Safe Storage' };
@@ -705,7 +714,7 @@ function agentPromptPrefix(thread,project) {
   let memory='';
   if(preferences.memory.browserActivity){const scopeIds=new Set(store.spaces.filter(s=>s.name===`agent-${thread.id}`||s.agentScopeKey===`${thread.projectId}:${thread.id}`||s.id===thread.browserSpaceId).map(s=>s.id));const recent=store.history.filter(row=>scopeIds.has(row.spaceId)).slice(-6).map(row=>{try{const url=new URL(row.url);return `${String(row.title||'').slice(0,120)}: ${(url.origin+url.pathname).slice(0,240)}`;}catch{return '';}}).filter(Boolean);if(recent.length)memory+=`\nUser-enabled recent browser activity (query strings and fragments omitted):\n${recent.join('\n')}`;}
   if(preferences.memory.localFiles){const files=fs.readdirSync(project.path,{withFileTypes:true}).filter(entry=>!entry.name.startsWith('.')&&entry.name!=='node_modules').slice(0,30).map(entry=>`${entry.name.slice(0,80)}${entry.isDirectory()?'/':''}`);memory+=`\nUser-enabled local project context (names only, not file bodies):\n${files.join('\n')}`;}
-  return `You are running in Vek Browser with a local browser automation CLI. To use it, run node with the path in VEK_BROWSER_CLI and the nodejs subcommand; pipe JavaScript on stdin or use -e. Read its skill subcommand first for the full SDK guide. VEK_DATA_DIR selects this browser instance. Use taskSpace(${JSON.stringify('agent-'+thread.id)}) to keep this conversation's browser work in its own persistent Space. The browser SDK requires its documented Space ownership and user handoff. Do not read other browser profile files or credentials. The api subcommand accepts a workbench action and --json payload, including workspace:*, agents:control:* and mcp:*; use only user-authorized task scope.\n${preferences.instructions?`User instructions:\n${preferences.instructions}`:''}${memory}${catalogService?.promptForThread(thread)||''}`;
+  return `You are running in Wiek Browser with a local browser automation CLI. To use it, run node with the path in WIEK_BROWSER_CLI and the nodejs subcommand; pipe JavaScript on stdin or use -e. Read its skill subcommand first for the full SDK guide. WIEK_DATA_DIR selects this browser instance. Use taskSpace(${JSON.stringify('agent-'+thread.id)}) to keep this conversation's browser work in its own persistent Space. The browser SDK requires its documented Space ownership and user handoff. Do not read other browser profile files or credentials. The api subcommand accepts a workbench action and --json payload, including workspace:*, agents:control:* and mcp:*; use only user-authorized task scope.\n${preferences.instructions?`User instructions:\n${preferences.instructions}`:''}${memory}${catalogService?.promptForThread(thread)||''}`;
 }
 app.whenReady().then(async () => {
   foregroundLease=await claimForeground(DATA);
@@ -715,7 +724,7 @@ app.whenReady().then(async () => {
   memoryService=createMemoryService({dataDir:DATA,policy:()=>preferencesService.snapshot().memory,projects:()=>agentService?.snapshot().projects||[],onChange:publish});
   nativeTheme.on('updated',()=>publish());
   agentService = createAgentService({ dataDir: DATA, onChange: () => publish(), turnCheckpoints:{before:args=>turnCheckpointService.before(args),after:args=>turnCheckpointService.after(args),locked:id=>turnCheckpointService?.locked(id)||false,dispatch:(...args)=>turnCheckpointService.dispatch(...args)}, runContext: ({thread,project}) => ({
-    env: { VEK_BROWSER_CLI: path.join(ROOT, 'cli/vek-browser.mjs'), VEK_DATA_DIR: DATA, VEK_THREAD_ID: thread.id, VEK_PROJECT_ID: thread.projectId, VEK_BROWSER_INSTANCE_ID: INSTANCE },
+    env: { WIEK_BROWSER_CLI:path.join(ROOT,'cli/wiek-browser.mjs'),WIEK_DATA_DIR:DATA, VEK_BROWSER_CLI: path.join(ROOT, 'cli/wiek-browser.mjs'), VEK_DATA_DIR: DATA, VEK_THREAD_ID: thread.id, VEK_PROJECT_ID: thread.projectId, VEK_BROWSER_INSTANCE_ID: INSTANCE },
     promptPrefix: agentPromptPrefix(thread,project),
   }) });
   workspaceService = createWorkspaceService({ projects: () => agentService.snapshot().projects, onChange: publish });
@@ -724,9 +733,14 @@ app.whenReady().then(async () => {
   catalogService = createCatalogService({ dataDir: DATA, projects: () => agentService.snapshot().projects });
   const whisperCommand = path.join(__dirname, 'bin/whisper-cli'), whisperModel = path.join(ROOT, 'models/ggml-tiny.bin');
   voiceService = createVoiceService({ dataDir: DATA, defaultConfig: fs.existsSync(whisperCommand) && fs.existsSync(whisperModel) ? { command:whisperCommand, args:['-m',whisperModel,'-f','{audio}','-l','{language}','-nt','-np','-ng'], output:'stdout' } : null });
+  const translationPython=path.join(DATA,'translation-runtime/bin/python');
+  translationService=createTranslationService({dataDir:DATA,onChange:publish,defaultConfig:fs.existsSync(translationPython)?{command:translationPython,args:[path.join(__dirname,'argos-translate.py')],source:'en',target:'zh'}:null});
   libraryService=createLibraryService({dataDir:DATA,onChange:publish,capture:async()=>{const t=pendingCaptureTarget?tabs.get(pendingCaptureTarget):visibleTab();pendingCaptureTarget=undefined;if(!t)throw new Error('Open a page to capture');const image=await captureTabImage(t);return {pngBase64:image.toPNG().toString('base64'),url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()};},activePage:async()=>{const t=visibleTab();if(!t)throw new Error('Open a page to save');return {url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()};},exportImage:async({pngBase64,suggestedName})=>{const pick=await dialog.showSaveDialog(window,{defaultPath:suggestedName,filters:[{name:'PNG image',extensions:['png']}]});if(pick.canceled||!pick.filePath)return {saved:false};fs.writeFileSync(pick.filePath,Buffer.from(pngBase64,'base64'),{mode:0o600});return {saved:true,path:pick.filePath};},openUrl:async url=>{const s=getSpace(store.selected);userControl(s);await createTab(s,url,{reveal:true});return {opened:true};}});
   const nativeDesktop=createNativeDesktop({dataDir:DATA,screenPermission:()=>process.platform==='darwin'?systemPreferences.getMediaAccessStatus('screen'):'unknown'});
   desktopService=createDesktopService({dataDir:DATA,registry:globalShortcut,capture:nativeDesktop.screenshot,selection:nativeDesktop.selection,permissions:()=>({screen:process.platform==='darwin'?systemPreferences.getMediaAccessStatus('screen'):'unsupported',accessibility:process.platform==='darwin'?(systemPreferences.isTrustedAccessibilityClient(false)?'granted':'not-granted'):'unsupported'}),checkChord:key=>{const p=preferencesService.snapshot(),physical=physicalChord(key,process.platform),conflict=[...p.reservedShortcuts,...Object.entries(p.shortcuts).filter(([,value])=>value).map(([action,accelerator])=>({accelerator,label:p.actions.find(a=>a.id===action)?.label||action}))].find(row=>physicalChord(row.accelerator,process.platform)===physical);return conflict?{valid:false,error:'Shortcut conflicts with '+conflict.label}:{valid:true};},onOpen:action=>openPanel(action==='chat'?'agents':action==='voice'?'voice':'desktop'),onChange:publish,copyText:text=>clipboard.writeText(text),saveText:payload=>libraryService.dispatch('library:items:create',{kind:'text',...payload})});
+  selectionToolbar=createSelectionToolbar({BrowserWindow,screen,ipcMain,consume:id=>desktopMonitorService.consume(id),dismiss:id=>desktopMonitorService.dismiss(id),copy:text=>clipboard.writeText(text),ask:text=>{openPanel('agents');window.webContents.send('vek:draft',text);},translate:async text=>{openPanel('translation');window.webContents.send('vek:translation',text);},onError:message=>window?.webContents.send('vek:error',message)});
+  desktopMonitorService=createDesktopMonitorService({dataDir:DATA,native:createDesktopMonitorNative({dataDir:DATA,screenPermission:()=>process.platform==='darwin'?systemPreferences.getMediaAccessStatus('screen'):'unsupported'}),onChange:publish,onSelection:value=>void selectionToolbar.show(value).catch(error=>console.error('Selection toolbar:',error.message))});
+  for(const event of ['suspend','resume','lock-screen','unlock-screen','user-did-resign-active','user-did-become-active'])powerMonitor.on(event,()=>{const mapped={'user-did-resign-active':'session-resigned','user-did-become-active':'session-active'}[event]||event;selectionToolbar.hide();void agentService.lifecycle(mapped).catch(error=>console.error('Scheduler lifecycle:',error.message));});
   recorderService=createActionRecorder({dataDir:DATA,onChange:()=>{for(const t of tabs.values())sendPageConfig(t);publish();},activePage:()=>{const t=visibleTab();return t?{targetId:t.id,url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()}:null;},capture:async({targetId})=>{const t=tabs.get(targetId);if(!t||t.view.webContents.isDestroyed())throw new Error('Recorded page was closed');return {pngBase64:(await captureTabImage(t)).toPNG().toString('base64')};}});
   const browserGateway = createBrowserGateway({ resolveScope: resolveAgentScope, callbacks: {
     listTabs: async ({scope}) => { const s = await spaceForScope(scope); return { tabs: s.tabs.map((id, i) => tabDescriptor(tabs.get(id), i)) }; },
@@ -735,7 +749,7 @@ app.whenReady().then(async () => {
     snapshot: async ({scope, arguments:args}) => { const s = await spaceForScope(scope), t = targetFor(s,args.targetId), sessionId = routeRoot(t); return snapshotPage({ sendCDP: (method, params, sid) => sendCDP(s, method, params, sid || sessionId), targetId:t.id, sessionId, options:args.options || {} }); },
   } });
   mcpService = createMcpService({ dataDir: DATA, oauthOptions:{available:()=>safeStorage.isEncryptionAvailable()&&(process.platform!=='linux'||['gnome_libsecret','kwallet','kwallet5','kwallet6'].includes(safeStorage.getSelectedStorageBackend())),encrypt:value=>safeStorage.encryptString(value),decrypt:value=>safeStorage.decryptString(value),openExternal:url=>shell.openExternal(url)}, resolveScope: resolveAgentScope, resolveCredential: ref => { if (!/^env:[A-Za-z_][A-Za-z0-9_]*$/.test(ref)) throw new Error('Only explicit environment credential references are supported'); const name=ref.slice(4); if (!process.env[name]) throw new Error('Referenced credential is unavailable'); return process.env[name]; }, browserGateway, onChange: publish });
-  window = new BrowserWindow({ width: 1380, height: 930, minWidth: 900, minHeight: 600, title: 'Vek Browser', backgroundColor: '#f6f7fb', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false } });
+  window = new BrowserWindow({ width: 1380, height: 930, minWidth: 900, minHeight: 600, title: 'Wiek Browser', backgroundColor: '#f6f7fb', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false } });
   Menu.setApplicationMenu(Menu.buildFromTemplate(browserMenu()));
   window.on('close',event=>{if(!closing&&(preferencesService.snapshot().backgroundMode||spaceWindows.size)){event.preventDefault();window.hide();}});
   window.on('close',()=>{if(!closing){clearTimeout(saving);writeBrowserStore();}});
@@ -754,9 +768,10 @@ app.whenReady().then(async () => {
   ipcMain.on('vek:page-action',(event,data)=>{const t=[...tabs.values()].find(t=>t.view.webContents===event.sender);if(!t||!data||typeof data!=='object')return;void recorderService.record({...data,targetId:t.id,url:event.senderFrame?.url||event.sender.getURL()}).catch(error=>console.error('Recorder:',error.message));});
   ipcMain.on('vek:selection-action',(event,data)=>{
     const t=visibleTab(),settings=preferencesService.snapshot().selectionToolbar;
-    if(!t||event.sender!==t.view.webContents||!settings.enabled||!data||typeof data.text!=='string'||data.text.length>50000||!['copy','ask','save'].includes(data.action)||!settings[data.action])return;
+    if(!t||event.sender!==t.view.webContents||!settings.enabled||!data||typeof data.text!=='string'||data.text.length>50000||!['copy','ask','save','translate'].includes(data.action)||!settings[data.action])return;
     if(data.action==='copy')clipboard.writeText(data.text);
     else if(data.action==='ask'){openPanel('agents');window.webContents.send('vek:draft',data.text);}
+    else if(data.action==='translate'){openPanel('translation');window.webContents.send('vek:translation',data.text);}
     else void saveSelection(data.text,t).catch(error=>window.webContents.send('vek:error',error.message));
   });
   ipcMain.handle('vek:state', event => { if (event.sender === window.webContents)return uiState();const secondary=[...spaceWindows].find(([,record])=>record.window.webContents===event.sender);if(!secondary)throw new Error('Invalid sender');return uiState(secondary[0]); });
@@ -773,7 +788,7 @@ app.whenReady().then(async () => {
   }
   if (!store.spaces.length) await createSpace('Personal', 'Default', 'user');
   store.selected = store.spaces.some(s => s.id === store.selected) ? store.selected : store.spaces[0].id;
-  browserStoreReady=true;persist();layout(); publish(); await startRPC();desktopService.activate();
+  browserStoreReady=true;persist();layout(); publish(); await startRPC();desktopService.activate();await desktopMonitorService.activate();
 }).catch(err => { console.error(err); foregroundLease?.release();app.exit(1); });
 app.on('will-quit',()=>foregroundLease?.release());
 app.on('window-all-closed', () => app.quit());
@@ -786,5 +801,6 @@ app.on('before-quit', event => {
   if (runtimeFile) { try { const r = JSON.parse(fs.readFileSync(runtimeFile)); if (r.pid === process.pid) fs.unlinkSync(runtimeFile); } catch {} }
   for (const c of connections) c.ws.close(); server?.close();
   tray?.destroy();
-  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([schedulerJobService?.close(),desktopService?.close(),agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),memoryService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
+  selectionToolbar?.close();
+  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([schedulerJobService?.close(),desktopMonitorService?.close(),translationService?.close(),desktopService?.close(),agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),memoryService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
 });

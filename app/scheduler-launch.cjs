@@ -21,7 +21,7 @@ async function launch(directory=__dirname){
  const priorNodeMode=process.env.ELECTRON_RUN_AS_NODE;delete process.env.ELECTRON_RUN_AS_NODE;
  const controller=new AbortController(),abort=()=>controller.abort();process.once('SIGTERM',abort);process.once('SIGINT',abort);
  try{const tick=await require(path.join(root,'app/scheduler-worker.cjs')).runSchedulerTick({dataDir,timeoutMs:receipt.timeoutMs,signal:controller.signal,guard});result={status:tick.status,attempted:tick.attempted.length,skipped:tick.skipped.length};}
- catch{result={status:'failed',reason:'Background tick failed. Open Vek to inspect configuration and recorded runs.'};}
+ catch{result={status:'failed',reason:'Background tick failed. Open Wiek to inspect configuration and recorded runs.'};}
  finally{process.removeListener('SIGTERM',abort);process.removeListener('SIGINT',abort);if(priorNodeMode===undefined)delete process.env.ELECTRON_RUN_AS_NODE;else process.env.ELECTRON_RUN_AS_NODE=priorNodeMode;}
  record(result);return result;
 }

@@ -19,7 +19,7 @@ test('real Electron recorder panel previews one requested image and wires explic
         const pngBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO/a5XQAAAAASUVORK5CYII=';
         const recording = { id: 'recording', name: '<img src=x onerror="window.attacked=true">', targetId: 'page', url: 'https://example.test/path', title: 'Recorded page', status: 'stopped', startedAt: new Date().toISOString(), imageBytes: 68, events: [{ id: 'event', kind: 'click', x: 25, y: 35, selector: '#button', box: { x: 20, y: 30, width: 50, height: 40 }, image: { id: 'png', bytes: 68 }, screenshotStatus: 'captured', at: new Date().toISOString() }] };
         const state = { sessions: [recording], recording: false, activeSessionId: null, limits: { maxEvents: 200, maxTotalImageBytes: 52428800 } }, calls = [];
-        VekRecorderPanel.mount(document.querySelector('#root'), async (name, payload) => {
+        WiekRecorderPanel.mount(document.querySelector('#root'), async (name, payload) => {
           calls.push({ name, payload });
           if (name === 'recorder:read') return { ...structuredClone(recording), ...(payload.eventId ? { preview: { eventId: 'event', pngBase64 } } : {}) };
           if (name === 'recorder:start') { state.recording = true; state.activeSessionId = recording.id; recording.status = 'recording'; }
@@ -28,7 +28,7 @@ test('real Electron recorder panel previews one requested image and wires explic
           if (name === 'recorder:restore') delete recording.deletedAt;
           return structuredClone(state);
         });
-        VekRecorderPanel.update(state);
+        WiekRecorderPanel.update(state);
         const literal = !document.querySelector('img') && !window.attacked && document.body.textContent.includes('<img src=x');
         const noAutoRecord = calls.length === 0;
         const click = async label => { const node = [...document.querySelectorAll('button')].find(item => item.textContent === label); if (!node) throw new Error('Missing control ' + label); node.click(); await new Promise(resolve => setTimeout(resolve, 15)); };

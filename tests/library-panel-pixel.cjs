@@ -1,5 +1,5 @@
 'use strict';
-// Standalone, hidden Electron probe. Does not launch Vek's main browser or SDK.
+// Standalone, hidden Electron probe. Does not launch Wiek's main browser or SDK.
 const fs=require('node:fs/promises'),path=require('node:path'),os=require('node:os');
 if(!process.versions.electron){
   const result=require('node:child_process').spawnSync(require('electron'),[__filename],{stdio:'inherit',env:{...process.env,ELECTRON_RUN_AS_NODE:''}});
@@ -17,7 +17,7 @@ app.whenReady().then(async()=>{
   window=new BrowserWindow({show:false,width:1100,height:850,webPreferences:{nodeIntegration:true,contextIsolation:false,sandbox:false,backgroundThrottling:false}});
   await window.loadURL('data:text/html,<html><body><main id="library"></main></body></html>');
   const base64=await window.webContents.executeJavaScript(`(()=>{const c=document.createElement('canvas');c.width=320;c.height=180;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,320,180);return c.toDataURL('image/png').split(',')[1]})()`);
-  service=createLibraryService({dataDir,capture:async()=>({pngBase64:base64,title:'Electron canvas fixture',url:'https://example.test/'}),exportImage:async({pngBase64})=>{await fs.writeFile(output,Buffer.from(pngBase64,'base64'));return{saved:true,path:output};},onChange:snapshot=>void window.webContents.executeJavaScript(`window.VekLibraryPanel.update(${JSON.stringify(snapshot)})`).catch(()=>{})});
+  service=createLibraryService({dataDir,capture:async()=>({pngBase64:base64,title:'Electron canvas fixture',url:'https://example.test/'}),exportImage:async({pngBase64})=>{await fs.writeFile(output,Buffer.from(pngBase64,'base64'));return{saved:true,path:output};},onChange:snapshot=>void window.webContents.executeJavaScript(`window.WiekLibraryPanel.update(${JSON.stringify(snapshot)})`).catch(()=>{})});
   ipcMain.handle('library-pixel-action',async(_event,action,payload)=>service.dispatch(action,payload));
   const css=await fs.readFile(path.join(__dirname,'../app/library-panel.css'),'utf8');
   await window.webContents.executeJavaScript(`(()=>{const style=document.createElement('style');style.textContent=${JSON.stringify(css)};document.head.append(style);document.body.style='font-family:system-ui;margin:28px;background:#f9fbff'})()`);
@@ -31,7 +31,7 @@ app.whenReady().then(async()=>{
     const pointer=(c,type,x,y)=>{const box=c.getBoundingClientRect();return c.dispatchEvent(new PointerEvent(type,{bubbles:true,cancelable:true,clientX:box.left+x*box.width/c.width,clientY:box.top+y*box.height/c.height,button:0,pointerId:1}))};
     const drag=async(tool,x1,y1,x2,y2)=>{await click(tool);const c=await ready();pointer(c,'pointerdown',x1,y1);pointer(c,'pointermove',x2,y2);pointer(c,'pointerup',x2,y2);return ready()};
     const pixel=(c,x,y)=>[...c.getContext('2d').getImageData(x,y,1,1).data],red=p=>p[0]>170&&p[1]<170&&p[2]<170;
-    window.VekLibraryPanel.mount(root,invoke);await tick();await window.VekLibraryPanel.capture();let canvas=await ready();
+    window.WiekLibraryPanel.mount(root,invoke);await tick();await window.WiekLibraryPanel.capture();let canvas=await ready();
     check(canvas.width===320&&(await invoke('library:snapshot')).counts.active===0,'Capture draft remains unsaved');
     canvas=await drag('Rectangle',20,20,100,70);check(red(pixel(canvas,20,40)),'Rectangle changes actual pixels');
     canvas=await drag('Arrow',130,30,220,90);check(red(pixel(canvas,175,60)),'Arrow changes actual pixels');

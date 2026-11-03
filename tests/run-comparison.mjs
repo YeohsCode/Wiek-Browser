@@ -104,7 +104,7 @@ async function runBrowser(browser, options) {
   let error = null;
   const start = Date.now();
   try {
-    cli = browser === "ego" ? await resolveEgoCli() : resolve(process.env.VEK_COMPARISON_VEK_CLI || join(root, "cli/vek-browser.mjs"));
+    cli = browser === "ego" ? await resolveEgoCli() : resolve(process.env.VEK_COMPARISON_VEK_CLI || join(root, "cli/wiek-browser.mjs"));
     const info = await stat(cli);
     if (!info.isFile()) throw new Error(`CLI is not a regular file: ${cli}`);
     await access(cli, constants.X_OK);
@@ -146,12 +146,12 @@ async function runBrowser(browser, options) {
 function cell(value) { return String(value ?? "—").replaceAll("|", "\\|").replaceAll("\n", " "); }
 
 export function comparisonMarkdown(report) {
-  const lines = ["# Ego / Vek Browser 同集测试对比", "", `生成时间：${report.generatedAt}`, "",
+  const lines = ["# Ego / Wiek Browser 同集测试对比", "", `生成时间：${report.generatedAt}`, "",
     "使用原封不动的上游真实浏览器 E2E runner、SDK 与本地 fixture，串行执行。SKIP 和未运行均不计为通过；本结果不等同 31 项在线模型 benchmark。", "",
     `选择：${report.selectedNames.length}/${names.length} 个 cases。${report.comparable ? "两侧 SDK、fixture 和 case 索引哈希一致。" : "尚无两侧相同 SDK、fixture、case 索引的完整运行证据。"}`, "",
     "| 浏览器 | 运行状态 | PASS | FAIL | SKIP | 未运行 | 断言 | 退出码 | 总用时 |", "|---|---|---:|---:|---:|---:|---:|---:|---:|"];
   for (const run of report.runs) lines.push(`| ${run.browser} | ${run.status} | ${run.counts.pass} | ${run.counts.fail} | ${run.counts.skip} | ${run.counts.notRun} | ${run.counts.assertions} | ${cell(run.exitCode)} | ${(run.wallTimeMs / 1000).toFixed(1)}s |`);
-  lines.push("", "| Case | Ego | Vek |", "|---|---|---|");
+  lines.push("", "| Case | Ego | Wiek |", "|---|---|---|");
   for (const name of names) {
     const status = (browser) => {
       const item = report.runs.find((run) => run.browser === browser)?.cases.find((row) => row.name === name);

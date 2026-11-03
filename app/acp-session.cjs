@@ -132,7 +132,7 @@ function connectAcp({ child, active, run, thread, project, text, attachments = [
     if (value.id !== undefined) {
       if (!((typeof value.id === 'number' && Number.isSafeInteger(value.id)) || validId(value.id)) || serverIds.has(value.id) || serverIds.size >= 10000) throw Error('ACP server request identity is invalid or repeated');
       serverIds.add(value.id);
-      if (value.method !== 'session/request_permission') { write({ id: value.id, error: { code: -32601, message: 'Vek does not expose client filesystem, terminal or authentication methods' } }); return; }
+      if (value.method !== 'session/request_permission') { write({ id: value.id, error: { code: -32601, message: 'Wiek does not expose client filesystem, terminal or authentication methods' } }); return; }
       if (phase !== 'prompt' || active.stopReason || params.sessionId !== sessionId) { respond(value.id, { outcome: { outcome: 'cancelled' } }); return; }
       if (!Array.isArray(params.options) || params.options.length > 32 || !params.options.every(item => validId(item?.optionId) && typeof item.kind === 'string') || new Set(params.options.map(item => item.optionId)).size !== params.options.length) throw Error('ACP permission options are invalid');
       if ((run.approvals?.length || 0) >= 64) { respond(value.id, { outcome: { outcome: 'cancelled' } }); return; }
@@ -150,7 +150,7 @@ function connectAcp({ child, active, run, thread, project, text, attachments = [
   });
   child.on('close', () => { closed = true; for (const handle of timers) clearTimeout(handle); timers.clear(); for (const entry of approvals.values()) if (entry.record.status === 'pending') entry.record.status = 'expired'; approvals.clear(); for (const entry of pending.values()) entry.reject(Error('ACP provider disconnected before completion')); pending.clear(); });
   active.native.ready = (async () => {
-    const initialized = await request('initialize', { protocolVersion: 1, clientCapabilities: { fs: { readTextFile: false, writeTextFile: false }, terminal: false, auth: { terminal: false } }, clientInfo: { name: 'vek-browser', version: require('../package.json').version } });
+    const initialized = await request('initialize', { protocolVersion: 1, clientCapabilities: { fs: { readTextFile: false, writeTextFile: false }, terminal: false, auth: { terminal: false } }, clientInfo: { name: 'wiek-browser', version: require('../package.json').version } });
     if (initialized.protocolVersion !== 1) throw Error('Unsupported ACP protocol version'); capabilities = initialized.agentCapabilities || {};
     if (active.stopReason || closed) return;
     const resumed = !!sessionId;

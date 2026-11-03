@@ -28,7 +28,7 @@ function createDesktopService({dataDir,platform=process.platform,registry,permis
   const ensure=()=>{if(closed)throw fail('Desktop tools are closed','VEK_DESKTOP_CLOSED');};
   const interactive=context=>{ensure();if(context?.interactive!==true)throw fail('Desktop capture requires the browser’s Desktop tools or a configured user shortcut','VEK_DESKTOP_INTERACTIVE_REQUIRED');};
   function reserved(){return [...new Set([...Object.values(config.shortcuts).filter(Boolean),...owned])].map(accelerator=>({accelerator,label:'Desktop global shortcut'}));}
-  function unregister(key){try{registry.unregister(key);owned.delete(key);}catch{lastError='A global shortcut could not be released; it will be released when Vek exits.';}}
+  function unregister(key){try{registry.unregister(key);owned.delete(key);}catch{lastError='A global shortcut could not be released; it will be released when Wiek exits.';}}
   function register(action,key){
     const check=checkChord(key);if(!check.valid)throw fail(check.error||'Shortcut conflicts with an application shortcut');
     const ok=registry.register(key,()=>{if(!closed&&active&&config.shortcuts[action]===key)void trigger(action).catch(()=>{});});

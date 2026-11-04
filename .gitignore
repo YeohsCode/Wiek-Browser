@@ -58,3 +58,7 @@ __pycache__/
 # Wiek agent documentation is source, not a downloaded reference checkout.
 !/skills/wiek-browser/references/
 !/skills/wiek-browser/references/*.md
+
+# SDK build inputs are source even though their directory is named references.
+!/skills/ego-browser/references/
+!/skills/ego-browser/references/*.md

@@ -1,3 +1,22 @@
+# Wiek Browser 0.20.2（2026-11-04）
+
+使用独立绘制的 W/青绿色标识，替换应用、托盘和兼容 Skill 的原 Ego 图片；同时修复远端 CI 的缺失构建输入。全量复刻、P3 物理系统矩阵和 P4 线上基准仍未完成。
+
+| 验证 | 结果 | 证据 |
+|---|---|---|
+| 本地服务/协议/组件 | 500/500；0 失败/跳过 | [source](v202-source-tests.log) |
+| SDK build/typecheck/单测 | 532/532 | [SDK](v202-sdk-tests.log) |
+| 最终打包宿主 | 197/197；0.20.2 | [host](v202-package-workbench.log) |
+| 同集浏览器 | Wiek 69/69、1,248 断言；保留同 SDK 的 Ego 68/69、1,235 断言 | [suite](v202-browser-suite.log)、[comparison](comparison.md) |
+| 发行身份 | 201 文件匹配、81 上游输入未改 | [identity](v202-package-identity.log) |
+| 独立图标 | 已知两张 Ego 原图 0 命中；打包 ICNS 与自有资源相同 | [audit](wiek-brand-audit.json)、[design](../analysis/wiek-brand-assets.md) |
+| 干净源码 | staged 文件导出后 SDK build 成功；只复用依赖，不借用忽略的 Skill 资料 | [build](v202-clean-sdk-build.log) |
+| 远端 CI | 首轮 run 41690733098 失败；已修复 Skill references 漏提交，待新远端结果 | [原始失败](p4-ci-initial-sdk-failure.log) |
+
+P3 本轮重新执行打包集成，没有把它当作最终包 OS 权限、物理多显示器、睡眠/登录的完整验收。P4 下一步的 SDK V2 共享 adapter 设计见[约束与验证顺序](../analysis/benchmark-sdk-v2-design.md)；未运行模型、线上账号任务或签名/公证。
+
+---
+
 # Wiek Browser 0.20.1（2026-11-04）
 
 已补齐真实桌面/翻译的有界证据，以及独立 CI 与干净检出的测试资料。**全量复刻、P3 系统矩阵和 P4 线上基准仍未完成**。

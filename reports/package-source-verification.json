@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-03T18:04:31.960Z",
-  "version": "0.20.1",
+  "generatedAt": "2026-11-04T11:54:13.703Z",
+  "version": "0.20.2",
   "versionMatches": true,
-  "checkedFiles": 192,
+  "checkedFiles": 201,
   "allMatch": true,
   "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
   "sdkMatchesCompared": true,
   "files": [
     {
       "file": "NOTICE.md",
-      "sha256": "68737798ab5bf11153f1ecc67c5599c92c119f45de19bd872e2934b118907ace",
+      "sha256": "2c15e683c889de8aed3e3fe32dc4bfbdfaa15b931c123b3cb4f406d4904363ff",
       "matches": true
     },
     {
@@ -40,6 +40,36 @@
     {
       "file": "app/argos-translate.py",
       "sha256": "82b24f4bebb96f3e126cf71c9c9c88c096f821814e15620152b50c58d217665c",
+      "matches": true
+    },
+    {
+      "file": "app/assets/wiek-tray.svg",
+      "sha256": "ceb12c8fd0e766c70d2acd827592f793d3be63cbbf05ddd2fcbcede42966a9c6",
+      "matches": true
+    },
+    {
+      "file": "app/assets/wiek-trayTemplate.png",
+      "sha256": "05a4befb12db475c763a936508c810409c4ff3e97fa1ad5727eb9406545792f6",
+      "matches": true
+    },
+    {
+      "file": "app/assets/wiek-trayTemplate@2x.png",
+      "sha256": "e6a3c2abff710ab77ca8bec1a0c698a19b1b481b7d94ed0eac5b2a20b7cb11f1",
+      "matches": true
+    },
+    {
+      "file": "app/assets/wiek.icns",
+      "sha256": "44d4630e01518bbcf94e3dde6f4f34da1952692adb6a563ebf281bdb40935b66",
+      "matches": true
+    },
+    {
+      "file": "app/assets/wiek.png",
+      "sha256": "3e03cd59293c2c713604c89af1d8ba586fcc5a4c23e5cf93179469ae6653c86a",
+      "matches": true
+    },
+    {
+      "file": "app/assets/wiek.svg",
+      "sha256": "f93f0e26deb63eb2d0271a1b91e799988bac343991549c5457fc631b49589566",
       "matches": true
     },
     {
@@ -164,7 +194,7 @@
     },
     {
       "file": "app/index.html",
-      "sha256": "68cb0d0b7f21f5c1239bd7e08ddc765e0da8a79be8d3b244df939d214f579788",
+      "sha256": "9db51c3d437685e75983772aed1f9b13eaf576d4d62c2660bcc3f1a23b68eca0",
       "matches": true
     },
     {
@@ -184,7 +214,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "8f5943ae827f24e1043b816256d9073fe651b679806d83819fc28b95f6cfda01",
+      "sha256": "64e0bf28f2058d4123b341acce77e6d5fe64efc91ef1d7fc4afbc5a716ff640b",
       "matches": true
     },
     {
@@ -379,7 +409,7 @@
     },
     {
       "file": "app/style.css",
-      "sha256": "a3e504fbea57c5eb884758e9d4ac9140a12c0be1ee67d8659bc7b6d345b71973",
+      "sha256": "d5f7439f468b7542f18f85a663fe2f0a48dda2afcae5e8f0f4168aaa6d248fda",
       "matches": true
     },
     {
@@ -484,17 +514,17 @@
     },
     {
       "file": "packages/sdk/dist/out/agent-skills/ego-browser/agents/openai.yaml",
-      "sha256": "81a941e83feb556827d72aa98d7bc97a909294e386ff9f6a1817de92e8767b89",
+      "sha256": "a02cfe467c011d941fbef59d6a0f6198602b55c0c9796ef28008ecd220de586d",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/out/agent-skills/ego-browser/assets/composer-icon.png",
-      "sha256": "2822b28752520f2a5506cb0693c8db2fd1ec0345806454b5f92d999b84b5bc1f",
+      "sha256": "bf4b40b08e68b1fb9fae7c94b29b9b8301fad99e9122e3609f8d0ec5d760fec2",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/out/agent-skills/ego-browser/assets/logo.png",
-      "sha256": "cec732e29ea3b03d8920b28d912306f43651186dc2f4a488800da9db0a50f993",
+      "sha256": "3e03cd59293c2c713604c89af1d8ba586fcc5a4c23e5cf93179469ae6653c86a",
       "matches": true
     },
     {
@@ -834,17 +864,17 @@
     },
     {
       "file": "skills/ego-browser/agents/openai.yaml",
-      "sha256": "81a941e83feb556827d72aa98d7bc97a909294e386ff9f6a1817de92e8767b89",
+      "sha256": "a02cfe467c011d941fbef59d6a0f6198602b55c0c9796ef28008ecd220de586d",
       "matches": true
     },
     {
       "file": "skills/ego-browser/assets/composer-icon.png",
-      "sha256": "2822b28752520f2a5506cb0693c8db2fd1ec0345806454b5f92d999b84b5bc1f",
+      "sha256": "bf4b40b08e68b1fb9fae7c94b29b9b8301fad99e9122e3609f8d0ec5d760fec2",
       "matches": true
     },
     {
       "file": "skills/ego-browser/assets/logo.png",
-      "sha256": "cec732e29ea3b03d8920b28d912306f43651186dc2f4a488800da9db0a50f993",
+      "sha256": "3e03cd59293c2c713604c89af1d8ba586fcc5a4c23e5cf93179469ae6653c86a",
       "matches": true
     },
     {
@@ -955,6 +985,21 @@
     {
       "file": "skills/wiek-browser/SKILL.md",
       "sha256": "cdcf7f11f758b245c31dfe14fd6f3398801bcecdaaf1d1200f5afce391816507",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/agents/openai.yaml",
+      "sha256": "6663d8aff1ad147a93e00f88588e1d98ac984afe3b1baee45a1b9eda8886a74b",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/assets/composer-icon.png",
+      "sha256": "bf4b40b08e68b1fb9fae7c94b29b9b8301fad99e9122e3609f8d0ec5d760fec2",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/assets/logo.png",
+      "sha256": "3e03cd59293c2c713604c89af1d8ba586fcc5a4c23e5cf93179469ae6653c86a",
       "matches": true
     },
     {

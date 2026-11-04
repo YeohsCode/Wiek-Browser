@@ -259,7 +259,7 @@ function attachSpaceWindow(id) {
 }
 async function openSpaceWindow(space) {
   if(spaceWindows.has(space.id)){spaceWindows.get(space.id).window.show();spaceWindows.get(space.id).window.focus();return;}
-  const secondary=new BrowserWindow({width:1100,height:800,minWidth:600,minHeight:400,title:`${space.name} — Wiek Browser`,backgroundColor:'#f6f7fb',webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,sandbox:true,nodeIntegration:false}});
+  const secondary=new BrowserWindow({icon:path.join(__dirname,'assets/wiek.png'),width:1100,height:800,minWidth:600,minHeight:400,title:`${space.name} — Wiek Browser`,backgroundColor:'#f6f7fb',webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,sandbox:true,nodeIntegration:false}});
   spaceWindows.set(space.id,{window:secondary});
   for(const id of space.tabs){const t=tabs.get(id);if(t){window.contentView.removeChildView(t.view);secondary.contentView.addChildView(t.view);}}
   secondary.on('resize',layout);secondary.on('close',event=>{if(!closing){event.preventDefault();attachSpaceWindow(space.id);}});
@@ -467,9 +467,7 @@ async function saveSelection(text,tab=visibleTab()) {
 function configureTray(enabled) {
   if (!enabled) {tray?.destroy();tray=null;return;}
   if (tray) return;
-  const pixels=Buffer.alloc(18*18*4);
-  for(let y=3;y<15;y++)for(let x=3;x<15;x++)if(Math.abs(x-(5+(y-3)/3))<1.3||Math.abs(x-(13-(y-3)/3))<1.3){const at=(y*18+x)*4;pixels[at+3]=255;}
-  const icon=nativeImage.createFromBitmap(pixels,{width:18,height:18});icon.setTemplateImage(true);tray=new Tray(icon);tray.setToolTip('Wiek Browser');tray.setContextMenu(Menu.buildFromTemplate([{label:'Show Wiek Browser',click:()=>{window.show();window.focus();}},{label:'Agents & automations',click:()=>openPanel('agents')},{type:'separator'},{label:'Quit Wiek Browser',click:()=>app.quit()}]));tray.on('click',()=>{window.show();window.focus();});
+  const icon=nativeImage.createFromPath(path.join(__dirname,'assets/wiek-trayTemplate.png'));icon.setTemplateImage(true);tray=new Tray(icon);tray.setToolTip('Wiek Browser');tray.setContextMenu(Menu.buildFromTemplate([{label:'Show Wiek Browser',click:()=>{window.show();window.focus();}},{label:'Agents & automations',click:()=>openPanel('agents')},{type:'separator'},{label:'Quit Wiek Browser',click:()=>app.quit()}]));tray.on('click',()=>{window.show();window.focus();});
 }
 function applyPreferences() {
   if(!preferencesService)return;const settings=preferencesService.snapshot();nativeTheme.themeSource=settings.theme;
@@ -717,6 +715,7 @@ function agentPromptPrefix(thread,project) {
   return `You are running in Wiek Browser with a local browser automation CLI. To use it, run node with the path in WIEK_BROWSER_CLI and the nodejs subcommand; pipe JavaScript on stdin or use -e. Read its skill subcommand first for the full SDK guide. WIEK_DATA_DIR selects this browser instance. Use taskSpace(${JSON.stringify('agent-'+thread.id)}) to keep this conversation's browser work in its own persistent Space. The browser SDK requires its documented Space ownership and user handoff. Do not read other browser profile files or credentials. The api subcommand accepts a workbench action and --json payload, including workspace:*, agents:control:* and mcp:*; use only user-authorized task scope.\n${preferences.instructions?`User instructions:\n${preferences.instructions}`:''}${memory}${catalogService?.promptForThread(thread)||''}`;
 }
 app.whenReady().then(async () => {
+  app.dock?.setIcon(path.join(__dirname,'assets/wiek.png'));
   foregroundLease=await claimForeground(DATA);
   schedulerJobService=createSchedulerJob({dataDir:DATA,root:ROOT,executable:process.execPath});
   const reservedShortcuts=[['CommandOrControl+C','Copy'],['CommandOrControl+X','Cut'],['CommandOrControl+V','Paste'],['CommandOrControl+A','Select all'],['CommandOrControl+Z','Undo'],['CommandOrControl+Shift+Z','Redo'],['CommandOrControl+P','Print'],['CommandOrControl+G','Find next'],['CommandOrControl+Shift+G','Find previous'],['Alt+CommandOrControl+I','Developer tools']].map(([accelerator,label])=>({accelerator,label}));
@@ -749,7 +748,7 @@ app.whenReady().then(async () => {
     snapshot: async ({scope, arguments:args}) => { const s = await spaceForScope(scope), t = targetFor(s,args.targetId), sessionId = routeRoot(t); return snapshotPage({ sendCDP: (method, params, sid) => sendCDP(s, method, params, sid || sessionId), targetId:t.id, sessionId, options:args.options || {} }); },
   } });
   mcpService = createMcpService({ dataDir: DATA, oauthOptions:{available:()=>safeStorage.isEncryptionAvailable()&&(process.platform!=='linux'||['gnome_libsecret','kwallet','kwallet5','kwallet6'].includes(safeStorage.getSelectedStorageBackend())),encrypt:value=>safeStorage.encryptString(value),decrypt:value=>safeStorage.decryptString(value),openExternal:url=>shell.openExternal(url)}, resolveScope: resolveAgentScope, resolveCredential: ref => { if (!/^env:[A-Za-z_][A-Za-z0-9_]*$/.test(ref)) throw new Error('Only explicit environment credential references are supported'); const name=ref.slice(4); if (!process.env[name]) throw new Error('Referenced credential is unavailable'); return process.env[name]; }, browserGateway, onChange: publish });
-  window = new BrowserWindow({ width: 1380, height: 930, minWidth: 900, minHeight: 600, title: 'Wiek Browser', backgroundColor: '#f6f7fb', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false } });
+  window = new BrowserWindow({icon:path.join(__dirname,'assets/wiek.png'), width: 1380, height: 930, minWidth: 900, minHeight: 600, title: 'Wiek Browser', backgroundColor: '#f6f7fb', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false } });
   Menu.setApplicationMenu(Menu.buildFromTemplate(browserMenu()));
   window.on('close',event=>{if(!closing&&(preferencesService.snapshot().backgroundMode||spaceWindows.size)){event.preventDefault();window.hide();}});
   window.on('close',()=>{if(!closing){clearTimeout(saving);writeBrowserStore();}});

@@ -1,0 +1,21 @@
+# P4 canonical SDK V2 adapter：实现约束
+
+本文件是基于当前 MIT SDK 源码的设计，**不是已运行的线上基准或已完成的 adapter**。参考框架固定在 `f566ac293e4e6bd80c4e9b062b5699f04eac41f4`；原始 adapter SHA-256 为 `baa7e1133eadb79fbcf0065ea9814a7a69cc9cb2cb9af84680271012282150cc`。两侧必须应用相同补丁和同一 SDK，不修改原始任务或评分标准。
+
+## 与旧接口不能直接互换的语义
+
+- 旧框架只探测 flat helpers 和 `taskSpaces.*`。新公共入口是 `taskSpace()`；能力探测只检查函数存在，不调用它。它会在名字不存在时创建新 space，因此截图与清理必须先用 `listTaskSpaces()` 找到现存精确 ID，再调用 `taskSpace(id)`。不存在时清理返回明确的幂等结果，截图返回缺失错误，不创建空白任务来冒充成功。
+- `TaskSpace.cdp()` 只支持 Target/Browser 域。`Page.captureScreenshot` 和 `Accessibility.getFullAXTree` 应经实际选中的 `Page.cdp()`，不能把旧全局 `cdp` 简单替换成 `task.cdp`。
+- `task.tabs()` 返回 `active`、`page`、`openedBy`；未托管 tab 的 `UnmanagedPage` 没有 Page 的 CDP 能力。优先选择实际 active 的托管页；active 页不受支持时应明确失败，不偷换成另一页或自动 adopt 用户页面。
+- 结束操作是 `task.finish({keep: []})`，不是 `completeTaskSpace(id,{keep:false})`。它只关闭 Agent 管理的页，可能保留未知来源/未托管页并返回 `closedSpace:false`。保留 receipt，并把未完全清理作为明确状态；不强制 claim/close 用户资料。
+- 用户接管和 user ownership 是控制边界。截图、清理不得在错误后回退到另一个历史 helper、擅自 takeover 或放宽隔离。
+
+源码依据：`packages/sdk/src/helpers.ts` 的 `taskSpace`/`resolveTaskSpace`，`packages/sdk/src/page-model.ts` 的 `TaskSpace.tabs`/`finish`/`cdp`、`Page.cdp` 与 `UnmanagedPage`。它们描述当前实现，不构成对 Ego 专有代码的推断。
+
+## 下一轮实现与验证顺序
+
+1. 在独立目录维护共享 adapter 和可重复应用的补丁，校验参考文件 hash；保留框架 MIT 许可证。不得静默修改被忽略的参考 checkout 作为唯一实现。
+2. 增加 canonical 的能力探测、Skill 匹配、任务候选解析/释放识别、截图/AX、结束与清理路径。旧方言继续使用其原合同，不以异常自动切换合同。
+3. 用合成 runtime 验证：探测零副作用；缺失名字不创建；ID/名字歧义；接管拒绝；选中页隔离；保留未知页；截图失败与空数据；旧文件不能伪装为新截图；每次清理有结构化 receipt。
+4. 对两侧同一 SDK 运行只访问本地 fixture 的实际 smoke：创建、跨进程恢复、截图/AX、结束和缺失任务幂等。记录 SDK、adapter、任务、CLI 和产物 hash；不启动模型、不使用真实账号。
+5. 获得专用 Stage A/Judge 配置和测试账号后才执行 31 项线上任务。发布未运行/失败/专有服务跳过的实际数量；本地 smoke 不能当作线上 benchmark 分数。

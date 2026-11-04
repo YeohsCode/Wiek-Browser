@@ -1,10 +1,12 @@
 # Wiek Browser
 
+<img src="app/assets/wiek.svg" alt="Wiek Browser" width="96">
+
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 本地 Chromium 浏览器与 Agent 工作区，原名 **Vek Browser**。项目独立实现 Electron 宿主、浏览器界面、Profile、任务 Space 和本地服务，复用 [citrolabs/ego-lite](https://github.com/citrolabs/ego-lite) 以 MIT 许可开放的 SDK。
 
-**当前开发检查点为 0.20.1。P3 仍在集成验收，尚未完成 Ego 全量功能复刻，P4 线上基准也未完成。** 实际进展见 [计划](PLAN.md)、[功能对照](analysis/feature-parity.md) 和 [验证结果](reports/RESULTS.md)。历史报告保留原 Vek 名称及其对应版本的测试结论。
+**当前开发检查点为 0.20.2。P3 仍在集成验收，尚未完成 Ego 全量功能复刻，P4 线上基准也未完成。** 实际进展见 [计划](PLAN.md)、[功能对照](analysis/feature-parity.md) 和 [验证结果](reports/RESULTS.md)。历史报告保留原 Vek 名称及其对应版本的测试结论。
 
 本检查点已通过 **500/500 本地测试**、**197/197 打包宿主检查**，并核对发行文件与源码匹配。这些结果覆盖已记录的范围，原生 P3 验收与线上模型基准仍未完成。
 
@@ -90,7 +92,7 @@ npm run dist
 
 macOS 产物为 `dist/mac-arm64/Wiek Browser.app`。当前为本地未签名构建，签名、公证和正式发布仍待配置。
 
-最近一次完整验收的 **0.19.0 Vek 基线**：436 项本地测试、197 项打包宿主检查、69/69 项同集浏览器测试通过；相同 SDK hash 的 Ego 保留结果为 68/69。**这些数字不代表当前 0.20.1 工作树已通过验收。** 当前日志与缺口见 [reports/RESULTS.md](reports/RESULTS.md)。公开 SDK 测试和 fixture 语义保持不变；本地 69 项用例不能替代尚未运行的 31 项线上模型基准。
+最近一次完整验收的 **0.19.0 Vek 基线**：436 项本地测试、197 项打包宿主检查、69/69 项同集浏览器测试通过；相同 SDK hash 的 Ego 保留结果为 68/69。**这些数字不代表当前 0.20.2 工作树已通过验收。** 当前日志与缺口见 [reports/RESULTS.md](reports/RESULTS.md)。公开 SDK 测试和 fixture 语义保持不变；本地 69 项用例不能替代尚未运行的 31 项线上模型基准。
 
 与 Ego 对标需要另外准备参考制品，放入被 Git 忽略的 `references/`、`downloads/`。仅开发和测试 Wiek 不要求持有 Ego 安装包。运行参考 E2E 时不要同时重建 SDK。
 

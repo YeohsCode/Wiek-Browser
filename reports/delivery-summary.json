@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-03T18:06:01.119582+00:00",
+  "generatedAt": "2026-11-04T11:55:14.190673+00:00",
   "project": "Wiek Browser",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "repository": "https://github.com/YeohsCode/Wiek-Browser",
   "fullParity": false,
   "localBrowserComparison": {
@@ -25,7 +25,7 @@
       },
       {
         "browser": "vek",
-        "startedAt": "2026-11-03T18:01:02.404Z",
+        "startedAt": "2026-11-04T11:50:55.062Z",
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs",
         "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
         "counts": {
@@ -44,28 +44,28 @@
     "pass": 532,
     "fail": 0,
     "rerun": true,
-    "log": "v201-sdk-tests.log"
+    "log": "v202-sdk-tests.log"
   },
   "localServiceAndParser": {
     "pass": 500,
     "fail": 0,
-    "log": "v201-source-tests.log"
+    "log": "v202-source-tests.log"
   },
   "packagedWorkbenchIntegration": {
     "checks": 197,
     "passed": true,
-    "version": "0.20.1",
-    "log": "v201-package-workbench.log"
+    "version": "0.20.2",
+    "log": "v202-package-workbench.log"
   },
   "package": {
     "path": "dist/mac-arm64/Wiek Browser.app",
     "sourceFilesMatch": true,
-    "sourceFilesChecked": 192,
+    "sourceFilesChecked": 201,
     "upstreamInputsUnchanged": 81,
     "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
     "signed": false,
     "notarized": false,
-    "note": "Only workbench API documentation changed in the final repack after E2E; app/CLI/SDK executable sources are unchanged."
+    "note": "Final 0.20.2 package passed host and shared SDK E2E; brand assets independently authored and packaged ICNS verified."
   },
   "p3": {
     "complete": false,
@@ -89,9 +89,9 @@
   "p4": {
     "complete": false,
     "workflow": ".github/workflows/wiek-ci.yml",
-    "remoteResult": "not-yet-verified",
-    "lastObservedRun": 41689129523,
-    "lastObservedStatus": "queued",
+    "remoteResult": "initial-run-failed-sdk-build; fix-pending-remote-verification",
+    "lastObservedRun": 41690733098,
+    "lastObservedStatus": "failure",
     "benchmarkRun": false,
     "benchmarkReadiness": "p4-benchmark-readiness.json",
     "blockers": [
@@ -99,10 +99,19 @@
       "Dedicated Stage A/Judge model and limits",
       "Dedicated account/login readiness",
       "Signing/notarization and release process"
-    ]
+    ],
+    "cleanStagedSourceSdkBuild": true,
+    "failureLog": "p4-ci-initial-sdk-failure.log"
   },
   "history": [
     "v190-delivery-summary.json",
-    "wiek-v0.20-checkpoint.json"
-  ]
+    "wiek-v0.20-checkpoint.json",
+    "wiek-v0.20.1-checkpoint.json"
+  ],
+  "brand": {
+    "independentlyAuthored": true,
+    "knownOriginalEgoLogoHits": 0,
+    "packagedIcnsMatches": true,
+    "audit": "wiek-brand-audit.json"
+  }
 }

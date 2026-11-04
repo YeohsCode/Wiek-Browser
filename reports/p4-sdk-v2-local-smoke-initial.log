@@ -1,0 +1,75 @@
+{
+  "generatedAt": "2026-11-04T11:57:30.875Z",
+  "onlineBenchmark": false,
+  "modelCalls": 0,
+  "accountActions": 0,
+  "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+  "controlSha256": "a70f0e087cf586a608b98e37f473c1ca1db02f243b3074a31d22cce151357990",
+  "fixtureSha256": "c65f27601d1ff23a5e13977b19ae8dc808b2d081ad555bf9822d518ad3f6c656",
+  "runs": [
+    {
+      "browser": "ego",
+      "taskName": "benchmark-v2-local-7f8a039a-5a30-4c39-b953-99916c75e3ea",
+      "passed": false,
+      "checks": [],
+      "error": "SDK smoke failed (exit=126, timeout=false, overflow=false): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli: line 3: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/downloads/ego/ego lite.app/Contents/Frameworks/ego Framework.framework/Versions/0.6.1.13/Helpers/ego-browser: No such file or directory\n/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli: line 3: exec: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/downloads/ego/ego lite.app/Contents/Frameworks/ego Framework.framework/Versions/0.6.1.13/Helpers/ego-browser: cannot execute: No such file or directory\n"
+    },
+    {
+      "browser": "wiek",
+      "taskName": "benchmark-v2-local-16ccbe1b-32ce-4680-8adc-78ed5058182c",
+      "passed": true,
+      "checks": [
+        {
+          "probe": {
+            "canonical": true,
+            "globalCanonical": true
+          }
+        },
+        {
+          "created": {
+            "spaceId": 2
+          }
+        },
+        {
+          "capture": {
+            "spaceId": 2,
+            "pngBytes": 13804,
+            "pngSha256": "c12e5e303f4a248d7419d76267ee632a1f03e8dacefeb7024ea49164d7393d01",
+            "axNodes": 9
+          }
+        },
+        {
+          "closed": [
+            {
+              "candidate": 2,
+              "ok": true,
+              "receipt": {
+                "spaceId": 2,
+                "closedSpace": true,
+                "keptManagedLabels": [],
+                "closedManagedLabels": [
+                  "p1"
+                ],
+                "preservedUnmanagedCount": 0
+              }
+            }
+          ]
+        },
+        {
+          "missing": {
+            "rows": [
+              {
+                "candidate": "benchmark-v2-local-16ccbe1b-32ce-4680-8adc-78ed5058182c",
+                "ok": true,
+                "notFound": true
+              }
+            ],
+            "before": 1,
+            "after": 1
+          }
+        }
+      ]
+    }
+  ],
+  "passed": false
+}

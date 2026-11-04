@@ -8,5 +8,14 @@ if(present){dataset=JSON.parse(await readFile(datasetPath,'utf8'));try{commit=ex
 const taskIds=manifest.map(row=>row.task_id),actual=dataset?.map(row=>row.task_id),sameTasks=actual?JSON.stringify(taskIds)===JSON.stringify(actual):false;
 const attachments=[...new Set(manifest.flatMap(row=>row.attachments))],attachmentStatus=[];for(const name of attachments)attachmentStatus.push({name,present:await exists(join(reference,'data/attachments',name))});
 const report={generatedAt:new Date().toISOString(),benchmarkRun:false,modelCalls:0,accountActions:0,reference:{present,commit,datasetSha256:present?sha(await readFile(datasetPath)):null,adapterSha256:adapter?sha(adapter):null},tasks:{count:manifest.length,unique:new Set(taskIds).size,sameOrderedIds:sameTasks,requiresLogin:manifest.filter(row=>row.requires_login).length,loginPlatforms:[...new Set(manifest.flatMap(row=>row.login_platforms))].sort(),attachments:attachmentStatus},adapter:{canonicalSdkV2Present:adapter?adapter.includes('typeof globalThis.taskSpace ==='):false,legacyOrFacadeProbePresent:adapter?adapter.includes('LEGACY_FLAT_V1')&&adapter.includes('TASKSPACES_FACADE_V1'):false},blockers:[]};
+const controlPath=join(root,'tools/benchmark-sdk-v2-contract.mjs');
+report.adapter.sharedCanonicalControlPresent=await exists(controlPath);
+report.adapter.stageAIntegrated=report.adapter.canonicalSdkV2Present;
+const smokePath=join(root,'reports/p4-sdk-v2-local-smoke.json');
+if(await exists(smokePath)){
+ const smoke=JSON.parse(await readFile(smokePath,'utf8'));
+ const currentHash=report.adapter.sharedCanonicalControlPresent?sha(await readFile(controlPath)):null;
+ report.adapter.localCanonicalSmoke={passed:smoke.passed===true&&smoke.controlSha256===currentHash,controlMatches:smoke.controlSha256===currentHash,onlineBenchmark:false,runs:smoke.runs.map(row=>({browser:row.browser,passed:row.passed,hostVersion:row.checks.find(check=>check.probe)?.probe.hostVersion?.currentVersion||null})),report:'p4-sdk-v2-local-smoke.json'};
+}
 if(!present)report.blockers.push('Pinned benchmark checkout not present');if(!sameTasks)report.blockers.push('Benchmark task IDs differ from the recorded ordered manifest');if(attachmentStatus.some(row=>!row.present))report.blockers.push('Required attachment missing');if(!report.adapter.canonicalSdkV2Present)report.blockers.push('Reference adapter probes legacy/taskSpaces facade; shared canonical SDK V2 taskSpace contract still needs implementation and validation');report.blockers.push('No dedicated Stage A/Judge model and thinking/limits configuration has been approved for a paid run','Dedicated test-account/login readiness is not recorded; personal browsing sessions are not benchmark fixtures','Equivalent pinned SDK, task, model, limits, account state and adapter behavior must be recorded for both browsers');
 await writeFile(join(root,'reports/p4-benchmark-readiness.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify(report,null,2));

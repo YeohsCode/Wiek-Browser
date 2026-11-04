@@ -202,3 +202,12 @@
 - [x] 最终包 197/197、同集 Wiek 69/69（1,248 断言）、201 文件身份与 81 上游输入未改；原图 hash 0 命中。
 - [x] 核对 V2 taskSpace 创建/截图 Page/finish 保护语义，写明共享 adapter 实现与双侧 smoke 设计。
 - [ ] 新远端 CI 结果待验收；P3 系统矩阵与 P4 共享 V2 adapter/线上基准仍保留。
+
+### 0.20.2 P4 第二轮干净 CI 与 V2 控制原语
+
+- [x] 远端 41824900816：SDK/native/local 500/500/模型恢复/应用构建通过；打包宿主发现第二份遗漏输入 `downloads/voice/jfk.wav`。
+- [x] 把同一 WAV（SHA-256 `59dfb9a4…7860e`）移入版本化测试夹具，保留 MIT 项目许可与转录断言；未修改 SDK 断言。
+- [x] 共享 V2 控制原语及 11/11 边界专项：精确现存 ID、active Page 截图/AX、保护未知页和结构化结束 receipt。
+- [x] 同一 SDK、控制源码和 loopback HTML：Ego 0.6.2.7 与 Wiek 0.20.2 双侧跨进程恢复、真实 PNG/AX、结束及缺失任务幂等全部通过；0 模型/账号操作。
+- [x] WAV 夹具修复后打包宿主重跑 197/197 通过。
+- [ ] 共享控制原语尚未接入完整 Stage A adapter；线上 benchmark 与新远端完整 CI 结果待验收。

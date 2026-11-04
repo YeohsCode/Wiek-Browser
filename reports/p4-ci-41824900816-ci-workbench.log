@@ -1,0 +1,15 @@
+node:internal/fs/promises:1345
+  return new FileHandle(await PromisePrototypeThen(
+                        ^
+
+Error: ENOENT: no such file or directory, open '/Users/runner/work/Wiek-Browser/Wiek-Browser/downloads/voice/jfk.wav'
+    at async open (node:internal/fs/promises:1345:25)
+    at async Object.readFile (node:internal/fs/promises:2003:14)
+    at async file:///Users/runner/work/Wiek-Browser/Wiek-Browser/tests/workbench-integration.mjs:275:13 {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/runner/work/Wiek-Browser/Wiek-Browser/downloads/voice/jfk.wav'
+}
+
+Node.js v24.22.1

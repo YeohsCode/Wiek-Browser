@@ -55,7 +55,8 @@
     "checks": 197,
     "passed": true,
     "version": "0.20.2",
-    "log": "v202-package-workbench.log"
+    "log": "v202-package-workbench.log",
+    "fixtureFixRerun": "v202-clean-audio-workbench.log"
   },
   "package": {
     "path": "dist/mac-arm64/Wiek Browser.app",
@@ -89,8 +90,8 @@
   "p4": {
     "complete": false,
     "workflow": ".github/workflows/wiek-ci.yml",
-    "remoteResult": "initial-run-failed-sdk-build; fix-pending-remote-verification",
-    "lastObservedRun": 41690733098,
+    "remoteResult": "sdk-native-local-model-build-passed; packaged-host-failed-missing-audio; fixed-pending-new-run",
+    "lastObservedRun": 41824900816,
     "lastObservedStatus": "failure",
     "benchmarkRun": false,
     "benchmarkReadiness": "p4-benchmark-readiness.json",
@@ -101,7 +102,18 @@
       "Signing/notarization and release process"
     ],
     "cleanStagedSourceSdkBuild": true,
-    "failureLog": "p4-ci-initial-sdk-failure.log"
+    "failureLog": "p4-ci-41824900816-ci-workbench.log",
+    "canonicalControlTests": {
+      "passed": 11,
+      "log": "p4-sdk-v2-contract-tests.log"
+    },
+    "canonicalLocalSmoke": {
+      "bothPassed": true,
+      "egoVersion": "0.6.2.7",
+      "wiekVersion": "0.20.2",
+      "report": "p4-sdk-v2-local-smoke.json",
+      "stageAIntegrated": false
+    }
   },
   "history": [
     "v190-delivery-summary.json",

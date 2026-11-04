@@ -1,6 +1,6 @@
 # P4 canonical SDK V2 adapter：实现约束
 
-本文件是基于当前 MIT SDK 源码的设计，**不是已运行的线上基准或已完成的 adapter**。参考框架固定在 `f566ac293e4e6bd80c4e9b062b5699f04eac41f4`；原始 adapter SHA-256 为 `baa7e1133eadb79fbcf0065ea9814a7a69cc9cb2cb9af84680271012282150cc`。两侧必须应用相同补丁和同一 SDK，不修改原始任务或评分标准。
+本文件基于当前 MIT SDK 源码。共享控制原语及本地 smoke runner 已实现，**框架完整 adapter 尚未接入，也未运行线上基准**。参考框架固定在 `f566ac293e4e6bd80c4e9b062b5699f04eac41f4`；原始 adapter SHA-256 为 `baa7e1133eadb79fbcf0065ea9814a7a69cc9cb2cb9af84680271012282150cc`。两侧必须应用相同补丁和同一 SDK，不修改原始任务或评分标准。
 
 ## 与旧接口不能直接互换的语义
 
@@ -19,3 +19,20 @@
 3. 用合成 runtime 验证：探测零副作用；缺失名字不创建；ID/名字歧义；接管拒绝；选中页隔离；保留未知页；截图失败与空数据；旧文件不能伪装为新截图；每次清理有结构化 receipt。
 4. 对两侧同一 SDK 运行只访问本地 fixture 的实际 smoke：创建、跨进程恢复、截图/AX、结束和缺失任务幂等。记录 SDK、adapter、任务、CLI 和产物 hash；不启动模型、不使用真实账号。
 5. 获得专用 Stage A/Judge 配置和测试账号后才执行 31 项线上任务。发布未运行/失败/专有服务跳过的实际数量；本地 smoke 不能当作线上 benchmark 分数。
+
+## 已实现的本地控制原语
+
+`tools/benchmark-sdk-v2-contract.mjs` 的 factory 可原样序列化到两侧 SDK 的 nodejs 环境，不读浏览器专属私有接口。11 项专项验证缺失任务零创建、所有权竞争、名字/ID 歧义、active Page 隔离、未知页保护、空截图与可选 AX 失败。
+
+`tools/verify-benchmark-v2-smoke.mjs --browser wiek|ego|both` 使用同一 SDK 与控制源码、同一 loopback HTML，分 CLI 进程创建/恢复/截图/AX/结束，校验真实 PNG、实际 AX 文本和缺失任务不改变数量。CLI 输出必须带本次随机 marker，退出失败或无 marker 不会冒充成功；Wiek 使用一次性数据目录并在最后停止该实例。
+
+Ego 显式版本示例：
+
+```sh
+WIEK_BENCH_EGO_CLI="/absolute/path/to/Versions/0.6.2.7/Helpers/ego-browser" \
+  node tools/verify-benchmark-v2-smoke.mjs --browser both
+```
+
+Ego 使用命名 `vek-reference` 的专用实例，不回退到个人默认浏览器。下载副本从历史 0.6.1.13 自动更新后，保留旧测试身份与新 smoke 的 CLI hash/实际 host version；不同版本的结果分别说明，不能把新 smoke 冒充旧版 69-case 重跑。原始路径/连接/脚本失败日志均保留。
+
+实际 smoke 两侧均通过：Ego 0.6.2.7（16,388-byte PNG/9 AX nodes）和 Wiek 0.20.2（13,804-byte PNG/9 AX nodes）。同一 SDK hash `a8c27da3…572a56`、同一控制源码与 fixture hash；详情见 `reports/p4-sdk-v2-local-smoke.json`。测试未运行模型或真实账号动作。当前 native Ego 将 marker 写入 stderr，runner 同时解析两个输出通道；所有初轮失败保留，没有据退出码 0 伪造成功。

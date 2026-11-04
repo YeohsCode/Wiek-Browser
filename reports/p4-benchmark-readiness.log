@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-03T17:52:04.514Z",
+  "generatedAt": "2026-11-04T12:03:55.491Z",
   "benchmarkRun": false,
   "modelCalls": 0,
   "accountActions": 0,
@@ -31,7 +31,27 @@
   },
   "adapter": {
     "canonicalSdkV2Present": false,
-    "legacyOrFacadeProbePresent": true
+    "legacyOrFacadeProbePresent": true,
+    "sharedCanonicalControlPresent": true,
+    "stageAIntegrated": false,
+    "localCanonicalSmoke": {
+      "passed": true,
+      "controlMatches": true,
+      "onlineBenchmark": false,
+      "runs": [
+        {
+          "browser": "ego",
+          "passed": true,
+          "hostVersion": "0.6.2.7"
+        },
+        {
+          "browser": "wiek",
+          "passed": true,
+          "hostVersion": "0.20.2"
+        }
+      ],
+      "report": "p4-sdk-v2-local-smoke.json"
+    }
   },
   "blockers": [
     "Reference adapter probes legacy/taskSpaces facade; shared canonical SDK V2 taskSpace contract still needs implementation and validation",

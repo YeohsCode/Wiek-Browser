@@ -1,3 +1,12 @@
+# 0.20.2 P4 继续推进（同日追加）
+
+- 共享 canonical V2 控制原语的 11 项边界测试通过；使用同一 SDK/控制源码/本地网页，Ego **0.6.2.7** 和 Wiek **0.20.2** 的跨进程创建/恢复、真实 PNG、9 节点 AX、结束与缺失任务幂等均通过。没有模型调用或真实账号操作。[实际结果](p4-sdk-v2-local-smoke.json)、[专项](p4-sdk-v2-contract-tests.log)。这是新增本地 smoke，旧 Ego 0.6.1.13 的 69-case 结果仍保留为原版本证据。
+- 原始路径失效、bootstrap、脚本求值和输出通道失败日志保留。最终 runner 使用随机 marker，同时解析 stdout/stderr，不把单独退出码 0 当成功。[设计与边界](../analysis/benchmark-sdk-v2-design.md)。
+- 远端 [41824900816](https://github.com/YeohsCode/Wiek-Browser/actions/runs/41824900816) 已通过 SDK、原生编译、本地 **500/500**、模型恢复及应用构建；打包宿主因忽略目录的 WAV 不存在失败。已把同一音频作为版本化 fixture，转录断言不变，本地最终包重跑 **197/197** 通过。[远端原始失败](p4-ci-41824900816-ci-workbench.log)、[修复回归](v202-clean-audio-workbench.log)。
+- 完整 Stage A 框架仍未接入 canonical adapter；31 项线上基准与正式签名发布未运行。新 CI 的完整结果待后续验收。
+
+---
+
 # Wiek Browser 0.20.2（2026-11-04）
 
 使用独立绘制的 W/青绿色标识，替换应用、托盘和兼容 Skill 的原 Ego 图片；同时修复远端 CI 的缺失构建输入。全量复刻、P3 物理系统矩阵和 P4 线上基准仍未完成。

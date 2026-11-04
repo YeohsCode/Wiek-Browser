@@ -147,7 +147,7 @@ function cell(value) { return String(value ?? "—").replaceAll("|", "\\|").repl
 
 export function comparisonMarkdown(report) {
   const lines = ["# Ego / Wiek Browser 同集测试对比", "", `生成时间：${report.generatedAt}`, "",
-    "使用原封不动的上游真实浏览器 E2E runner、SDK 与本地 fixture，串行执行。SKIP 和未运行均不计为通过；本结果不等同 31 项在线模型 benchmark。", "",
+    "使用未改断言的上游真实浏览器 E2E runner 与本地 fixture，串行执行；两侧使用相同 SDK，本地修复见 ../analysis/sdk-changes.md。SKIP 和未运行均不计为通过；本结果不等同 31 项在线模型 benchmark。", "",
     `选择：${report.selectedNames.length}/${names.length} 个 cases。${report.comparable ? "两侧 SDK、fixture 和 case 索引哈希一致。" : "尚无两侧相同 SDK、fixture、case 索引的完整运行证据。"}`, "",
     "| 浏览器 | 运行状态 | PASS | FAIL | SKIP | 未运行 | 断言 | 退出码 | 总用时 |", "|---|---|---:|---:|---:|---:|---:|---:|---:|"];
   for (const run of report.runs) lines.push(`| ${run.browser} | ${run.status} | ${run.counts.pass} | ${run.counts.fail} | ${run.counts.skip} | ${run.counts.notRun} | ${run.counts.assertions} | ${cell(run.exitCode)} | ${(run.wallTimeMs / 1000).toFixed(1)}s |`);

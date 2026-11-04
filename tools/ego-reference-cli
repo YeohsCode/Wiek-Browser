@@ -1,3 +1,6 @@
 #!/bin/sh
 VEK_ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
-exec "$VEK_ROOT/downloads/ego/ego lite.app/Contents/Frameworks/ego Framework.framework/Versions/0.6.1.13/Helpers/ego-browser" --ego-server-name=vek-reference "$@"
+# Explicit pin; do not silently follow the browser updater's Current symlink.
+WIEK_REFERENCE_VERSION=${WIEK_REFERENCE_VERSION:-0.6.1.13}
+case "$WIEK_REFERENCE_VERSION" in *[!0-9.]*|'') echo "Invalid reference version" >&2; exit 2;; esac
+exec "$VEK_ROOT/downloads/ego/ego lite.app/Contents/Frameworks/ego Framework.framework/Versions/$WIEK_REFERENCE_VERSION/Helpers/ego-browser" --ego-server-name=vek-reference "$@"

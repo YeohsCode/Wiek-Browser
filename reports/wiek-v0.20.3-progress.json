@@ -1,0 +1,21 @@
+{
+  "generatedAt": "2026-11-04T12:20:57.259062+00:00",
+  "version": "0.20.3",
+  "sourceTests": {
+    "pass": 512,
+    "fail": 0,
+    "log": "v203-source-tests-final.log"
+  },
+  "sdkTests": {
+    "pass": 532,
+    "fail": 0,
+    "log": "v203-sdk-tests.log"
+  },
+  "packagedHost": {
+    "checks": 197,
+    "passed": true,
+    "log": "v203-package-workbench.log"
+  },
+  "browserComparison": "rerunning both browsers against identical modified SDK",
+  "fullParity": false
+}

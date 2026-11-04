@@ -1,23 +1,23 @@
 {
-  "generatedAt": "2026-11-04T12:02:51.384Z",
+  "generatedAt": "2026-11-04T12:19:57.006Z",
   "onlineBenchmark": false,
   "modelCalls": 0,
   "accountActions": 0,
-  "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+  "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
   "controlSha256": "a70f0e087cf586a608b98e37f473c1ca1db02f243b3074a31d22cce151357990",
   "fixtureSha256": "c65f27601d1ff23a5e13977b19ae8dc808b2d081ad555bf9822d518ad3f6c656",
   "runs": [
     {
       "browser": "ego",
       "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/downloads/ego/ego lite.app/Contents/Frameworks/ego Framework.framework/Versions/0.6.2.7/Helpers/ego-browser",
-      "taskName": "benchmark-v2-local-c5975abb-6423-43b5-8260-345f9522c165",
+      "taskName": "benchmark-v2-local-d801a493-49ce-4931-b2ab-a0560ed7e707",
       "passed": true,
       "checks": [
         {
           "probe": {
             "canonical": true,
             "globalCanonical": true,
-            "runtimeSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+            "runtimeSdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
             "hostVersion": {
               "currentVersion": "0.6.2.7",
               "updateAvailable": false
@@ -26,12 +26,12 @@
         },
         {
           "created": {
-            "spaceId": 2
+            "spaceId": 1
           }
         },
         {
           "capture": {
-            "spaceId": 2,
+            "spaceId": 1,
             "pngBytes": 16388,
             "pngSha256": "572ee32fd06e5e89fbb7f06d024e9acd32e325ef0be56ae8ccb2d23069dae5be",
             "axNodes": 9
@@ -40,10 +40,10 @@
         {
           "closed": [
             {
-              "candidate": 2,
+              "candidate": 1,
               "ok": true,
               "receipt": {
-                "spaceId": 2,
+                "spaceId": 1,
                 "closedSpace": true,
                 "keptManagedLabels": [],
                 "closedManagedLabels": [
@@ -58,7 +58,7 @@
           "missing": {
             "rows": [
               {
-                "candidate": "benchmark-v2-local-c5975abb-6423-43b5-8260-345f9522c165",
+                "candidate": "benchmark-v2-local-d801a493-49ce-4931-b2ab-a0560ed7e707",
                 "ok": true,
                 "notFound": true
               }
@@ -73,16 +73,16 @@
     {
       "browser": "wiek",
       "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/cli/wiek-browser.mjs",
-      "taskName": "benchmark-v2-local-dd31d873-cef7-433c-847a-bc619da70044",
+      "taskName": "benchmark-v2-local-64b66ea8-43e8-46b0-b3b6-42598717a5d9",
       "passed": true,
       "checks": [
         {
           "probe": {
             "canonical": true,
             "globalCanonical": true,
-            "runtimeSdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+            "runtimeSdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
             "hostVersion": {
-              "currentVersion": "0.20.2",
+              "currentVersion": "0.20.3",
               "updateAvailable": false
             }
           }
@@ -121,7 +121,7 @@
           "missing": {
             "rows": [
               {
-                "candidate": "benchmark-v2-local-dd31d873-cef7-433c-847a-bc619da70044",
+                "candidate": "benchmark-v2-local-64b66ea8-43e8-46b0-b3b6-42598717a5d9",
                 "ok": true,
                 "notFound": true
               }

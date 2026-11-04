@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T12:03:55.491Z",
+  "generatedAt": "2026-11-04T12:20:57.329Z",
   "benchmarkRun": false,
   "modelCalls": 0,
   "accountActions": 0,
@@ -36,6 +36,7 @@
     "stageAIntegrated": false,
     "localCanonicalSmoke": {
       "passed": true,
+      "sdkMatches": true,
       "controlMatches": true,
       "onlineBenchmark": false,
       "runs": [
@@ -47,7 +48,7 @@
         {
           "browser": "wiek",
           "passed": true,
-          "hostVersion": "0.20.2"
+          "hostVersion": "0.20.3"
         }
       ],
       "report": "p4-sdk-v2-local-smoke.json"

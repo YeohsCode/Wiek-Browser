@@ -2,13 +2,15 @@
 
 <img src="app/assets/wiek.svg" alt="Wiek Browser" width="96">
 
+应用与 Skill 使用[独立绘制的 Wiek 标识](analysis/wiek-brand-assets.md)。
+
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 本地 Chromium 浏览器与 Agent 工作区，原名 **Vek Browser**。项目独立实现 Electron 宿主、浏览器界面、Profile、任务 Space 和本地服务，复用 [citrolabs/ego-lite](https://github.com/citrolabs/ego-lite) 以 MIT 许可开放的 SDK。
 
-**当前开发检查点为 0.20.2。P3 仍在集成验收，尚未完成 Ego 全量功能复刻，P4 线上基准也未完成。** 实际进展见 [计划](PLAN.md)、[功能对照](analysis/feature-parity.md) 和 [验证结果](reports/RESULTS.md)。历史报告保留原 Vek 名称及其对应版本的测试结论。
+**当前开发检查点为 0.20.3。P3 仍在集成验收，尚未完成 Ego 全量功能复刻，P4 线上基准也未完成。** 实际进展见 [计划](PLAN.md)、[功能对照](analysis/feature-parity.md) 和 [验证结果](reports/RESULTS.md)。历史报告保留原 Vek 名称及其对应版本的测试结论。
 
-本检查点已通过 **500/500 本地测试**、**197/197 打包宿主检查**，并核对发行文件与源码匹配。这些结果覆盖已记录的范围，原生 P3 验收与线上模型基准仍未完成。
+0.20.3 已通过 **512/512 本地测试**、**532/532 SDK 测试**和 **197/197 打包宿主检查**。使用同一 popup 修复的双浏览器 69 项重跑正在进行；原生 P3 验收与线上模型基准仍未完成。
 
 ## 从源码启动
 
@@ -52,7 +54,7 @@ node cli/wiek-browser.mjs stop
 - 自动化调度、执行模式、明确启用的 macOS login job、忙碌延期、运行记忆/结果、停止条件评估和保守的崩溃恢复。
 - Library/Collections、截图标注、网页操作录制、本地语音转写，以及需要用户启用的桌面工具。
 
-**本检查点尚待完成的 P3 验收：** 物理多显示器/权限撤销及更多翻译语言、睡眠/登录/权限撤销，以及完整打包回归。远程 Git 使用一次性本地 bare 仓库验证；GitHub PR 使用合成协议进程测试，没有操作真实账号。其余 Agent 集成继续暂缓。完整浏览器资料迁移、部分 MCP 能力、语义 memory、签名/公证和 31 项线上模型基准仍在后续计划中。
+**本检查点尚待完成的 P3 验收：** 物理多显示器/权限撤销及更多翻译语言、睡眠/登录/权限撤销。远程 Git 使用一次性本地 bare 仓库验证；GitHub PR 使用合成协议进程测试，没有操作真实账号。其余 Agent 集成继续暂缓。完整浏览器资料迁移、部分 MCP 能力、语义 memory、签名/公证和 31 项线上模型基准仍在后续计划中。
 
 ## 让 Agent 操作网页
 
@@ -92,7 +94,7 @@ npm run dist
 
 macOS 产物为 `dist/mac-arm64/Wiek Browser.app`。当前为本地未签名构建，签名、公证和正式发布仍待配置。
 
-最近一次完整验收的 **0.19.0 Vek 基线**：436 项本地测试、197 项打包宿主检查、69/69 项同集浏览器测试通过；相同 SDK hash 的 Ego 保留结果为 68/69。**这些数字不代表当前 0.20.2 工作树已通过验收。** 当前日志与缺口见 [reports/RESULTS.md](reports/RESULTS.md)。公开 SDK 测试和 fixture 语义保持不变；本地 69 项用例不能替代尚未运行的 31 项线上模型基准。
+**0.20.2 验收**：500 项完整本地测试、532 项 SDK 测试、197 项打包宿主检查、69/69 项同集浏览器测试通过；另有 11 项新增 SDK V2 控制边界专项通过。相同 SDK hash 的 Ego 0.6.1.13 历史结果保留为 68/69；新增 Ego 0.6.2.7 / Wiek 0.20.2 的本地 V2 smoke 两侧通过。日志与缺口见 [reports/RESULTS.md](reports/RESULTS.md)。公开 SDK 测试和 fixture 语义保持不变；这些本地用例不能替代尚未运行的 31 项线上模型基准。
 
 与 Ego 对标需要另外准备参考制品，放入被 Git 忽略的 `references/`、`downloads/`。仅开发和测试 Wiek 不要求持有 Ego 安装包。运行参考 E2E 时不要同时重建 SDK。
 

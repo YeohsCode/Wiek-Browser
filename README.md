@@ -2,13 +2,15 @@
 
 <img src="app/assets/wiek.svg" alt="Wiek Browser" width="96">
 
+The app and Skills use [independently authored Wiek artwork](analysis/wiek-brand-assets.md).
+
 [English](README.md) | [简体中文](README.zh-CN.md)
 
 A local Chromium browser and agent workspace, previously named **Vek Browser**. Wiek implements its own Electron host, browser UI, profiles, task spaces, and local services, and reuses the MIT-licensed public SDK from [citrolabs/ego-lite](https://github.com/citrolabs/ego-lite).
 
-**Development checkpoint: 0.20.2.** The repository includes ongoing P3 work; full Ego feature parity and the P4 live-site benchmark are **not complete**. See [PLAN.md](PLAN.md), [feature coverage](analysis/feature-parity.md), and [validation](reports/RESULTS.md). Historical reports retain the former project name and describe their original builds.
+**Development checkpoint: 0.20.3.** The repository includes ongoing P3 work; full Ego feature parity and the P4 live-site benchmark are **not complete**. See [PLAN.md](PLAN.md), [feature coverage](analysis/feature-parity.md), and [validation](reports/RESULTS.md). Historical reports retain the former project name and describe their original builds.
 
-This checkpoint passed **500/500 local tests**, **197/197 packaged host checks**, and the packaged-file identity checks. This validates the recorded scope; native P3 acceptance and the model benchmark remain open.
+The 0.20.3 source gates passed **512/512 local tests**, **532/532 SDK tests**, and **197/197 packaged host checks**. The two-browser 69-case rerun with the shared popup fix is in progress; native P3 acceptance and the online model benchmark remain open.
 
 ## Quick start
 
@@ -52,7 +54,7 @@ Data-directory reuse covers stored files; OS-bound encrypted credential migratio
 - Scheduled automations, execution modes, opt-in macOS login jobs, busy deferral, run memory/results, stop evaluation, and conservative crash recovery.
 - Library/collections, screenshot annotation, webpage recording, local speech transcription, and opt-in desktop tools.
 
-**P3 work in this checkpoint still needs final acceptance:** physical multi-display/permission-revocation coverage and additional translation languages, system sleep/login/revocation behavior, and complete packaged regression. Remote Git is tested against disposable local bare repositories; GitHub PR tests use synthetic protocol processes, with no real account writes. Other agent integrations remain deferred. Full browser-data migration, some MCP features, semantic memory, signing/notarization, and the 31-task live-site benchmark remain open.
+**P3 work in this checkpoint still needs final acceptance:** physical multi-display/permission-revocation coverage and additional translation languages, system sleep/login/revocation behavior. Remote Git is tested against disposable local bare repositories; GitHub PR tests use synthetic protocol processes, with no real account writes. Other agent integrations remain deferred. Full browser-data migration, some MCP features, semantic memory, signing/notarization, and the 31-task live-site benchmark remain open.
 
 ## Browser automation
 
@@ -93,7 +95,7 @@ The Wiek-owned [CI workflow](.github/workflows/wiek-ci.yml) installs locked depe
 
 The macOS artifact is `dist/mac-arm64/Wiek Browser.app`. It is a local unsigned build until signing/notarization is configured.
 
-The last fully validated **0.19.0 Vek** baseline passed 436 local tests, 197 packaged host checks, and 69/69 shared browser cases; the retained Ego run passed 68/69 with the same SDK hash. These figures do **not** certify this 0.20.2 working tree. Current evidence and remaining failures belong in [reports/RESULTS.md](reports/RESULTS.md). SDK tests/fixture semantics stay unchanged. The local 69-case suite is separate from the unrun 31-task model benchmark.
+**0.20.2 acceptance:** 500 local tests, 532 SDK tests, 197 packaged host checks, and 69/69 shared browser cases passed, alongside 11 new SDK V2 control-boundary tests. The retained Ego 0.6.1.13 run passed 68/69 with the same SDK hash; the additional local canonical V2 smoke passed on both Ego 0.6.2.7 and Wiek 0.20.2. See [reports/RESULTS.md](reports/RESULTS.md) for evidence and remaining gaps. SDK tests/fixture semantics stay unchanged. These local checks are separate from the unrun 31-task model benchmark.
 
 Ego reference comparisons require separately obtained reference artifacts under ignored `references/` and `downloads/`; ordinary Wiek-only development does not. Do not rebuild the SDK concurrently with reference E2E.
 

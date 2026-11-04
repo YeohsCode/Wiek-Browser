@@ -1,3 +1,13 @@
+# 0.20.3 共享 SDK 修复与 CI 视口（验收进行中）
+
+新增回归稳定复现旧 popup 的 URL 更新误触新 waiter，修复仅记录注册时已有目标 ID；没有改上游断言。SDK 532/532、完整本地最终 512/512、0.20.3 打包宿主 197/197 通过；同一修改后的 SDK 在 Ego/Wiek 双侧重跑中。P3 系统边界和 P4 线上基准未完成。
+
+日志：[复现失败](p4-popup-refresh-before-fix.log)、[修复专项](p4-popup-refresh-after-fix.log)、[SDK](v203-sdk-tests.log)、[源码最终](v203-source-tests-final.log)、[宿主](v203-package-workbench.log)。首轮本地 511/512 的合成 PR 超时保留在 [初轮](v203-source-tests.log)，该项单独及完整重跑通过。
+
+CI 先前的完整浏览器失败保留在 [41826077172](p4-ci-41826077172-ci-browser-suite.log)；媒体 fixture 为固定宽度，在 runner 794×537 页面视口中发生点击失败。runner-only CoreGraphics 显示配置步骤已远端执行成功，后续完整结果仍待记录。共享 SDK 修改见 [SDK changes](../analysis/sdk-changes.md)。
+
+---
+
 # 0.20.2 P4 继续推进（同日追加）
 
 - 共享 canonical V2 控制原语的 11 项边界测试通过；使用同一 SDK/控制源码/本地网页，Ego **0.6.2.7** 和 Wiek **0.20.2** 的跨进程创建/恢复、真实 PNG、9 节点 AX、结束与缺失任务幂等均通过。没有模型调用或真实账号操作。[实际结果](p4-sdk-v2-local-smoke.json)、[专项](p4-sdk-v2-contract-tests.log)。这是新增本地 smoke，旧 Ego 0.6.1.13 的 69-case 结果仍保留为原版本证据。

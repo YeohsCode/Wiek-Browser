@@ -1,0 +1,28 @@
+✖ a late title/URL refresh of an old popup cannot satisfy a newly armed waiter (1.796333ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 89.551667
+
+✖ failing tests:
+
+test at tests/sdk-popup-refresh.test.mjs:6:1
+✖ a late title/URL refresh of an old popup cannot satisfy a newly armed waiter (1.796333ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'p2' !== 'p3'
+  
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/sdk-popup-refresh.test.mjs:13:14)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'p2',
+    expected: 'p3',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

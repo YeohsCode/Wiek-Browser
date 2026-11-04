@@ -1799,6 +1799,12 @@ class Page {
 
     // Subscribe synchronously so the common `const pending = waitForEvent();
     // await click()` pattern cannot miss a popup created by the click.
+    // Metadata refreshes of an existing unobserved popup are not new popups.
+    const alreadyDiscovered = new Set(
+      peekUnhandledPageNotices()
+        .filter((notice) => notice.spaceId === this.spaceId)
+        .map((notice) => notice.targetId),
+    );
     return new Promise<Page>((resolve, reject) => {
       let settled = false;
       let timer: ReturnType<typeof setTimeout> | undefined;
@@ -1812,7 +1818,8 @@ class Page {
       const onNotice = (notice: UnhandledPageNotice) => {
         if (
           notice.spaceId !== this.spaceId ||
-          notice.openerLabel !== this.label
+          notice.openerLabel !== this.label ||
+          alreadyDiscovered.has(notice.targetId)
         ) {
           return;
         }

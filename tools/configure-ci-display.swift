@@ -11,10 +11,22 @@ let before = CGDisplayBounds(display)
 let modes = CGDisplayCopyAllDisplayModes(display, nil) as? [CGDisplayMode] ?? []
 let candidates = modes.filter { $0.width >= 1440 && $0.height >= 1000 }
     .sorted { $0.width * $0.height < $1.width * $1.height }
+let verifyOnly = CommandLine.arguments.contains("--verify-only")
 var errorCode: Int32 = 0
-if before.width < 1440 || before.height < 1000 {
+if !verifyOnly && (before.width < 1440 || before.height < 1000) {
     if let selected = candidates.first {
-        errorCode = CGDisplaySetDisplayMode(display, selected, nil).rawValue
+        // CGDisplaySetDisplayMode reverts when this process exits. Commit for
+        // the ephemeral runner's login session, then verify in a new process.
+        var config: CGDisplayConfigRef?
+        errorCode = CGBeginDisplayConfiguration(&config).rawValue
+        if errorCode == 0, let transaction = config {
+            errorCode = CGConfigureDisplayWithDisplayMode(transaction, display, selected, nil).rawValue
+            if errorCode == 0 {
+                errorCode = CGCompleteDisplayConfiguration(transaction, .forSession).rawValue
+            } else {
+                CGCancelDisplayConfiguration(transaction)
+            }
+        }
     } else {
         errorCode = -1
     }
@@ -23,6 +35,7 @@ let after = CGDisplayBounds(display)
 let report: [String: Any] = [
     "before": ["width": before.width, "height": before.height],
     "after": ["width": after.width, "height": after.height],
+    "verifyOnly": verifyOnly,
     "errorCode": errorCode,
     "availableModes": modes.map { ["width": $0.width, "height": $0.height] }
 ]

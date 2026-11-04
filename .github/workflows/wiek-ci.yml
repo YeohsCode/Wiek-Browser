@@ -29,7 +29,9 @@ jobs:
           npm ci
           npm --prefix packages/sdk ci --ignore-scripts
       - name: Configure and record deterministic desktop size
-        run: swift tools/configure-ci-display.swift > reports/ci-display.log 2>&1
+        run: |
+          swift tools/configure-ci-display.swift > reports/ci-display.log 2>&1
+          swift tools/configure-ci-display.swift --verify-only > reports/ci-display-verify.log 2>&1
       - name: SDK tests and build
         run: npm run test:upstream > reports/ci-sdk.log 2>&1
       - name: Build owned native helpers

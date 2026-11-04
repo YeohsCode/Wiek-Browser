@@ -1,6 +1,6 @@
 # 文档索引
 
-当前开发检查点 **Wiek Browser 0.20.1**（原 Vek Browser）。P3 桌面正向/翻译已补齐有界证据，最终同集回归与系统边界继续验收；P1 其他 Agent 集成继续暂缓，P2 剩余项与 P4 线上模型基准仍未完成。进度见 [PLAN.md](../PLAN.md)，分版本验收见 [RESULTS.md](../reports/RESULTS.md)。历史调查和报告保留其原有名称及版本证据。
+当前开发检查点 **Wiek Browser 0.20.3**（原 Vek Browser）。已加入独立标识、共享SDK popup修复、两侧同集与V2本地smoke，并通过完整远端CI；P3实机系统边界继续验收；P1 其他 Agent 集成继续暂缓，P2 剩余项与 P4 线上模型基准仍未完成。进度见 [PLAN.md](../PLAN.md)，分版本验收见 [RESULTS.md](../reports/RESULTS.md)。历史调查和报告保留其原有名称及版本证据。
 
 | 用途 | 文档 |
 |---|---|
@@ -10,6 +10,10 @@
 | Ego/Wiek 同集比较 | [comparison.md](../reports/comparison.md) |
 | 产品功能与未完成项 | [feature-parity.md](../analysis/feature-parity.md)；0.3 条目覆盖对应 0.2 时点 |
 | 现代HTTP MCP资源/通知流 | [mcp-modern-subscriptions.md](../analysis/mcp-modern-subscriptions.md) |
+| 独立标识与可重复图标构建 | [wiek-brand-assets.md](../analysis/wiek-brand-assets.md) |
+| 干净CI排查与最终通过证据 | [ci-clean-checkout.md](../analysis/ci-clean-checkout.md) |
+| P4 V2共享控制与Stage A剩余设计 | [benchmark-sdk-v2-design.md](../analysis/benchmark-sdk-v2-design.md) |
+| 共享SDK修改与回归边界 | [sdk-changes.md](../analysis/sdk-changes.md) |
 | 本地 API | [API.md](../skills/wiek-browser/API.md) |
 | REA 来源、证据与覆盖限制 | [rea-investigation.md](../analysis/rea-investigation.md)、[daemon](../analysis/shipped-daemon-features.md)、[client](../analysis/client-resource-feature-ledger.md) |
 | Agent/Codex/附件 | [扩展设计](../analysis/agent-service-extensions.md)、[附件](../analysis/agent-attachments.md) |

@@ -1,0 +1,94 @@
+{
+  "checkedAt": "2026-11-04T12:10:23.044240+00:00",
+  "runId": 41826077172,
+  "headSha": "4bbc28327d2890e7b2add7220ff886f56906f7ff",
+  "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/41826077172",
+  "jobs": [
+    {
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install locked dependencies",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "SDK tests and build",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build owned native helpers",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Local services and actual Electron fixture panels",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Restore pinned optional speech model",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Build unsigned macOS application",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Packaged host integration",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Shared SDK browser suite on Wiek",
+          "status": "completed",
+          "conclusion": "failure"
+        },
+        {
+          "name": "Verify package and pinned upstream inputs",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Upload validation evidence",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ]
+}

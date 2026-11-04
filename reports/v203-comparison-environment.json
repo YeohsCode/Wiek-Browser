@@ -1,0 +1,41 @@
+{
+  "generatedAt": "2026-11-04T12:32:59.108374+00:00",
+  "scope": "69 deterministic local browser cases; not the 31-task online model benchmark",
+  "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+  "fixtureSha256": "2ae49ba77bacbfc3db369fbab14fa0d4e132238ffcbac6bd90124d0ceaa52706",
+  "indexSha256": "965bb9790a6e880523117031d64e144c38a4d4fd0258ca816c7f0e0c4ceb4f69",
+  "sameSdkFixtureAndIndex": true,
+  "referenceVersionPin": "0.6.2.7",
+  "nativeReferenceCliSha256": "ab1324145a361698e3c905d3fb8bebce2eecd9a02ea23c8290e4f3bb37c83954",
+  "runtimePreflight": [
+    {
+      "browser": "ego",
+      "probe": {
+        "canonical": true,
+        "globalCanonical": true,
+        "runtimeSdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+        "hostVersion": {
+          "currentVersion": "0.6.2.7",
+          "updateAvailable": false
+        }
+      }
+    },
+    {
+      "browser": "wiek",
+      "probe": {
+        "canonical": true,
+        "globalCanonical": true,
+        "runtimeSdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+        "hostVersion": {
+          "currentVersion": "0.20.3",
+          "updateAvailable": false
+        }
+      }
+    }
+  ],
+  "platform": "Darwin",
+  "arch": "arm64",
+  "paidModelCalls": 0,
+  "realAccountWrites": 0,
+  "viewportPolicy": "Default host window for 69-case local run; no pixel-equality or online benchmark claim."
+}

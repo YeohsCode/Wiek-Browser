@@ -1,10 +1,23 @@
-# 0.20.3 共享 SDK 修复与 CI 视口（验收进行中）
+# Wiek Browser 0.20.3（2026-11-04）
 
-新增回归稳定复现旧 popup 的 URL 更新误触新 waiter，修复仅记录注册时已有目标 ID；没有改上游断言。SDK 532/532、完整本地最终 512/512、0.20.3 打包宿主 197/197 通过；同一修改后的 SDK 在 Ego/Wiek 双侧重跑中。P3 系统边界和 P4 线上基准未完成。
+独立 Wiek 标识、干净检出资料与共享 SDK popup 竞态修复均已实现。**全量复刻、P3 物理系统矩阵、P4 完整 Stage A adapter 和线上模型基准仍未完成。**
 
-日志：[复现失败](p4-popup-refresh-before-fix.log)、[修复专项](p4-popup-refresh-after-fix.log)、[SDK](v203-sdk-tests.log)、[源码最终](v203-source-tests-final.log)、[宿主](v203-package-workbench.log)。首轮本地 511/512 的合成 PR 超时保留在 [初轮](v203-source-tests.log)，该项单独及完整重跑通过。
+| 验证 | 结果 | 证据 |
+|---|---|---|
+| 完整本地 | 512/512；0失败/跳过 | [source](v203-source-tests-final.log) |
+| SDK构建/typecheck/单测 | 532/532；新增回归复现旧popup刷新后通过 | [SDK](v203-sdk-tests.log)、[before](p4-popup-refresh-before-fix.log)、[after](p4-popup-refresh-after-fix.log) |
+| 最终打包宿主 | 197/197；0.20.3；无付费模型/账号写操作 | [host](v203-package-workbench.log) |
+| 同集浏览器 | Wiek69/69、1,248断言；Ego0.6.2.7为68/69、1,235断言（HTML paste失败）；两侧0跳过/未运行 | [完整日志](v203-browser-suite.log)、[comparison](comparison.md)、[条件](v203-comparison-environment.json) |
+| 发行身份/独立图标 | 201文件与源码一致、81上游输入未改；打包ICNS匹配、已知两张原Ego PNG零命中 | [identity](v203-package-identity.log)、[brand](wiek-brand-audit.json) |
+| P4 V2本地控制 | 相同修复后SDK，两侧跨进程恢复、真实PNG/AX、结束/幂等通过 | [smoke](p4-sdk-v2-local-smoke.json) |
+| 远端完整CI | **success**：532 SDK、512本地、197宿主、69浏览器/1,248断言、201发行文件与品牌检查全部通过 | [Actions](https://github.com/YeohsCode/Wiek-Browser/actions/runs/41830745101)、[保存状态](p4-ci-41830745101-status.json) |
 
-CI 先前的完整浏览器失败保留在 [41826077172](p4-ci-41826077172-ci-browser-suite.log)；媒体 fixture 为固定宽度，在 runner 794×537 页面视口中发生点击失败。runner-only CoreGraphics 显示配置步骤已远端执行成功，后续完整结果仍待记录。共享 SDK 修改见 [SDK changes](../analysis/sdk-changes.md)。
+远端验收对应代码提交 `b50f9b702dc1a297a53769f0c62548048b0da017`；随后提交仅更新文档与证据，不改变产品或CI源码。
+
+共享 SDK hash 为 `b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13`，两侧使用相同 fixture/用例索引和 popup 修复。所有原始断言保留；旧 Ego0.6.1.13 原始日志保存到 [history](history/ego-0.6.1.13-ego-e2e.json)。
+
+首轮本地合成PR超时的511/512日志保留，单例及完整重跑通过。CI先后修复Skill references、语音fixture、popup竞态；显示模式首版会随进程退出恢复，现用session transaction并由第二进程确认1600×1200。随后一次SDK单测的短墙钟预算在并行负载下失败；改为单文件并发后，全部532原断言及整条远端CI通过，未跳过失败用例。[初轮](v203-source-tests.log)、[CI原始浏览器失败](p4-ci-41828541167-ci-browser-suite.log)。
+
 
 ---
 

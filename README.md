@@ -10,7 +10,7 @@ A local Chromium browser and agent workspace, previously named **Vek Browser**. 
 
 **Development checkpoint: 0.20.3.** The repository includes ongoing P3 work; full Ego feature parity and the P4 live-site benchmark are **not complete**. See [PLAN.md](PLAN.md), [feature coverage](analysis/feature-parity.md), and [validation](reports/RESULTS.md). Historical reports retain the former project name and describe their original builds.
 
-The 0.20.3 source gates passed **512/512 local tests**, **532/532 SDK tests**, and **197/197 packaged host checks**. The two-browser 69-case rerun with the shared popup fix is in progress; native P3 acceptance and the online model benchmark remain open.
+The 0.20.3 source gates passed **512/512 local tests**, **532/532 SDK tests**, and **197/197 packaged host checks**. The shared-SDK browser suite passed 69/69 on Wiek and 68/69 on Ego 0.6.2.7; the remaining Ego failure is HTML paste. Native P3 acceptance and the online model benchmark remain open.
 
 ## Quick start
 
@@ -90,14 +90,14 @@ npm run test:workbench
 npm run dist
 ```
 
-The Wiek-owned [CI workflow](.github/workflows/wiek-ci.yml) installs locked dependencies, restores pinned speech weights, and runs SDK/local/packaged tests on macOS ARM64. Its first remote result is tracked separately; a workflow definition alone does not prove a pass. `npm run test:upstream` restores two exact upstream workflow files as inactive test fixtures; it does not enable their publishing automation.
+The Wiek-owned [CI workflow](.github/workflows/wiek-ci.yml) installs locked dependencies, restores pinned speech weights, and runs SDK/local/packaged tests on macOS ARM64. The complete remote run [41830745101](https://github.com/YeohsCode/Wiek-Browser/actions/runs/41830745101) passed on code commit `b50f9b7`; the source and packaged gates match the recorded scope. `npm run test:upstream` restores two exact upstream workflow files as inactive test fixtures; it does not enable their publishing automation.
 
 
 The macOS artifact is `dist/mac-arm64/Wiek Browser.app`. It is a local unsigned build until signing/notarization is configured.
 
-**0.20.2 acceptance:** 500 local tests, 532 SDK tests, 197 packaged host checks, and 69/69 shared browser cases passed, alongside 11 new SDK V2 control-boundary tests. The retained Ego 0.6.1.13 run passed 68/69 with the same SDK hash; the additional local canonical V2 smoke passed on both Ego 0.6.2.7 and Wiek 0.20.2. See [reports/RESULTS.md](reports/RESULTS.md) for evidence and remaining gaps. SDK tests/fixture semantics stay unchanged. These local checks are separate from the unrun 31-task model benchmark.
+**0.20.3 acceptance:** 512 local tests, 532 SDK tests, 197 packaged host checks, and 69/69 Wiek browser cases (1,248 assertions) passed. Ego 0.6.2.7 passed 68/69 (1,235 assertions) with the same modified SDK, fixture and case index; 81 original upstream test inputs remain unchanged. Both local canonical V2 smoke runs passed. See [reports/RESULTS.md](reports/RESULTS.md) and [SDK changes](analysis/sdk-changes.md). These checks are separate from the unrun 31-task model benchmark.
 
-Ego reference comparisons require separately obtained reference artifacts under ignored `references/` and `downloads/`; ordinary Wiek-only development does not. Do not rebuild the SDK concurrently with reference E2E.
+Ego reference comparisons require separately obtained reference artifacts under ignored `references/` and `downloads/`; ordinary Wiek-only development does not. Do not rebuild the SDK concurrently with reference E2E. Pin the native reference version explicitly and use `tools/ego-reference-cli` with the dedicated `vek-reference` instance, rather than a personal default session. For the recorded run, `WIEK_REFERENCE_VERSION=0.6.2.7` and `VEK_COMPARISON_EGO_CLI="$PWD/tools/ego-reference-cli"` were set. Use an isolated Wiek data directory for comparison runs.
 
 ## Project documents
 

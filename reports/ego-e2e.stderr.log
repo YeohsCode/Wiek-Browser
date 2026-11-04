@@ -1,5 +1,5 @@
 
-  dist/src/page-model.js                         86.5kb
+  dist/src/page-model.js                         86.7kb
   dist/src/element-resolver.js                   69.6kb
   dist/src/driver/page-actions.js                46.4kb
   dist/src/browser-runtime.js                    41.5kb
@@ -21,7 +21,7 @@
   dist/src/index.js                               6.0kb
   ...and 25 more output files...
 
-⚡ Done in 29ms
+⚡ Done in 20ms
 {"capabilityWarning":{"method":"Browser.getVersion","message":"'Browser.getVersion' wasn't found"}}
 {"ok":true,"assertions":23}
 
@@ -575,7 +575,7 @@ NodeRuntime disconnected
 
 {"ok":true,"assertions":17}
 
-{"screenshotBytes":{"default":54585,"raw":54585},"screenshotSamples":{"default":{"colorful":25,"sampled":25,"width":1188,"height":1197},"raw":{"colorful":25,"sampled":25,"width":1188,"height":1197}}}
+{"screenshotBytes":{"default":54744,"raw":54744},"screenshotSamples":{"default":{"colorful":25,"sampled":25,"width":1188,"height":1197},"raw":{"colorful":25,"sampled":25,"width":1188,"height":1197}}}
 {"ok":true,"assertions":13}
 
 {"ok":true,"assertions":4}
@@ -651,12 +651,12 @@ NodeRuntime disconnected
 {"ok":true,"assertions":4}
 
 Error: real browser e2e: paste exposes HTML to rich editors: expected true, got false
-    at assertEqual (file:////[eval2]:32:15)
-    at file:////[eval2]:489:5
+    at assertEqual (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/[eval2]:32:15)
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/[eval2]:489:5
 {"ok":false,"assertions":26,"error":"paste exposes HTML to rich editors: expected true, got false"}
 
 ego's nodejs process exited with code 1.
-[FAIL] Page keyboard interface (1.9s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
+[FAIL] Page keyboard interface (1.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js exited with code 1
 {"ok":true,"assertions":9}
 
 {"ok":true,"assertions":7}

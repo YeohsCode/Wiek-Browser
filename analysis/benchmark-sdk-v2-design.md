@@ -36,3 +36,5 @@ WIEK_BENCH_EGO_CLI="/absolute/path/to/Versions/0.6.2.7/Helpers/ego-browser" \
 Ego 使用命名 `vek-reference` 的专用实例，不回退到个人默认浏览器。下载副本从历史 0.6.1.13 自动更新后，保留旧测试身份与新 smoke 的 CLI hash/实际 host version；不同版本的结果分别说明，不能把新 smoke 冒充旧版 69-case 重跑。原始路径/连接/脚本失败日志均保留。
 
 实际 smoke 两侧均通过：Ego 0.6.2.7（16,388-byte PNG/9 AX nodes）和 Wiek 0.20.2（13,804-byte PNG/9 AX nodes）。同一 SDK hash `a8c27da3…572a56`、同一控制源码与 fixture hash；详情见 `reports/p4-sdk-v2-local-smoke.json`。测试未运行模型或真实账号动作。当前 native Ego 将 marker 写入 stderr，runner 同时解析两个输出通道；所有初轮失败保留，没有据退出码 0 伪造成功。
+
+当前 smoke 验证 API 生命周期与本地内容，不做像素相同或质量评分断言；两侧沿用各自窗口 viewport。正式 Stage A 应显式固定 viewport，并在截图后清理 metrics override。严格实例 guard 还需要同时适配 canonical 脚本的任务选择，不能只改能力探测后继续使用 Wiek CLI 不支持的旧 `--taskspace` 前缀。

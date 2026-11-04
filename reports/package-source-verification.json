@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-04T11:54:13.703Z",
-  "version": "0.20.2",
+  "generatedAt": "2026-11-04T12:28:44.341Z",
+  "version": "0.20.3",
   "versionMatches": true,
   "checkedFiles": 201,
   "allMatch": true,
-  "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+  "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
   "sdkMatchesCompared": true,
   "files": [
     {
@@ -624,7 +624,7 @@
     },
     {
       "file": "packages/sdk/dist/out/index.js",
-      "sha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+      "sha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
       "matches": true
     },
     {
@@ -804,7 +804,7 @@
     },
     {
       "file": "packages/sdk/dist/src/page-model.js",
-      "sha256": "2bb2995aa18c393a0a893a8a2fae5ae56019031f142eb6091e2f676616a5a51b",
+      "sha256": "202d976dd21219a66a86637e7a9bbb4342f58626b666663754a7158dfb94da9d",
       "matches": true
     },
     {

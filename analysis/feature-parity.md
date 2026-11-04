@@ -1,10 +1,12 @@
-# Vek Browser 功能对齐清单
+# Wiek Browser 功能对齐清单
 
-本清单以新建的 **Vek Browser** 为实现目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
+本清单以独立实现的 **Wiek Browser**（原 Vek Browser）为目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前源码检查点 **Wiek Browser 0.20.1**（原 Vek Browser），更新于 2026-11-03；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以历次版本增量和当前报告为准。
+当前源码检查点 **Wiek Browser 0.20.3**（原 Vek Browser），更新于 2026-11-04；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以历次版本增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
+
+0.20.3 新增独立 Wiek 标识，已从活跃应用/Skill 资源移除原 Ego 图标；本地512、SDK532、打包宿主197、Wiek69/69通过，Ego0.6.2.7为68/69（HTML paste失败），相同SDK/fixture/索引。完整远端CI41830745101已通过。共享V2控制与两侧本地smoke可用，完整Stage A adapter、线上31任务与P3实机系统矩阵仍未完成；详见[当前结果](../reports/RESULTS.md)。
 
 ## 浏览器应用与交付面
 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-04T11:55:14.190673+00:00",
+  "generatedAt": "2026-11-04T12:46:32.783832+00:00",
   "project": "Wiek Browser",
-  "version": "0.20.2",
+  "version": "0.20.3",
   "repository": "https://github.com/YeohsCode/Wiek-Browser",
   "fullParity": false,
   "localBrowserComparison": {
@@ -10,9 +10,9 @@
     "runs": [
       {
         "browser": "ego",
-        "startedAt": "2026-10-30T01:37:12.876Z",
+        "startedAt": "2026-11-04T12:19:59.945Z",
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli",
-        "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+        "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
         "counts": {
           "total": 69,
           "selected": 69,
@@ -25,9 +25,9 @@
       },
       {
         "browser": "vek",
-        "startedAt": "2026-11-04T11:50:55.062Z",
+        "startedAt": "2026-11-04T12:24:42.946Z",
         "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs",
-        "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+        "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
         "counts": {
           "total": 69,
           "selected": 69,
@@ -38,24 +38,26 @@
           "assertions": 1248
         }
       }
-    ]
+    ],
+    "environmentReport": "v203-comparison-environment.json"
   },
   "sdkUnitTests": {
     "pass": 532,
     "fail": 0,
     "rerun": true,
-    "log": "v202-sdk-tests.log"
+    "log": "v203-sdk-tests.log",
+    "serialLog": "v203-sdk-serial-tests.log"
   },
   "localServiceAndParser": {
-    "pass": 500,
+    "pass": 512,
     "fail": 0,
-    "log": "v202-source-tests.log"
+    "log": "v203-source-tests-final.log"
   },
   "packagedWorkbenchIntegration": {
     "checks": 197,
     "passed": true,
-    "version": "0.20.2",
-    "log": "v202-package-workbench.log",
+    "version": "0.20.3",
+    "log": "v203-package-workbench.log",
     "fixtureFixRerun": "v202-clean-audio-workbench.log"
   },
   "package": {
@@ -63,10 +65,10 @@
     "sourceFilesMatch": true,
     "sourceFilesChecked": 201,
     "upstreamInputsUnchanged": 81,
-    "sdkSha256": "a8c27da3bf8733b77b927549ffdb40867737592b235dea03bdaffb9fcc572a56",
+    "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
     "signed": false,
     "notarized": false,
-    "note": "Final 0.20.2 package passed host and shared SDK E2E; brand assets independently authored and packaged ICNS verified."
+    "note": "Final 0.20.3 app passed local host and shared-SDK browser suite; both browsers use the same documented popup fix."
   },
   "p3": {
     "complete": false,
@@ -90,19 +92,18 @@
   "p4": {
     "complete": false,
     "workflow": ".github/workflows/wiek-ci.yml",
-    "remoteResult": "sdk-native-local-model-build-passed; packaged-host-failed-missing-audio; fixed-pending-new-run",
-    "lastObservedRun": 41824900816,
-    "lastObservedStatus": "failure",
+    "remoteResult": "success",
+    "lastObservedRun": 41830745101,
+    "lastObservedStatus": "completed",
     "benchmarkRun": false,
     "benchmarkReadiness": "p4-benchmark-readiness.json",
     "blockers": [
-      "Canonical SDK V2 benchmark adapter",
+      "Complete canonical SDK V2 Stage A adapter integration (shared control primitives and local smoke already passed)",
       "Dedicated Stage A/Judge model and limits",
       "Dedicated account/login readiness",
       "Signing/notarization and release process"
     ],
     "cleanStagedSourceSdkBuild": true,
-    "failureLog": "p4-ci-41824900816-ci-workbench.log",
     "canonicalControlTests": {
       "passed": 11,
       "log": "p4-sdk-v2-contract-tests.log"
@@ -110,15 +111,30 @@
     "canonicalLocalSmoke": {
       "bothPassed": true,
       "egoVersion": "0.6.2.7",
-      "wiekVersion": "0.20.2",
+      "wiekVersion": "0.20.3",
       "report": "p4-sdk-v2-local-smoke.json",
       "stageAIntegrated": false
-    }
+    },
+    "remoteConclusion": "success",
+    "verifiedCodeCommit": "b50f9b702dc1a297a53769f0c62548048b0da017",
+    "remoteUrl": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/41830745101",
+    "remoteEvidence": "p4-ci-41830745101-status.json",
+    "remoteCounts": {
+      "sdkTests": 532,
+      "localTests": 512,
+      "packagedChecks": 197,
+      "browserCases": 69,
+      "browserAssertions": 1248,
+      "packageFiles": 201,
+      "upstreamInputsUnchanged": 81
+    },
+    "previousFailureLog": "p4-ci-41830035061-ci-sdk.log"
   },
   "history": [
     "v190-delivery-summary.json",
     "wiek-v0.20-checkpoint.json",
-    "wiek-v0.20.1-checkpoint.json"
+    "wiek-v0.20.1-checkpoint.json",
+    "wiek-v0.20.2-checkpoint.json"
   ],
   "brand": {
     "independentlyAuthored": true,

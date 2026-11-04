@@ -36,16 +36,16 @@
 | 项目 | 已完成的验收 | 当前状态 |
 |---|---|---|
 | 参考制品与调查 | ego-lite MIT 源码、Ego 0.6.1.13 安装包、31 任务 benchmark 已下载；REA daemon/client 证据及覆盖限制保留 | 已完成有界调查；全部 native/client 路径仍未覆盖 |
-| 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Wiek 69/69、保留Ego 68/69 | 0.20.1同集验收完成，非引擎全面等价 |
+| 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Wiek 69/69、保留Ego 68/69 | 0.20.3 共享修复 SDK 下重新完成两侧同集验收，非引擎全面等价 |
 | 本地 Agent 工作台 | 通用 CLI、opt-in Codex app-server/Claude stream-json/OpenCode ACP、多 Agent 控制、对话分支/附件/审批、Claude选定历史分支、Codex有效rollout压缩/回滚导入及实时工具/子活动、Codex/Claude模型与effort目录 | 部分完成；其他5种原生 provider、源CLI原生会话迁移/后台任务和真实付费 turn 未验证 |
 | 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，linked worktree 仍缺；已补有审核的远程 Git/PR 流程，真实 PR 账号验收待执行 |
 | MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；已补 session 资源/模板/订阅；已补预注册public OAuth/PKCE与加密绑定；现代HTTP资源/列表与更新订阅已补；已补本地工具form MRTR；已补有界CIMD/身份审核；托管身份/DCR/step-up/sampling/URL与资源MRTR仍缺失 |
 | 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 0.16新增明确审核的macOS login job/前台接管；三种mode和closed-app tick可用，物理sleep/login撤销未实测，0.20 已补 busy 延期、turn contract、completion evaluator 与 SIGKILL 恢复守护 |
 | 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；新增显式网页/项目文本 memory 索引；0.14增加显式OS单次采集；0.20.1 有界源码 host 的被动选区/工具栏 Copy/指定应用录制正向通过，真实中英翻译通过；物理系统兼容矩阵仍待验收 |
 | 浏览器界面/权限/资料 | 主题/标签布局/快捷键、独立窗口/托盘；权限隔离；Profile 数据归属；Chromium 选择导入和v2显式web storage加密archive | 部分完成；完整迁移/扩展/OS 设备能力仍有缺口 |
-| 交付与基准 | macOS ARM64 应用；500/500 本地测试、532/532新一轮SDK、197/197 打包宿主集成、81 个上游文件未改 | 0.20.1有界检查点完成，192个发行文件匹配，31 项线上模型任务未运行 |
+| 交付与基准 | macOS ARM64 应用；512/512 本地测试、532/532 SDK、197/197 打包宿主集成、81 个上游文件未改 | 0.20.3有界检查点完成，201个发行文件匹配，31 项线上模型任务未运行 |
 
-证据入口：[当前结果](reports/RESULTS.md)、[同集对比](reports/comparison.md)、[逐项功能清单](analysis/feature-parity.md)、[机器可读结果](reports/delivery-summary.json)。532 项 SDK 单测在本轮重新运行通过；历史版本数据仍保留。
+证据入口：[当前结果](reports/RESULTS.md)、[同集对比](reports/comparison.md)、[逐项功能清单](analysis/feature-parity.md)、[机器可读结果](reports/delivery-summary.json)。532 项 SDK 单测在本轮重新运行通过；Ego 0.6.2.7 新运行仍为 HTML paste 单项失败，原 0.6.1.13 日志另存 reports/history/；历史版本数据仍保留。
 
 ## 版本进度
 
@@ -130,7 +130,8 @@
 - [ ] 获得专用 Stage A/Judge 模型配置与必要站点测试账号后，执行同 commit/task/model/thinking/limits/login 条件的 31 任务基准。
 - [ ] 分别统计成功、失败、未运行和确实依赖 Ego 专有服务的跳过；不套用营销成功率。
 - [x] 建立 Wiek 独立 CI、固定 action SHA/依赖/模型身份、干净检出的上游测试资料恢复；已推送并触发远端队列。
-- [ ] 远端 CI 成功、SDK V2 benchmark adapter、签名/公证及正式版本发布仍待完成；代码推送不等于发布签名安装包。
+- [x] 远端完整 CI：代码提交 `b50f9b7`，运行 [41830745101](https://github.com/YeohsCode/Wiek-Browser/actions/runs/41830745101) 成功；含532 SDK、512本地、197宿主、69浏览器和发行/品牌身份核对。
+- [ ] 完整 SDK V2 Stage A adapter、签名/公证及正式发布仍待完成；代码推送不等于发布签名安装包。
 
 ## 提交与验证约定
 
@@ -218,4 +219,12 @@
 - [x] 新回归修复前失败、修复后通过；SDK waiter 在注册时记录已发现目标，后续旧 URL/title 更新不能当作新 popup。保留上游测试与 fixture，两个浏览器使用同一修改后的 SDK。
 - [x] 原有 SDK 532/532、完整本地最终重跑 512/512、打包宿主 197/197；首轮一个合成 PR 操作超时已保留，单例及完整重跑通过。
 - [x] runner-only 显示配置脚本 typecheck 与本机拒绝执行通过；远端 41828102389 的显示配置步骤成功。
-- [ ] 更新后的双侧 69 项、远端完整 CI 和最终发行身份待本轮收尾记录。
+- [x] 新 SDK b4ddb961…fec13 下，Wiek69/69（1,248断言）、Ego0.6.2.7为68/69（1,235断言、HTML paste失败）；201个发行文件匹配、81原始输入未改；两侧V2 smoke通过。
+- [x] 显示配置改用 session transaction，第二个独立进程确认1600×1200保持；首版进程退出恢复的问题保留原始日志。
+- [x] 保留远端短墙钟预算531/532的初轮失败；全部阈值/断言不变，单文件并发后532/532，整条远端CI于41830745101成功。
+
+## 下一步（0.20.3 后）
+
+1. 将共享 V2 控制原语接入完整 Stage A：能力探测、Skill配对、canonical任务候选解析、严格实例guard、固定viewport及截图/结束receipt；两侧使用同一补丁。
+2. P3继续最终包的OS权限、物理多显示器/权限撤销、sleep/login边界与更多翻译语种；需要真实环境证据的项目保持未验收。
+3. 线上31任务需要专用Stage A/Judge配置与测试账号；签名/公证需相应配置。尚未执行付费模型/真实账号任务，不以本地69项代替线上得分。

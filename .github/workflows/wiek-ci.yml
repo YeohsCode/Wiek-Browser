@@ -33,7 +33,16 @@ jobs:
           swift tools/configure-ci-display.swift > reports/ci-display.log 2>&1
           swift tools/configure-ci-display.swift --verify-only > reports/ci-display-verify.log 2>&1
       - name: SDK tests and build
-        run: npm run test:upstream > reports/ci-sdk.log 2>&1
+        # Original assertions include small wall-clock budgets. Keep all tests
+        # and thresholds, but avoid unrelated parallel files stalling timers.
+        run: |
+          {
+            node tools/prepare-sdk-test-fixtures.mjs
+            npm --prefix packages/sdk run build
+            npm --prefix packages/sdk run check:skill-translation
+            npm --prefix packages/sdk run typecheck
+            (cd packages/sdk && node --test --test-concurrency=1 "src/**/*.test.mjs")
+          } > reports/ci-sdk.log 2>&1
       - name: Build owned native helpers
         run: npm run build:desktop-native > reports/ci-native-build.log 2>&1
       - name: Local services and actual Electron fixture panels

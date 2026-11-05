@@ -1,6 +1,6 @@
 # Wiek Browser 复刻计划与进度
 
-更新：2026-11-04（Asia/Shanghai）。当前源码检查点：**0.20.3（共享 popup 竞态修复与 CI 视口）**；原品牌历史基线：**0.19.0（Vek）**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
+更新：2026-11-05（Asia/Shanghai）。当前源码检查点：**0.21.0（橙白标识、完整 V2 框架接入、linked worktree、中英/中西翻译）**；原品牌历史基线：**0.19.0（Vek）**。项目目标仍是独立复刻 Ego 的可验证功能；**全量复刻未完成**，不以任意百分比或 69 项 SDK 通过代替产品完成度。
 
 ## Wiek 改名与首个远程检查点
 
@@ -38,7 +38,7 @@
 | 参考制品与调查 | ego-lite MIT 源码、Ego 0.6.1.13 安装包、31 任务 benchmark 已下载；REA daemon/client 证据及覆盖限制保留 | 已完成有界调查；全部 native/client 路径仍未覆盖 |
 | 浏览器 SDK 与宿主 | Space/Profile/多标签、DOM/AX snapshot、CDP、上传/下载、剪贴板、iframe/worker 等；同集测试 Wiek 69/69、保留Ego 68/69 | 0.20.3 共享修复 SDK 下重新完成两侧同集验收，非引擎全面等价 |
 | 本地 Agent 工作台 | 通用 CLI、opt-in Codex app-server/Claude stream-json/OpenCode ACP、多 Agent 控制、对话分支/附件/审批、Claude选定历史分支、Codex有效rollout压缩/回滚导入及实时工具/子活动、Codex/Claude模型与effort目录 | 部分完成；其他5种原生 provider、源CLI原生会话迁移/后台任务和真实付费 turn 未验证 |
-| 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，linked worktree 仍缺；已补有审核的远程 Git/PR 流程，真实 PR 账号验收待执行 |
+| 文件/Git | 受项目范围约束的读写/search/watch；常用 Git 操作；命名 checkpoint、预览/显式恢复/保护快照 | 部分完成；已有 turn 自动关联，0.21 已补 linked worktree 独立 index/refs；已补有审核的远程 Git/PR 流程，真实 PR 账号验收待执行 |
 | MCP | stdio、scoped gateway/pairing；远程 HTTPS、legacy session/SSE 和显式 modern 工具模式 | 部分完成；已补 session 资源/模板/订阅；已补预注册public OAuth/PKCE与加密绑定；现代HTTP资源/列表与更新订阅已补；已补本地工具form MRTR；已补有界CIMD/身份审核；托管身份/DCR/step-up/sampling/URL与资源MRTR仍缺失 |
 | 自动化 | at/interval/heartbeat/IANA cron、DST、防重复预约、运行记忆/提案/停止条件 | 0.16新增明确审核的macOS login job/前台接管；三种mode和closed-app tick可用，物理sleep/login撤销未实测，0.20 已补 busy 延期、turn contract、completion evaluator 与 SIGKILL 恢复守护 |
 | 语音/Library/录制 | 本地 Whisper tiny、语音历史/词典；Collections、截图标注；显式网页操作录制 | 本地范围可用；新增显式网页/项目文本 memory 索引；0.14增加显式OS单次采集；0.20.1 有界源码 host 的被动选区/工具栏 Copy/指定应用录制正向通过，真实中英翻译通过；物理系统兼容矩阵仍待验收 |
@@ -82,7 +82,7 @@
 - [x] 处理失败/取消/重启、重复事件、HEAD 改变、不支持的仓库与超限情况；保留可解释的未捕获状态，不伪造快照成功。
 - [x] 用真实临时 Git 仓库和本地 provider 验证成功/失败/中断/冲突/保护快照恢复；既有 SDK 用例与断言保持不变。
 
-完成标准：一个实际本地 provider 修改文件后，UI 可查看该 turn 的真实 diff，明确确认后能恢复文件与 index；失败、中断和重启路径有实际测试证据。现有普通小仓库限制需明确显示；linked worktree 支持单独设计与验证，不在无证据时承诺。
+完成标准：一个实际本地 provider 修改文件后，UI 可查看该 turn 的真实 diff，明确确认后能恢复文件与 index；失败、中断和重启路径有实际测试证据。现有普通小仓库限制需明确显示；0.21 已补 linked worktree 支持并以真实临时仓库验证，见 analysis/linked-worktree-checkpoints.md。
 
 ### P1 / 不同 Agent 集成暂缓：原生 provider 与会话完整性
 
@@ -126,12 +126,12 @@
 
 ### P4：同条件线上基准与发布
 
-- [ ] 修复或固定 benchmark adapter 与 SDK V2 的版本漂移，对 Ego/Vek 同等应用。
+- [x] 0.21 完整共享 V2 框架 adapter：相同补丁/SDK；59 项框架回归、14 项控制边界和两侧实际截图/AX/清理 hook 通过，未运行模型。
 - [ ] 获得专用 Stage A/Judge 模型配置与必要站点测试账号后，执行同 commit/task/model/thinking/limits/login 条件的 31 任务基准。
 - [ ] 分别统计成功、失败、未运行和确实依赖 Ego 专有服务的跳过；不套用营销成功率。
 - [x] 建立 Wiek 独立 CI、固定 action SHA/依赖/模型身份、干净检出的上游测试资料恢复；已推送并触发远端队列。
 - [x] 远端完整 CI：代码提交 `b50f9b7`，运行 [41830745101](https://github.com/YeohsCode/Wiek-Browser/actions/runs/41830745101) 成功；含532 SDK、512本地、197宿主、69浏览器和发行/品牌身份核对。
-- [ ] 完整 SDK V2 Stage A adapter、签名/公证及正式发布仍待完成；代码推送不等于发布签名安装包。
+- [x] 完整 SDK V2 Stage A adapter 已接入；签名/公证及正式发布仍待完成，代码推送不等于发布签名安装包。
 
 ## 提交与验证约定
 
@@ -228,3 +228,21 @@
 1. 将共享 V2 控制原语接入完整 Stage A：能力探测、Skill配对、canonical任务候选解析、严格实例guard、固定viewport及截图/结束receipt；两侧使用同一补丁。
 2. P3继续最终包的OS权限、物理多显示器/权限撤销、sleep/login边界与更多翻译语种；需要真实环境证据的项目保持未验收。
 3. 线上31任务需要专用Stage A/Judge配置与测试账号；签名/公证需相应配置。尚未执行付费模型/真实账号任务，不以本地69项代替线上得分。
+
+## 0.21 当前验收（2026-11-05）
+
+以下覆盖前文历史检查点的“下一步”，不把仍依赖真实设备/账号的项勾成完成。
+
+- [x] 按用户要求改为橙色背景、底部白色渐变、白色右上圆点；所有应用/Skill PNG/ICNS 从独立 SVG 重建，最终包 ICNS 匹配、原 Ego 两张图片 hash 零命中。
+- [x] 完整 benchmark overlay 纳入版本控制，可按固定 commit/原文件/任务数据/parser 身份重复安装；不只修改忽略的参考 checkout。探测、Skill、严格语法 guard、截图/AX hook、清理/队列 purge 均接入。
+- [x] 59 项框架回归（33 新增 + 26 原框架）、14 控制边界通过；Ego0.6.2.7/Wiek0.21.0 的实际 registry/hook 双侧 smoke 通过，固定1280×800，恢复视口、校验新 marker/hash/receipt；0 模型/账号操作。
+- [x] linked worktree 手动/turn checkpoint：每个工作树独立 index lock 与 refs；6 项真实 Git 新回归，包含主/另外工作树不被恢复影响、GC/detached、metadata/identity 拒绝。
+- [x] 翻译安装器支持显式语言方向；中英/中西四例通过源码与打包服务，推理禁止 socket。首轮模型未预热失败保留；模型和 Python 不随包分发。
+- [x] 当前本地522/522、打包宿主197/197、Wiek同集69/69（1,248断言）；202发行文件匹配、81上游输入未改。SDK未改，沿用相同b4ddb961…fec13及其此前532/532证据。
+- [x] 最终包只读OS状态：screen/accessibility granted；已停止本轮独立检查进程。不是原生采集正向证明。
+- [ ] 新增 benchmark CI stage 的远端执行结果待验收；之前成功 run41830745101 属于0.20.3，不冒充0.21远端通过。
+- [ ] P3外部验收：最终包原生正向、物理多显示器/实际撤权、sleep/wake/logout/login/后台项撤销和更广应用矩阵。当前未物理切换系统会话。
+- [ ] P4线上31任务：仍缺专用Stage A/Judge模型/思考/限额与测试账号；已向用户请求配置位置，不读取个人默认资料或执行付费模型。
+- [ ] 正式发布：仍缺Apple签名/公证配置。P1其他Agent暂缓；P2剩余OAuth/迁移等继续保留，不能据本检查点宣称全量复刻完成。
+
+下一步：先验收本轮新增CI阶段并修复实际失败；获得专用配置后跑两侧同条件31任务、记录实际成功/失败/服务依赖跳过，再完成签名发布和真实设备矩阵。P2后续代码缺口以其原清单继续实施。

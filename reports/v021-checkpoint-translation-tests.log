@@ -1,0 +1,39 @@
+✔ linked restore preserves staged and working bytes without changing the main worktree index or files (744.783375ms)
+✔ main and two linked worktrees cannot list or restore one another’s checkpoints (1072.500041ms)
+✔ each linked index lock is honored independently and existing locks are retained (296.170667ms)
+✔ mismatched backlink and symlinked metadata refuse checkpoint writes (108.236583ms)
+✔ linked checkpoint refs survive Git gc and detached HEAD while remaining scoped (370.951458ms)
+✔ turn associations support linked snapshots and reject replacement of the .git identity (613.254792ms)
+✔ invalid language requests cannot create directories or start an installer (4.194375ms)
+✔ translation CLI receives literal JSON stdin, persists provider only, bounds text and enforces trusted controls (90.5ms)
+✔ translation cancellation waits for actual child exit; overlap and reconfiguration are rejected (43.570875ms)
+✔ translation rejects broken, oversized and failing providers and enforces deadline (631.1165ms)
+✔ real provider turn records before/after, staged and worktree diff, explicit restore and protection (1923.413459ms)
+✔ failed provider changes are captured, and stale or cross-turn restore previews are refused (1613.984291ms)
+✔ stop and graceful shutdown wait for actual provider termination and snapshot finalization (1233.081208ms)
+✔ unsupported before capture prevents provider launch; disabled project preserves ordinary CLI behavior (254.179334ms)
+✔ after capture failure retains known before snapshot without claiming a complete diff (558.20225ms)
+✔ project concurrency, configuration and restore leases cannot overlap a protected turn (465.195333ms)
+✔ interrupted associations recover conservatively; import and fork do not acquire snapshot authority (953.246583ms)
+✔ HEAD changes keep immutable diff available but prevent history-changing restoration (903.710209ms)
+✔ stopping during before-capture never launches a provider and retains the known snapshot (463.348292ms)
+✔ native thread and turn IDs bind real wire events to immutable file snapshots once (962.938625ms)
+✔ actual host-process hard stop recovers the known before snapshot without inventing after state (862.762875ms)
+✔ named checkpoint preserves real staged, unstaged, untracked bytes without changing index or stash (512.90775ms)
+✔ explicit restore reproduces exact index, staged blob, worktree, untracked binary and deletion (1318.1045ms)
+✔ restore requires explicit confirmation and fresh preview; conflicting work stays intact (898.615833ms)
+✔ external symlink, index lock, submodule mode and merge states are refused without writes (275.241542ms)
+✔ HEAD changes and ignored destination collisions refuse restore without losing files (641.653666ms)
+✔ checkpoints survive service restart and git gc without changing branches or user stashes (629.290917ms)
+✔ index flags remain byte-identical and split-index layouts are refused (727.005125ms)
+✔ late filesystem collision rolls back real file replacements and preserves concurrent bytes (8683.794583ms)
+✔ preview authorization is bound to the selected checkpoint and unsafe restore symlinks are refused (729.2665ms)
+✔ a new Git lock acquired after index replacement is never removed by checkpoint cleanup (727.414ms)
+ℹ tests 31
+ℹ suites 0
+ℹ pass 31
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 18489.699875

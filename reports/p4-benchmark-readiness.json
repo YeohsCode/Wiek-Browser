@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-04T12:32:59.191Z",
+  "generatedAt": "2026-11-05T02:00:21.075Z",
   "benchmarkRun": false,
   "modelCalls": 0,
   "accountActions": 0,
@@ -7,7 +7,7 @@
     "present": true,
     "commit": "f566ac293e4e6bd80c4e9b062b5699f04eac41f4",
     "datasetSha256": "e1495bef65b83c7bcb4cf3bf7a6e515239c6763c620efe1d31749ad6d54f6200",
-    "adapterSha256": "baa7e1133eadb79fbcf0065ea9814a7a69cc9cb2cb9af84680271012282150cc"
+    "adapterSha256": "d9793ef41c05fc19c542b5f934b6d779ac1882d0c2b4d9eb2dba908301a4fe1f"
   },
   "tasks": {
     "count": 31,
@@ -30,14 +30,55 @@
     ]
   },
   "adapter": {
-    "canonicalSdkV2Present": false,
+    "canonicalSdkV2Present": true,
     "legacyOrFacadeProbePresent": true,
     "sharedCanonicalControlPresent": true,
-    "stageAIntegrated": false,
-    "localCanonicalSmoke": {
+    "installedIdentities": [
+      {
+        "file": "ego_bench/browser_tools/ego_browser.py",
+        "matches": true
+      },
+      {
+        "file": "ego_bench/hooks/pi_extension_helper.py",
+        "matches": true
+      },
+      {
+        "file": "canonical_v2.py",
+        "matches": true
+      },
+      {
+        "file": "_canonical_guard.mjs",
+        "matches": true
+      },
+      {
+        "file": "_canonical_control.mjs",
+        "matches": true
+      }
+    ],
+    "stageAIntegrated": true,
+    "frameworkSmoke": {
       "passed": true,
       "sdkMatches": true,
-      "controlMatches": true,
+      "sourceMatches": true,
+      "onlineBenchmark": false,
+      "runs": [
+        {
+          "browser": "ego",
+          "passed": true,
+          "hostVersion": "0.6.2.7"
+        },
+        {
+          "browser": "wiek",
+          "passed": true,
+          "hostVersion": "0.21.0"
+        }
+      ],
+      "report": "p4-sdk-v2-framework-smoke.json"
+    },
+    "localCanonicalSmoke": {
+      "passed": false,
+      "sdkMatches": true,
+      "controlMatches": false,
       "onlineBenchmark": false,
       "runs": [
         {
@@ -55,7 +96,6 @@
     }
   },
   "blockers": [
-    "Reference adapter probes legacy/taskSpaces facade; shared canonical SDK V2 taskSpace contract still needs implementation and validation",
     "No dedicated Stage A/Judge model and thinking/limits configuration has been approved for a paid run",
     "Dedicated test-account/login readiness is not recorded; personal browsing sessions are not benchmark fixtures",
     "Equivalent pinned SDK, task, model, limits, account state and adapter behavior must be recorded for both browsers"

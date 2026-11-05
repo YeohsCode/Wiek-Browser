@@ -45,6 +45,24 @@ jobs:
           } > reports/ci-sdk.log 2>&1
       - name: Build owned native helpers
         run: npm run build:desktop-native > reports/ci-native-build.log 2>&1
+      - name: Check out pinned MIT benchmark framework
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          repository: citrolabs/ego-browser-benchmark-framework
+          ref: f566ac293e4e6bd80c4e9b062b5699f04eac41f4
+          path: references/ego-browser-benchmark-framework
+          persist-credentials: false
+      - name: Shared SDK V2 framework and original regression tests
+        run: |
+          {
+            python3 -m venv data/benchmark-bootstrap
+            data/benchmark-bootstrap/bin/pip install uv==0.11.19
+            data/benchmark-bootstrap/bin/uv sync --project references/ego-browser-benchmark-framework --python 3.13.13 --frozen --group dev
+            python3 benchmark/sdk-v2/apply.py references/ego-browser-benchmark-framework
+            export PYTHONPATH="$PWD/references/ego-browser-benchmark-framework"
+            references/ego-browser-benchmark-framework/.venv/bin/python -m pytest -q benchmark/sdk-v2/test_canonical_v2.py references/ego-browser-benchmark-framework/tests/test_ego_browser_runtime_contract.py references/ego-browser-benchmark-framework/tests/test_screenshotter_ax_tree.py references/ego-browser-benchmark-framework/tests/test_runspace_core.py references/ego-browser-benchmark-framework/tests/test_bootstrap_script.py
+            references/ego-browser-benchmark-framework/.venv/bin/python benchmark/sdk-v2/smoke.py references/ego-browser-benchmark-framework --browser wiek
+          } > reports/ci-benchmark-adapter.log 2>&1
       - name: Local services and actual Electron fixture panels
         run: node --test --test-concurrency=2 tests/*.test.mjs > reports/ci-source-tests.log 2>&1
       - name: Restore pinned optional speech model

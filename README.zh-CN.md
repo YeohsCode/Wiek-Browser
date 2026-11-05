@@ -8,9 +8,9 @@
 
 本地 Chromium 浏览器与 Agent 工作区，原名 **Vek Browser**。项目独立实现 Electron 宿主、浏览器界面、Profile、任务 Space 和本地服务，复用 [citrolabs/ego-lite](https://github.com/citrolabs/ego-lite) 以 MIT 许可开放的 SDK。
 
-**当前开发检查点为 0.20.3。P3 仍在集成验收，尚未完成 Ego 全量功能复刻，P4 线上基准也未完成。** 实际进展见 [计划](PLAN.md)、[功能对照](analysis/feature-parity.md) 和 [验证结果](reports/RESULTS.md)。历史报告保留原 Vek 名称及其对应版本的测试结论。
+**当前开发检查点为 0.21.0。P3 仍在集成验收，尚未完成 Ego 全量功能复刻，P4 线上基准也未完成。** 实际进展见 [计划](PLAN.md)、[功能对照](analysis/feature-parity.md) 和 [验证结果](reports/RESULTS.md)。历史报告保留原 Vek 名称及其对应版本的测试结论。
 
-0.20.3 已通过 **512/512 本地测试**、**532/532 SDK 测试**和 **197/197 打包宿主检查**。使用相同 SDK 的浏览器同集对标已完成：Wiek 69/69，Ego 0.6.2.7 为 68/69，唯一 Ego 失败为 HTML 粘贴。原生 P3 验收与线上模型基准仍未完成。
+0.21.0 已通过 **522/522 本地测试**、**相同 SDK 之前通过的 532/532 测试**和 **197/197 打包宿主检查**。使用相同 SDK 的浏览器同集对标已完成：Wiek 69/69，Ego 0.6.2.7 为 68/69，唯一 Ego 失败为 HTML 粘贴。原生 P3 验收与线上模型基准仍未完成。
 
 ## 从源码启动
 
@@ -54,7 +54,7 @@ node cli/wiek-browser.mjs stop
 - 自动化调度、执行模式、明确启用的 macOS login job、忙碌延期、运行记忆/结果、停止条件评估和保守的崩溃恢复。
 - Library/Collections、截图标注、网页操作录制、本地语音转写，以及需要用户启用的桌面工具。
 
-**本检查点尚待完成的 P3 验收：** 物理多显示器/权限撤销及更多翻译语言、睡眠/登录/权限撤销。远程 Git 使用一次性本地 bare 仓库验证；GitHub PR 使用合成协议进程测试，没有操作真实账号。其余 Agent 集成继续暂缓。完整浏览器资料迁移、部分 MCP 能力、语义 memory、签名/公证和 31 项线上模型基准仍在后续计划中。
+**本检查点尚待完成的 P3 验收：** 物理多显示器/权限撤销、最终包原生采集、睡眠/登录/权限撤销。远程 Git 使用一次性本地 bare 仓库验证；GitHub PR 使用合成协议进程测试，没有操作真实账号。其余 Agent 集成继续暂缓。完整浏览器资料迁移、部分 MCP 能力、语义 memory、签名/公证和 31 项线上模型基准仍在后续计划中。
 
 ## 让 Agent 操作网页
 
@@ -73,13 +73,13 @@ JS
 
 语音功能使用本地 Whisper tiny 模型。Git 不包含模型权重；语音测试或打包前需按 [models/MODEL-NOTICE.md](models/MODEL-NOTICE.md) 恢复固定版本并校验 SHA-256。该文档同时说明模型许可和 decoder 构建来源。
 
-实验性的翻译适配使用 Python/Argos 及中英双向模型，可显式安装：
+实验性的翻译适配使用 Python/Argos 及显式选择的翻译方向，可安装中英、中西双向模型：
 
 ```sh
-node cli/wiek-browser.mjs translation install --python /absolute/path/to/python3.12
+node cli/wiek-browser.mjs translation install --python /absolute/path/to/python3.12 --pairs en-zh,zh-en,en-es,es-en
 ```
 
-安装步骤会下载依赖和模型到选定数据目录；推理设计为离线运行。已修复模型分句兼容问题，中英双向真实样例已通过服务层验证，推理期间禁止 socket 连接；这不是通用翻译质量分数。Python 和 Argos 模型不包含在应用包中。
+安装步骤会下载依赖和模型到选定数据目录；推理设计为离线运行。已修复模型分句兼容问题，中英、中西双向的四个真实样例已通过源码和最终包服务层验证，推理期间禁止 socket 连接；这不是通用翻译质量分数。Python 和 Argos 模型不包含在应用包中。
 
 ## 测试与打包
 
@@ -94,7 +94,7 @@ npm run dist
 
 macOS 产物为 `dist/mac-arm64/Wiek Browser.app`。当前为本地未签名构建，签名、公证和正式发布仍待配置。
 
-**0.20.3 验收**：512 项本地测试、532 项 SDK 测试、197 项打包宿主检查、Wiek 69/69 项浏览器测试（1,248 断言）通过。相同 SDK/fixture/用例索引下，Ego 0.6.2.7 为 68/69（1,235 断言），唯一失败是 HTML 粘贴；81 个原始上游测试输入未改。两侧 canonical V2 本地 smoke 均通过。详情见 [验证结果](reports/RESULTS.md) 和 [SDK 修改](analysis/sdk-changes.md)。这些本地验收不替代尚未运行的 31 项线上模型基准。
+**0.21.0 验收**：522 项本地测试、相同 SDK 之前通过的 532 项测试、197 项打包宿主检查、Wiek 69/69 项浏览器测试（1,248 断言）通过。相同 SDK/fixture/用例索引下，Ego 0.6.2.7 为 68/69（1,235 断言），唯一失败是 HTML 粘贴；81 个原始上游测试输入未改。完整共享 canonical V2 框架 adapter 已接入，59 项回归与两侧本地截图/AX/清理 hook smoke 通过，见[适配说明](benchmark/sdk-v2/README.md)。详情见 [验证结果](reports/RESULTS.md) 和 [SDK 修改](analysis/sdk-changes.md)。这些本地验收不替代尚未运行的 31 项线上模型基准。
 
 Ego 对标需要另行取得并保存在忽略目录中的参考制品；普通 Wiek 开发不需要。对标时显式固定版本并使用专用 `vek-reference` 实例；本轮设置 `WIEK_REFERENCE_VERSION=0.6.2.7` 和 `VEK_COMPARISON_EGO_CLI="$PWD/tools/ego-reference-cli"`，Wiek 使用独立测试数据目录。不要在参考 E2E 运行时重建 SDK。
 

@@ -1,0 +1,55 @@
+{
+  "passed": true,
+  "realModels": true,
+  "packaged": true,
+  "socketConnectionsBlockedByAdapter": true,
+  "scope": "Four synthetic English/Chinese/Spanish examples through the real service and JSON subprocess. No general translation-quality score.",
+  "models": [
+    {
+      "installed": "en-zh",
+      "version": "1.9",
+      "sha256": "433e7c4f034d87fbe2353161e05f18646d7999452f801a4e1f0378522b9850ab"
+    },
+    {
+      "installed": "zh-en",
+      "version": "1.9",
+      "sha256": "62e7af5a3a48b530e47b7b3e5c78c2de79073ecd815750d2bf3ab35b4a67da2d"
+    },
+    {
+      "installed": "en-es",
+      "version": "1.0",
+      "sha256": "d698d0ef87ad70d5d184b7fa6965905bf4368f09a2bb9ffb165a79bac96af0c4"
+    },
+    {
+      "installed": "es-en",
+      "version": "1.9",
+      "sha256": "c54df2b62fceaf54a3ce5d97db6bf56efd7940063329f6778f4212d2acb370d4"
+    }
+  ],
+  "cases": [
+    {
+      "source": "en",
+      "target": "zh",
+      "input": "Hello world. This browser runs locally.",
+      "output": "哈罗世界。 此浏览器运行于本地 。"
+    },
+    {
+      "source": "zh",
+      "target": "en",
+      "input": "你好世界。这个浏览器在本地运行。",
+      "output": "Hello world. This browser is running locally."
+    },
+    {
+      "source": "en",
+      "target": "es",
+      "input": "Hello world. This browser runs locally.",
+      "output": "Hola mundo. Este navegador funciona localmente."
+    },
+    {
+      "source": "es",
+      "target": "en",
+      "input": "Hola mundo. Este navegador funciona localmente.",
+      "output": "Hey, world. This browser works locally."
+    }
+  ]
+}

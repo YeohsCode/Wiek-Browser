@@ -57,3 +57,27 @@ test('cleanup reports per-candidate failures and continues only explicit candida
   const {control}=fixture({resolve:()=>{throw new Error('native permission changed');}});
   const rows=await control.close(['task','absent']);assert.equal(rows[0].ok,false);assert.match(rows[0].error,/permission changed/);assert.equal(rows[1].notFound,true);
 });
+const viewport={width:1280,height:800,deviceScaleFactor:1,mobile:false};
+test('formal capture applies and clears the same page viewport on success and failure',async()=>{
+  for(const fail of [false,true]){
+    const methods=[];
+    const {control}=fixture({tabs:[{active:true,targetId:'p1',page:{cdp:async(method,params)=>{
+      methods.push([method,params]);if(method==='Page.captureScreenshot'){if(fail)throw Error('target closed');return {data:'png'};}return {nodes:[]};
+    }}}]});
+    if(fail)await assert.rejects(control.capture(['task'],{format:'png'},{viewport}),/target closed/);
+    else assert.deepEqual((await control.capture(['task'],{format:'png'},{viewport})).viewport,viewport);
+    assert.deepEqual(methods[0],['Emulation.setDeviceMetricsOverride',viewport]);
+    assert.deepEqual(methods.at(-1),['Emulation.clearDeviceMetricsOverride',{}]);
+  }
+});
+test('failed viewport cleanup is a capture failure rather than silent page pollution',async()=>{
+  const {control}=fixture({tabs:[{active:true,page:{cdp:async method=>{
+    if(method==='Emulation.clearDeviceMetricsOverride')throw Error('cleanup unavailable');return {data:'png'};
+  }}}]});
+  await assert.rejects(control.capture(['task'],{format:'png'},{viewport}),/cleanup unavailable/);
+});
+test('invalid fixed viewport never alters page metrics',async()=>{
+  const {control,calls}=fixture();
+  await assert.rejects(control.capture(['task'],{format:'png'},{viewport:{...viewport,width:99999}}),/Invalid benchmark viewport/);
+  assert.deepEqual(calls,[{selected:7}]);
+});

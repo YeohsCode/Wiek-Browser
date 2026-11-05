@@ -19,21 +19,45 @@ if model_dir:
         os.environ[variable] = str(Path(model_dir).parent / folder)
 
 if len(sys.argv) > 1 and sys.argv[1] == "install":
+    import re
+    import socket
+    # urllib's upstream downloader otherwise has no connection/read timeout.
+    socket.setdefaulttimeout(30)
+    if len(sys.argv) == 2:
+        selected = ["en-zh", "zh-en"]
+    elif len(sys.argv) == 4 and sys.argv[2] == "--pairs":
+        selected = sys.argv[3].split(",")
+    else:
+        raise ValueError("Use install [--pairs en-zh,zh-en,en-es,es-en]")
+    if not 1 <= len(selected) <= 20 or len(set(selected)) != len(selected) or any(not re.fullmatch(r"[a-z]{2,3}-[a-z]{2,3}", pair) or len(set(pair.split("-"))) != 2 for pair in selected):
+        raise ValueError("Invalid translation language pairs")
     import argostranslate.package
     argostranslate.package.update_package_index()
     packages = argostranslate.package.get_available_packages()
-    manifest = []
-    for source, target in [("en", "zh"), ("zh", "en")]:
-        package = next(p for p in packages if p.from_code == source and p.to_code == target)
+    # Resolve every requested direction before downloading any weights.
+    resolved = []
+    for pair in selected:
+        source, target = pair.split("-")
+        package = next((p for p in packages if p.from_code == source and p.to_code == target), None)
+        if package is None:
+            raise ValueError(f"No direct Argos model available for {pair}")
+        resolved.append((source, target, package))
+    manifest_path = Path(model_dir).parent / "model-manifest.json"
+    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else []
+    for source, target, package in resolved:
         downloaded = package.download()
         argostranslate.package.install_from_path(downloaded)
         record = {"installed": f"{source}-{target}", "version": package.package_version, "sha256": hashlib.file_digest(open(downloaded, "rb"), "sha256").hexdigest()}
-        manifest.append(record)
+        manifest = [row for row in manifest if row.get("installed") != record["installed"]] + [record]
+        temporary = manifest_path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(manifest, indent=2))
+        temporary.replace(manifest_path)
         print(json.dumps(record), flush=True)
     import argostranslate.translate
-    for source, target, text in [("en", "zh", "Hello world."), ("zh", "en", "你好世界。")]:
+    samples = {"en": "Hello world.", "zh": "你好世界。", "es": "Hola mundo.", "fr": "Bonjour le monde.", "ja": "こんにちは世界。", "de": "Hallo Welt."}
+    for source, target, _package in resolved:
+        text = samples.get(source, "Hello world.")
         argostranslate.translate.translate(text, source, target)
-    Path(model_dir).parent.joinpath("model-manifest.json").write_text(json.dumps(manifest, indent=2))
 else:
     # Installation warms required segmenters. Inference fails closed if any
     # dependency attempts to download another resource.

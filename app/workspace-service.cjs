@@ -6,6 +6,7 @@ const crypto = require('node:crypto');
 const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 const { createRemoteGit } = require('./workspace-remote-git.cjs');
+const { repositoryLayout } = require('./repository-layout.cjs');
 const execute = promisify(execFile);
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const IGNORED = new Set(['.git', 'node_modules', '.next', '.cache', 'dist', 'build']);
@@ -227,22 +228,27 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
     return value;
   }
   // Checkpoints are private Git objects/refs. The real index is never used as a scratch index.
-  const checkpointPrefix = 'refs/vek/checkpoints/';
+  const checkpointPrefix = ctx => repositoryLayout(ctx.root).checkpointPrefix;
+  async function checkpointRefs(ctx){
+    const prefix=checkpointPrefix(ctx);
+    return (await git(ctx,['for-each-ref','--format=%(refname)',prefix])).stdout.trim().split('\n').filter(ref=>ref.startsWith(prefix)&&/^[a-f0-9-]{36}$/.test(ref.slice(prefix.length)));
+  }
   const objectId = value => typeof value === 'string' && /^(?:[a-f0-9]{40}|[a-f0-9]{64})$/.test(value);
   function checkpointId(value) { if (typeof value !== 'string' || !/^[a-f0-9-]{36}$/.test(value)) throw fail('Choose a checkpoint from this repository'); return value; }
   async function checkpointLock(ctx, operation) {
-    const gitDir=path.join(ctx.root,'.git');
-    const stat=await fsp.lstat(gitDir);if(!stat.isDirectory()||stat.isSymbolicLink()||await fsp.realpath(gitDir)!==gitDir)throw fail('Checkpoints require a regular repository .git directory; linked worktrees are not supported');
-    if(await fsp.realpath((await git(ctx,['rev-parse','--path-format=absolute','--git-common-dir'])).stdout.trim())!==gitDir)throw fail('Checkpoints require repository-local Git storage','VEK_CHECKPOINT_UNSAFE');
-    for(const directory of ['objects','refs','refs/vek','refs/vek/checkpoints'])try{const target=path.join(gitDir,directory),info=await fsp.lstat(target);if(info.isSymbolicLink()||!info.isDirectory()||await fsp.realpath(target)!==target)throw fail('Git checkpoint storage cannot use directory aliases','VEK_CHECKPOINT_UNSAFE');}catch(error){if(error.code!=='ENOENT')throw error;}
-    for(const entry of await fsp.readdir(path.join(gitDir,'objects'),{withFileTypes:true}))if(entry.isSymbolicLink())throw fail('Git objects cannot use symlink storage','VEK_CHECKPOINT_UNSAFE');
+    const layout=repositoryLayout(ctx.root),{gitDir,commonDir}=layout;
+    if(path.resolve((await git(ctx,['rev-parse','--absolute-git-dir'])).stdout.trim())!==gitDir||path.resolve((await git(ctx,['rev-parse','--path-format=absolute','--git-common-dir'])).stdout.trim())!==commonDir)throw fail('Git storage differs from the selected repository layout','VEK_CHECKPOINT_UNSAFE');
+    const storage=['objects','refs','refs/vek','refs/vek/checkpoints'];
+    if(layout.linked)storage.push(path.relative(commonDir,path.join(commonDir,layout.checkpointPrefix)));
+    for(const directory of storage)try{const target=path.join(commonDir,directory),info=await fsp.lstat(target);if(info.isSymbolicLink()||!info.isDirectory()||await fsp.realpath(target)!==target)throw fail('Git checkpoint storage cannot use directory aliases','VEK_CHECKPOINT_UNSAFE');}catch(error){if(error.code!=='ENOENT')throw error;}
+    for(const entry of await fsp.readdir(path.join(commonDir,'objects'),{withFileTypes:true}))if(entry.isSymbolicLink())throw fail('Git objects cannot use symlink storage','VEK_CHECKPOINT_UNSAFE');
     for(const name of ['MERGE_HEAD','CHERRY_PICK_HEAD','REVERT_HEAD','REBASE_HEAD','rebase-merge','rebase-apply','sequencer'])if(fs.existsSync(path.join(gitDir,name)))throw fail('Finish the active merge/rebase/cherry-pick before using checkpoints','VEK_CHECKPOINT_UNSAFE');
     if((await git(ctx,['rev-parse','--shared-index-path'])).stdout.trim())throw fail('Split indexes are not supported by checkpoints','VEK_CHECKPOINT_UNSAFE');
     if((await git(ctx,['config','--bool','core.sparseCheckout']).catch(()=>({stdout:''}))).stdout.trim()==='true')throw fail('Sparse checkouts are not supported by checkpoints','VEK_CHECKPOINT_UNSAFE');
     const lockPath=path.join(gitDir,'index.lock');let lock;
     try{lock=await fsp.open(lockPath,'wx',0o600);}catch(error){if(error.code==='EEXIST')throw fail('Git index is busy. Finish the other Git operation and retry.','VEK_CHECKPOINT_CONFLICT');throw error;}
     const identity=await lock.stat(),info={gitDir,indexPath:path.join(gitDir,'index'),lockPath,lock};
-    try{return await operation(info);}finally{await lock.close().catch(()=>{});try{const present=await fsp.lstat(lockPath);if(!present.isSymbolicLink()&&present.ino===identity.ino&&present.dev===identity.dev)await fsp.unlink(lockPath);}catch{}}
+    try{if(repositoryLayout(ctx.root).identity!==layout.identity)throw fail('Repository identity changed while locking');return await operation(info);}finally{await lock.close().catch(()=>{});try{const present=await fsp.lstat(lockPath);if(!present.isSymbolicLink()&&present.ino===identity.ino&&present.dev===identity.dev)await fsp.unlink(lockPath);}catch{}}
   }
   async function checkpointPath(ctx,file,{missing=false}={}) {
     const rel=relative(file);if(rel.includes('\ufffd'))throw fail('Checkpoint cannot safely represent this filename encoding','VEK_CHECKPOINT_UNSAFE');if(rel!==file)throw fail('Checkpoint contains a noncanonical path','VEK_CHECKPOINT_UNSAFE');
@@ -264,7 +270,7 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
   }
   async function checkpointStore(ctx,info,current,name) {
     if(typeof name!=='string'||!name.trim()||name.length>120)throw fail('Checkpoint name must contain 1–120 characters');
-    if((await git(ctx,['for-each-ref','--format=%(refname)',checkpointPrefix])).stdout.trim().split('\n').filter(Boolean).length>=1000)throw fail('At most 1000 checkpoints including protection snapshots are supported');
+    if((await checkpointRefs(ctx)).length>=1000)throw fail('At most 1000 checkpoints including protection snapshots are supported');
     const id=crypto.randomUUID(),createdAt=new Date().toISOString(),temporary=path.join(info.gitDir,'vek-index-'+crypto.randomUUID());
     const env={GIT_INDEX_FILE:temporary},blob=async bytes=>(await git(ctx,['hash-object','-w','--stdin'],{input:bytes})).stdout.trim();
     let indexTree,worktreeTree;
@@ -282,10 +288,10 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
     const tree=(await git(ctx,['mktree'],{input:`100644 blob ${manifestBlob}\tmanifest.json\n${indexBlob?`100644 blob ${indexBlob}\tindex.bin\n`:''}040000 tree ${indexTree}\tindex-tree\n040000 tree ${worktreeTree}\tworktree\n`})).stdout.trim();
     const commit=(await git(ctx,['commit-tree',tree,'-p',current.head,'-m','Wiek checkpoint: '+name.trim()],{env:{GIT_AUTHOR_NAME:'Wiek Checkpoint',GIT_AUTHOR_EMAIL:'checkpoint@localhost',GIT_COMMITTER_NAME:'Wiek Checkpoint',GIT_COMMITTER_EMAIL:'checkpoint@localhost'}})).stdout.trim();
     if((await checkpointState(ctx,info)).signature!==current.signature)throw fail('Files or index changed while creating the checkpoint. Retry after changes settle.','VEK_CHECKPOINT_CONFLICT');
-    await git(ctx,['update-ref',checkpointPrefix+id,commit,'0'.repeat(commit.length)]);return manifest;
+    await git(ctx,['update-ref',checkpointPrefix(ctx)+id,commit,'0'.repeat(commit.length)]);return manifest;
   }
   async function checkpointRead(ctx,id) {
-    const ref=checkpointPrefix+checkpointId(id),raw=(await git(ctx,['show',ref+':manifest.json'])).stdout;
+    const ref=checkpointPrefix(ctx)+checkpointId(id),raw=(await git(ctx,['show',ref+':manifest.json'])).stdout;
     if(Buffer.byteLength(raw)>2*1024*1024)throw fail('Checkpoint manifest is too large');let value;try{value=JSON.parse(raw);}catch{throw fail('Checkpoint manifest is invalid');}
     if(value.version!==1||value.id!==id||typeof value.name!=='string'||!objectId(value.head)||!objectId(value.indexTree)||!objectId(value.worktreeTree)||!Array.isArray(value.files)||value.files.length>2000||!(value.indexBlob===null||objectId(value.indexBlob)))throw fail('Checkpoint manifest is invalid');
     if((await git(ctx,['rev-parse',ref+':worktree'])).stdout.trim()!==value.worktreeTree||(await git(ctx,['rev-parse',ref+':index-tree'])).stdout.trim()!==value.indexTree)throw fail('Checkpoint trees changed');
@@ -308,7 +314,7 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
       for(let i=0;i+1<staged.length;i+=2){const kind=staged[i],file=staged[i+1];if(!file)continue;relative(file);const row=changes.get(file)||{path:file,kind:kind==='A'?'add':kind==='D'?'remove':'modify',worktree:false};row.staged=true;changes.set(file,row);}
       return{projectId:payload.projectId,from:checkpointMeta(from),to:checkpointMeta(to),headChanged:from.head!==to.head,changes:[...changes.values()].sort((a,b)=>a.path.localeCompare(b.path)),stagedDiff,worktreeDiff};
     }
-    if(operation==='list'){const refs=(await git(ctx,['for-each-ref','--format=%(refname)',checkpointPrefix])).stdout.trim().split('\n').filter(Boolean);if(refs.length>1000)throw fail('Too many checkpoints to list');const checkpoints=[];for(const ref of refs)checkpoints.push(checkpointMeta(await checkpointRead(ctx,ref.slice(checkpointPrefix.length))));return{projectId:payload.projectId,checkpoints:checkpoints.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))};}
+    if(operation==='list'){const refs=await checkpointRefs(ctx);if(refs.length>1000)throw fail('Too many checkpoints to list');const checkpoints=[];for(const ref of refs)checkpoints.push(checkpointMeta(await checkpointRead(ctx,ref.slice(checkpointPrefix(ctx).length))));return{projectId:payload.projectId,checkpoints:checkpoints.sort((a,b)=>b.createdAt.localeCompare(a.createdAt))};}
     return checkpointLock(ctx,async info=>{
       const current=await checkpointState(ctx,info);
       if(operation==='create'){const saved=await checkpointStore(ctx,info,current,payload.name);publish({type:'checkpoint-created',projectId:payload.projectId,id:saved.id});return{projectId:payload.projectId,checkpoint:checkpointMeta(saved)};}

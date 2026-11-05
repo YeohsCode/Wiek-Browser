@@ -1,0 +1,153 @@
+{
+  "onlineBenchmark": false,
+  "modelCalls": 0,
+  "accountActions": 0,
+  "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+  "adapter": {
+    "referenceCommit": "f566ac293e4e6bd80c4e9b062b5699f04eac41f4",
+    "datasetSha256": "e1495bef65b83c7bcb4cf3bf7a6e515239c6763c620efe1d31749ad6d54f6200",
+    "patchSha256": "6675ca5e6455cfdf3569033a670d700639a2382af7b9941b8d60e86b8edbf09c",
+    "patchedFiles": {
+      "ego_bench/browser_tools/ego_browser.py": "d9793ef41c05fc19c542b5f934b6d779ac1882d0c2b4d9eb2dba908301a4fe1f",
+      "ego_bench/hooks/pi_extension_helper.py": "69388dc6647ad06776f347b94656005b1a049f763668eda07d117a7f3f0a16ad"
+    },
+    "overlayFiles": {
+      "canonical_v2.py": "b4038426e90479e955d4f200e83108146f0ffefc9bf224a70c33cc8da8a20e6f",
+      "_canonical_guard.mjs": "6332e4bb6c1cfef927d9ccf6e54d54532e2af6d36d55eaef0eaac53f2ae46227",
+      "_canonical_control.mjs": "f2230adfd231c226ead5625eddbe50ee6b01e3c70158311a46d52965a24f65e1",
+      "_canonical_acorn.mjs": "1cbcbf252a5800e496dc505c706f309a9dd4e1789392e12963c77ae9497ff6f7",
+      "_canonical_acorn.LICENSE": "76a876cf886ff9be2a8b5e2e86514fed06223c8c9f0c1e9ee9606e93841e00b7"
+    },
+    "modelCalls": 0,
+    "accountActions": 0
+  },
+  "fixtureSha256": "caf1c8d3a411fa2d75faaa7578aae60c2fa7308193f50d39e57946cc3bd0532e",
+  "runs": [
+    {
+      "browser": "ego",
+      "passed": true,
+      "cliSha256": "cf2d7aaf21d94fb0cff2cfcbc21f9feac051e23ae77bc956d7ac148063a8e4aa",
+      "checks": [
+        {
+          "probe": "canonical-sdk-v2",
+          "zeroMutation": true,
+          "pairedSkill": true
+        },
+        {
+          "strictHook": true,
+          "screenshotHook": true,
+          "pngSha256": "53ae9031bd3348a4d08cedb5d1df7ed6831fb725602dd882c08107fa0a251dfa",
+          "pngBytes": 12806,
+          "ax": true,
+          "viewportRestored": true,
+          "receipt": {
+            "canonicalMarker": "ccbffc9aa692400b8036feec38807f1b",
+            "spaceId": 1,
+            "targetId": "B2C5F11B23F9F1DAAD07D7A4AA3D5975",
+            "viewport": {
+              "width": 1280,
+              "height": 800,
+              "deviceScaleFactor": 1,
+              "mobile": false
+            },
+            "axError": null,
+            "sha256": "53ae9031bd3348a4d08cedb5d1df7ed6831fb725602dd882c08107fa0a251dfa"
+          }
+        },
+        {
+          "closed": {
+            "egoBenchClose": [
+              {
+                "candidate": "framework-smoke-98dc9960e521449a935e968d4286eec2",
+                "ok": true,
+                "receipt": {
+                  "spaceId": 1,
+                  "closedSpace": true,
+                  "keptManagedLabels": [],
+                  "closedManagedLabels": [
+                    "p1"
+                  ],
+                  "preservedUnmanagedCount": 0
+                }
+              }
+            ],
+            "canonicalMarker": "9d2741aa181e4762ba89df3844dd910c"
+          },
+          "missingCleanupIdempotent": true
+        }
+      ],
+      "referenceProfile": "data/ego-reference",
+      "hostVersion": {
+        "currentVersion": "0.6.2.7",
+        "updateAvailable": false
+      },
+      "finalCleanup": {
+        "ok": true,
+        "error": null
+      }
+    },
+    {
+      "browser": "wiek",
+      "passed": true,
+      "cliSha256": "8b679e84ba18bf316077eacf7383d0e2e7bf338e98e61ed3cbdc2897a6eece71",
+      "checks": [
+        {
+          "probe": "canonical-sdk-v2",
+          "zeroMutation": true,
+          "pairedSkill": true
+        },
+        {
+          "strictHook": true,
+          "screenshotHook": true,
+          "pngSha256": "53ae9031bd3348a4d08cedb5d1df7ed6831fb725602dd882c08107fa0a251dfa",
+          "pngBytes": 12806,
+          "ax": true,
+          "viewportRestored": true,
+          "receipt": {
+            "canonicalMarker": "59771728688a4793a437306002ade39b",
+            "spaceId": 2,
+            "targetId": "FABD38D0B9B441400D8A0D8B14F046C9",
+            "viewport": {
+              "width": 1280,
+              "height": 800,
+              "deviceScaleFactor": 1,
+              "mobile": false
+            },
+            "axError": null,
+            "sha256": "53ae9031bd3348a4d08cedb5d1df7ed6831fb725602dd882c08107fa0a251dfa"
+          }
+        },
+        {
+          "closed": {
+            "egoBenchClose": [
+              {
+                "candidate": "framework-smoke-801defbad01f4108846abce37d138ff9",
+                "ok": true,
+                "receipt": {
+                  "spaceId": 2,
+                  "closedSpace": true,
+                  "keptManagedLabels": [],
+                  "closedManagedLabels": [
+                    "p1"
+                  ],
+                  "preservedUnmanagedCount": 0
+                }
+              }
+            ],
+            "canonicalMarker": "4d0f77275e8146d1a267eb03f738d178"
+          },
+          "missingCleanupIdempotent": true
+        }
+      ],
+      "hostVersion": {
+        "currentVersion": "0.21.0",
+        "updateAvailable": false
+      },
+      "finalCleanup": {
+        "ok": true,
+        "error": null
+      }
+    }
+  ],
+  "passed": true
+}

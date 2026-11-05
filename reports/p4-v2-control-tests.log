@@ -1,0 +1,22 @@
+✔ missing cleanup and capture never create a named task (1.38525ms)
+✔ user ownership is a boundary even when another candidate is Agent-owned (0.101083ms)
+✔ numeric-looking names resolve by name before id, then use a numeric handle (0.070334ms)
+✔ ownership race fails without retrying a different task (0.1285ms)
+✔ screenshot and AX use the selected page without reading another tab (0.103334ms)
+✔ active unmanaged page cannot fall back to an inactive managed page (0.062125ms)
+✔ missing or ambiguous active pages produce an explicit error (0.081208ms)
+✔ empty screenshot fails before AX, and screenshot errors do not select another candidate (0.082792ms)
+✔ optional AX error is preserved alongside a successful screenshot (0.1025ms)
+✔ protected-page receipt stays incomplete without force-closing or claiming (0.134084ms)
+✔ cleanup reports per-candidate failures and continues only explicit candidates (0.131458ms)
+✔ formal capture applies and clears the same page viewport on success and failure (0.131166ms)
+✔ failed viewport cleanup is a capture failure rather than silent page pollution (0.081292ms)
+✔ invalid fixed viewport never alters page metrics (0.058667ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 74.1595

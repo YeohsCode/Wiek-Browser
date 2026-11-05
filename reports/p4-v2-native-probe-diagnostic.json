@@ -1,0 +1,26 @@
+[
+  {
+    "source": "const __benchmarkRun=async()=>{return {canonical:typeof taskSpace==='function'&&typeof listTaskSpaces==='function'};};const result=await __benchmarkRun();console.log(JSON.stringify({benchmarkSmoke:'debug',result}));",
+    "exit": 0,
+    "stdout": "Please complete the onboarding process first. A setup window has opened; follow the on-screen instructions to continue. After completing onboarding, open a new terminal window for the command to take effect.\n",
+    "stderr": ""
+  },
+  {
+    "source": "\nconst __probeRuntimeContract=async()=>{\n  const canonical=typeof taskSpace==='function'&&typeof listTaskSpaces==='function';\n  if(canonical)return {canonical:true,legacy:false,facade:false,screenshot:true};\n  const legacy=typeof globalThis.useOrCreateTaskSpace==='function'&&typeof globalThis.switchTaskSpace==='function'&&typeof globalThis.completeTaskSpace==='function'&&typeof globalThis.cliLog==='function';\n  const facade=Boolean(globalThis.taskSpaces&&typeof globalThis.taskSpaces.useOrCreate==='function'&&typeof globalThis.taskSpaces.switch==='function'&&typeof globalThis.taskSpaces.complete==='function');\n  const screenshot=typeof cdp==='function'||(typeof ego!=='undefined'&&ego&&typeof ego.cdp==='function')||typeof captureScreenshot==='function';\n  return {canonical:false,legacy,facade,screenshot};\n};\nconst __contractResult=await __probeRuntimeContract();\nconsole.log(JSON.stringify({egoBenchRuntimeContractProbe:__contractResult}));\n",
+    "exit": 0,
+    "stdout": "Please complete the onboarding process first. A setup window has opened; follow the on-screen instructions to continue. After completing onboarding, open a new terminal window for the command to take effect.\n",
+    "stderr": ""
+  },
+  {
+    "source": "console.log('literal console output');",
+    "exit": 0,
+    "stdout": "Please complete the onboarding process first. A setup window has opened; follow the on-screen instructions to continue. After completing onboarding, open a new terminal window for the command to take effect.\n",
+    "stderr": ""
+  },
+  {
+    "source": "const t=await listTaskSpaces();console.log(JSON.stringify(t));",
+    "exit": 0,
+    "stdout": "Please complete the onboarding process first. A setup window has opened; follow the on-screen instructions to continue. After completing onboarding, open a new terminal window for the command to take effect.\n",
+    "stderr": ""
+  }
+]

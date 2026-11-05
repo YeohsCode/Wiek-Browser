@@ -1,0 +1,68 @@
+{
+  "generatedAt": "2026-11-05T02:00:55.789932+00:00",
+  "scope": "69 deterministic local browser cases; not the 31-task online model benchmark",
+  "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+  "fixtureSha256": "2ae49ba77bacbfc3db369fbab14fa0d4e132238ffcbac6bd90124d0ceaa52706",
+  "indexSha256": "965bb9790a6e880523117031d64e144c38a4d4fd0258ca816c7f0e0c4ceb4f69",
+  "sameSdkFixtureAndIndex": true,
+  "referenceVersionPin": "0.6.2.7",
+  "nativeReferenceCliSha256": "ab1324145a361698e3c905d3fb8bebce2eecd9a02ea23c8290e4f3bb37c83954",
+  "runtimePreflight": [
+    {
+      "browser": "ego",
+      "hostVersion": {
+        "currentVersion": "0.6.2.7",
+        "updateAvailable": false
+      },
+      "evidence": "p4-sdk-v2-framework-smoke.json"
+    },
+    {
+      "browser": "wiek",
+      "hostVersion": {
+        "currentVersion": "0.21.0",
+        "updateAvailable": false
+      },
+      "evidence": "p4-sdk-v2-framework-smoke.json"
+    }
+  ],
+  "platform": "Darwin",
+  "arch": "arm64",
+  "paidModelCalls": 0,
+  "realAccountWrites": 0,
+  "viewportPolicy": "Default host window for 69-case local run; no pixel-equality or online benchmark claim.",
+  "note": "Wiek rerun from final 0.21.0 package; Ego 69-case result retained from 0.20.3 checkpoint with the identical SDK/fixture/index. Both browsers rerun through full framework hooks this checkpoint.",
+  "runs": [
+    {
+      "browser": "ego",
+      "startedAt": "2026-11-04T12:19:59.945Z",
+      "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+      "fixtureSha256": "2ae49ba77bacbfc3db369fbab14fa0d4e132238ffcbac6bd90124d0ceaa52706",
+      "suiteIndexSha256": "965bb9790a6e880523117031d64e144c38a4d4fd0258ca816c7f0e0c4ceb4f69",
+      "counts": {
+        "total": 69,
+        "selected": 69,
+        "pass": 68,
+        "fail": 1,
+        "skip": 0,
+        "notRun": 0,
+        "assertions": 1235
+      }
+    },
+    {
+      "browser": "vek",
+      "startedAt": "2026-11-05T01:54:15.086Z",
+      "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+      "fixtureSha256": "2ae49ba77bacbfc3db369fbab14fa0d4e132238ffcbac6bd90124d0ceaa52706",
+      "suiteIndexSha256": "965bb9790a6e880523117031d64e144c38a4d4fd0258ca816c7f0e0c4ceb4f69",
+      "counts": {
+        "total": 69,
+        "selected": 69,
+        "pass": 69,
+        "fail": 0,
+        "skip": 0,
+        "notRun": 0,
+        "assertions": 1248
+      }
+    }
+  ]
+}

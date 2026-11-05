@@ -1,0 +1,230 @@
+--- a/ego_bench/browser_tools/ego_browser.py
++++ b/ego_bench/browser_tools/ego_browser.py
+@@ -73,17 +73,22 @@
+ class EgoBrowserRuntimeContract(str, Enum):
+     """Machine-selected helper surface for one complete Stage A run."""
+ 
++    CANONICAL_V2 = "canonical-sdk-v2"
+     LEGACY_FLAT_V1 = "legacy-flat-v1"
+     TASKSPACES_FACADE_V1 = "taskspaces-facade-v1"
+ 
+     @property
+     def switch_callee(self) -> str:
++        if self is EgoBrowserRuntimeContract.CANONICAL_V2:
++            return "taskSpace"
+         if self is EgoBrowserRuntimeContract.LEGACY_FLAT_V1:
+             return "switchTaskSpace"
+         return "taskSpaces.switch"
+ 
+     @property
+     def complete_callee(self) -> str:
++        if self is EgoBrowserRuntimeContract.CANONICAL_V2:
++            return "task.finish"
+         if self is EgoBrowserRuntimeContract.LEGACY_FLAT_V1:
+             return "completeTaskSpace"
+         return "taskSpaces.complete"
+@@ -114,28 +119,17 @@
+ 
+ _CONTRACT_PROBE_KEY = "egoBenchRuntimeContractProbe"
+ _CONTRACT_PROBE_JS = f"""
+-const legacy = (
+-  typeof globalThis.useOrCreateTaskSpace === 'function' &&
+-  typeof globalThis.switchTaskSpace === 'function' &&
+-  typeof globalThis.completeTaskSpace === 'function' &&
+-  typeof globalThis.cliLog === 'function'
+-);
+-const facade = Boolean(
+-  globalThis.taskSpaces &&
+-  typeof globalThis.taskSpaces.useOrCreate === 'function' &&
+-  typeof globalThis.taskSpaces.switch === 'function' &&
+-  typeof globalThis.taskSpaces.complete === 'function' &&
+-  globalThis.console &&
+-  typeof globalThis.console.log === 'function'
+-);
+-const screenshot = Boolean(
+-  typeof cdp === 'function' ||
+-  (typeof ego !== 'undefined' && ego && typeof ego.cdp === 'function') ||
+-  typeof captureScreenshot === 'function'
+-);
+-const line = JSON.stringify({{ {_CONTRACT_PROBE_KEY}: {{ legacy, facade, screenshot }} }});
+-try {{ if (globalThis.console && typeof globalThis.console.log === 'function') console.log(line); }} catch {{}}
+-try {{ if (typeof globalThis.cliLog === 'function') globalThis.cliLog(line); }} catch {{}}
++const __probeRuntimeContract=async()=>{{
++  const canonical=typeof taskSpace==='function'&&typeof listTaskSpaces==='function';
++  if(canonical)return {{canonical:true,legacy:false,facade:false,screenshot:true}};
++  const legacy=typeof globalThis.useOrCreateTaskSpace==='function'&&typeof globalThis.switchTaskSpace==='function'&&typeof globalThis.completeTaskSpace==='function'&&typeof globalThis.cliLog==='function';
++  const facade=Boolean(globalThis.taskSpaces&&typeof globalThis.taskSpaces.useOrCreate==='function'&&typeof globalThis.taskSpaces.switch==='function'&&typeof globalThis.taskSpaces.complete==='function');
++  const screenshot=typeof cdp==='function'||(typeof ego!=='undefined'&&ego&&typeof ego.cdp==='function')||typeof captureScreenshot==='function';
++  return {{canonical:false,legacy,facade,screenshot}};
++}};
++const __contractResult=await __probeRuntimeContract();
++const __contractLine=JSON.stringify({{{_CONTRACT_PROBE_KEY}:__contractResult}});
++if(!__contractResult.canonical&&typeof cliLog==='function')cliLog(__contractLine);else console.log(__contractLine);
+ """
+ 
+ 
+@@ -173,11 +167,17 @@
+ 
+     payload = _probe_payload(proc.stdout) or _probe_payload(proc.stderr)
+     if payload is None:
+-        stderr_tail = (proc.stderr or "").strip()[-500:]
++        stderr_tail = (proc.stderr or proc.stdout or "").strip()[-500:]
+         raise RuntimeError(
+             "ego-browser runtime contract probe produced no marker "
+             f"(rc={proc.returncode}, sdk={sdk}): {stderr_tail or '<no stderr>'}"
+         )
++    if proc.returncode != 0:
++        raise RuntimeError(f"runtime contract probe failed (rc={proc.returncode})")
++    # V2 installs guarded legacy globals. Prefer its lexical public API, without
++    # invoking any helper or treating those guards as a second live dialect.
++    if payload.get("canonical") is True:
++        return EgoBrowserRuntimeContract.CANONICAL_V2
+     matches: list[EgoBrowserRuntimeContract] = []
+     if payload.get("legacy") is True:
+         matches.append(EgoBrowserRuntimeContract.LEGACY_FLAT_V1)
+@@ -201,6 +201,10 @@
+ ) -> EgoBrowserRuntimeContract | None:
+     """Classify an unambiguous SKILL call surface; prose-only/dual syntax stays unknown."""
+     text = Path(skill_path).read_text(encoding="utf-8")
++    if re.search(r"(?<![\w.])taskSpace\s*\(", text):
++        if _SKILL_FACADE_CALL_RE.search(text) or _SKILL_LEGACY_CALL_RE.search(text):
++            return None
++        return EgoBrowserRuntimeContract.CANONICAL_V2
+     has_facade = bool(_SKILL_FACADE_CALL_RE.search(text))
+     has_legacy = bool(_SKILL_LEGACY_CALL_RE.search(text))
+     if has_facade == has_legacy:
+@@ -222,6 +226,8 @@
+             f"ego-browser SKILL/runtime mismatch: skill={skill.resolve()}, expected={expected} for sdk={sdk}"
+         )
+     skill_contract = classify_skill_runtime_contract(skill)
++    if runtime_contract is EgoBrowserRuntimeContract.CANONICAL_V2 and skill_contract is None:
++        raise RuntimeError("Canonical SDK V2 requires an unambiguous release-paired Skill")
+     if skill_contract is not None and skill_contract is not runtime_contract:
+         raise RuntimeError(
+             "ego-browser SKILL/runtime contract mismatch: "
+@@ -341,6 +347,9 @@
+     runtime_contract: EgoBrowserRuntimeContract,
+     tree_output_path: str | None = None,
+ ) -> str:
++    if runtime_contract is EgoBrowserRuntimeContract.CANONICAL_V2:
++        from .canonical_v2 import screenshot_js
++        return screenshot_js(cdp_params, output_path, candidates, tree_output_path, "")
+     return (
+         "const fs = await import('node:fs');\n"
+         f"const params = {json.dumps(cdp_params)};\n"
+@@ -400,6 +409,9 @@
+ """
+ 
+ 
++from .canonical_v2 import purge_js as _canonical_purge_js
++_PURGE_SPACES_JS = ("if(typeof taskSpace==='function'&&typeof listTaskSpaces==='function'){" + _canonical_purge_js() + "}else{" + _PURGE_SPACES_JS + "}")
++
+ def purge_agent_task_spaces(
+     *,
+     bin_path: str | None = None,
+@@ -442,6 +454,9 @@
+ 
+ 
+ def _close_js(candidates: list[str], runtime_contract: EgoBrowserRuntimeContract) -> str:
++    if runtime_contract is EgoBrowserRuntimeContract.CANONICAL_V2:
++        from .canonical_v2 import close_js
++        return close_js(candidates)
+     return (
+         f"const candidates = {json.dumps(candidates)};\n"
+         "const results = [];\n"
+@@ -485,6 +500,12 @@
+             value_flags=_VALUE_FLAGS,
+         )
+ 
++    def validate_instance_command(self, command: str, task_id: str, mode: str) -> tuple[bool, str | None]:
++        if os.environ.get(RUNTIME_CONTRACT_ENV) != EgoBrowserRuntimeContract.CANONICAL_V2.value:
++            return False, None
++        from .canonical_v2 import validate_invocation
++        return True, validate_invocation(self, command, task_id, mode)
++
+     # --- space-candidate parsing (single-sourced here, called by screenshot hook) ---
+ 
+     def extract_space_candidates(self, command: str) -> list[str]:
+@@ -493,6 +514,9 @@
+         Only literal string/number args are recoverable; variables / templates /
+         ``task.id`` are not. This resolution is best effort.
+         """
++        if os.environ.get(RUNTIME_CONTRACT_ENV) == EgoBrowserRuntimeContract.CANONICAL_V2.value:
++            from .canonical_v2 import extract_candidates
++            return extract_candidates(self, command)
+         matches: list[tuple[int, re.Match[str]]] = []
+         for pattern in (_FACADE_CANDIDATE_RE, _LEGACY_CANDIDATE_RE):
+             matches.extend((m.start(), m) for m in pattern.finditer(command))
+@@ -511,6 +535,9 @@
+     def mentions_space_release(self, command: str) -> bool:
+         """True only for the release surface selected for this run."""
+         runtime_contract = _runtime_contract_from_env()
++        if runtime_contract is EgoBrowserRuntimeContract.CANONICAL_V2:
++            from .canonical_v2 import mentions_release
++            return mentions_release(self, command)
+         if runtime_contract is EgoBrowserRuntimeContract.LEGACY_FLAT_V1:
+             return bool(_LEGACY_RELEASE_RE.search(command))
+         return bool(_FACADE_RELEASE_RE.search(command))
+@@ -554,6 +581,9 @@
+         params: CdpScreenshotParams,
+         tree_output_path: str | None = None,
+     ) -> None:
++        if _runtime_contract_from_env() is EgoBrowserRuntimeContract.CANONICAL_V2:
++            from .canonical_v2 import capture
++            return capture(self, instance_id=instance_id, output_path=output_path, params=params, tree_output_path=tree_output_path)
+         candidates = self._load_candidates(instance_id)
+         runtime_contract = _runtime_contract_from_env()
+         proc = self._run_nodejs(
+@@ -589,6 +619,9 @@
+         return None
+ 
+     def close_targets(self, *, instance_id: str | None) -> CloseResult:
++        if _runtime_contract_from_env() is EgoBrowserRuntimeContract.CANONICAL_V2:
++            from .canonical_v2 import close
++            return close(self, instance_id=instance_id)
+         # No --taskspace (avoids any use-or-create); the run-selected contract completes each
+         # candidate. not-found is idempotent success; audit comes from the marker, never rc.
+         candidates = self._load_candidates(instance_id)
+@@ -627,6 +660,13 @@
+         )
+ 
+     def instance_constraint(self, task_id: str, mode: str) -> str:
++        if os.environ.get(RUNTIME_CONTRACT_ENV) == EgoBrowserRuntimeContract.CANONICAL_V2.value:
++            sdk = _sdk_path_from_env()
++            return (f"BROWSER INSTANCE ISOLATION: use only {shlex.quote(self.bin())} nodejs "
++                    f"--sdk-path {shlex.quote(sdk)} -e <shell-quoted JavaScript>. "
++                    f"Every script must directly call await taskSpace({json.dumps(task_id)}) with that exact literal name; "
++                    "use its Page methods. Do not use --taskspace, other control helpers, dynamic task IDs, imports or file scripts. "
++                    "The syntax guard is advisory isolation; browser ownership remains authoritative.")
+         return (
+             f"BROWSER INSTANCE ISOLATION: EVERY `ego-browser` command MUST place "
+             f"`--taskspace={task_id}` immediately after `ego-browser` and BEFORE the "
+@@ -638,6 +678,9 @@
+     def cleanup_command(self, task_id: str) -> str:
+         runtime_contract = _runtime_contract_from_env()
+         sdk_path = _sdk_path_from_env()
++        if runtime_contract is EgoBrowserRuntimeContract.CANONICAL_V2:
++            from .canonical_v2 import close_js
++            return shlex.join([self.bin(), "nodejs", "--sdk-path", sdk_path, "-e", close_js([task_id])])
+         js = f"await {runtime_contract.complete_callee}({json.dumps(task_id)}, {{ keep: false }})"
+         return shlex.join([self.bin(), "nodejs", "--sdk-path", sdk_path, "-e", js])
+ 
+--- a/ego_bench/hooks/pi_extension_helper.py
++++ b/ego_bench/hooks/pi_extension_helper.py
+@@ -73,6 +73,16 @@
+     for seg, ctx in _contexts(tool, command):
+         if ctx.tool_name != tool_name:
+             continue
++        # Canonical V2 validates the actual JS selection before historical flag
++        # and release exemptions. A finish() in one segment cannot waive scope.
++        validate_instance = getattr(tool, "validate_instance_command", None)
++        if validate_instance is not None:
++            handled, error = validate_instance(seg, task_id, mode)
++            if handled:
++                if error:
++                    print(error)
++                    return 1
++                continue
+         if is_task_management_subcommand(ctx.tool_name, ctx.subcommand):
+             continue
+         # space-release commands (taskSpaces.complete/taskSpaces.handOff) are the

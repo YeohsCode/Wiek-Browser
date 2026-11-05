@@ -1,6 +1,6 @@
 # P4 canonical SDK V2 adapter：实现约束
 
-本文件基于当前 MIT SDK 源码。共享控制原语及本地 smoke runner 已实现，**框架完整 adapter 尚未接入，也未运行线上基准**。参考框架固定在 `f566ac293e4e6bd80c4e9b062b5699f04eac41f4`；原始 adapter SHA-256 为 `baa7e1133eadb79fbcf0065ea9814a7a69cc9cb2cb9af84680271012282150cc`。两侧必须应用相同补丁和同一 SDK，不修改原始任务或评分标准。
+本文件基于当前 MIT SDK 源码。共享控制原语及本地 smoke runner 已实现，**0.21 已接入完整框架 adapter，并通过两侧本地 hook smoke；线上基准仍未运行**。参考框架固定在 `f566ac293e4e6bd80c4e9b062b5699f04eac41f4`；原始 adapter SHA-256 为 `baa7e1133eadb79fbcf0065ea9814a7a69cc9cb2cb9af84680271012282150cc`。两侧必须应用相同补丁和同一 SDK，不修改原始任务或评分标准。
 
 ## 与旧接口不能直接互换的语义
 
@@ -12,7 +12,7 @@
 
 源码依据：`packages/sdk/src/helpers.ts` 的 `taskSpace`/`resolveTaskSpace`，`packages/sdk/src/page-model.ts` 的 `TaskSpace.tabs`/`finish`/`cdp`、`Page.cdp` 与 `UnmanagedPage`。它们描述当前实现，不构成对 Ego 专有代码的推断。
 
-## 下一轮实现与验证顺序
+## 实现与验证约束（已按 0.21 执行）
 
 1. 在独立目录维护共享 adapter 和可重复应用的补丁，校验参考文件 hash；保留框架 MIT 许可证。不得静默修改被忽略的参考 checkout 作为唯一实现。
 2. 增加 canonical 的能力探测、Skill 匹配、任务候选解析/释放识别、截图/AX、结束与清理路径。旧方言继续使用其原合同，不以异常自动切换合同。
@@ -38,3 +38,11 @@ Ego 使用命名 `vek-reference` 的专用实例，不回退到个人默认浏�
 实际 smoke 两侧均通过：Ego 0.6.2.7（16,388-byte PNG/9 AX nodes）和 Wiek 0.20.2（13,804-byte PNG/9 AX nodes）。同一 SDK hash `a8c27da3…572a56`、同一控制源码与 fixture hash；详情见 `reports/p4-sdk-v2-local-smoke.json`。测试未运行模型或真实账号动作。当前 native Ego 将 marker 写入 stderr，runner 同时解析两个输出通道；所有初轮失败保留，没有据退出码 0 伪造成功。
 
 当前 smoke 验证 API 生命周期与本地内容，不做像素相同或质量评分断言；两侧沿用各自窗口 viewport。正式 Stage A 应显式固定 viewport，并在截图后清理 metrics override。严格实例 guard 还需要同时适配 canonical 脚本的任务选择，不能只改能力探测后继续使用 Wiek CLI 不支持的旧 `--taskspace` 前缀。
+
+## 0.21 完整框架接入
+
+版本化 overlay 位于 [benchmark/sdk-v2](../benchmark/sdk-v2/README.md)，以原始文件 hash、固定 commit、原始任务数据和 Acorn 身份为前置条件。能力探测使用 lexical canonical 入口，严格 guard 解析实际 JavaScript，先于旧 release/任务管理豁免执行；不能用注释、字符串或 finish() 为错误任务放行。它是 harness 语法约束，不是任意 JS 的安全沙箱。
+
+当前 59 项回归（33 新增、26 原框架测试）和 14 项共享控制测试通过；Ego 0.6.2.7/Wiek 0.21.0 的实际 framework registry、Skill 配对、截图/AX hook、1280×800 PNG、视口恢复、结构化清理与缺失幂等均通过。见 [框架结果](../reports/p4-sdk-v2-framework-smoke.json)。测试没有运行 agent 模型循环或 judge；31 项任务数据未改。
+
+最初使用全新 Ego fixture Profile 时触发首次引导，CLI 虽然退出 0 却没有执行脚本。保留各轮失败和直接诊断；最终使用此前已经初始化的 data/ego-reference 专用测试资料，不绕过引导、不访问个人默认资料。截图每次使用随机 marker 与独立临时文件，校验输出 hash、PNG 尺寸和实际 task/Page receipt；未清除 metrics override 则失败。线上公平性仍须另行固定交互 viewport、模型、思考、预算、附件与账户状态。

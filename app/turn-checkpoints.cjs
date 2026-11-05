@@ -2,6 +2,7 @@
 const fs=require('node:fs');
 const path=require('node:path');
 const {randomUUID}=require('node:crypto');
+const {repositoryLayout}=require('./repository-layout.cjs');
 const clone=value=>JSON.parse(JSON.stringify(value));
 const fail=message=>Object.assign(new Error(message),{error_code:'VEK_TURN_CHECKPOINT_ERROR'});
 const uuid=value=>typeof value==='string'&&/^[a-f0-9-]{36}$/i.test(value);
@@ -14,7 +15,7 @@ function createTurnCheckpoints({dataDir,workspace,projects,isRunning=()=>false,o
   for(const row of records)if(['capturing-before','awaiting-run','capturing-after'].includes(row.status)){row.status='interrupted';row.error='Browser stopped before the turn snapshots were finalized. No after snapshot was inferred.';row.updatedAt=new Date().toISOString();}
   persist();
   function project(id){if(closed)throw fail('Turn checkpoint service is closed');const found=projects().find(p=>p.id===id);if(!found)throw fail('Project no longer exists');return found;}
-  function identity(p){const git=path.join(p.path,'.git'),stat=fs.lstatSync(git);if(!stat.isDirectory()||stat.isSymbolicLink())throw fail('Automatic checkpoints require a regular repository .git directory');return `${stat.dev}:${stat.ino}`;}
+  function identity(p){return repositoryLayout(p.path).identity;}
   function owned(thread,runId){const p=project(thread.projectId),row=records.find(r=>r.threadId===thread.id&&r.runId===runId&&r.projectId===p.id);if(!row)throw fail('No local checkpoint association for this turn; imported transcripts do not restore files');if(row.projectPath!==p.path||row.repositoryIdentity!==identity(p))throw fail('Repository identity changed; use the workspace checkpoint manager to review it');return{p,row};}
   const view=row=>clone(Object.fromEntries(Object.entries(row).filter(([key])=>!['projectPath','repositoryIdentity'].includes(key))));
   async function before({thread,project:p,run}){

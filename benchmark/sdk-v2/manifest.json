@@ -1,0 +1,14 @@
+{
+  "referenceCommit": "f566ac293e4e6bd80c4e9b062b5699f04eac41f4",
+  "files": {
+    "ego_bench/browser_tools/ego_browser.py": {
+      "originalSha256": "baa7e1133eadb79fbcf0065ea9814a7a69cc9cb2cb9af84680271012282150cc",
+      "patchedSha256": "d9793ef41c05fc19c542b5f934b6d779ac1882d0c2b4d9eb2dba908301a4fe1f"
+    },
+    "ego_bench/hooks/pi_extension_helper.py": {
+      "originalSha256": "1dd68aba723e243e7291be47e23e93d8bdcee7210cd0bbf02221b51ee39fdc5e",
+      "patchedSha256": "69388dc6647ad06776f347b94656005b1a049f763668eda07d117a7f3f0a16ad"
+    }
+  },
+  "acornSha256": "1cbcbf252a5800e496dc505c706f309a9dd4e1789392e12963c77ae9497ff6f7"
+}

@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-04T12:28:44.341Z",
-  "version": "0.20.3",
+  "generatedAt": "2026-11-05T02:00:56.009Z",
+  "version": "0.21.0",
   "versionMatches": true,
-  "checkedFiles": 201,
+  "checkedFiles": 202,
   "allMatch": true,
   "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
   "sdkMatchesCompared": true,
   "files": [
     {
       "file": "NOTICE.md",
-      "sha256": "2c15e683c889de8aed3e3fe32dc4bfbdfaa15b931c123b3cb4f406d4904363ff",
+      "sha256": "1d058a694c622d26f0d6061f71d94cc7733baf126f74e8f202775a9bc5b0bbe0",
       "matches": true
     },
     {
@@ -39,7 +39,7 @@
     },
     {
       "file": "app/argos-translate.py",
-      "sha256": "82b24f4bebb96f3e126cf71c9c9c88c096f821814e15620152b50c58d217665c",
+      "sha256": "41149d30356dfea427043818f3b0cb5658f353387506a5a478dde3199a5eb21b",
       "matches": true
     },
     {
@@ -59,17 +59,17 @@
     },
     {
       "file": "app/assets/wiek.icns",
-      "sha256": "44d4630e01518bbcf94e3dde6f4f34da1952692adb6a563ebf281bdb40935b66",
+      "sha256": "2e61e3dd03e6096f202e7b24918e2fc7717b5654616c35401eb5bdb8c3b5645e",
       "matches": true
     },
     {
       "file": "app/assets/wiek.png",
-      "sha256": "3e03cd59293c2c713604c89af1d8ba586fcc5a4c23e5cf93179469ae6653c86a",
+      "sha256": "7745c483a647d384e991392a7ff282544933590980a8dd5098e380d7468dc630",
       "matches": true
     },
     {
       "file": "app/assets/wiek.svg",
-      "sha256": "f93f0e26deb63eb2d0271a1b91e799988bac343991549c5457fc631b49589566",
+      "sha256": "ea63a9fe708fac36fe304efd1e0c8a48a9e48d5b0ec19ba9391c701fd8dcb18a",
       "matches": true
     },
     {
@@ -328,6 +328,11 @@
       "matches": true
     },
     {
+      "file": "app/repository-layout.cjs",
+      "sha256": "fe9caeeca6952943700adf1eca20e7cf186c419648945b65f7fa108eb3263016",
+      "matches": true
+    },
+    {
       "file": "app/scheduler-control.cjs",
       "sha256": "3d5aace889ac85a87f7d05baa295a02f7f9ea89653963da98f63111cac018542",
       "matches": true
@@ -424,7 +429,7 @@
     },
     {
       "file": "app/translation-panel.js",
-      "sha256": "63ec90846988960dee43f029cfcc607dfda9d4f493a64c13388abab38a906292",
+      "sha256": "7dc9224f546c3baf545ef84a3006926419d182f3e0df434b61ac69546aea6abf",
       "matches": true
     },
     {
@@ -434,7 +439,7 @@
     },
     {
       "file": "app/turn-checkpoints.cjs",
-      "sha256": "385ee1b4bbf6afd3e49aebe17ccec0fe87a0bffeacb89956dff03c9ad313ff46",
+      "sha256": "098a656948bb1f546d85852c6425b97ae1dcab854b09d55c1d6e2f06d92a5b40",
       "matches": true
     },
     {
@@ -459,7 +464,7 @@
     },
     {
       "file": "app/workspace-service.cjs",
-      "sha256": "0b1fbfdb23bf01d7f2b7e4c8a8c633f7ccaa0120e03048033c4b85d3f3cb9c5d",
+      "sha256": "c49879eb2211011d6cc475b117e9824a0478fea71245d667e1cdd20fba6131c5",
       "matches": true
     },
     {
@@ -474,7 +479,7 @@
     },
     {
       "file": "cli/translation-install.mjs",
-      "sha256": "0c9a155d694207183b998ffb5f392a4532fd5d1124700db380452d9833cc0471",
+      "sha256": "6c65bd241e7d11c67662e891580dc4496c1e9dc9a2ef8cb8385cbaa17206101b",
       "matches": true
     },
     {
@@ -484,7 +489,7 @@
     },
     {
       "file": "cli/wiek-browser.mjs",
-      "sha256": "8113b0f74c69e90d81f06cd1e80cc6077cf065c7396c9a946d394e19c277d7ff",
+      "sha256": "8b679e84ba18bf316077eacf7383d0e2e7bf338e98e61ed3cbdc2897a6eece71",
       "matches": true
     },
     {
@@ -514,17 +519,17 @@
     },
     {
       "file": "packages/sdk/dist/out/agent-skills/ego-browser/agents/openai.yaml",
-      "sha256": "a02cfe467c011d941fbef59d6a0f6198602b55c0c9796ef28008ecd220de586d",
+      "sha256": "27ee97b51b9f7d3892cde0fd92560c33fb752020579ca4d54774b6621a6203e3",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/out/agent-skills/ego-browser/assets/composer-icon.png",
-      "sha256": "bf4b40b08e68b1fb9fae7c94b29b9b8301fad99e9122e3609f8d0ec5d760fec2",
+      "sha256": "a0e2b82638b6b31ab3cec507a28dacbcddc245060f66c915a8649291d637efd8",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/out/agent-skills/ego-browser/assets/logo.png",
-      "sha256": "3e03cd59293c2c713604c89af1d8ba586fcc5a4c23e5cf93179469ae6653c86a",
+      "sha256": "7745c483a647d384e991392a7ff282544933590980a8dd5098e380d7468dc630",
       "matches": true
     },
     {
@@ -864,17 +869,17 @@
     },
     {
       "file": "skills/ego-browser/agents/openai.yaml",
-      "sha256": "a02cfe467c011d941fbef59d6a0f6198602b55c0c9796ef28008ecd220de586d",
+      "sha256": "27ee97b51b9f7d3892cde0fd92560c33fb752020579ca4d54774b6621a6203e3",
       "matches": true
     },
     {
       "file": "skills/ego-browser/assets/composer-icon.png",
-      "sha256": "bf4b40b08e68b1fb9fae7c94b29b9b8301fad99e9122e3609f8d0ec5d760fec2",
+      "sha256": "a0e2b82638b6b31ab3cec507a28dacbcddc245060f66c915a8649291d637efd8",
       "matches": true
     },
     {
       "file": "skills/ego-browser/assets/logo.png",
-      "sha256": "3e03cd59293c2c713604c89af1d8ba586fcc5a4c23e5cf93179469ae6653c86a",
+      "sha256": "7745c483a647d384e991392a7ff282544933590980a8dd5098e380d7468dc630",
       "matches": true
     },
     {
@@ -989,17 +994,17 @@
     },
     {
       "file": "skills/wiek-browser/agents/openai.yaml",
-      "sha256": "6663d8aff1ad147a93e00f88588e1d98ac984afe3b1baee45a1b9eda8886a74b",
+      "sha256": "5ec5fab97a9c46a23ebb4169b2a457b72eec1954bf690697ef19bb70aa494ce1",
       "matches": true
     },
     {
       "file": "skills/wiek-browser/assets/composer-icon.png",
-      "sha256": "bf4b40b08e68b1fb9fae7c94b29b9b8301fad99e9122e3609f8d0ec5d760fec2",
+      "sha256": "a0e2b82638b6b31ab3cec507a28dacbcddc245060f66c915a8649291d637efd8",
       "matches": true
     },
     {
       "file": "skills/wiek-browser/assets/logo.png",
-      "sha256": "3e03cd59293c2c713604c89af1d8ba586fcc5a4c23e5cf93179469ae6653c86a",
+      "sha256": "7745c483a647d384e991392a7ff282544933590980a8dd5098e380d7468dc630",
       "matches": true
     },
     {

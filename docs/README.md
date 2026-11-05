@@ -1,6 +1,6 @@
 # 文档索引
 
-当前开发检查点 **Wiek Browser 0.20.3**（原 Vek Browser）。已加入独立标识、共享SDK popup修复、两侧同集与V2本地smoke，并通过完整远端CI；P3实机系统边界继续验收；P1 其他 Agent 集成继续暂缓，P2 剩余项与 P4 线上模型基准仍未完成。进度见 [PLAN.md](../PLAN.md)，分版本验收见 [RESULTS.md](../reports/RESULTS.md)。历史调查和报告保留其原有名称及版本证据。
+当前开发检查点 **Wiek Browser 0.21.0**（原 Vek Browser）。已更新橙白标识、linked worktree checkpoint、中英/中西翻译和完整V2框架adapter；当前包本地验收通过，新增CI步骤待远端验证（上版CI已通过）；P3实机系统边界继续验收；P1 其他 Agent 集成继续暂缓，P2 剩余项与 P4 线上模型基准仍未完成。进度见 [PLAN.md](../PLAN.md)，分版本验收见 [RESULTS.md](../reports/RESULTS.md)。历史调查和报告保留其原有名称及版本证据。
 
 | 用途 | 文档 |
 |---|---|

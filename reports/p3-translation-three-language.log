@@ -1,0 +1,15 @@
+/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/translation-service.cjs:3
+const fail=message=>Object.assign(new Error(message),{error_code:'VEK_TRANSLATION_INVALID'});
+                                  ^
+
+Error: Translation provider failed
+    at fail (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/translation-service.cjs:3:35)
+    at ChildProcess.<anonymous> (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/translation-service.cjs:21:623)
+    at Object.onceWrapper (node:events:623:26)
+    at ChildProcess.emit (node:events:508:28)
+    at maybeClose (node:internal/child_process:1085:16)
+    at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+  error_code: 'VEK_TRANSLATION_INVALID'
+}
+
+Node.js v25.2.1

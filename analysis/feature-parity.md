@@ -2,11 +2,11 @@
 
 本清单以独立实现的 **Wiek Browser**（原 Vek Browser）为目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
 
-当前源码检查点 **Wiek Browser 0.20.3**（原 Vek Browser），更新于 2026-11-04；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以历次版本增量和当前报告为准。
+当前源码检查点 **Wiek Browser 0.21.0**（原 Vek Browser），更新于 2026-11-05；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以历次版本增量和当前报告为准。
 
 公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
 
-0.20.3 新增独立 Wiek 标识，已从活跃应用/Skill 资源移除原 Ego 图标；本地512、SDK532、打包宿主197、Wiek69/69通过，Ego0.6.2.7为68/69（HTML paste失败），相同SDK/fixture/索引。完整远端CI41830745101已通过。共享V2控制与两侧本地smoke可用，完整Stage A adapter、线上31任务与P3实机系统矩阵仍未完成；详见[当前结果](../reports/RESULTS.md)。
+0.20.3 新增独立 Wiek 标识，已从活跃应用/Skill 资源移除原 Ego 图标；本地512、SDK532、打包宿主197、Wiek69/69通过，Ego0.6.2.7为68/69（HTML paste失败），相同SDK/fixture/索引。完整远端CI41830745101已通过。共享V2控制与两侧本地smoke可用，完整Stage A adapter已在0.21接入并通过本地双侧hook；线上31任务与P3实机系统矩阵仍未完成；详见[当前结果](../reports/RESULTS.md)。
 
 ## 浏览器应用与交付面
 
@@ -399,3 +399,11 @@ Wiek 品牌、CLI/旧数据兼容、中英文 README 已实现。本轮源码 49
 ## Wiek 0.20.1：真实桌面/翻译与P4准备
 
 完整本地500/500、新一轮SDK532/532、打包宿主197/197、同集69/69通过；192个发行文件匹配。源码host原生选区/工具栏Copy/应用click录制与真实PNG、最终helper孤儿自停已获证据；真实中英翻译与Electron面板通过。物理系统切换、多显示器/撤权、最终包native权限、更多语言与完整账号路径未穷尽。独立CI已触发、远端仍排队；31任务只完成静态就绪核对，无线上分数。
+
+## 0.21 增量
+
+- 橙色背景、底部白色渐变、白色右上圆点；SVG、PNG、ICNS、窗口/Dock/Skill 同步更新，发行图标身份匹配。
+- 普通仓库和 linked worktree 的手动/turn checkpoint；每个工作树独立 index lock 与 refs namespace，真实恢复不改变另一工作树。原先拒绝的 split/sparse/submodule/别名布局继续拒绝。
+- 翻译安装器支持明确的语言方向列表；真实中英/中西四例通过源码与打包服务，推理禁止 socket 连接。模型和 Python 不包含在包内。
+- 完整共享 V2 框架 overlay：59 项回归、14 控制边界，以及两个浏览器的实际截图/AX/清理 hook 通过。仍非31任务线上结果。
+- 本地522/522、打包宿主197/197；当前报告列明其余验收。最终包只读权限状态为 screen/accessibility granted，不等价于原生采集正向验收。

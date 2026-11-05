@@ -1,6 +1,6 @@
 {
   "name": "wiek-browser",
-  "version": "0.20.3",
+  "version": "0.21.0",
   "private": true,
   "license": "MIT",
   "description": "A local Chromium browser with task spaces and an MIT-compatible agent runtime",

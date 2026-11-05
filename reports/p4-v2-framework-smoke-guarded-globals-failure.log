@@ -1,0 +1,97 @@
+{
+  "onlineBenchmark": false,
+  "modelCalls": 0,
+  "accountActions": 0,
+  "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+  "adapter": {
+    "referenceCommit": "f566ac293e4e6bd80c4e9b062b5699f04eac41f4",
+    "patchSha256": "74cb373f45ae4b60a50635677fddab875bce9ee62627f2b14833b72d1d933115",
+    "patchedFiles": {
+      "ego_bench/browser_tools/ego_browser.py": "5999fee4e60fd3aaac63d236f4fb91794c7a8596c11ab53d6e132b6ea7c12ede",
+      "ego_bench/hooks/pi_extension_helper.py": "69388dc6647ad06776f347b94656005b1a049f763668eda07d117a7f3f0a16ad"
+    },
+    "overlayFiles": {
+      "canonical_v2.py": "b4038426e90479e955d4f200e83108146f0ffefc9bf224a70c33cc8da8a20e6f",
+      "_canonical_guard.mjs": "6332e4bb6c1cfef927d9ccf6e54d54532e2af6d36d55eaef0eaac53f2ae46227",
+      "_canonical_control.mjs": "f2230adfd231c226ead5625eddbe50ee6b01e3c70158311a46d52965a24f65e1",
+      "_canonical_acorn.mjs": "1cbcbf252a5800e496dc505c706f309a9dd4e1789392e12963c77ae9497ff6f7",
+      "_canonical_acorn.LICENSE": "76a876cf886ff9be2a8b5e2e86514fed06223c8c9f0c1e9ee9606e93841e00b7"
+    },
+    "modelCalls": 0,
+    "accountActions": 0
+  },
+  "fixtureSha256": "caf1c8d3a411fa2d75faaa7578aae60c2fa7308193f50d39e57946cc3bd0532e",
+  "runs": [
+    {
+      "browser": "ego",
+      "passed": false,
+      "cliSha256": "cf2d7aaf21d94fb0cff2cfcbc21f9feac051e23ae77bc956d7ac148063a8e4aa",
+      "checks": [],
+      "error": "ego-browser runtime contract probe produced no marker (rc=0, sdk=/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/packages/sdk/dist/out/index.js): <no stderr>",
+      "cleanupError": "missing required env: EGO_BENCH_EGO_BROWSER_RUNTIME_CONTRACT"
+    },
+    {
+      "browser": "wiek",
+      "passed": true,
+      "cliSha256": "8113b0f74c69e90d81f06cd1e80cc6077cf065c7396c9a946d394e19c277d7ff",
+      "checks": [
+        {
+          "probe": "canonical-sdk-v2",
+          "zeroMutation": true,
+          "pairedSkill": true
+        },
+        {
+          "strictHook": true,
+          "screenshotHook": true,
+          "pngSha256": "53ae9031bd3348a4d08cedb5d1df7ed6831fb725602dd882c08107fa0a251dfa",
+          "pngBytes": 12806,
+          "ax": true,
+          "viewportRestored": true,
+          "receipt": {
+            "canonicalMarker": "b4393ce2b1d2421ab95f1f1eb54689be",
+            "spaceId": 2,
+            "targetId": "1C2208286C53A0A20079B88E61A55786",
+            "viewport": {
+              "width": 1280,
+              "height": 800,
+              "deviceScaleFactor": 1,
+              "mobile": false
+            },
+            "axError": null,
+            "sha256": "53ae9031bd3348a4d08cedb5d1df7ed6831fb725602dd882c08107fa0a251dfa"
+          }
+        },
+        {
+          "closed": {
+            "egoBenchClose": [
+              {
+                "candidate": "framework-smoke-3789eb5be90849a3bd5d34fb9ae53a12",
+                "ok": true,
+                "receipt": {
+                  "spaceId": 2,
+                  "closedSpace": true,
+                  "keptManagedLabels": [],
+                  "closedManagedLabels": [
+                    "p1"
+                  ],
+                  "preservedUnmanagedCount": 0
+                }
+              }
+            ],
+            "canonicalMarker": "ab90db47656f46f7b23dfdd07cb40ab8"
+          },
+          "missingCleanupIdempotent": true
+        }
+      ],
+      "hostVersion": {
+        "currentVersion": "0.20.3",
+        "updateAvailable": false
+      },
+      "finalCleanup": {
+        "ok": true,
+        "error": null
+      }
+    }
+  ],
+  "passed": false
+}

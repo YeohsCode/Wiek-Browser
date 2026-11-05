@@ -1,0 +1,18 @@
+{
+  "referenceCommit": "f566ac293e4e6bd80c4e9b062b5699f04eac41f4",
+  "datasetSha256": "e1495bef65b83c7bcb4cf3bf7a6e515239c6763c620efe1d31749ad6d54f6200",
+  "patchSha256": "6675ca5e6455cfdf3569033a670d700639a2382af7b9941b8d60e86b8edbf09c",
+  "patchedFiles": {
+    "ego_bench/browser_tools/ego_browser.py": "d9793ef41c05fc19c542b5f934b6d779ac1882d0c2b4d9eb2dba908301a4fe1f",
+    "ego_bench/hooks/pi_extension_helper.py": "69388dc6647ad06776f347b94656005b1a049f763668eda07d117a7f3f0a16ad"
+  },
+  "overlayFiles": {
+    "canonical_v2.py": "b4038426e90479e955d4f200e83108146f0ffefc9bf224a70c33cc8da8a20e6f",
+    "_canonical_guard.mjs": "6332e4bb6c1cfef927d9ccf6e54d54532e2af6d36d55eaef0eaac53f2ae46227",
+    "_canonical_control.mjs": "f2230adfd231c226ead5625eddbe50ee6b01e3c70158311a46d52965a24f65e1",
+    "_canonical_acorn.mjs": "1cbcbf252a5800e496dc505c706f309a9dd4e1789392e12963c77ae9497ff6f7",
+    "_canonical_acorn.LICENSE": "76a876cf886ff9be2a8b5e2e86514fed06223c8c9f0c1e9ee9606e93841e00b7"
+  },
+  "modelCalls": 0,
+  "accountActions": 0
+}

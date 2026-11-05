@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-05T02:00:20.702570+00:00",
+  "project": "Wiek Browser",
+  "version": "0.21.0",
+  "repository": "https://github.com/YeohsCode/Wiek-Browser",
+  "fullParity": false,
+  "localBrowserComparison": {
+    "comparable": true,
+    "runs": [
+      {
+        "browser": "ego",
+        "startedAt": "2026-11-04T12:19:59.945Z",
+        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli",
+        "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+        "counts": {
+          "total": 69,
+          "selected": 69,
+          "pass": 68,
+          "fail": 1,
+          "skip": 0,
+          "notRun": 0,
+          "assertions": 1235
+        }
+      },
+      {
+        "browser": "vek",
+        "startedAt": "2026-11-05T01:54:15.086Z",
+        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs",
+        "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+        "counts": {
+          "total": 69,
+          "selected": 69,
+          "pass": 69,
+          "fail": 0,
+          "skip": 0,
+          "notRun": 0,
+          "assertions": 1248
+        }
+      }
+    ],
+    "environmentReport": "v021-comparison-environment.json"
+  },
+  "sdkUnitTests": {
+    "pass": 532,
+    "fail": 0,
+    "rerun": false,
+    "log": "v203-sdk-tests.log",
+    "serialLog": "v203-sdk-serial-tests.log",
+    "note": "Same unchanged SDK bundle as prior 532/532 run; original input identities verified this checkpoint."
+  },
+  "localServiceAndParser": {
+    "pass": 522,
+    "fail": 0,
+    "skip": 0,
+    "log": "v021-source-tests.log"
+  },
+  "packagedWorkbenchIntegration": {
+    "checks": 197,
+    "passed": true,
+    "version": "0.21.0",
+    "log": "v021-package-workbench.log"
+  },
+  "package": {
+    "path": "dist/mac-arm64/Wiek Browser.app",
+    "sourceFilesMatch": true,
+    "sourceFilesChecked": 202,
+    "upstreamInputsUnchanged": 81,
+    "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+    "signed": false,
+    "notarized": false,
+    "note": "0.21.0 final package passed local host and same-SDK browser suite; unsigned and unnotarized."
+  },
+  "p3": {
+    "complete": false,
+    "desktop": {
+      "sourceHostNativePositive": true,
+      "finalPackageNativePermissionsVerified": false,
+      "evidence": "p3-desktop-native-check.json",
+      "parentExitEvidence": "p3-desktop-native-parent-check.json",
+      "scope": "Disposable public fixture; no physical multi-display or permission revocation.",
+      "packagedPermissionStatus": {
+        "screen": "granted",
+        "accessibility": "granted",
+        "evidence": "p3-v021-packaged-permission-status.json"
+      },
+      "finalPackageNativeCaptureVerified": false
+    },
+    "translation": {
+      "realEnglishChineseServiceExamples": true,
+      "socketConnectionsBlockedDuringInference": true,
+      "evidence": "p3-translation-real-service.json",
+      "electronPanelChecks": 8,
+      "modelBundled": false,
+      "realEnglishSpanishServiceExamples": true,
+      "sourceAndPackagedExamples": 4,
+      "packagedEvidence": "p3-translation-packaged-service.json",
+      "languages": [
+        "en",
+        "zh",
+        "es"
+      ]
+    },
+    "automation": "Busy/cooldown/contract/stop evaluator/SIGKILL recovery locally tested; physical sleep/login pending.",
+    "remoteGit": "Real local bare repositories and synthetic GitHub protocol/panel; no actual PR account writes."
+  },
+  "p4": {
+    "complete": false,
+    "workflow": ".github/workflows/wiek-ci.yml",
+    "remoteResult": "pending",
+    "lastObservedRun": 41830745101,
+    "lastObservedStatus": "completed",
+    "benchmarkRun": false,
+    "benchmarkReadiness": "p4-benchmark-readiness.json",
+    "blockers": [
+      "Dedicated Stage A/Judge model and limits",
+      "Dedicated account/login readiness",
+      "Signing/notarization and release process"
+    ],
+    "cleanStagedSourceSdkBuild": true,
+    "canonicalControlTests": {
+      "passed": 14,
+      "log": "p4-v2-control-tests.log"
+    },
+    "canonicalLocalSmoke": {
+      "bothPassed": true,
+      "egoVersion": "0.6.2.7",
+      "wiekVersion": "0.21.0",
+      "report": "p4-sdk-v2-framework-smoke.json",
+      "stageAIntegrated": true,
+      "onlineBenchmark": false
+    },
+    "remoteConclusion": "Previous 0.20.3 run succeeded; new 0.21 framework stage requires its own run.",
+    "remoteUrl": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/41830745101",
+    "remoteEvidence": "p4-ci-41830745101-status.json",
+    "remoteCounts": {
+      "sdkTests": 532,
+      "localTests": 512,
+      "packagedChecks": 197,
+      "browserCases": 69,
+      "browserAssertions": 1248,
+      "packageFiles": 201,
+      "upstreamInputsUnchanged": 81
+    },
+    "previousFailureLog": "p4-ci-41830035061-ci-sdk.log",
+    "frameworkTests": {
+      "pass": 59,
+      "new": 33,
+      "original": 26,
+      "log": "p4-v2-framework-regression.log"
+    },
+    "previousVerifiedCodeCommit": "b50f9b702dc1a297a53769f0c62548048b0da017"
+  },
+  "history": [
+    "v190-delivery-summary.json",
+    "wiek-v0.20-checkpoint.json",
+    "wiek-v0.20.1-checkpoint.json",
+    "wiek-v0.20.2-checkpoint.json",
+    "wiek-v0.20.3-checkpoint.json"
+  ],
+  "brand": {
+    "independentlyAuthored": true,
+    "knownOriginalEgoLogoHits": 0,
+    "packagedIcnsMatches": true,
+    "audit": "wiek-brand-audit.json",
+    "background": "orange-to-white",
+    "indicator": "white"
+  },
+  "linkedWorktreeCheckpoints": {
+    "implemented": true,
+    "newTests": 6,
+    "evidence": "v021-checkpoint-translation-tests.log"
+  }
+}

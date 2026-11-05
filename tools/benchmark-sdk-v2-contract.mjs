@@ -17,7 +17,7 @@ export function createBenchmarkV2({listTaskSpaces,taskSpace}) {
     }
     return null;
   }
-  async function capture(candidates,params={format:'png'}) {
+  async function capture(candidates,params={format:'png'},{viewport=null}={}) {
     const selected=await existing(candidates);
     if(!selected)throw new Error('Benchmark task space not found');
     const tabs=await selected.task.tabs();
@@ -25,11 +25,22 @@ export function createBenchmarkV2({listTaskSpaces,taskSpace}) {
     if(active.length!==1)throw new Error('Expected exactly one active benchmark tab');
     const page=active[0].page;
     if(!page||typeof page.cdp!=='function')throw new Error('Active benchmark tab is unmanaged; capture refused');
-    const image=await page.cdp('Page.captureScreenshot',params);
-    if(!image||typeof image.data!=='string'||!image.data)throw new Error('Empty screenshot data');
-    let ax=null,axError=null;
-    try{ax=await page.cdp('Accessibility.getFullAXTree',{});}catch(error){axError=String(error.message||error);}
-    return {spaceId:selected.descriptor.id,targetId:active[0].targetId,data:image.data,ax,axError};
+    let overridden=false;
+    try {
+      if(viewport){
+        if(!Number.isInteger(viewport.width)||!Number.isInteger(viewport.height)||viewport.width<1||viewport.height<1||viewport.width>8192||viewport.height>8192||viewport.deviceScaleFactor!==1||viewport.mobile!==false)throw new Error('Invalid benchmark viewport');
+        await page.cdp('Emulation.setDeviceMetricsOverride',viewport);overridden=true;
+      }
+      const image=await page.cdp('Page.captureScreenshot',params);
+      if(!image||typeof image.data!=='string'||!image.data)throw new Error('Empty screenshot data');
+      let ax=null,axError=null;
+      try{ax=await page.cdp('Accessibility.getFullAXTree',{});}catch(error){axError=String(error.message||error);}
+      return {spaceId:selected.descriptor.id,targetId:active[0].targetId,data:image.data,ax,axError,viewport};
+    } finally {
+      // An uncleared override contaminates later observations. Surface that
+      // failure instead of accepting a capture with unknown page state.
+      if(overridden)await page.cdp('Emulation.clearDeviceMetricsOverride',{});
+    }
   }
   async function close(candidates) {
     const results=[];

@@ -20,7 +20,7 @@ const defaultData = packaged
 const dataDir = resolve(process.env.VEK_DATA_DIR || defaultData);
 const runtimePath = join(dataDir, 'runtime.json');
 const args = process.argv.slice(2);
-const usage = `Wiek Browser — local browser and agent workspace\n\n  wiek-browser start                  Open the browser\n  wiek-browser status                 Show host status\n  wiek-browser translation install --python PATH  Install offline English/Chinese models\n  wiek-browser automation memory --stdin  Replace memory for this scheduled run\n  wiek-browser automation result --json JSON  Report notify/silent for this run\n  wiek-browser scheduler tick         Run opted-in due CLI automations once while closed\n  wiek-browser api ACTION --json JSON Call the local workbench API\n  wiek-browser skill                  Print the agent API guide\n  wiek-browser nodejs [-e JavaScript]  Run a script (or read stdin)\n  wiek-browser nodejs --sdk-path PATH  Use an explicit compatible SDK\n  wiek-browser stop [--timeout-ms N]  Wait for this browser to exit (default 30000 ms)\n\nExample:\n  const task = await taskSpace('research');\n  const page = task.page('p1');\n  await page.goto('https://example.com');\n  console.log(await page.snapshot());\n\nWIEK_DATA_DIR selects an independent persistent browser data directory.\n`;
+const usage = `Wiek Browser — local browser and agent workspace\n\n  wiek-browser start                  Open the browser\n  wiek-browser status                 Show host status\n  wiek-browser translation install --python PATH  Install offline models [--pairs en-zh,zh-en,en-es,es-en]\n  wiek-browser automation memory --stdin  Replace memory for this scheduled run\n  wiek-browser automation result --json JSON  Report notify/silent for this run\n  wiek-browser scheduler tick         Run opted-in due CLI automations once while closed\n  wiek-browser api ACTION --json JSON Call the local workbench API\n  wiek-browser skill                  Print the agent API guide\n  wiek-browser nodejs [-e JavaScript]  Run a script (or read stdin)\n  wiek-browser nodejs --sdk-path PATH  Use an explicit compatible SDK\n  wiek-browser stop [--timeout-ms N]  Wait for this browser to exit (default 30000 ms)\n\nExample:\n  const task = await taskSpace('research');\n  const page = task.page('p1');\n  await page.goto('https://example.com');\n  console.log(await page.snapshot());\n\nWIEK_DATA_DIR selects an independent persistent browser data directory.\n`;
 let rpc;
 try {
   if (args.includes('--help') || args[0] === '-h') {
@@ -28,8 +28,8 @@ try {
   } else if(args[0]==='automation'){
     const {runAutomationContract}=await import('./automation-contract.mjs');process.stdout.write(JSON.stringify(await runAutomationContract(args.slice(1)),null,2)+'\n');
   } else if(args[0]==='translation'){
-    if(args[1]!=='install'||args[2]!=='--python'||args.length!==4)throw new Error('Usage: wiek-browser translation install --python /absolute/path/to/python3.12');
-    const {installOfflineTranslation}=await import('./translation-install.mjs');await installOfflineTranslation({dataDir,python:args[3],root});
+    if(args[1]!=='install'||args[2]!=='--python'||![4,6].includes(args.length)||(args.length===6&&args[4]!=='--pairs'))throw new Error('Usage: wiek-browser translation install --python /absolute/path/to/python3.12 [--pairs en-zh,zh-en,en-es,es-en]');
+    const {installOfflineTranslation}=await import('./translation-install.mjs');await installOfflineTranslation({dataDir,python:args[3],root,pairs:args[5]});
   } else if (args[0] === 'scheduler') {
     if(args[1]!=='tick'||(args.length!==2&&(args.length!==4||args[2]!=='--timeout-ms')))throw new Error('Usage: wiek-browser scheduler tick [--timeout-ms N]');
     const controller=new AbortController(),abort=()=>controller.abort();process.once('SIGINT',abort);process.once('SIGTERM',abort);

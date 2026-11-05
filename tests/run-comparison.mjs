@@ -24,7 +24,8 @@ export function parseArguments(argv) {
     if (arg === "--help" || arg === "-h") return { help: true };
     if (arg === "--browser") {
       browser = argv[++i];
-      if (!["ego", "vek", "both"].includes(browser)) throw new Error("--browser requires ego, vek, or both");
+      browser=({reference:'ego',wiek:'vek'})[browser]||browser;
+      if (!["ego", "vek", "both"].includes(browser)) throw new Error("--browser requires reference, wiek, or both");
     } else if (arg === "--only") {
       const name = argv[++i];
       if (!names.includes(name)) throw new Error(`--only requires an exact case name; got ${JSON.stringify(name)}. Available: ${names.join("; ")}`);
@@ -67,6 +68,7 @@ async function sha256(path) {
 }
 
 async function resolveEgoCli() {
+  if (process.env.WIEK_REFERENCE_CLI) return resolve(process.env.WIEK_REFERENCE_CLI);
   if (process.env.VEK_COMPARISON_EGO_CLI) return resolve(process.env.VEK_COMPARISON_EGO_CLI);
   const versions = join(root, "downloads/ego/ego lite.app/Contents/Frameworks/ego Framework.framework/Versions");
   const current = join(versions, "Current/Helpers/ego-browser");
@@ -80,8 +82,8 @@ async function resolveEgoCli() {
     }
   } catch {}
   if (candidates.length === 1) return candidates[0];
-  if (candidates.length > 1) throw new Error(`Ambiguous Ego CLI versions: ${candidates.join(", ")}. Set VEK_COMPARISON_EGO_CLI to the intended executable.`);
-  throw new Error(`Ego CLI is missing or not executable: ${current}`);
+  if (candidates.length > 1) throw new Error('Multiple reference CLI versions found. Set WIEK_REFERENCE_CLI to the intended executable.');
+  throw new Error('Reference CLI is missing or not executable. Set WIEK_REFERENCE_CLI to the intended executable.');
 }
 
 async function runBrowser(browser, options) {
@@ -104,7 +106,7 @@ async function runBrowser(browser, options) {
   let error = null;
   const start = Date.now();
   try {
-    cli = browser === "ego" ? await resolveEgoCli() : resolve(process.env.VEK_COMPARISON_VEK_CLI || join(root, "cli/wiek-browser.mjs"));
+    cli = browser === "ego" ? await resolveEgoCli() : resolve(process.env.WIEK_COMPARISON_CLI || process.env.VEK_COMPARISON_VEK_CLI || join(root, "cli/wiek-browser.mjs"));
     const info = await stat(cli);
     if (!info.isFile()) throw new Error(`CLI is not a regular file: ${cli}`);
     await access(cli, constants.X_OK);
@@ -146,12 +148,13 @@ async function runBrowser(browser, options) {
 function cell(value) { return String(value ?? "—").replaceAll("|", "\\|").replaceAll("\n", " "); }
 
 export function comparisonMarkdown(report) {
-  const lines = ["# Ego / Wiek Browser 同集测试对比", "", `生成时间：${report.generatedAt}`, "",
+  const label=browser=>browser==='vek'?'Wiek':'参考侧';
+  const lines = ["# Wiek Browser 同集测试对比", "", `生成时间：${report.generatedAt}`, "",
     "使用未改断言的上游真实浏览器 E2E runner 与本地 fixture，串行执行；两侧使用相同 SDK，本地修复见 ../analysis/sdk-changes.md。SKIP 和未运行均不计为通过；本结果不等同 31 项在线模型 benchmark。", "",
     `选择：${report.selectedNames.length}/${names.length} 个 cases。${report.comparable ? "两侧 SDK、fixture 和 case 索引哈希一致。" : "尚无两侧相同 SDK、fixture、case 索引的完整运行证据。"}`, "",
     "| 浏览器 | 运行状态 | PASS | FAIL | SKIP | 未运行 | 断言 | 退出码 | 总用时 |", "|---|---|---:|---:|---:|---:|---:|---:|---:|"];
-  for (const run of report.runs) lines.push(`| ${run.browser} | ${run.status} | ${run.counts.pass} | ${run.counts.fail} | ${run.counts.skip} | ${run.counts.notRun} | ${run.counts.assertions} | ${cell(run.exitCode)} | ${(run.wallTimeMs / 1000).toFixed(1)}s |`);
-  lines.push("", "| Case | Ego | Wiek |", "|---|---|---|");
+  for (const run of report.runs) lines.push(`| ${label(run.browser)} | ${run.status} | ${run.counts.pass} | ${run.counts.fail} | ${run.counts.skip} | ${run.counts.notRun} | ${run.counts.assertions} | ${cell(run.exitCode)} | ${(run.wallTimeMs / 1000).toFixed(1)}s |`);
+  lines.push("", "| Case | 参考侧 | Wiek |", "|---|---|---|");
   for (const name of names) {
     const status = (browser) => {
       const item = report.runs.find((run) => run.browser === browser)?.cases.find((row) => row.name === name);
@@ -161,9 +164,8 @@ export function comparisonMarkdown(report) {
   }
   lines.push("", "## 可审计产物", "");
   for (const run of report.runs) {
-    lines.push(`- **${run.browser}**：[合并日志](${run.browser}-e2e.log)、[stdout](${run.browser}-e2e.stdout.log)、[stderr](${run.browser}-e2e.stderr.log)、[结构化结果](${run.browser}-e2e.json)。`,
-      `  CLI：\`${run.cli || "未解析"}\`；SDK SHA-256：\`${run.sdkSha256 || "未生成"}\`。`);
-    if (run.error) lines.push(`  启动错误：${cell(run.error)}`);
+    lines.push(`- **${label(run.browser)}**：SDK SHA-256：\`${run.sdkSha256 || "未生成"}\`。CLI 身份、完整诊断及日志索引见[结构化记录](comparison.json)。`);
+    if (run.error) lines.push('  启动失败；完整错误保存在结构化记录中。');
   }
   lines.push("", "## 在线 benchmark", "", "未运行（blocked）：本次没有为 Stage A 与 Judge 提供已确认可用的模型认证，也未确认五类第三方网站登录。未读取个人 API key。框架与 31 项任务已下载；详细前提见 ../analysis/public-api-and-tests.md。", "");
   return lines.join("\n");
@@ -172,7 +174,7 @@ export function comparisonMarkdown(report) {
 export async function main(argv = process.argv.slice(2)) {
   const options = parseArguments(argv);
   if (options.help) {
-    console.log('Usage: npm run test:e2e -- [--browser ego|vek|both] [--only "exact case name"]\nRepeat --only for multiple exact names, or set EGO_BROWSER_REAL_E2E_ONLY. CLI overrides: VEK_COMPARISON_EGO_CLI, VEK_COMPARISON_VEK_CLI.');
+    console.log('Usage: npm run test:e2e -- [--browser reference|wiek|both] [--only "exact case name"]\nRepeat --only for multiple exact names. CLI overrides: WIEK_REFERENCE_CLI, WIEK_COMPARISON_CLI.');
     return;
   }
   await mkdir(reportsDir, { recursive: true });

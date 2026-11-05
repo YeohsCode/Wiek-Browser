@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "referenceVersion": "0.6.2.7",
+  "sourceSha256": "4bd6d3c9116a5075666174d21ff9f1838646b8d0e607cd9ad4deaba694b49427",
+  "sourceBytes": 5202881,
+  "startByte": 5007542,
+  "endByteExclusive": 5031977,
+  "startLine": 126725,
+  "endLine": 127390,
+  "excerptSha256": "8f82f9540c580ef6ac494bdd61c6302c554050c6aa0c9938e9abcd7d58b2d419",
+  "excerptBytes": 24435,
+  "scope": "Exact module excerpt; surrounding imports and whole-application reachability are not covered.",
+  "historicalEvidenceId": "ev_0a7bdc68255ac1adb7db5fd967eaa355b6bbd1830efb7f12c750d8540dcbbee3",
+  "feature": "Project local services",
+  "analysisEvidenceId": "ev_5eb2b6d90d5a8c8ca00ff53739844dd93fd521c9b62523d1f0e1fbe51c94cdae",
+  "stopTraceEvidenceId": "ev_7bc632d81150c6a580c66a0881ffb480415c88334bac22c969ebbdcd0dabbb66",
+  "analysis": {
+    "parsedJavaScriptFiles": 1,
+    "visitedAstNodes": 3687,
+    "parseFailures": 0,
+    "semanticNodes": 2774,
+    "semanticRelations": 2370,
+    "coverage": "partial"
+  },
+  "stopTrace": {
+    "status": "found",
+    "seedMatches": 1,
+    "traversedNodes": 3,
+    "traversedRelations": 2,
+    "unknowns": 4
+  },
+  "referenceRuntimeVerified": false,
+  "implementationCopied": false,
+  "requirements": [
+    {
+      "id": "LS-01",
+      "requirement": "Group listening endpoints with process metadata",
+      "sourceLines": [
+        127340,
+        127352
+      ],
+      "implemented": "Project-scoped read-only list",
+      "test": "tests/local-server-service.test.mjs"
+    },
+    {
+      "id": "LS-02",
+      "requirement": "Validate target and supported stop status before termination",
+      "sourceLines": [
+        127361,
+        127376
+      ],
+      "implemented": "One-use review with project, birth, executable, cwd and port rechecks",
+      "test": "tests/local-server-service.test.mjs"
+    },
+    {
+      "id": "LS-03",
+      "requirement": "Send one termination signal and report actual settlement",
+      "sourceLines": [
+        127377,
+        127389
+      ],
+      "implemented": "SIGTERM only; no group kill or escalation",
+      "test": "tests/local-server-panel.test.mjs"
+    }
+  ],
+  "unknowns": [
+    "Whole-application reachability is outside this excerpt analysis",
+    "Reference runtime behavior is not established",
+    "Dynamic calls/imports remain unresolved",
+    "Global classification, ancestor inference and automatic title probing are outside the implemented scope"
+  ]
+}

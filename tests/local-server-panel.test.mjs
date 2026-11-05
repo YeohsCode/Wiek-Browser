@@ -1,0 +1,46 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {mkdtemp,mkdir,writeFile,rm} from 'node:fs/promises';
+import {spawn} from 'node:child_process';
+import {tmpdir} from 'node:os';
+import {join,resolve} from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {createRequire} from 'node:module';
+const electron=createRequire(import.meta.url)('electron'),root=resolve(process.env.WIEK_TEST_APP_ROOT||import.meta.dirname+'/..');
+test('actual workspace panel refresh, open dispatch, review, cancel and confirmed stop use a real disposable server',{skip:process.platform!=='darwin'},async()=>{
+  const temporary=await mkdtemp(join(tmpdir(),'wiek-services-panel-')),project=join(temporary,'public fixture');await mkdir(project);
+  try{
+    await writeFile(join(temporary,'preload.cjs'),"const{contextBridge,ipcRenderer}=require('electron');contextBridge.exposeInMainWorld('bridge',{invoke:(a,p)=>ipcRenderer.invoke('fixture',a,p)});");
+    await writeFile(join(temporary,'panel.html'),`<!doctype html><meta charset="utf-8"><main id="root"></main><link rel="stylesheet" href="${pathToFileURL(join(root,'app/workspace-panel.css'))}"><script src="${pathToFileURL(join(root,'app/workspace-panel.js'))}"></script>`);
+    await writeFile(join(temporary,'main.cjs'),`
+const{app,BrowserWindow,ipcMain}=require('electron'),assert=require('node:assert/strict'),{spawn}=require('node:child_process'),{once}=require('node:events');
+const{createWorkspaceService}=require(${JSON.stringify(join(root,'app/workspace-service.cjs'))});
+app.setPath('userData',${JSON.stringify(join(temporary,'electron'))});let server,service,window;
+app.whenReady().then(async()=>{let checks=0,opened=[];const eq=(a,b)=>{assert.deepEqual(a,b);checks++};
+server=spawn(${JSON.stringify(process.execPath)},['-e',"const s=require('http').createServer((q,r)=>r.end('Public fixture'));s.listen(0,'127.0.0.1',()=>console.log(s.address().port));"],{cwd:${JSON.stringify(project)},stdio:['ignore','pipe','pipe']});
+const[data]=await once(server.stdout,'data'),port=Number(data.toString().trim());
+service=createWorkspaceService({projects:()=>[{id:'p',name:'Public fixture',path:${JSON.stringify(project)}}]});
+ipcMain.handle('fixture',(_,action,payload)=>{if(action==='navigate'){opened.push(payload);return{ok:true}}return service.dispatch(action,payload,{interactive:true});});
+window=new BrowserWindow({show:false,width:1100,height:1000,webPreferences:{preload:${JSON.stringify(join(temporary,'preload.cjs'))},sandbox:true,nodeIntegration:false,contextIsolation:true,backgroundThrottling:false}});
+await window.loadFile(${JSON.stringify(join(temporary,'panel.html'))});
+const e=code=>window.webContents.executeJavaScript(code),wait=async code=>{for(let i=0;i<350;i++){if(await e(code))return;await new Promise(r=>setTimeout(r,15));}throw Error('Panel timeout: '+code)};
+await e('WiekWorkspacePanel.mount(document.getElementById("root"),bridge.invoke);window.click=label=>[...document.querySelectorAll("button")].find(b=>b.textContent===label)?.click();undefined');
+await wait('[...document.querySelectorAll("button")].some(b=>b.textContent==="Local services"&&!b.disabled)');
+await e('click("Local services");undefined');await wait('!![...document.querySelectorAll("button")].find(b=>b.textContent==="Refresh local services")');
+eq(await e('document.querySelectorAll(".vw-server-row").length'),0);eq(server.exitCode,null);
+await e('click("Refresh local services");undefined');await wait('!!document.querySelector(".vw-server-row")');
+eq(await e('document.querySelector(".vw-server-row").dataset.serverPid'),String(server.pid));eq(await e('document.querySelector(".vw-server-row").textContent.includes('+JSON.stringify(String(port))+')'),true);
+await e('click('+JSON.stringify('Open '+port)+');undefined');eq(opened,['http://127.0.0.1:'+port+'/']);
+await e('click("Review stop");undefined');await wait('!!document.querySelector(".vw-server-review")');eq(server.exitCode,null);eq(await e('document.querySelector(".vw-server-review").textContent.includes('+JSON.stringify(String(server.pid))+')'),true);
+await e('click("Cancel stop review");undefined');await wait('!document.querySelector(".vw-server-review")');eq(server.exitCode,null);
+await e('click("Review stop");undefined');await wait('!!document.querySelector(".vw-server-review")');const exited=once(server,'close');await e('click("Confirm stop");undefined');await exited;
+await wait('document.body.textContent.includes("Process exited.")');eq(server.signalCode,'SIGTERM');eq(await e('document.querySelectorAll(".vw-server-row").length'),0);eq(await e('document.querySelector(".vw-server-review")===null'),true);
+console.log(JSON.stringify({ok:true,checks,realElectronIPC:true,realNativeDiscovery:true,realReviewedProcessStop:true,modelCalls:0,accountActions:0}));
+await service.close();window.destroy();app.exit(0);
+}).catch(async error=>{console.error(error);if(server&&server.exitCode===null&&!server.signalCode)server.kill('SIGKILL');await service?.close();app.exit(1)});
+`);
+    const env={...process.env};delete env.ELECTRON_RUN_AS_NODE;
+    const child=spawn(electron,[join(temporary,'main.cjs')],{env,stdio:['ignore','pipe','pipe']});let output='';child.stdout.on('data',chunk=>output+=chunk);child.stderr.on('data',chunk=>output+=chunk);
+    const timer=setTimeout(()=>child.kill('SIGKILL'),30000),code=await new Promise(resolve=>child.once('close',resolve));clearTimeout(timer);assert.equal(code,0,output);assert.match(output,/"ok":true/);process.stdout.write(output.split('\n').filter(line=>line.startsWith('{')).join('\n')+'\n');
+  }finally{await rm(temporary,{recursive:true,force:true});}
+});

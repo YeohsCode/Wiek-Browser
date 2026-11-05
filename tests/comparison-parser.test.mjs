@@ -37,7 +37,12 @@ test("exact case names containing commas survive CLI selection", () => {
   assert.deepEqual(options.selectedNames, ["wait, fetch, cdp, js, help"]);
   assert.deepEqual(JSON.parse(options.selection), options.selectedNames);
   assert.throws(() => parseArguments(["--only", "wait"]), /exact case name/);
-  assert.throws(() => parseArguments(["--browser", "other"]), /requires ego, vek, or both/);
+  assert.throws(() => parseArguments(["--browser", "other"]), /requires reference, wiek, or both/);
+});
+test('public browser selectors preserve compatibility with saved run identifiers',()=>{
+  assert.equal(parseArguments(['--browser','wiek']).browser,'vek');
+  assert.equal(parseArguments(['--browser','reference']).browser,'ego');
+  assert.equal(parseArguments(['--browser','both']).browser,'both');
 });
 
 test("single-browser Markdown leaves the counterpart unrun and documents evidence limitations", () => {

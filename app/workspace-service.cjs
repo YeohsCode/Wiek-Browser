@@ -7,6 +7,7 @@ const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
 const { createRemoteGit } = require('./workspace-remote-git.cjs');
 const { repositoryLayout } = require('./repository-layout.cjs');
+const { createLocalServerService } = require('./local-server-service.cjs');
 const execute = promisify(execFile);
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
 const IGNORED = new Set(['.git', 'node_modules', '.next', '.cache', 'dist', 'build']);
@@ -16,11 +17,12 @@ const inside = (parent, child) => child === parent || child.startsWith(parent + 
 const clone = value => JSON.parse(JSON.stringify(value));
 const cap = (value, fallback, max) => Math.max(1, Math.min(max, Math.floor(Number(value) || fallback)));
 
-function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'git', ghCommand = 'gh', remoteTimeoutMs } = {}) {
+function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'git', ghCommand = 'gh', remoteTimeoutMs, localServerOptions } = {}) {
   if (typeof projects !== 'function') throw new TypeError('projects must return the registered project list');
   let closed = false, sequence = 0, lastEvent = null;
   const watches = new Map(), mutations = new Map();
   const remoteGit = createRemoteGit({ gitCommand, ghCommand, timeoutMs: remoteTimeoutMs, publish });
+  const localServers = createLocalServerService(localServerOptions);
   async function serialized(key, fn) {
     const previous = mutations.get(key) || Promise.resolve();
     const current = previous.catch(() => {}).then(fn); mutations.set(key, current);
@@ -182,7 +184,7 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
     try { onChange(snapshot()); } catch {}
   }
   function snapshot() {
-    return { version: 1, projects: clone(projects()), watches: [...watches.values()].map(({ projectId, recursive }) => ({ projectId, recursive })), lastEvent: clone(lastEvent), remoteGit: remoteGit.snapshot(), capabilities: { fileLimitBytes: MAX_FILE_BYTES, git: true, checkpoints: true, remoteGit: true, remotePullRequests: true, executablePreview: false } };
+    return { version: 1, projects: clone(projects()), watches: [...watches.values()].map(({ projectId, recursive }) => ({ projectId, recursive })), lastEvent: clone(lastEvent), remoteGit: remoteGit.snapshot(), capabilities: { fileLimitBytes: MAX_FILE_BYTES, git: true, checkpoints: true, remoteGit: true, remotePullRequests: true, localServers:localServers.available, executablePreview: false } };
   }
   async function watch(ctx, payload) {
     if (payload.enabled === false) { const existing = watches.get(payload.projectId); existing?.handle.close(); clearTimeout(existing?.timer); watches.delete(payload.projectId); return snapshot(); }
@@ -409,9 +411,10 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
     if (mutating.has(operation)) publish({ type: 'git-changed', projectId: payload.projectId, operation });
     return { projectId: payload.projectId, ...result };
   }
-  async function dispatch(action, payload = {}) {
+  async function dispatch(action, payload = {}, authority = {}) {
     if (action === 'workspace:snapshot') return snapshot();
     const ctx = await context(payload);
+    if(action.startsWith('workspace:servers:'))return localServers.dispatch(action,payload,ctx,authority);
     if (action.startsWith('workspace:git:remote:') || action.startsWith('workspace:git:pr:')) {
       await repository(ctx);
       const operation = action.slice('workspace:git:'.length);
@@ -433,7 +436,7 @@ function createWorkspaceService({ projects, onChange = () => {}, gitCommand = 'g
       default: throw fail('Unknown workspace action');
     }
   }
-  async function close() { closed = true; await remoteGit.close(); await Promise.allSettled([...mutations.values()]); for (const record of watches.values()) { record.handle.close(); clearTimeout(record.timer); } watches.clear(); }
+  async function close() { closed = true; localServers.close(); await remoteGit.close(); await Promise.allSettled([...mutations.values()]); for (const record of watches.values()) { record.handle.close(); clearTimeout(record.timer); } watches.clear(); }
   return { dispatch, snapshot, close };
 }
 module.exports = { createWorkspaceService };

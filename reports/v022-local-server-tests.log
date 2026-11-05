@@ -1,0 +1,24 @@
+✔ listener parser handles duplicates, bracketed IPv6 and refuses malformed endpoints (1.27875ms)
+✔ listing is read-only, project-scoped, and exposes only derived loopback URLs (1.263292ms)
+✔ review and explicit confirmation are required; the review is single-use (0.540125ms)
+✔ reviews are bound to project id and canonical root and cannot cross scope (0.159166ms)
+✔ expired and cancelled reviews never send a signal (0.192458ms)
+✔ changed birth identity invalidates a review without stopping a process (0.13625ms)
+✔ changed working directory invalidates a review without stopping a process (0.097208ms)
+✔ changed executable invalidates a review without stopping a process (0.110125ms)
+✔ changed listener set invalidates a review without stopping a process (0.112916ms)
+✔ changed listener removal invalidates a review without stopping a process (0.146417ms)
+✔ the last identity read catches a process replacement after listener discovery (0.125625ms)
+✔ current host, its ancestors and unknown runtimes cannot be stopped (0.120042ms)
+✔ a process ignoring termination stays running; no force stop or group signal is sent (0.138833ms)
+✔ service close invalidates reviews without terminating any server (0.064875ms)
+✔ native probe uses bounded literal argv and rejects nonmatching process identities (0.21675ms)
+✔ actual temporary TCP servers are discovered by native identity and only the reviewed project process stops (428.851417ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 503.005666

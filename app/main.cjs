@@ -541,7 +541,7 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
     return voiceService.snapshot();
   }
   if (action==='workspace:git:checkpoint:restore')return turnCheckpointService.withRestoreLease(value.projectId,()=>workspaceService.dispatch(action,value));
-  if (action.startsWith('workspace:')) return workspaceService.dispatch(action, value);
+  if (action.startsWith('workspace:')) return workspaceService.dispatch(action, value, {interactive:interactiveDesktop});
   if (action.startsWith('mcp:')) return mcpService.dispatch(action, value);
   if (action.startsWith('voice:')) { if(action==='voice:transcribe'&&preferencesService.snapshot().onDeviceModels===false&&voiceService.snapshot().config?.command===path.join(__dirname,'bin/whisper-cli'))throw new Error('Enable on-device models in Preferences to use the bundled transcriber');return voiceService.dispatch(action, value); }
   if (action.startsWith('catalog:')) {

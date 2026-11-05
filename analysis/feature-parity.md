@@ -1,12 +1,10 @@
 # Wiek Browser 功能对齐清单
 
-本清单以独立实现的 **Wiek Browser**（原 Vek Browser）为目标。静态设计、源码存在和动态验证是三种不同证据；逐项状态区分已实现、局部验证与剩余缺口；完整E2E结果仍以原始报告为准。验证结果以 `reports/comparison.json` / `reports/comparison.md` 及原始日志为准。
+当前检查点：**0.22.0**，2026-11-06。目标是完整实现目标功能，**全量覆盖尚未完成**。本清单保留细粒度范围和历史增量；历史数字不自动适用于当前版本。
 
-当前源码检查点 **Wiek Browser 0.21.0**（原 Vek Browser），更新于 2026-11-05；执行进度和下一阶段验收见 [PLAN.md](../PLAN.md)。下文 0.2 表为历史检查点，同名能力以历次版本增量和当前报告为准。
+本轮恢复已有制品研究，并对精确本地服务模块完成新的分析和函数追踪。新增项目内服务发现、打开地址和审核停止。证据、实现、测试与未知项见[本地服务设计](local-services-design.md)；完整进度见[计划](../PLAN.md)，实际结果见[验证报告](../reports/RESULTS.md)。
 
-公开 SDK 来源：`references/ego-lite`（MIT，aecc5831fc5a9ea01a078b632185992a3a7ac448）；新应用复用副本：`packages/sdk`。闭源安装包行为需要 REA 安装包证据与运行观察补充。
-
-0.20.3 新增独立 Wiek 标识，已从活跃应用/Skill 资源移除原 Ego 图标；本地512、SDK532、打包宿主197、Wiek69/69通过，Ego0.6.2.7为68/69（HTML paste失败），相同SDK/fixture/索引。完整远端CI41830745101已通过。共享V2控制与两侧本地smoke可用，完整Stage A adapter已在0.21接入并通过本地双侧hook；线上31任务与P3实机系统矩阵仍未完成；详见[当前结果](../reports/RESULTS.md)。
+静态设计、源码存在和动态验证分别标记。第三方SDK来源身份与许可见[NOTICE](../NOTICE.md)和原始完整记录；产品宿主采用独立实现。以下协议方法仅列方法名，省略接收者名称。
 
 ## 浏览器应用与交付面
 
@@ -17,14 +15,14 @@
 | Space 工作区 | 用户 Space、Agent Space、多空间切换、状态与持久化 | 已实现；task spaces/control、跨空间与跨轮测试通过 |
 | 用户接管 | 手工操作中止 Agent，移交/接管、inactive/permission 错误码 | 待验证 |
 | Profile | 列举/创建/选择，cookies/storage 隔离，Space 归属 | 已实现；profile selection/跨空间测试通过；迁移不等价 |
-| 已登录浏览状态 | 与 ego 等价的身份/登录导入语义；Chrome 数据与密钥可解密性 | partial：只读选择 Chromium profile 导入书签/历史/macOS v10 Cookies/密码，加密 vault；完整会话/web storage/扩展一键迁移仍未实现 |
+| 已登录浏览状态 | 与参考侧等价的身份/登录导入语义；Chrome 数据与密钥可解密性 | partial：只读选择 Chromium profile 导入书签/历史/macOS v10 Cookies/密码，加密 vault；完整会话/web storage/扩展一键迁移仍未实现 |
 | 历史/书签 | 列表、访问、增删、持久化 | 已实现；0.3修复跨Profile UI/增删/迁移归属，真实宿主隔离验证通过 |
 | 下载管理 | 正常完成/失败/取消/保存，UI 与 Agent download 协调 | 已实现；全部download/PDF/concurrent/跨轮用例通过 |
 | 扩展 | 载入/启用/移除及兼容边界 | partial：解压扩展载入/启停/移除/重启重载；受Electron API限制，无Chrome商店完整兼容 |
 | 权限与设备 | Profile/top/requester/capability规则、native提示、once/持久授权/阻止、导航/超时撤销、Agent接管 | 0.3已实现并由真实Chromium query/预阻止request验证；设备chooser/OS授权/已打开stream撤销仍不等价 |
-| 剪贴板 | 原生纯文本/HTML paste、原有内容恢复 | Vek Page keyboard interface通过38断言；Ego同项失败 |
+| 剪贴板 | 原生纯文本/HTML paste、原有内容恢复 | Wiek Page keyboard interface通过38断言；参考侧同项失败 |
 | 原生菜单/快捷键 | 多标签、地址栏、开发工具、缩放等实际行为 | 待验证；需实物功能清单 |
-| 帐户/ego 服务 | 不伪造账号/云同步/更新端点；服务功能测试按用户允许跳过 | 未验证；无自建等价服务 |
+| 帐户/远端服务 | 不伪造账号/云同步/更新端点；服务功能测试按用户允许跳过 | 未验证；无自建等价服务 |
 | 安装与升级 | 本地启动、CLI 路径、可打包应用、版本与升级语义 | 待验证；不得标为已发布 |
 | Agent CLI | nodejs heredoc/-e、--sdk-path、taskspace、skill/help、失败退出码 | 已实现；打包CLI完整69-case通过 |
 | Skill 与插件 | 同版 guide、learnings、九主机包装、用户已装 Skill 不被覆盖 | 待验证 |
@@ -36,30 +34,30 @@
 
 | 接口 | 状态 |
 |---|---|
-| `ego.getBrowserVersion` | 已实现；同源真实E2E覆盖 |
-| `ego.listProfiles` | 已实现；同源真实E2E覆盖 |
-| `ego.useTaskSpace` | 已实现；同源真实E2E覆盖 |
-| `ego.listTaskSpaces` | 已实现；同源真实E2E覆盖 |
-| `ego.createTaskSpace` | 已实现；同源真实E2E覆盖 |
-| `ego.claimTaskSpace` | 已实现；同源真实E2E覆盖 |
-| `ego.closeTaskSpace` | 已实现；同源真实E2E覆盖 |
-| `ego.completeTaskSpace` | 已实现；同源真实E2E覆盖 |
-| `ego.handOffTaskSpace` | 已实现；同源真实E2E覆盖 |
-| `ego.takeOverTaskSpace` | 已实现；同源真实E2E覆盖 |
-| `ego.setAgentTaskState` | 已实现；同源真实E2E覆盖 |
-| `ego.createTab` | 已实现；同源真实E2E覆盖 |
-| `ego.listTabs` | 已实现；同源真实E2E覆盖 |
-| `ego.snapshot` | 已实现；同源真实E2E覆盖 |
-| `ego.animationHighlightMouseToPosition` | 已实现；同源真实E2E覆盖 |
-| `ego.sendCDPMessage` | 已实现；同源真实E2E覆盖 |
-| `ego.onCDPMessage` | 已实现；同源真实E2E覆盖 |
-| `ego.onSendCDPMessageError` | 已实现；同源真实E2E覆盖 |
+| `getBrowserVersion` | 已实现；同源真实E2E覆盖 |
+| `listProfiles` | 已实现；同源真实E2E覆盖 |
+| `useTaskSpace` | 已实现；同源真实E2E覆盖 |
+| `listTaskSpaces` | 已实现；同源真实E2E覆盖 |
+| `createTaskSpace` | 已实现；同源真实E2E覆盖 |
+| `claimTaskSpace` | 已实现；同源真实E2E覆盖 |
+| `closeTaskSpace` | 已实现；同源真实E2E覆盖 |
+| `completeTaskSpace` | 已实现；同源真实E2E覆盖 |
+| `handOffTaskSpace` | 已实现；同源真实E2E覆盖 |
+| `takeOverTaskSpace` | 已实现；同源真实E2E覆盖 |
+| `setAgentTaskState` | 已实现；同源真实E2E覆盖 |
+| `createTab` | 已实现；同源真实E2E覆盖 |
+| `listTabs` | 已实现；同源真实E2E覆盖 |
+| `snapshot` | 已实现；同源真实E2E覆盖 |
+| `animationHighlightMouseToPosition` | 已实现；同源真实E2E覆盖 |
+| `sendCDPMessage` | 已实现；同源真实E2E覆盖 |
+| `onCDPMessage` | 已实现；同源真实E2E覆盖 |
+| `onSendCDPMessageError` | 已实现；同源真实E2E覆盖 |
 
 Snapshot 额外要求：viewport/full/subtree、compact text、唯一 ref、frame provenance、iframe/OOPIF、stable locator identity、DOM 更新/导航失效。CDP 额外要求：root/session 路由、Target 过滤、session 重附加、事件隔离、worker/OOPIF autoattach、dialog/permission 边界。这些都需真实浏览器测试。
 
 ## 全部公开 V2 SDK API
 
-来源：`packages/sdk/src/public-api-schema.ts`。复用 SDK 能减少重复实现，但每条 API 仍依赖 Vek 原生桥接正确性；有源码不等于已验证。
+来源：`packages/sdk/src/public-api-schema.ts`。复用 SDK 能减少重复实现，但每条 API 仍依赖 Wiek 原生桥接正确性；有源码不等于已验证。
 
 | API | 状态 |
 |---|---|
@@ -140,11 +138,11 @@ Snapshot 额外要求：viewport/full/subtree、compact text、唯一 ref、fram
 
 V1 兼容 helper、CDP/fetch、site tools 与 migration guard 的入口见 `packages/sdk/src/helpers.ts:695`；仍需 helper surface 和 v1/v2 parity 测试。
 
-## 同一真实 E2E 的逐项验证状态
+## 保存的同集逐项验证表
 
-此处是工作清单，运行后应直接查报告，不手动把失败写成通过。未选择的 case 记 SKIP，选中但未产生上游结果记 not_run。
+以下保存历史逐项表；最新结果以[当前比较](../reports/comparison.md)为准。运行后应直接查报告，不手动把失败写成通过。未选择的 case 记 SKIP，选中但未产生上游结果记 not_run。
 
-| Case | Ego baseline | Vek Browser |
+| Case | 参考侧 baseline | Wiek Browser |
 |---|---|---|
 | environment initialization | PASS (23 assertions) | PASS (24 assertions) |
 | helper surface | PASS (67 assertions) | PASS (67 assertions) |
@@ -222,21 +220,21 @@ V1 兼容 helper、CDP/fetch、site tools 与 migration guard 的入口见 `pack
 
 公开 benchmark adapter 与最新 SDK V2 的候选空间解析有版本漂移，须同等修复两侧或固定兼容版本。默认 medium 不等于营销 max；公开模型报告 87.1% 不等于对比页 93.5% 的同批原始数据。没有实际运行证据时不生成虚构成功率。
 
-## Vek 0.2.0 本地工作台复刻状态（历史检查点）
+## Wiek 0.2.0 本地工作台复刻状态（历史检查点）
 
-本轮继续使用 daemon Evidence `ev_0a7bdc68255ac1adb7db5fd967eaa355b6bbd1830efb7f12c750d8540dcbbee3`，并新增客户端 PAK Evidence `ev_c746b1b63234454354fe180d624d455e35d018a7b6219d016262de3385d93883`。后者确认了此前未列入的偏好、Library、截图标注、操作录制等发货界面；静态存在不等于已确认 Ego 运行可用。完整边界见 [client-resource-feature-ledger.md](client-resource-feature-ledger.md)。
+本轮继续使用 daemon Evidence `ev_0a7bdc68255ac1adb7db5fd967eaa355b6bbd1830efb7f12c750d8540dcbbee3`，并新增客户端 PAK Evidence `ev_c746b1b63234454354fe180d624d455e35d018a7b6219d016262de3385d93883`。后者确认了此前未列入的偏好、Library、截图标注、操作录制等发货界面；静态存在不等于已确认 参考侧 运行可用。完整边界见 [client-resource-feature-ledger.md](client-resource-feature-ledger.md)。
 
-| 功能 | Vek 0.2.0 实现与证据 | 仍有的差距 |
+| 功能 | Wiek 0.2.0 实现与证据 | 仍有的差距 |
 |---|---|---|
 | 本地 Agent / provider | 通用 argv CLI；opt-in 原生 Codex app-server，真实 initialize + ephemeral thread/start 无付费探针；流式回复/恢复/审批/用量使用真实 fake wire 测试 | 其余七种 provider 原生协议、真实付费生成未验证；配置目录不代表已认证 |
 | 多 Agent 控制 | create/read/list/wait/steer/stop/handoff；父子关系、并发/停止/下一轮排队；native turn steer/interrupt | 通用 CLI 不伪称有原生会话 steering |
-| 对话组织和分支 | 归档/置顶/笔记/markers/goal、fork/sidechat、消息编辑重发/回滚、JSON 导入导出 | 回滚仅对话修订；没有自动 Git checkpoint revert；不是 Ego 原生 ZIP 格式 |
+| 对话组织和分支 | 归档/置顶/笔记/markers/goal、fork/sidechat、消息编辑重发/回滚、JSON 导入导出 | 回滚仅对话修订；没有自动 Git checkpoint revert；不是 参考侧 原生 ZIP 格式 |
 | 附件 | 20 MiB/件、10件活跃上限、私有副本、软移除/恢复、native localImage、内联导入导出 | 非图像附件仅真实路径上下文；是否读取由实际 provider 决定 |
 | 自动化 | at/interval/UTC 五字段 cron/heartbeat、记忆、提案审批、运行历史、maxRuns/日期/失败停止条件 | 无应用退出后的 OS 调度；无任意时区/DST、完整 standalone/dedicated 执行语义 |
 | 文件/Git | 项目范围读写/搜索/tree/watch/冲突/hash、文字与图片预览、实际 Git status/diff/log/branch/stage/commit/stash | 无 remote PR/comment/push；无任意脚本执行/完整 studio 编辑器 |
 | MCP | 真实 stdio 客户端、project/thread scope、工具列表/任务等待取消、引用凭据、一次性 pairing、loopback bearer gateway、4个受 Space 控制的浏览器工具 | 无远程 HTTP/OAuth客户端、完整 sampling/elicitation/provider gateway 自动注入 |
 | Skills/commands/agents | 本机和项目有界目录、来源与正文、启停、按会话选择、实际 provider context 注入 | 无在线 marketplace / 安装包管理；不改个人全局配置 |
-| 语音 | 自建静态 CPU Whisper + multilingual tiny 模型，真实公开音频转写；录音/WAV、停止、词典、语言、历史保留、音频下载、提示音、网页静音恢复 | 麦克风系统权限需用户在 app 中授予；没有 Ego 云端润色/反馈/语音 provider 全兼容 |
+| 语音 | 自建静态 CPU Whisper + multilingual tiny 模型，真实公开音频转写；录音/WAV、停止、词典、语言、历史保留、音频下载、提示音、网页静音恢复 | 麦克风系统权限需用户在 app 中授予；没有 参考侧 云端润色/反馈/语音 provider 全兼容 |
 | Library/Collections | text/page/url/image、collection/group/tag、软删除恢复、私有本地图片保存 | 页面保存为链接/元数据，不是完整离线网页归档 |
 | 截图标注 | 实际网页 PNG、区域裁剪、矩形/箭头/文本、颜色/粗细/字号、undo/redo、PNG 导出；真实 Electron 像素探针 | 当前采集范围为浏览器页面；无系统全屏/跨应用截图权限集成 |
 | 操作录制 | 显式 start/stop、当前 target 锁定、可信 click/key/scroll、元素框与截图、限额、软删除恢复与 JSON 导出；真实宿主可信/伪造点击回归 | 不记录字段值/敏感字段；无跨应用 OS 事件采集 |
@@ -244,19 +242,19 @@ V1 兼容 helper、CDP/fetch、site tools 与 migration guard 的入口见 `pack
 | Memory 开关 | 默认关闭；开启后仅注入当前会话 Space 的去 query/hash 历史摘要和项目顶层文件名 | 没有全局索引/嵌入检索/完整 Memory Workspace；客户端中该界面亦含 demo 数据 |
 | 选择工具栏 | 浏览器 DOM 选区 copy/save/ask；ask 只进入草稿不自动发送 | 无 OS 跨应用 AX 选区；translate 后端未实现（不展示可用翻译） |
 | Space 与窗口 | 固定、批量关闭（默认保留固定和运行任务）、停止关联任务、最近关闭恢复、真正独立原生窗口并复用 WebContents、托盘后台模式 | 独立窗口保留轻量浏览器工具栏；关闭返回主窗；窗口布局不持久化 |
-| Home 快捷网站 | 当前 Profile 的添加/编辑/移除、真实打开 | 不同步到 Ego 云端 |
+| Home 快捷网站 | 当前 Profile 的添加/编辑/移除、真实打开 | 不同步到 参考侧 云端 |
 | Chromium 资料迁移 | 用户选择只读目录、书签/历史、macOS v10 Cookie/密码、系统加密独立 vault、精确 origin 手动填充、逐项失败统计 | 无 Safari、多源 profile 自动发现、完整 IndexedDB/localStorage/扩展/会话迁移；分区 Cookie 不支持 |
-| Profile archive | Vek 专用 AES-256-GCM+scrypt 文件，tabs/书签/历史/cookies/可选密码/扩展元数据；恢复到新 Profile | 不兼容未知 Ego export 格式；不传扩展二进制和 web storage |
+| Profile archive | Wiek 专用 AES-256-GCM+scrypt 文件，tabs/书签/历史/cookies/可选密码/扩展元数据；恢复到新 Profile | 不兼容未知 参考侧 export 格式；不传扩展二进制和 web storage |
 | 扩展/下载 | 解压扩展路径持久、启停/重载；下载历史/状态保存与中断恢复 | Electron 扩展 API/商店与定制 Chromium 仍不等价；中断下载不自动续传 |
 
 本轮最终服务/原生打包集成结果见 ../reports/RESULTS.md 和原始日志；数字以最后完成的测试为准。保留所有失败/中断尝试，不把单次 SDK gate 或 fake provider 测试解释为全产品 100% 对齐。**全量功能复刻仍未完成**：上表右栏和引擎/专有服务边界仍然存在。
 
 ## 引擎版本边界
 
-最终macOS包使用Electron42.11.18 / Chromium148.0.7778.280 / Node24.19.0，Ego0.6.1.13的CLI报告Chromium156.0.8078.48 / Node24.22.1。协议适配通过69个既有用例，不代表全部Web平台特性或自定义Chromium修改等价。实际版本记录在 `reports/package-runtime-versions.json`。
+最终macOS包使用Electron42.11.18 / Chromium148.0.7778.280 / Node24.19.0，参考侧0.6.1.13的CLI报告Chromium156.0.8078.48 / Node24.22.1。协议适配通过69个既有用例，不代表全部Web平台特性或自定义Chromium修改等价。实际版本记录在 `reports/package-runtime-versions.json`。
 
 
-## Vek 0.3.0 继续补齐（覆盖上文对应 0.2 时点）
+## Wiek 0.3.0 继续补齐（覆盖上文对应 0.2 时点）
 
 | 能力 | 当前实现和已完成证据 | 仍然存在的边界 |
 |---|---|---|
@@ -266,12 +264,12 @@ V1 兼容 helper、CDP/fetch、site tools 与 migration guard 的入口见 `pack
 | 网站权限 | Profile+顶层origin+请求origin+能力；camera/microphone拆分；allow/block/ask；once/超时/导航/关闭、旧请求身份、原生弹窗AbortSignal，11个专项测试 | 设备chooser/桌面采集/service worker/OS授权/现有stream结束仍不完整；opaque和未知能力拒绝 |
 | Profile数据归属 | 书签/历史/下载显示和修改、资料导入/导出的目标Profile；旧未标记行归Default；RPC显式Space派生Profile | 旧版本混入的无标记数据无法凭空判断原Profile；不推测恢复所属 |
 | 下载暂停继续 | 真实DownloadItem pause/canResume/resume，2MiB真实限速文件的暂停字节稳定与完整下载验证 | 不承诺跨重启续传；CDP指定路径可能不出现在Electron savePath，SDK负责其路径 |
-| 页面右键菜单 | 原生links/images/edit/selection/Library/agent draft/navigation/inspect，打开菜单交还Agent控制 | 独立功能实现，非Ego所有菜单逐像素等价；第三方网页/OS功能仍受其规则 |
+| 页面右键菜单 | 原生links/images/edit/selection/Library/agent draft/navigation/inspect，打开菜单交还Agent控制 | 独立功能实现，非参考侧所有菜单逐像素等价；第三方网页/OS功能仍受其规则 |
 
-本轮完整结果以 ../reports/RESULTS.md 为准。0.3的本地能力增量不能消除完整Chromium替换、其他provider原生协议、Chrome/Safari全资料迁移、OS跨应用功能、翻译、远程PR、Ego专有服务和31项线上benchmark的剩余工作。**全量功能复刻仍未完成。**
+本轮完整结果以 ../reports/RESULTS.md 为准。0.3的本地能力增量不能消除完整Chromium替换、其他provider原生协议、Chrome/Safari全资料迁移、OS跨应用功能、翻译、远程PR、参考侧专有服务和31项线上benchmark的剩余工作。**全量功能复刻仍未完成。**
 
 
-## Vek 0.4.0 Agent turn 文件快照
+## Wiek 0.4.0 Agent turn 文件快照
 
 已完成项目显式启用、真实provider运行前后快照、thread/run/native turn关联、逐turn和会话span的真实worktree/index差异、预览/精确名称确认恢复及保护快照。失败/停止/准备期取消/after超限/HEAD变更/并发/导入/fork和实际host SIGKILL后的恢复均有真实临时Git验证。原生UI实际运行本地fixture并完成文件/index恢复，非模拟成功。
 
@@ -323,7 +321,7 @@ stop先核对已连接host的PID/instance，再请求shutdown，成功返回前�
 
 ## 0.10.0 当前增量：Claude目录与声明能力
 
-initialize目录发现不发送user、不产生Vek run或已拥有session，使用实际并发与项目lease并可停止。最多256项、alias/resolvedModel、显式effort/adaptive元数据；缺字段unknown，冲突/错误类型拒绝。每次有目录的turn重新校验；显式effort经apply_flag_settings确认后才发user，旧CLI不支持则明确失败。空模型明确重置新resume进程default，canonical UI选择保持。
+initialize目录发现不发送user、不产生Wiek run或已拥有session，使用实际并发与项目lease并可停止。最多256项、alias/resolvedModel、显式effort/adaptive元数据；缺字段unknown，冲突/错误类型拒绝。每次有目录的turn重新校验；显式effort经apply_flag_settings确认后才发user，旧CLI不支持则明确失败。空模型明确重置新resume进程default，canonical UI选择保持。
 
 新增16项回归，本地264/264；官方CLI2.1.31隔离初始化只返回3项目录，无effort字段，0user/0模型调用。现代控制由官方SDK类型和合成wire单独验证，不声称实际模型effort或权益成功。source原生迁移/后台任务和其他5种原生provider仍缺；打包/UI/SDK见 [RESULTS](../reports/RESULTS.md)，设计见 [claude-model-catalogue](claude-model-catalogue.md)。
 
@@ -351,7 +349,7 @@ HTTP MCP新增预注册public client none/S256授权，metadata/challenge/OIDC�
 
 自有Swift AXSelectedText helper，按应用排除/secure控件拒绝，一次读取后先预览；Apple系统工具显式区域/窗口截图进入现有标注编辑器。全局screenshot/selection/chat/voice快捷键默认无分配，OS注册失败可见，app/global冲突双向检查；后台voice只开面板。CLI/RPC仅可读desktop状态，不能取正文或触发OS采集。18项新服务/真实子进程/Electron IPC/panel测试，真实OS只验证权限/注册及截图启动取消清理；全局触发、AX正文和原生PNG正向链路未确认。最终打包和实际OS验证见[RESULTS](../reports/RESULTS.md)。
 
-没有复刻被动选区监听/浮动toolbar、Fn、OS视频/音频录制或Ego所有native backing；原版只有bounded shipped-static证据，Vek的独立本地成功不算Ego运行对标。权限、TCC归属、跨平台、多显示器及应用兼容边界见[desktop-tools](desktop-tools.md)。P2/P3与全量parity仍false。
+没有复刻被动选区监听/浮动toolbar、Fn、OS视频/音频录制或参考侧所有native backing；原版只有bounded shipped-static证据，Wiek的独立本地成功不算参考侧运行对标。权限、TCC归属、跨平台、多显示器及应用兼容边界见[desktop-tools](desktop-tools.md)。P2/P3与全量parity仍false。
 
 
 ## 0.15：P3执行模式和显式closed-app worker
@@ -360,7 +358,7 @@ heartbeat继续原thread，standalone每次干净thread，dedicated持久绑定�
 
 新增默认关闭的普通CLI一次性worker，浏览器关闭后可显式tick已到期任务；复用预约、锁、workspace和turn checkpoint。锁存在即skip，不清陈旧锁；signal/timeout等待实际退出。CLI子上下文禁止自动启动浏览器，只读user instructions，不加载网页Profile或MCP。Native provider/审批UI、OS作业安装与睡眠唤醒、自动前台handoff未实现。
 
-新增27项，完整/专项/打包/SDK结果见[RESULTS](../reports/RESULTS.md)。Ego modes依据匹配身份shipped-static dispatch语义，没有runtime对测；busy/cooldown延期、iteration重开与completion工具契约仍不等价。设计与精确证据见[automation-execution](automation-execution.md)。P2/P3和全量parity仍false，P1不同Agent集成继续暂缓。
+新增27项，完整/专项/打包/SDK结果见[RESULTS](../reports/RESULTS.md)。参考侧 modes依据匹配身份shipped-static dispatch语义，没有runtime对测；busy/cooldown延期、iteration重开与completion工具契约仍不等价。设计与精确证据见[automation-execution](automation-execution.md)。P2/P3和全量parity仍false，P1不同Agent集成继续暂缓。
 
 
 ## 0.16：P3审核式macOS login job与前台接管
@@ -369,7 +367,7 @@ Settings显式prepare/review/enable，默认关闭；固定argv/calendar-minute/
 
 Foreground取得gate，认证请求worker停止，实际provider/checkpoint收尾并释放writer lease后才打开状态；ack不算完成，timeout不抢占。真实临时launchd fixture验证bootstrap/RunAtLoad、gate跳过、同专属线程续接、不重复和卸载，发行Electron Node runtime再次验证。新增20项，最终[RESULTS](../reports/RESULTS.md)；设计见[background-scheduling](background-scheduling.md)。
 
-没有Ego同OS安装后端的runtime对标；物理sleep/wake、登录退出、OS后台项撤销和完整恢复未验收，当前不会唤醒睡眠机器。P2/P3/full parity仍false，P1其他Agent继续暂缓。
+没有参考侧同OS安装后端的runtime对标；物理sleep/wake、登录退出、OS后台项撤销和完整恢复未验收，当前不会唤醒睡眠机器。P2/P3/full parity仍false，P1其他Agent继续暂缓。
 
 
 ## 0.17：P2现代HTTP MCP资源与显式通知流
@@ -378,23 +376,23 @@ Foreground取得gate，认证请求worker停止，实际provider/checkpoint收�
 
 通知只增加revision/使列表失效，不读取正文或执行内容；并发read保留stale，工具列表竞态拒绝旧结果，界面移除失效工具按钮。确认后流可超出普通timeout，逐事件/行有界；16流上限仍给普通请求留socket空间。新增21项、实际Electron panel14内部检查，精确发行结果见[RESULTS](../reports/RESULTS.md)，设计/公开规范见[mcp-modern-subscriptions](mcp-modern-subscriptions.md)。
 
-没有MRTR续传、采样/表单、prompt通知、现代stdio或task extension，也未进行Ego同功能runtime对测。OAuth CIMD/DCR/完整step-up、来源迁移与P3剩余项保留；全量parity仍false，P1不同Agent集成继续暂缓。
+没有MRTR续传、采样/表单、prompt通知、现代stdio或task extension，也未进行参考侧同功能runtime对测。OAuth CIMD/DCR/完整step-up、来源迁移与P3剩余项保留；全量parity仍false，P1不同Agent集成继续暂缓。
 
 ## 0.18：P2有界MCP工具表单MRTR
 
 现代HTTP本地工具任务支持awaiting_input、typed form、逐项accept/decline/cancel、明确续传和整任务取消。新请求ID/当前轮response与原样opaque state绑定原工具/参数，按scope和一次性review ID校验；旧审阅、断线、超时、关闭不重放。表单/输入/state与交互结果不写MCP历史，重启不恢复。
 
-新增17项（含实际Electron面板13内部检查），完整本地416/416，打包宿主184/184。公开协议独立实现，没有Ego同功能runtime对测；资源读取/URL/sampling/现代stdio等仍缺，全量parity=false。P1不同Agent集成暂缓。详情见[mcp-input-continuations](mcp-input-continuations.md)和[当前结果](../reports/RESULTS.md)。
+新增17项（含实际Electron面板13内部检查），完整本地416/416，打包宿主184/184。公开协议独立实现，没有参考侧同功能runtime对测；资源读取/URL/sampling/现代stdio等仍缺，全量parity=false。P1不同Agent集成暂缓。详情见[mcp-input-continuations](mcp-input-continuations.md)和[当前结果](../reports/RESULTS.md)。
 
 ## 0.19：P2显式CIMD与客户端身份
 
-HTTP OAuth新增HTTPS client metadata URL、无网络模板、固定callback、只读客户端身份审核、精确issuer与已有密文预注册身份绑定。只在AS声明支持后无凭据获取5KiB有界文档，验证ID/公共auth/code/redirect；失败不自动注册、开浏览器或重放工具。CIMD不等于Vek托管身份或真实公网AS等价。
+HTTP OAuth新增HTTPS client metadata URL、无网络模板、固定callback、只读客户端身份审核、精确issuer与已有密文预注册身份绑定。只在AS声明支持后无凭据获取5KiB有界文档，验证ID/公共auth/code/redirect；失败不自动注册、开浏览器或重放工具。CIMD不等于Wiek托管身份或真实公网AS等价。
 
 新增20项（19协议/服务和实际Electron面板20内部检查），本地436/436；其余最终数字见[RESULTS](../reports/RESULTS.md)。DCR/完整step-up、托管publisher、来源迁移、其余MRTR和P3范围保留；全量parity=false，P1不同Agent集成暂缓。细节见[mcp-client-identity](mcp-client-identity.md)。
 
 ## Wiek 0.20：改名与 P3 集成检查点
 
-Wiek 品牌、CLI/旧数据兼容、中英文 README 已实现。本轮源码 498/498、打包宿主 197/197、190 个发行文件匹配；SDK/81 上游输入未改。P3 新增忙碌延期、运行 contract/停止评估、崩溃恢复、被动选区/应用录制和远程 Git/PR 集成；原生正向、离线翻译模型兼容与物理系统边界仍待验收。完整清单见 PLAN，不能将本次回归当作全量对齐。
+Wiek 品牌、CLI/旧数据兼容、中英文 制品分析工具DME 已实现。本轮源码 498/498、打包宿主 197/197、190 个发行文件匹配；SDK/81 上游输入未改。P3 新增忙碌延期、运行 contract/停止评估、崩溃恢复、被动选区/应用录制和远程 Git/PR 集成；原生正向、离线翻译模型兼容与物理系统边界仍待验收。完整清单见 PLAN，不能将本次回归当作全量对齐。
 
 ## Wiek 0.20.1：真实桌面/翻译与P4准备
 
@@ -409,3 +407,11 @@ Wiek 品牌、CLI/旧数据兼容、中英文 README 已实现。本轮源码 49
 - 本地522/522、打包宿主197/197；当前报告列明其余验收。最终包只读权限状态为 screen/accessibility granted，不等价于原生采集正向验收。
 
 0.21完整远端CI41952407500已通过，含全部532 SDK、522本地、59框架、197宿主、69浏览器/1,248断言及202发行文件核对。验证源码提交57cc0a1，线上任务与原生设备矩阵不在此结果内。
+
+## 0.22 增量
+
+- 项目本地服务管理：按需监听端口发现、回环地址派发、停止审核/取消/确认，以及进程启动微秒、目录、可执行文件和端点复核。
+- 原生只读身份helper，宿主和祖先保护；祖先身份不能完整确认时禁用停止。
+- 17项服务测试、实际Electron面板11项检查、完整本地541/541与打包宿主197项通过；打包模块面板11项通过。
+- 精确研究摘要、字节/哈希身份和停止函数追踪已落档；全局分类/自动标题、其他平台及参考侧运行行为尚未覆盖。
+- 本轮浏览器同集、发行身份和CI以[当前结果](../reports/RESULTS.md)更新后的实际状态为准。P1其他provider继续暂缓。

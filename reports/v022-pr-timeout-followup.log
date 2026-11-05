@@ -1,0 +1,24 @@
+✖ large PR diffs have an explicit bounded preview instead of a silently shortened full-diff claim (4702.197875ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4775.777958
+
+✖ failing tests:
+
+test at tests/workspace-remote-git.test.mjs:172:1
+✖ large PR diffs have an explicit bounded preview instead of a silently shortened full-diff claim (4702.197875ms)
+  Error: Operation timed out; refresh the remote before retrying a write.
+      at fail (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/workspace-remote-git.cjs:6:72)
+      at ChildProcess.<anonymous> (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/workspace-remote-git.cjs:52:35)
+      at ChildProcess.emit (node:events:508:28)
+      at maybeClose (node:internal/child_process:1085:16)
+      at Socket.<anonymous> (node:internal/child_process:456:11)
+      at Socket.emit (node:events:508:28)
+      at Pipe.<anonymous> (node:net:346:12) {
+    error_code: 'VEK_REMOTE_TIMEOUT'
+  }

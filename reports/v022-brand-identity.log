@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-11-05T23:51:34.965Z",
+  "version": "0.22.0",
+  "checked": 386,
+  "originalEgoLogoHits": [],
+  "skillMappings": [
+    {
+      "base": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/",
+      "skill": "wiek-browser",
+      "matches": true
+    },
+    {
+      "base": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/",
+      "skill": "ego-browser",
+      "matches": true
+    },
+    {
+      "base": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app",
+      "skill": "wiek-browser",
+      "matches": true
+    },
+    {
+      "base": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app",
+      "skill": "ego-browser",
+      "matches": true
+    }
+  ],
+  "packagedIconMatches": true,
+  "scope": "Exact SHA-256 check of two original Ego PNGs; independently authored Wiek SVG is the brand source."
+}

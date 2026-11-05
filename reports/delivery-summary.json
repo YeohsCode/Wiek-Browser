@@ -1,18 +1,56 @@
 {
-  "schemaVersion": 2,
-  "generatedAt": "2026-11-05T13:31:00.986938+00:00",
+  "schemaVersion": 3,
+  "generatedAt": "2026-11-05T23:52:23.652532+00:00",
   "project": "Wiek Browser",
-  "version": "0.21.0",
+  "version": "0.22.0",
   "repository": "https://github.com/YeohsCode/Wiek-Browser",
   "fullParity": false,
-  "localBrowserComparison": {
+  "research": {
+    "feature": "Project local services",
+    "summary": "local-services-research.json",
+    "sourcePresenceVerified": true,
+    "referenceRuntimeVerified": false,
+    "implementationCopied": false
+  },
+  "localTests": {
+    "pass": 541,
+    "fail": 0,
+    "skip": 0,
+    "execution": "Serial test files; original deadlines unchanged",
+    "log": "v022-source-tests-final.log",
+    "previousFailures": [
+      "v022-source-tests.log",
+      "v022-pr-timeout-followup.log"
+    ]
+  },
+  "localServices": {
+    "unitTests": 17,
+    "sourcePanelChecks": 11,
+    "packagedModulePanelChecks": 11,
+    "realNativeDiscovery": true,
+    "realTemporaryProcessTermination": true,
+    "evidence": [
+      "v022-local-server-final.log",
+      "v022-package-local-server-panel.log"
+    ],
+    "scope": "Registered project only; review and SIGTERM; no global classification or automatic title probes"
+  },
+  "packagedHost": {
+    "checks": 197,
+    "passed": true,
+    "version": "0.22.0",
+    "log": "v022-package-workbench.log"
+  },
+  "browserComparison": {
     "comparable": true,
     "runs": [
       {
-        "browser": "ego",
+        "browser": "reference",
+        "version": "0.6.2.7",
         "startedAt": "2026-11-04T12:19:59.945Z",
-        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/ego-reference-cli",
         "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+        "fixtureSha256": "2ae49ba77bacbfc3db369fbab14fa0d4e132238ffcbac6bd90124d0ceaa52706",
+        "suiteIndexSha256": "965bb9790a6e880523117031d64e144c38a4d4fd0258ca816c7f0e0c4ceb4f69",
         "counts": {
           "total": 69,
           "selected": 69,
@@ -21,13 +59,16 @@
           "skip": 0,
           "notRun": 0,
           "assertions": 1235
-        }
+        },
+        "retainedFromPreviousCheckpoint": true
       },
       {
-        "browser": "vek",
-        "startedAt": "2026-11-05T01:54:15.086Z",
-        "cli": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs",
+        "browser": "wiek",
+        "version": "0.22.0",
+        "startedAt": "2026-11-05T16:56:38.914Z",
         "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+        "fixtureSha256": "2ae49ba77bacbfc3db369fbab14fa0d4e132238ffcbac6bd90124d0ceaa52706",
+        "suiteIndexSha256": "965bb9790a6e880523117031d64e144c38a4d4fd0258ca816c7f0e0c4ceb4f69",
         "counts": {
           "total": 69,
           "selected": 69,
@@ -36,152 +77,66 @@
           "skip": 0,
           "notRun": 0,
           "assertions": 1248
-        }
+        },
+        "retainedFromPreviousCheckpoint": false
       }
     ],
-    "environmentReport": "v021-comparison-environment.json"
-  },
-  "sdkUnitTests": {
-    "pass": 532,
-    "fail": 0,
-    "rerun": true,
-    "log": "p4-ci-41952407500-ci-sdk.log",
-    "serialLog": "v203-sdk-serial-tests.log",
-    "note": "All original SDK assertions rerun and passed in this checkpoint remote CI.",
-    "execution": "Remote macOS CI; source bundle unchanged"
-  },
-  "localServiceAndParser": {
-    "pass": 522,
-    "fail": 0,
-    "skip": 0,
-    "log": "v021-source-tests.log"
-  },
-  "packagedWorkbenchIntegration": {
-    "checks": 197,
-    "passed": true,
-    "version": "0.21.0",
-    "log": "v021-package-workbench.log"
+    "environmentReport": "v022-comparison-environment.json",
+    "onlineBenchmark": false
   },
   "package": {
-    "path": "dist/mac-arm64/Wiek Browser.app",
-    "sourceFilesMatch": true,
-    "sourceFilesChecked": 202,
-    "upstreamInputsUnchanged": 81,
+    "filesChecked": 204,
+    "sourceMatches": true,
     "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+    "upstreamInputsUnchanged": 81,
     "signed": false,
     "notarized": false,
-    "note": "0.21.0 final package passed local host and same-SDK browser suite; unsigned and unnotarized."
+    "evidence": "v022-package-identity.log"
   },
-  "p3": {
-    "complete": false,
-    "desktop": {
-      "sourceHostNativePositive": true,
-      "finalPackageNativePermissionsVerified": false,
-      "evidence": "p3-desktop-native-check.json",
-      "parentExitEvidence": "p3-desktop-native-parent-check.json",
-      "scope": "Disposable public fixture; no physical multi-display or permission revocation.",
-      "packagedPermissionStatus": {
-        "screen": "granted",
-        "accessibility": "granted",
-        "evidence": "p3-v021-packaged-permission-status.json"
-      },
-      "finalPackageNativeCaptureVerified": false,
-      "finalPackageAttempt": {
-        "passed": false,
-        "reason": "Native UI window selection resolves to existing project replacement alert; no confirmation clicked.",
-        "evidence": "p3-v021-native-package-attempt.json"
-      }
-    },
-    "translation": {
-      "realEnglishChineseServiceExamples": true,
-      "socketConnectionsBlockedDuringInference": true,
-      "evidence": "p3-translation-real-service.json",
-      "electronPanelChecks": 8,
-      "modelBundled": false,
-      "realEnglishSpanishServiceExamples": true,
-      "sourceAndPackagedExamples": 4,
-      "packagedEvidence": "p3-translation-packaged-service.json",
-      "languages": [
-        "en",
-        "zh",
-        "es"
-      ]
-    },
-    "automation": "Busy/cooldown/contract/stop evaluator/SIGKILL recovery locally tested; physical sleep/login pending.",
-    "remoteGit": "Real local bare repositories and synthetic GitHub protocol/panel; no actual PR account writes."
-  },
-  "p4": {
-    "complete": false,
-    "workflow": ".github/workflows/wiek-ci.yml",
-    "remoteResult": "success",
-    "lastObservedRun": 41952407500,
-    "lastObservedStatus": "completed",
-    "benchmarkRun": false,
-    "benchmarkReadiness": "p4-benchmark-readiness.json",
-    "blockers": [
-      "Dedicated Stage A/Judge model and limits",
-      "Dedicated account/login readiness",
-      "Signing/notarization and release process"
-    ],
-    "cleanStagedSourceSdkBuild": true,
-    "canonicalControlTests": {
-      "passed": 14,
-      "log": "p4-v2-control-tests.log"
-    },
-    "canonicalLocalSmoke": {
-      "bothPassed": true,
-      "egoVersion": "0.6.2.7",
-      "wiekVersion": "0.21.0",
-      "report": "p4-sdk-v2-framework-smoke.json",
-      "stageAIntegrated": true,
-      "onlineBenchmark": false
-    },
-    "remoteConclusion": "success",
-    "remoteUrl": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/41952407500",
-    "remoteEvidence": "p4-ci-41952407500-status.json",
-    "remoteCounts": {
-      "sdkTests": 532,
-      "localTests": 522,
-      "frameworkTests": 59,
-      "packagedChecks": 197,
-      "browserCases": 69,
-      "browserAssertions": 1248,
-      "packageFiles": 202,
-      "upstreamInputsUnchanged": 81
-    },
-    "previousFailureLog": "p4-ci-41830035061-ci-sdk.log",
-    "frameworkTests": {
-      "pass": 59,
-      "new": 33,
-      "original": 26,
-      "log": "p4-v2-framework-regression.log"
-    },
-    "previousVerifiedCodeCommit": "b50f9b702dc1a297a53769f0c62548048b0da017",
-    "verifiedCodeCommit": "57cc0a16a3e877ed674dd1ae3c2e9de725e3d1c8",
-    "cleanFrameworkCheckout": {
-      "tests": 59,
-      "passed": true,
-      "report": "p4-v2-clean-regression.log"
-    }
-  },
-  "history": [
-    "v190-delivery-summary.json",
-    "wiek-v0.20-checkpoint.json",
-    "wiek-v0.20.1-checkpoint.json",
-    "wiek-v0.20.2-checkpoint.json",
-    "wiek-v0.20.3-checkpoint.json"
-  ],
   "brand": {
-    "independentlyAuthored": true,
-    "knownOriginalEgoLogoHits": 0,
-    "packagedIcnsMatches": true,
-    "audit": "wiek-brand-audit.json",
     "background": "orange-to-white",
-    "indicator": "white"
+    "indicator": "white",
+    "independentlyAuthored": true,
+    "packagedIconMatches": true,
+    "evidence": "v022-brand-identity.log"
   },
-  "linkedWorktreeCheckpoints": {
-    "implemented": true,
-    "newTests": 6,
-    "evidence": "v021-checkpoint-translation-tests.log"
-  }
+  "publicCopy": {
+    "documentsChecked": 10,
+    "passed": true,
+    "evidence": "v022-public-copy.log"
+  },
+  "sdkTests": {
+    "currentCheckpointRemoteResult": "pending",
+    "previousVerifiedPass": 532,
+    "previousVerifiedRun": 41952407500,
+    "sourceBundleUnchanged": true
+  },
+  "ci": {
+    "currentCheckpointStatus": "pending-commit",
+    "previousVerifiedRun": 41952407500,
+    "previousVerifiedCommit": "57cc0a16a3e877ed674dd1ae3c2e9de725e3d1c8"
+  },
+  "remaining": {
+    "otherProviders": "Deferred per priority",
+    "p2": [
+      "DCR and complete step-up",
+      "Modern stdio, prompt notifications and remaining continuations",
+      "Full profile migration and IndexedDB"
+    ],
+    "p3": [
+      "Physical multi-display and permission revocation",
+      "Final-package native capture positive matrix",
+      "Physical sleep/wake and login/logout",
+      "Semantic retrieval and broader local service classification"
+    ],
+    "p4": [
+      "31 online model tasks with dedicated models and accounts",
+      "Signing/notarization and release"
+    ]
+  },
+  "paidModelCalls": 0,
+  "realAccountWrites": 0,
+  "history": [
+    "wiek-v0.21-checkpoint.json"
+  ]
 }

@@ -3,6 +3,7 @@
   let root, invoke, state = { projects: [], watches: [], capabilities: {} }, projectId = '', tab = 'files', busy = 0, error = '';
   let tree = null, directory = '', file = null, preview = null, dirty = false, changed = false, search = null, artifacts = null, git = {}, gitError = '', staged = false, dialog = null, lastEvent = 0;
   let checkpointPreview = null, checkpointNotice = '';
+  let localServers = null, serverReview = null, serverNotice = '';
   let remoteName = '', remoteBranch = '', remoteReview = null, remoteResult = null, remoteRunning = '', prList = null, prDetail = null;
   let query = '', contentSearch = true, commitMessage = '', generation = 0;
   const node = (tag, text, cls) => { const item = document.createElement(tag); if (text !== undefined) item.textContent = String(text); if (cls) item.className = cls; return item; };
@@ -46,6 +47,7 @@
     if (dirty) return confirmAction('Switch project', 'Discard the unsaved editor changes before switching?', () => { dirty = false; return perform(() => selectProject(next), true); });
     const previous = projectId; projectId = next; generation++; directory = ''; tree = file = preview = search = artifacts = null; git = {}; checkpointPreview = null; checkpointNotice = ''; changed = false;
     remoteName = remoteBranch = remoteRunning = ''; remoteReview = remoteResult = prList = prDetail = null;
+    localServers = serverReview = null; serverNotice = '';
     if (previous && previous !== next) await invoke('workspace:watch', { projectId: previous, enabled: false }).catch(() => {});
     if (!next) { render(); return; }
     await Promise.all([loadTree(), loadGit(), request('workspace:watch', { enabled: true }).then(result => { state = { ...state, watches: result.watches || [] }; })]); render();
@@ -83,6 +85,31 @@
     if (!state.projects.length) chooser.append(node('option', 'Add a project in Agent workspace first'));
     for (const project of state.projects) { const option = node('option', project.name); option.value = project.id; chooser.append(option); } chooser.value = projectId;
     chooser.onchange = () => perform(() => selectProject(chooser.value)); heading.append(chooser); return heading;
+  }
+  async function loadServers(){const mine=generation;const result=await request('workspace:servers:list');if(mine===generation)localServers=result;}
+  function serversView(body){
+    const section=node('section','','vw-wide');
+    section.append(node('h2','Project local services'),node('p','Refresh to find listening processes in this project. Page contents and process arguments are not inspected.','vw-hint'));
+    const refresh=button('Refresh local services',()=>perform(async()=>{serverReview=null;serverNotice='';await loadServers();}));
+    if(state.capabilities?.localServers===false){refresh.disabled=true;section.append(node('p','Native local service discovery is unavailable on this installation.','vw-hint'));}
+    section.append(refresh);
+    if(serverNotice){const notice=node('p',serverNotice,'vw-notice');notice.role='status';section.append(notice);}
+    if(localServers&&!localServers.servers.length)section.append(node('p','No listening services found in this project.','vw-empty'));
+    for(const row of localServers?.servers||[]){
+      const card=node('article','','vw-server-row');card.dataset.serverPid=String(row.pid);
+      card.append(node('h3',`${row.name} · PID ${row.pid}`),node('code',row.cwd),node('p',row.ports.map(item=>`${item.address}:${item.port}`).join(' · '),'vw-hint'));
+      const actions=node('div','','vw-actions');
+      for(const url of row.urls)actions.append(button(`Open ${new URL(url).port}`,()=>invoke('navigate',url)));
+      const stop=button('Review stop',()=>perform(async()=>{const mine=generation,review=await request('workspace:servers:prepare-stop',{pid:row.pid});if(mine===generation)serverReview=review;}));
+      stop.disabled=busy>0||!row.isStoppable;stop.title=row.stopDisabledReason||'';actions.append(stop);card.append(actions);section.append(card);
+    }
+    if(serverReview){
+      const review=serverReview,card=node('div','','vw-server-review');
+      card.append(node('h3','Review process stop'),node('p',`Stop ${review.process.name}, PID ${review.process.pid}, ports ${review.process.ports.map(row=>row.port).join(', ')}?`),node('code',review.process.cwd),node('p','This ends that process with a stop signal. Unsaved application state may be lost.','vw-hint'));
+      card.append(button('Confirm stop',()=>perform(async()=>{serverReview=null;const mine=generation,result=await request('workspace:servers:stop',{reviewId:review.reviewId,confirm:true});if(mine===generation){serverNotice=result.message;await loadServers();}},true)),button('Cancel stop review',()=>perform(async()=>{serverReview=null;await request('workspace:servers:cancel',{reviewId:review.reviewId});})));
+      section.append(card);
+    }
+    body.append(section);
   }
   function filesView(body) {
     const rail = node('section', '', 'vw-file-rail'); const tools = node('div', '', 'vw-file-tools'); tools.append(button('Project root', () => perform(() => loadTree(''))), button('+ File', createFile)); rail.append(tools);
@@ -241,9 +268,9 @@
     if (!projectId) { if (error) root.append(node('div', error, 'vw-error')); root.append(node('div', 'Add a real project folder in Agent workspace to use files and local Git.', 'vw-empty')); return; }
     const meta = node('div', '', 'vw-project-meta'); meta.append(node('code', currentProject()?.path || ''), node('span', state.watches.some(watch => watch.projectId === projectId) ? 'Watching for changes' : 'Watch inactive')); root.append(meta);
     const nav = node('nav', '', 'vw-tabs'); nav.setAttribute('aria-label', 'Workspace sections');
-    for (const [id, label] of [['files', 'Files'], ['search', 'Search'], ['artifacts', 'Artifacts'], ['git', 'Git']]) nav.append(button(label, async () => { tab = id; render(); if (id === 'git') await perform(loadGit); if (id === 'artifacts') await perform(async () => artifacts = await request('workspace:artifacts', { hidden: true })); }, tab === id ? 'is-active' : '')); root.append(nav);
+    for (const [id, label] of [['files', 'Files'], ['search', 'Search'], ['artifacts', 'Artifacts'], ['git', 'Git'], ['servers','Local services']]) nav.append(button(label, async () => { tab = id; render(); if (id === 'git') await perform(loadGit); if (id === 'artifacts') await perform(async () => artifacts = await request('workspace:artifacts', { hidden: true })); }, tab === id ? 'is-active' : '')); root.append(nav);
     if (error && !dialog) { const alert = node('div', error, 'vw-error'); alert.role = 'alert'; root.append(alert); }
-    const body = node('div', '', `vw-body ${tab === 'files' ? 'vw-files-layout' : ''}`); if (tab === 'files') filesView(body); else if (tab === 'search') searchView(body); else if (tab === 'artifacts') artifactsView(body); else gitView(body); root.append(body);
+    const body = node('div', '', `vw-body ${tab === 'files' ? 'vw-files-layout' : ''}`); if (tab === 'files') filesView(body); else if (tab === 'search') searchView(body); else if (tab === 'artifacts') artifactsView(body); else if(tab==='servers')serversView(body);else gitView(body); root.append(body);
     if (dialog) root.append(dialogNode()); const wide = root.querySelector('.vw-wide'); if (wide) wide.scrollTop = oldScroll;
     if (focus) { const input = [...root.querySelectorAll('[data-focus]')].find(item => item.dataset.focus === focus); input?.focus({ preventScroll: true }); if (input && selection && typeof input.setSelectionRange === 'function') try { input.setSelectionRange(...selection); } catch {} }
   }

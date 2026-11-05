@@ -12,5 +12,5 @@ for(const run of runs){
 for(const key of ['sdkSha256','fixtureSha256','suiteIndexSha256']) if(!ego[key] || ego[key]!==vek[key]) throw new Error(`Cannot compare runs with different ${key}`);
 const report={schemaVersion:1,generatedAt:new Date().toISOString(),suite:'ego-lite real-browser-e2e',selectedNames,comparable:true,aggregation:'explicit complete saved runs with identical SDK/fixture/case hashes',runs};
 await writeFile(new URL('../reports/comparison.json',import.meta.url),JSON.stringify(report,null,2)+'\n');
-await writeFile(new URL('../reports/comparison.md',import.meta.url),comparisonMarkdown(report)+'\n\n本表通过 tools/compare-saved-runs.mjs 显式合并两次完整记录，哈希校验通过。Ego 基准先执行；Wiek 使用最终 macOS 应用包的 CLI 执行，保留各自开始/结束时间及原始日志。\n');
+await writeFile(new URL('../reports/comparison.md',import.meta.url),comparisonMarkdown(report)+'\n\n本表通过 tools/compare-saved-runs.mjs 显式合并两次完整记录，哈希校验通过。参考侧基准先执行；Wiek 使用最终 macOS 应用包的 CLI 执行，保留各自开始/结束时间及原始日志。\n');
 console.log(runs.map(r=>`${r.browser}: ${r.counts.pass}/${r.counts.total}, fail ${r.counts.fail}, not_run ${r.counts.notRun}`).join('\n'));

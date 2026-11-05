@@ -1,20 +1,14 @@
 # Wiek Browser
 
-<img src="app/assets/wiek.svg" alt="Wiek Browser" width="96">
+[简体中文](README.zh-CN.md) · English
 
-The app and Skills use [independently authored Wiek artwork](analysis/wiek-brand-assets.md).
+![Wiek Browser](app/assets/wiek.svg)
 
-[English](README.md) | [简体中文](README.zh-CN.md)
+A local Chromium browser and agent workspace with task spaces, isolated browser profiles, file/Git tools, scheduled automations, and browser automation. Wiek has an independently implemented Electron host and local services. Third-party license and copyright details are retained in [NOTICE.md](NOTICE.md).
 
-A local Chromium browser and agent workspace, previously named **Vek Browser**. Wiek implements its own Electron host, browser UI, profiles, task spaces, and local services, and reuses the MIT-licensed public SDK from [citrolabs/ego-lite](https://github.com/citrolabs/ego-lite).
+**Current checkpoint: 0.22.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
 
-**Development checkpoint: 0.21.0.** The repository includes ongoing P3 work; full Ego feature parity and the P4 live-site benchmark are **not complete**. See [PLAN.md](PLAN.md), [feature coverage](analysis/feature-parity.md), and [validation](reports/RESULTS.md). Historical reports retain the former project name and describe their original builds.
-
-The 0.21.0 source gates passed **522/522 local tests**, **532/532 SDK tests in remote CI**, and **197/197 packaged host checks**. The shared-SDK browser suite passed 69/69 on Wiek and 68/69 on Ego 0.6.2.7; the remaining Ego failure is HTML paste. Native P3 acceptance and the online model benchmark remain open.
-
-## Quick start
-
-The tested desktop target is **macOS ARM64**. Use Node.js 24 or a compatible newer version.
+## Run locally
 
 ```sh
 git clone https://github.com/YeohsCode/Wiek-Browser.git
@@ -22,39 +16,33 @@ cd Wiek-Browser
 npm ci
 npm --prefix packages/sdk ci --ignore-scripts
 npm run build:sdk
+npm run build:desktop-native
 npm start
 ```
 
-The source checkout starts without the optional speech model. Rebuild the native macOS desktop helpers after changing their Swift sources:
-
-```sh
-npm run build:desktop-native
-```
-
-CLI:
+The native helpers and the application distribution currently target macOS ARM64. Browser automation and local services do not require a cloud account. Model-backed agent turns require a separately configured provider.
 
 ```sh
 node cli/wiek-browser.mjs start
-node cli/wiek-browser.mjs status
 node cli/wiek-browser.mjs skill
+node cli/wiek-browser.mjs status
 node cli/wiek-browser.mjs stop
 ```
 
-Use `WIEK_DATA_DIR=/absolute/path` for an isolated instance. `VEK_DATA_DIR` and `cli/vek-browser.mjs` remain compatibility aliases. Development data defaults to `data/`; packaged builds use `~/Library/Application Support/Wiek Browser/`. If only the former `Vek Browser` directory exists, Wiek reuses it without moving or deleting it. An existing Wiek directory takes precedence. Changes to the app identifier can require renewed macOS permissions and login-job review.
+Use `WIEK_DATA_DIR=/absolute/path` to start an isolated instance. Development data defaults to `data/`; packaged builds use `~/Library/Application Support/Wiek Browser/`. Existing compatible data is reused without automatic movement or deletion. OS-bound encrypted credentials and system permissions require separate migration acceptance.
 
-Data-directory reuse covers stored files; OS-bound encrypted credential migration remains separately unverified. See [rename compatibility](analysis/wiek-rebrand.md).
+## Features
 
-## Features and scope
+- Browser tabs, task spaces, isolated profiles, bookmarks, history, downloads, permissions, and user/agent handoff.
+- JavaScript browser SDK with snapshots, locators, input, frames, screenshots, upload/download, and CDP.
+- Agent workspace with approvals, attachments, conversation branches, selected native adapters, and model catalogues.
+- Scoped files, Git operations, reviewed remote operations, and file checkpoints with linked-worktree isolation.
+- **Project local services:** refresh listening processes, open a loopback address, review a process stop, and confirm it. Process birth identity, directory, executable and endpoints are rechecked before one termination signal. Discovery does not fetch pages or read process arguments/environment.
+- MCP connections, scoped tools/resources, subscriptions, reviewed OAuth and bounded input continuations.
+- Scheduled automations, opt-in background jobs, execution modes, busy deferral, run memory/results, and crash recovery.
+- Collections, screenshots and annotation, page/application recording, explicit desktop capture, local transcription, and configurable offline translation.
 
-- Multi-tab browsing, task spaces, isolated profiles, bookmarks/history/downloads, website permissions, and user/agent handoff.
-- JavaScript browser SDK: snapshots, locators, keyboard/mouse input, frames, screenshots, upload/download, and CDP.
-- Local agent workspace with CLI providers, selected native protocol adapters, approvals, attachments, conversation history, and turn-linked file/Git checkpoints, including isolated linked worktrees.
-- Scoped file editing/search/watch, local Git, reviewed remote fetch/pull/push, and GitHub PR workflows through an installed, authenticated `gh` CLI.
-- stdio and HTTP MCP, scoped connections, resources/subscriptions, reviewed OAuth/PKCE, client metadata, and bounded tool-input continuations.
-- Scheduled automations, execution modes, opt-in macOS login jobs, busy deferral, run memory/results, stop evaluation, and conservative crash recovery.
-- Library/collections, screenshot annotation, webpage recording, local speech transcription, and opt-in desktop tools.
-
-**P3 work in this checkpoint still needs final acceptance:** physical multi-display/permission-revocation coverage, final-package native capture, and system sleep/login/revocation behavior. Remote Git is tested against disposable local bare repositories; GitHub PR tests use synthetic protocol processes, with no real account writes. Other agent integrations remain deferred. Full browser-data migration, some MCP features, semantic memory, signing/notarization, and the 31-task live-site benchmark remain open.
+Project local services require the macOS native helper. Only matching project directories are shown; protected processes and unsupported runtimes cannot be stopped. A process that ignores the signal remains reported as running. No force-stop escalation is performed.
 
 ## Browser automation
 
@@ -67,44 +55,40 @@ console.log(await page.snapshot());
 JS
 ```
 
-Reuse the task name and page label across turns. Run `node cli/wiek-browser.mjs skill` for the SDK guide or `node cli/wiek-browser.mjs api help` for the [local workbench API](skills/wiek-browser/API.md).
+Reuse the task name and page label across turns. Local workspace APIs are documented in the [API guide](skills/wiek-browser/API.md).
 
 ## Optional local models
 
-Speech uses a local Whisper tiny model. Its pinned download, checksum, license, and decoder build identity are documented in [models/MODEL-NOTICE.md](models/MODEL-NOTICE.md). Model weights are excluded from Git; restore them before speech validation or building a speech-enabled package.
+Restore the pinned speech model before speech-enabled packaging:
 
-The experimental translation adapter uses an explicitly installed Python/Argos runtime and explicitly selected direct language models:
+```sh
+node tools/fetch-speech-model.mjs
+```
+
+Download identities and licenses are in [the model notice](models/MODEL-NOTICE.md). Translation installs into the selected data directory:
 
 ```sh
 node cli/wiek-browser.mjs translation install --python /absolute/path/to/python3.12 --pairs en-zh,zh-en,en-es,es-en
 ```
 
-Installation downloads dependencies/models into the selected data directory; inference is intended to remain offline. Four real English/Chinese/Spanish examples passed through both source and packaged services with socket connections blocked during inference; this is a bounded acceptance result, not a general translation-quality score. Python and Argos models are not bundled in the application.
+Four synthetic English/Chinese/Spanish examples passed through source and packaged services with socket connections blocked during inference. This is bounded functional acceptance, not a general quality score. Python and translation weights are installed separately.
 
 ## Validation and packaging
 
 ```sh
 npm test
 npm run test:upstream
+npm run test:e2e -- --browser wiek
 npm run test:workbench
 npm run dist
 ```
 
-The Wiek-owned [CI workflow](.github/workflows/wiek-ci.yml) installs locked dependencies, restores pinned speech weights, and runs SDK/local/packaged tests on macOS ARM64. The complete remote run [41830745101](https://github.com/YeohsCode/Wiek-Browser/actions/runs/41830745101) passed on code commit `b50f9b7`; the source and packaged gates match the recorded scope. `npm run test:upstream` restores two exact upstream workflow files as inactive test fixtures; it does not enable their publishing automation.
+The app is built at `dist/mac-arm64/Wiek Browser.app`. It remains unsigned and unnotarized until release credentials are configured. The [CI workflow](.github/workflows/wiek-ci.yml) runs SDK, local, native, framework, packaged-host and browser checks from a clean checkout.
 
+The local 69-case browser suite and the 31-task online model benchmark are separate. Online evaluation requires matched model/thinking/limits and dedicated test accounts; it has not run. See the [shared adapter setup](benchmark/sdk-v2/README.md) and [current results](reports/RESULTS.md).
 
-The macOS artifact is `dist/mac-arm64/Wiek Browser.app`. It is a local unsigned build until signing/notarization is configured.
+Remaining work includes broader profile migration, additional MCP flows, semantic memory, other provider integrations, final native-device acceptance, and signed release. Physical sleep/login, multiple displays, permission revocation and real account workflows are recorded separately from synthetic tests.
 
-**0.21.0 acceptance:** 522 local tests, 532 SDK tests in remote CI, 197 packaged host checks, and 69/69 Wiek browser cases (1,248 assertions) passed. Ego 0.6.2.7 passed 68/69 (1,235 assertions) with the same modified SDK, fixture and case index; 81 original upstream test inputs remain unchanged. The full shared canonical V2 framework adapter passed 59 regressions and both local browser smoke runs, including screenshot/AX hooks and cleanup. See [adapter setup](benchmark/sdk-v2/README.md). See [reports/RESULTS.md](reports/RESULTS.md) and [SDK changes](analysis/sdk-changes.md). These checks are separate from the unrun 31-task model benchmark.
+## License
 
-Ego reference comparisons require separately obtained reference artifacts under ignored `references/` and `downloads/`; ordinary Wiek-only development does not. Do not rebuild the SDK concurrently with reference E2E. Pin the native reference version explicitly and use `tools/ego-reference-cli` with the dedicated `vek-reference` instance, rather than a personal default session. For the recorded run, `WIEK_REFERENCE_VERSION=0.6.2.7` and `VEK_COMPARISON_EGO_CLI="$PWD/tools/ego-reference-cli"` were set. Use an isolated Wiek data directory for comparison runs.
-
-## Project documents
-
-- [Plan and outstanding acceptance](PLAN.md)
-- [Document index](docs/README.md)
-- [Feature coverage and evidence limits](analysis/feature-parity.md)
-- [Shared-suite comparison](reports/comparison.md)
-- [Third-party notices](NOTICE.md) and [MIT license](LICENSE)
-
-Runtime data, credentials, dependencies, builds, model weights, reference binaries, and full extracted proprietary evidence are excluded from Git. Wiek is independently implemented and is not affiliated with CitroLabs. Historical Vek identifiers remain where required for data, protocol, and test-evidence compatibility.
+Wiek's original implementation uses the MIT license. Bundled SDK, runtime, decoder and model components retain their own notices and licenses. Runtime data, credentials, dependencies, builds, model weights, reference artifacts and full research records are excluded from Git.

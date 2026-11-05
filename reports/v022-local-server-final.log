@@ -1,0 +1,27 @@
+{"ok":true,"checks":11,"realElectronIPC":true,"realNativeDiscovery":true,"realReviewedProcessStop":true,"modelCalls":0,"accountActions":0}
+✔ actual workspace panel refresh, open dispatch, review, cancel and confirmed stop use a real disposable server (1071.181833ms)
+✔ listener parser handles duplicates, bracketed IPv6 and refuses malformed endpoints (1.486833ms)
+✔ listing is read-only, project-scoped, and exposes only derived loopback URLs (1.444667ms)
+✔ review and explicit confirmation are required; the review is single-use (0.647875ms)
+✔ reviews are bound to project id and canonical root and cannot cross scope (0.192583ms)
+✔ expired and cancelled reviews never send a signal (0.209875ms)
+✔ changed birth identity invalidates a review without stopping a process (0.147917ms)
+✔ changed working directory invalidates a review without stopping a process (0.098708ms)
+✔ changed executable invalidates a review without stopping a process (0.107833ms)
+✔ changed listener set invalidates a review without stopping a process (0.105584ms)
+✔ changed listener removal invalidates a review without stopping a process (0.137917ms)
+✔ the last identity read catches a process replacement after listener discovery (0.132667ms)
+✔ current host, its ancestors and unknown runtimes cannot be stopped (0.139917ms)
+✔ a process ignoring termination stays running; no force stop or group signal is sent (0.149625ms)
+✔ service close invalidates reviews without terminating any server (0.061916ms)
+✔ unavailable ancestor identity disables stopping rather than guessing ownership (0.072125ms)
+✔ native probe uses bounded literal argv and rejects nonmatching process identities (0.2355ms)
+✔ actual temporary TCP servers are discovered by native identity and only the reviewed project process stops (480.147708ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1136.375083

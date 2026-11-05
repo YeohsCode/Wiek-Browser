@@ -10,7 +10,7 @@ A local Chromium browser and agent workspace, previously named **Vek Browser**. 
 
 **Development checkpoint: 0.21.0.** The repository includes ongoing P3 work; full Ego feature parity and the P4 live-site benchmark are **not complete**. See [PLAN.md](PLAN.md), [feature coverage](analysis/feature-parity.md), and [validation](reports/RESULTS.md). Historical reports retain the former project name and describe their original builds.
 
-The 0.21.0 source gates passed **522/522 local tests** (the unchanged SDK previously passed **532/532 tests**), and **197/197 packaged host checks**. The shared-SDK browser suite passed 69/69 on Wiek and 68/69 on Ego 0.6.2.7; the remaining Ego failure is HTML paste. Native P3 acceptance and the online model benchmark remain open.
+The 0.21.0 source gates passed **522/522 local tests**, **532/532 SDK tests in remote CI**, and **197/197 packaged host checks**. The shared-SDK browser suite passed 69/69 on Wiek and 68/69 on Ego 0.6.2.7; the remaining Ego failure is HTML paste. Native P3 acceptance and the online model benchmark remain open.
 
 ## Quick start
 
@@ -95,7 +95,7 @@ The Wiek-owned [CI workflow](.github/workflows/wiek-ci.yml) installs locked depe
 
 The macOS artifact is `dist/mac-arm64/Wiek Browser.app`. It is a local unsigned build until signing/notarization is configured.
 
-**0.21.0 acceptance:** 522 local tests, the unchanged SDK’s prior 532 tests, 197 packaged host checks, and 69/69 Wiek browser cases (1,248 assertions) passed. Ego 0.6.2.7 passed 68/69 (1,235 assertions) with the same modified SDK, fixture and case index; 81 original upstream test inputs remain unchanged. The full shared canonical V2 framework adapter passed 59 regressions and both local browser smoke runs, including screenshot/AX hooks and cleanup. See [adapter setup](benchmark/sdk-v2/README.md). See [reports/RESULTS.md](reports/RESULTS.md) and [SDK changes](analysis/sdk-changes.md). These checks are separate from the unrun 31-task model benchmark.
+**0.21.0 acceptance:** 522 local tests, 532 SDK tests in remote CI, 197 packaged host checks, and 69/69 Wiek browser cases (1,248 assertions) passed. Ego 0.6.2.7 passed 68/69 (1,235 assertions) with the same modified SDK, fixture and case index; 81 original upstream test inputs remain unchanged. The full shared canonical V2 framework adapter passed 59 regressions and both local browser smoke runs, including screenshot/AX hooks and cleanup. See [adapter setup](benchmark/sdk-v2/README.md). See [reports/RESULTS.md](reports/RESULTS.md) and [SDK changes](analysis/sdk-changes.md). These checks are separate from the unrun 31-task model benchmark.
 
 Ego reference comparisons require separately obtained reference artifacts under ignored `references/` and `downloads/`; ordinary Wiek-only development does not. Do not rebuild the SDK concurrently with reference E2E. Pin the native reference version explicitly and use `tools/ego-reference-cli` with the dedicated `vek-reference` instance, rather than a personal default session. For the recorded run, `WIEK_REFERENCE_VERSION=0.6.2.7` and `VEK_COMPARISON_EGO_CLI="$PWD/tools/ego-reference-cli"` were set. Use an isolated Wiek data directory for comparison runs.
 

@@ -1,0 +1,3 @@
+Error: Wiek Browser is not running (ENOENT: no such file or directory, open '/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v021-workbench/runtime.json'). Run wiek-browser start.
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:119:27)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:45:11

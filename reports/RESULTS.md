@@ -11,11 +11,14 @@
 | 完整V2框架 | 59/59回归（33新增+26原框架）；14/14控制边界；Ego/Wiek实际hook smoke均通过 | [回归](p4-v2-framework-regression.log)、[控制](p4-v2-control-tests.log)、[双侧](p4-sdk-v2-framework-smoke.json) |
 | Linked worktree | 6项真实Git专项；相关checkpoint/turn/翻译集合31/31 | [focused](v021-checkpoint-translation-tests.log)、[设计](../analysis/linked-worktree-checkpoints.md) |
 | 中英/中西翻译 | 源码/最终包各4个真实服务样例；推理socket阻断；无通用质量分数 | [源码](p3-translation-real-service.json)、[打包](p3-translation-packaged-service.json) |
+| 完整远端CI | success，含新增框架阶段；源码57cc0a1 | [Actions](https://github.com/YeohsCode/Wiek-Browser/actions/runs/41952407500)、[状态](p4-ci-41952407500-status.json) |
 | 最终包OS状态 | screen/accessibility granted；只读状态，不代表采集正向 | [状态](p3-v021-packaged-permission-status.json) |
 
-SDK源码和bundle未改变（`b4ddb961…fec13`），532/532为此前相同SDK的已记录结果，本轮没有为颜色或宿主变化重复运行它。原始81项输入通过身份核对。0.20.3远端CI成功记录继续保留；0.21新增框架CI阶段的当前结果以其独立记录为准。
+SDK源码和bundle未改变（`b4ddb961…fec13`），本地沿用此前532/532记录，远端CI本轮已重新运行全部532项并通过。原始81项输入通过身份核对。0.20.3远端CI成功记录继续保留；0.21远端[41952407500](https://github.com/YeohsCode/Wiek-Browser/actions/runs/41952407500)已完整成功：532 SDK、522本地、59框架回归、197宿主、69浏览器/1,248断言和202文件身份检查。验证代码提交`57cc0a16a3e877ed674dd1ae3c2e9de725e3d1c8`，随后只补文档/证据。
 
 完整adapter已进入版本化目录并以固定commit/原文件/parser/任务数据hash安装。实际框架验证registry、Skill配对、strict guard、截图/AX hook、1280×800 PNG、视口恢复、finish receipt和缺失幂等；没有运行agent模型循环、judge或真实站点。见[运行说明](../benchmark/sdk-v2/README.md)。Ego新空白Profile最初被onboarding阻止，保留[直接诊断](p4-v2-native-probe-diagnostic.json)和各轮失败；最终复用专用已初始化fixture profile。翻译首轮在西语模型未完成预热时失败，保留[日志](p3-translation-three-language.log)，安装完成后源码/打包均通过。
+
+最终包原生UI尝试被窗口定位阻止：工具选中已有“替换当前项目”确认框，未进行任何确认；本轮fixture/独立host已停止。[尝试记录](p3-v021-native-package-attempt.json)。干净参考checkout的59项回归也通过：[clean](p4-v2-clean-regression.log)。
 
 待验收：P3最终包原生采集正向、真实多屏/撤权和sleep/login；PR真实账号路径；P4专用Stage A/Judge模型/思考/限额、专用账号及Apple签名/公证。P1其他Agent仍按既有要求暂缓，P2其余代码缺口保留在PLAN。未将这些工作声明为完成。
 

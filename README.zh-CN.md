@@ -10,7 +10,7 @@
 
 **当前开发检查点为 0.21.0。P3 仍在集成验收，尚未完成 Ego 全量功能复刻，P4 线上基准也未完成。** 实际进展见 [计划](PLAN.md)、[功能对照](analysis/feature-parity.md) 和 [验证结果](reports/RESULTS.md)。历史报告保留原 Vek 名称及其对应版本的测试结论。
 
-0.21.0 已通过 **522/522 本地测试**、**相同 SDK 之前通过的 532/532 测试**和 **197/197 打包宿主检查**。使用相同 SDK 的浏览器同集对标已完成：Wiek 69/69，Ego 0.6.2.7 为 68/69，唯一 Ego 失败为 HTML 粘贴。原生 P3 验收与线上模型基准仍未完成。
+0.21.0 已通过 **522/522 本地测试**、**远端 CI 重新通过的 532/532 SDK 测试**和 **197/197 打包宿主检查**。使用相同 SDK 的浏览器同集对标已完成：Wiek 69/69，Ego 0.6.2.7 为 68/69，唯一 Ego 失败为 HTML 粘贴。原生 P3 验收与线上模型基准仍未完成。
 
 ## 从源码启动
 
@@ -94,7 +94,7 @@ npm run dist
 
 macOS 产物为 `dist/mac-arm64/Wiek Browser.app`。当前为本地未签名构建，签名、公证和正式发布仍待配置。
 
-**0.21.0 验收**：522 项本地测试、相同 SDK 之前通过的 532 项测试、197 项打包宿主检查、Wiek 69/69 项浏览器测试（1,248 断言）通过。相同 SDK/fixture/用例索引下，Ego 0.6.2.7 为 68/69（1,235 断言），唯一失败是 HTML 粘贴；81 个原始上游测试输入未改。完整共享 canonical V2 框架 adapter 已接入，59 项回归与两侧本地截图/AX/清理 hook smoke 通过，见[适配说明](benchmark/sdk-v2/README.md)。详情见 [验证结果](reports/RESULTS.md) 和 [SDK 修改](analysis/sdk-changes.md)。这些本地验收不替代尚未运行的 31 项线上模型基准。
+**0.21.0 验收**：522 项本地测试、远端 CI 重新通过的 532 项 SDK 测试、197 项打包宿主检查、Wiek 69/69 项浏览器测试（1,248 断言）通过。相同 SDK/fixture/用例索引下，Ego 0.6.2.7 为 68/69（1,235 断言），唯一失败是 HTML 粘贴；81 个原始上游测试输入未改。完整共享 canonical V2 框架 adapter 已接入，59 项回归与两侧本地截图/AX/清理 hook smoke 通过，见[适配说明](benchmark/sdk-v2/README.md)。详情见 [验证结果](reports/RESULTS.md) 和 [SDK 修改](analysis/sdk-changes.md)。这些本地验收不替代尚未运行的 31 项线上模型基准。
 
 Ego 对标需要另行取得并保存在忽略目录中的参考制品；普通 Wiek 开发不需要。对标时显式固定版本并使用专用 `vek-reference` 实例；本轮设置 `WIEK_REFERENCE_VERSION=0.6.2.7` 和 `VEK_COMPARISON_EGO_CLI="$PWD/tools/ego-reference-cli"`，Wiek 使用独立测试数据目录。不要在参考 E2E 运行时重建 SDK。
 

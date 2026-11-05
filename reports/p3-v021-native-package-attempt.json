@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-05T02:03:16.915252+00:00",
+  "packagedNativeCapturePassed": false,
+  "attempted": true,
+  "permissionPromptAccepted": false,
+  "modelCalls": 0,
+  "accountActions": 0,
+  "blocker": "Native UI tool selects an existing Wiek project-replacement alert instead of a distinguishable owned QA window; no alert was dismissed and no project was replaced.",
+  "fixtureStopped": true,
+  "permissionStatusReport": "p3-v021-packaged-permission-status.json"
+}

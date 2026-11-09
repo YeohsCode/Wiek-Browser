@@ -37,31 +37,22 @@ jobs:
         # and thresholds, but avoid unrelated parallel files stalling timers.
         run: |
           {
-            node tools/prepare-sdk-test-fixtures.mjs
             npm --prefix packages/sdk run build
             npm --prefix packages/sdk run check:skill-translation
             npm --prefix packages/sdk run typecheck
-            (cd packages/sdk && node --test --test-concurrency=1 "src/**/*.test.mjs")
+            node tools/run-sdk-regression.mjs
           } > reports/ci-sdk.log 2>&1
       - name: Build owned native helpers
         run: npm run build:desktop-native > reports/ci-native-build.log 2>&1
-      - name: Check out pinned MIT benchmark framework
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-        with:
-          repository: citrolabs/ego-browser-benchmark-framework
-          ref: f566ac293e4e6bd80c4e9b062b5699f04eac41f4
-          path: references/ego-browser-benchmark-framework
-          persist-credentials: false
-      - name: Shared SDK V2 framework and original regression tests
+      - name: Repository-owned V2 evaluation framework
         run: |
           {
             python3 -m venv data/benchmark-bootstrap
             data/benchmark-bootstrap/bin/pip install uv==0.11.19
-            data/benchmark-bootstrap/bin/uv sync --project references/ego-browser-benchmark-framework --python 3.13.13 --frozen --group dev
-            python3 benchmark/sdk-v2/apply.py references/ego-browser-benchmark-framework
-            export PYTHONPATH="$PWD/references/ego-browser-benchmark-framework"
-            references/ego-browser-benchmark-framework/.venv/bin/python -m pytest -q benchmark/sdk-v2/test_canonical_v2.py references/ego-browser-benchmark-framework/tests/test_ego_browser_runtime_contract.py references/ego-browser-benchmark-framework/tests/test_screenshotter_ax_tree.py references/ego-browser-benchmark-framework/tests/test_runspace_core.py references/ego-browser-benchmark-framework/tests/test_bootstrap_script.py
-            references/ego-browser-benchmark-framework/.venv/bin/python benchmark/sdk-v2/smoke.py references/ego-browser-benchmark-framework --browser wiek
+            data/benchmark-bootstrap/bin/uv sync --project benchmark/framework --python 3.13.13 --frozen --group dev
+            export PYTHONPATH="$PWD/benchmark/framework"
+            benchmark/framework/.venv/bin/python -m pytest -q benchmark/sdk-v2/test_canonical_v2.py benchmark/framework/tests
+            benchmark/framework/.venv/bin/python benchmark/sdk-v2/smoke.py benchmark/framework --browser wiek
           } > reports/ci-benchmark-adapter.log 2>&1
       - name: Local services and actual Electron fixture panels
         # Preserve the fixture subprocess deadlines while isolating test files.
@@ -86,6 +77,7 @@ jobs:
         run: node tests/run-comparison.mjs --browser wiek > reports/ci-browser-suite.log 2>&1
       - name: Verify package and pinned upstream inputs
         run: |
+          node tools/verify-independent-runtime.mjs "dist/mac-arm64/Wiek Browser.app/Contents/Resources/app" > reports/ci-independent-runtime.log 2>&1
           node tools/verify-public-copy.mjs > reports/ci-public-copy.log 2>&1
           node tools/verify-release.mjs > reports/ci-package-identity.log 2>&1
           node tools/verify-brand-assets.mjs "dist/mac-arm64/Wiek Browser.app/Contents/Resources/app" > reports/ci-brand-identity.log 2>&1
@@ -97,8 +89,8 @@ jobs:
           retention-days: 7
           path: |
             reports/ci-*.log
-            reports/vek-e2e*.json
-            reports/vek-e2e*.log
+            reports/wiek-e2e*.json
+            reports/wiek-e2e*.log
             reports/package-source-verification.json
             reports/package-content-audit.json
             reports/upstream-test-integrity.json

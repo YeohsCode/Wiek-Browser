@@ -1,0 +1,7 @@
+
+> wiek-browser@0.22.0 build:desktop-native
+> node tools/build-selection-helper.mjs
+
+/Users/runner/work/Wiek-Browser/Wiek-Browser/app/bin/vek-selection
+/Users/runner/work/Wiek-Browser/Wiek-Browser/app/bin/vek-desktop-monitor
+/Users/runner/work/Wiek-Browser/Wiek-Browser/app/bin/wiek-process-info

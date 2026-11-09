@@ -1,0 +1,11 @@
+file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/check-package-idle.mjs:9
+ if(processes.length)throw Error('Close the running packaged Wiek instances before rebuilding their application directory. PIDs: '+processes.join(', '));
+                           ^
+
+Error: Close the running packaged Wiek instances before rebuilding their application directory. PIDs: 17599
+    at file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tools/check-package-idle.mjs:9:28
+    at ModuleJob.run (node:internal/modules/esm/module_job:413:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:654:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+
+Node.js v25.2.1

@@ -1,9 +1,9 @@
 # Wiek Browser
 
-Keep the public SDK's upstream test assertions and fixture semantics intact. SDK-specific conventions remain in references/ego-lite/AGENTS.md. Wiek's app/ files are independent implementations; do not copy closed-source shipped code into them.
+The application and SDK use the independent Wiek runtime contract. No application path may discover, import, install or launch a different browser. Keep app/cli/SDK/Skill outputs free of retired runtime namespaces, commands, URLs and installers; verify the actual packaged output.
 
-Use REA evidence for claims about the reference browser and distinguish source presence, static inference, and runtime proof. Keep analysis/feature-parity.md and reports/comparison.md honest about missing, skipped, failed and unrun behavior. Do not equate the 69 local deterministic cases with the 31 live-site model benchmark.
+Original SDK test inputs live under tests/fixtures/sdk-original with pinned SHA-256 identities. Do not change their bytes or assertions. tools/run-sdk-regression.mjs executes an isolated name-mapped copy against the Wiek build; it must not remove cases, assertions or deadlines. Evaluation uses the repository-owned benchmark/framework and unchanged ordered task identities.
 
-App/CLI runtime data belongs in data/ or an explicit VEK_DATA_DIR, never in tracked source. Keep RPC loopback-only, token-protected, with origins rejected. Remote pages must not receive privileged browser chrome APIs. Agent providers run argv without a shell; no test may invoke a paid model or alter a real website account.
+Keep static observations separate from runtime proof. Preserve the capability matrix and current results honestly. The 69 local browser cases are not the 31 online model tasks. Keep third-party copyright and license notices. Do not copy proprietary shipped implementation into app code.
 
-Do not run SDK builds concurrently with reference-browser E2E. The native reference host reads that bundle on each invocation.
+Runtime state belongs under data/ or explicit WIEK_DATA_DIR. RPC is loopback-only, token-protected and rejects origins. Pages receive no privileged chrome APIs. Providers execute argv without a shell. Tests never call a paid model or modify a real website account. Run clipboard/native UI suites sequentially and use isolated fixture profiles.

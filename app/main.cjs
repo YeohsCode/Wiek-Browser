@@ -83,7 +83,7 @@ const sitePermissions=createSitePermissions({initial:store.sitePermissions||[],l
   return ['block-once','block','allow-once','allow'][result.response]||'block-once';
 }});
 store.sitePermissions=sitePermissions.snapshot().rules;delete store.permissions;
-const error = (message, error_code = 'EGO_OPERATION_FAILED') => Object.assign(new Error(message), { error_code });
+const error = (message, error_code = 'WIEK_OPERATION_FAILED') => Object.assign(new Error(message), { error_code });
 function persist() {
   clearTimeout(saving);
   saving = setTimeout(writeBrowserStore, 120);
@@ -92,15 +92,15 @@ function writePrivateFile(target,contents){const temporary=path.join(path.dirnam
 function writeBrowserStore(){if(!browserStoreReady)return;const data={...store,downloads:downloads.map(({item,...d})=>d),spaces:store.spaces.map(s=>({...s,tabs:s.tabs.map(id=>tabs.get(id)).filter(Boolean).map(t=>{const destroyed=t.view.webContents.isDestroyed();return {url:t.restoreUrl||(destroyed?t.url:t.view.webContents.getURL()||t.url),title:destroyed?'':t.view.webContents.getTitle(),active:s.activeTab===t.id};})}))};writePrivateFile(path.join(DATA,'browser.json'),JSON.stringify(data,null,2));}
 function profile(id) { return store.profiles.find(p => p.id === id) || store.profiles[0]; }
 function getSpace(id) {
-  if (id === undefined || id === null) throw error('Task space not selected', 'EGO_TASK_SPACE_NOT_SELECTED');
+  if (id === undefined || id === null) throw error('Task space not selected', 'WIEK_TASK_SPACE_NOT_SELECTED');
   const space = store.spaces.find(s => s.id === id);
-  if (!space) throw error(`Task space not found: ${id}`, 'EGO_TASK_SPACE_NOT_FOUND');
+  if (!space) throw error(`Task space not found: ${id}`, 'WIEK_TASK_SPACE_NOT_FOUND');
   return space;
 }
 function controlled(id) {
   const space = getSpace(id);
-  if (space.ownership === 'user') throw error('Task space is inactive', 'EGO_TASK_SPACE_INACTIVE');
-  if (space.ownership !== 'agent') throw error(space.controlReason || 'manual_takeover', 'EGO_TASK_SPACE_USER_IN_CONTROL');
+  if (space.ownership === 'user') throw error('Task space is inactive', 'WIEK_TASK_SPACE_INACTIVE');
+  if (space.ownership !== 'agent') throw error(space.controlReason || 'manual_takeover', 'WIEK_TASK_SPACE_USER_IN_CONTROL');
   return space;
 }
 function descriptor(s) { return { id: s.id, taskId: s.name, name: s.name, detached:spaceWindows.has(s.id), pinned:Boolean(s.pinned), ownership: s.ownership, createdBy: s.createdBy, profileId: s.profileId, profileName: profile(s.profileId).name, recentTabTitles: s.tabs.map(id => tabs.get(id)?.view.webContents.getTitle() || '').slice(-5) }; }
@@ -226,8 +226,8 @@ function normalizeURL(input) {
   return `https://www.google.com/search?q=${encodeURIComponent(input)}`;
 }
 async function createSpace(name, profileId = 'Default', ownership = 'agent') {
-  if (!store.profiles.some(p => p.id === profileId)) throw error('Profile not found', 'EGO_PROFILE_NOT_FOUND');
-  if (ownership === 'agent' && store.spaces.some(s => s.name === name)) throw error(`Task space name in use: ${name}`, 'EGO_TASK_SPACE_NAME_IN_USE');
+  if (!store.profiles.some(p => p.id === profileId)) throw error('Profile not found', 'WIEK_PROFILE_NOT_FOUND');
+  if (ownership === 'agent' && store.spaces.some(s => s.name === name)) throw error(`Task space name in use: ${name}`, 'WIEK_TASK_SPACE_NAME_IN_USE');
   const s = { id: store.nextSpace++, name, profileId, ownership, createdBy: ownership === 'agent' ? 'agent' : 'user', tabs: [], activeTab: null, taskState: '' };
   store.spaces.push(s);
   await createTab(s, 'about:blank', { reveal: ownership === 'user' });
@@ -289,7 +289,7 @@ function onDebuggerEvent(t, method, params, child) {
 }
 function targetFor(s, targetId) {
   const t = tabs.get(targetId || s.activeTab);
-  if (!t || t.spaceId !== s.id) throw error('No target with given id found', 'EGO_WEB_CONTENTS_UNAVAILABLE');
+  if (!t || t.spaceId !== s.id) throw error('No target with given id found', 'WIEK_WEB_CONTENTS_UNAVAILABLE');
   return t;
 }
 async function sendCDP(s, method, params = {}, sessionId, client) {
@@ -298,7 +298,7 @@ async function sendCDP(s, method, params = {}, sessionId, client) {
     const route = attachedSessions.get(sessionId);
     if (!route) throw new Error('Session with given id not found');
     t = route.tab; child = route.child;
-    if (t.spaceId !== s.id) throw error('Target is outside selected task space', 'EGO_TASK_SPACE_NOT_FOUND');
+    if (t.spaceId !== s.id) throw error('Target is outside selected task space', 'WIEK_TASK_SPACE_NOT_FOUND');
   } else t = targetFor(s);
   if (method === 'Target.setDiscoverTargets' && client) { if (params.discover) client.discoverySpaces.add(s.id); else client.discoverySpaces.delete(s.id); }
   if (method === 'Page.handleJavaScriptDialog' && t.promptDialog) { resolvePrompt(t, params.accept, params.promptText); return {}; }
@@ -329,7 +329,7 @@ async function sendCDP(s, method, params = {}, sessionId, client) {
 function validateArgs(method, args) {
   const spec = { getBrowserVersion: [0,0], listProfiles: [0,0], listTaskSpaces: [0,0], useTaskSpace: [1,1,'number'], createTaskSpace: [1,2,'string','string'], claimTaskSpace: [1,2,'number','string'], createTab: [1,1,'string'], listTabs: [0,0], snapshot: [0,1,'object'], closeTaskSpace: [0,0], completeTaskSpace: [0,0], handOffTaskSpace: [0,0], takeOverTaskSpace: [0,0], setAgentTaskState: [1,1,'string'], animationHighlightMouseToPosition: [2,2,'number','number'], sendCDPMessage: [1,1,'string'] }[method];
   if (!spec) return;
-  if (args.length < spec[0] || args.length > spec[1] || args.some((a, i) => typeof a !== spec[i+2] || a === null || typeof a === 'number' && !Number.isFinite(a))) throw error(`Invalid arguments for ${method}`, 'EGO_INVALID_ARGUMENT');
+  if (args.length < spec[0] || args.length > spec[1] || args.some((a, i) => typeof a !== spec[i+2] || a === null || typeof a === 'number' && !Number.isFinite(a))) throw error(`Invalid arguments for ${method}`, 'WIEK_INVALID_ARGUMENT');
 }
 async function rpc(client, method, args = [], spaceId) {
   validateArgs(method, args);
@@ -337,23 +337,23 @@ async function rpc(client, method, args = [], spaceId) {
   if (method === 'getBrowserVersion') return { currentVersion: app.getVersion(), updateAvailable: false };
   if (method === 'browserInfo') return { version: app.getVersion(), browserInstanceId: INSTANCE, pid: process.pid, dataDir: DATA };
   if (method === 'getState') {if(sid!=null)getSpace(sid);return uiState(sid??undefined);}
-  if (method === 'workbenchAction') { if (typeof args[0] !== 'string') throw error('Expected an action name', 'EGO_INVALID_ARGUMENT');if(sid!=null)getSpace(sid);return uiAction(args[0], args[1],sid??undefined); }
+  if (method === 'workbenchAction') { if (typeof args[0] !== 'string') throw error('Expected an action name', 'WIEK_INVALID_ARGUMENT');if(sid!=null)getSpace(sid);return uiAction(args[0], args[1],sid??undefined); }
   if (method === 'captureChrome') return { data: (await window.webContents.capturePage()).toPNG().toString('base64') };
   if (method === 'shutdown') { setTimeout(() => app.quit(), 200); return true; }
   if (method === 'listProfiles') return { profiles: store.profiles };
   if (method === 'listTaskSpaces') return { taskSpaces: store.spaces.map(descriptor) };
   if (method === 'useTaskSpace') { client.selectedSpace = args[0]; return args[0]; }
   if (method === 'createTaskSpace') {
-    if (!args[0].trim()) throw error('Task space name is empty', 'EGO_INVALID_ARGUMENT');
+    if (!args[0].trim()) throw error('Task space name is empty', 'WIEK_INVALID_ARGUMENT');
     const pid = !args[1] || args[1] === 'default' ? store.profiles.find(p => p.isDefault).id : args[1];
     return descriptor(await createSpace(args[0], pid));
   }
   if (method === 'claimTaskSpace') { const s = getSpace(args[0]); s.ownership = 'agent'; s.controlReason = null; if (args[1] !== undefined) s.name = args[1]; publish(); persist(); return descriptor(s); }
-  if (method === 'takeOverTaskSpace') { const s = getSpace(sid); if (s.ownership === 'user') throw error('Task space is inactive', 'EGO_TASK_SPACE_INACTIVE'); s.ownership = 'agent'; s.controlReason = null; publish(); persist(); return `${s.id} has been taken over by the agent.`; }
+  if (method === 'takeOverTaskSpace') { const s = getSpace(sid); if (s.ownership === 'user') throw error('Task space is inactive', 'WIEK_TASK_SPACE_INACTIVE'); s.ownership = 'agent'; s.controlReason = null; publish(); persist(); return `${s.id} has been taken over by the agent.`; }
   if (method === 'sendCDPMessage') {
     let payload;
     try { const s = controlled(sid); payload = JSON.parse(args[0]); sendCDP(s, payload.method, payload.params || {}, payload.sessionId, client).then(result => emitCDP(client, { id: payload.id, result, ...(payload.sessionId ? { sessionId: payload.sessionId } : {}) })).catch(err => emitCDP(client, { id: payload.id, error: { code: -32000, message: err.message }, ...(payload.sessionId ? { sessionId: payload.sessionId } : {}) })); }
-    catch (err) { client.ws.send(JSON.stringify({ event: 'cdp-error', message: err.message, error_code: err.error_code || 'EGO_CDP_SEND_FAILED' })); }
+    catch (err) { client.ws.send(JSON.stringify({ event: 'cdp-error', message: err.message, error_code: err.error_code || 'WIEK_CDP_SEND_FAILED' })); }
     return null;
   }
   const s = controlled(sid);
@@ -365,7 +365,7 @@ async function rpc(client, method, args = [], spaceId) {
   if (method === 'closeTaskSpace') { for (const id of [...s.tabs]) closeTab(tabs.get(id)); store.spaces = store.spaces.filter(x => x !== s); if (store.selected === s.id) store.selected = store.spaces[0]?.id; layout(); publish(); persist(); return `${s.id} task space closed.`; }
   if (method === 'setAgentTaskState') { s.taskState = args[0]; publish(); return `${s.id} state updated.`; }
   if (method === 'animationHighlightMouseToPosition') { window.webContents.send('vek:highlight', { x: args[0], y: args[1] }); return `${s.id} mouse highlight shown.`; }
-  throw error(`Unknown native method: ${method}`, 'EGO_INVALID_ARGUMENT');
+  throw error(`Unknown native method: ${method}`, 'WIEK_INVALID_ARGUMENT');
 }
 function resolvePrompt(t, accept, promptText) {
   const pending = t.promptDialog;
@@ -396,7 +396,7 @@ async function startRPC() {
     ws.on('message', async data => {
       let r;
       try { r = JSON.parse(data); const result = await rpc(c, r.method, r.args || [], r.spaceId); if (ws.readyState === 1) ws.send(JSON.stringify({ id: r.id, result })); }
-      catch (err) { if (ws.readyState === 1) ws.send(JSON.stringify({ id: r?.id, error: { message: err.message, error_code: err.error_code || 'EGO_OPERATION_FAILED' } })); }
+      catch (err) { if (ws.readyState === 1) ws.send(JSON.stringify({ id: r?.id, error: { message: err.message, error_code: err.error_code || 'WIEK_OPERATION_FAILED' } })); }
     });
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));

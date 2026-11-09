@@ -1,0 +1,74 @@
+# --- Python -----------------------------------------------------------------
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# --- Operating system --------------------------------------------------------
+.DS_Store
+
+# --- Local environment and runtime artifacts ---------------------------------
+.env
+*.log
+
+# Run artifacts.
+runs/
+
+# Local scratch directory.
+tmp/
+
+# wiek-browser release cache downloaded by the WebUI or CLI.
+wiek-browser-releases/
+
+# --- Agent configuration ------------------------------------------------------
+# Personal agent configuration; the project's shared skills stay tracked.
+.claude/*
+!.claude/skills/
+
+# Agent instructions kept local to the author's checkout. The leading slash is
+# load-bearing: agent-home/.pi/agent/AGENTS.md is the pi system prompt and must
+# stay tracked, so these patterns anchor to the repository root only.
+/CLAUDE.md
+/AGENTS.md
+
+# Skill symlink rebuilt from the release cache during activation.
+agent-home/.pi/agent/skills/wiek-browser
+
+# Agent-home runtime artifacts.
+agent-home/.pi/agent/models-store.json
+agent-home/.pi/agent/sessions/
+# Working directory pi hands to judge subprocesses.
+agent-home/.pi/agent/workspace/
+# Third-party helper binaries Pi resolves at runtime; install them yourself
+# (e.g. `brew install fd`) rather than vendoring them into this repository.
+agent-home/.pi/agent/bin/
+
+# Codex provider home: only the isolation policy and the auth template ship.
+agent-home/.codex/*
+!agent-home/.codex/config.toml
+!agent-home/.codex/auth.json.example
+
+# --- Credentials --------------------------------------------------------------
+# Never source-controlled. Copy the adjacent *.example files and fill them in,
+# or let scripts/bootstrap.sh do it. tests/test_repository_conventions.py fails
+# the build if any of these become tracked again.
+agent-home/.pi/agent/auth.json
+agent-home/.codex/auth.json
+
+# Pi debug dumps may contain sensitive authorization headers.
+pi_full_request_dump*.json
+
+# Model catalog. Untracked because a provider entry is the only place pi accepts a
+# custom baseUrl: it interpolates $VAR in apiKey and headers but not in baseUrl, so a
+# tracked file could not hold a private gateway address without publishing it. Copy
+# models.json.example and edit, or let scripts/bootstrap.sh do it.
+agent-home/.pi/agent/models.json
+
+# --- Local documents ----------------------------------------------------------
+# Local product and design documents; not part of the public distribution.
+docs/

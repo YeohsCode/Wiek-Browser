@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Authored SVGs are the source of truth. This build tool does not read Ego assets.
+// Authored SVGs are the source of truth. This build tool does not read third-party assets.
 import {readFile,writeFile,mkdir,copyFile,mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join,resolve} from 'node:path';
@@ -14,7 +14,7 @@ const png=(source,size)=>new Resvg(source,{fitTo:{mode:'width',value:size},font:
 await writeFile(join(assets,'wiek.png'),png(svg,1024));
 await writeFile(join(assets,'wiek-trayTemplate.png'),png(tray,18));
 await writeFile(join(assets,'wiek-trayTemplate@2x.png'),png(tray,36));
-for(const skill of ['wiek-browser','ego-browser']){
+for(const skill of ['wiek-browser']){
   const dir=join(root,'skills',skill,'assets');await mkdir(dir,{recursive:true});
   await copyFile(join(assets,'wiek.png'),join(dir,'logo.png'));
   await writeFile(join(dir,'composer-icon.png'),png(svg,128));

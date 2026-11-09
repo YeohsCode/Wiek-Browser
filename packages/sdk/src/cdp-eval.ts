@@ -42,7 +42,7 @@ export async function js(expression, targetId = undefined) {
     if (!hasWarnedAboutFunctionJs) {
       hasWarnedAboutFunctionJs = true;
       process.stderr.write(
-        `[ego-browser] js() received a function and auto-wrapped it (${jsSnippet(source, 80)}).\n` +
+        `[wiek-browser] js() received a function and auto-wrapped it (${jsSnippet(source, 80)}).\n` +
           `  js() is a thin wrapper over CDP Runtime.evaluate; it takes a string expression,\n` +
           `  not a Puppeteer/Playwright-style callable. Auto-wrap does NOT capture closure\n` +
           `  variables and has NO args channel.\n` +

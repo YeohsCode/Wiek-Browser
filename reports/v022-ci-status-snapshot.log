@@ -1,0 +1,186 @@
+{
+  "id": 42132702954,
+  "head_sha": "55f5d5934fbbcc2351d6c4332fe8af81acf5483b",
+  "status": "completed",
+  "conclusion": "failure",
+  "html_url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/42132702954",
+  "created_at": "2026-11-05T23:52:41Z",
+  "updated_at": "2026-11-05T23:58:04Z",
+  "jobs": [
+    {
+      "name": "macos-arm64",
+      "status": "completed",
+      "conclusion": "failure",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-05T23:53:23Z",
+          "completed_at": "2026-11-05T23:53:27Z"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-05T23:53:27Z",
+          "completed_at": "2026-11-05T23:53:30Z"
+        },
+        {
+          "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-05T23:53:30Z",
+          "completed_at": "2026-11-05T23:53:32Z"
+        },
+        {
+          "name": "Install locked dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-05T23:53:32Z",
+          "completed_at": "2026-11-05T23:53:42Z"
+        },
+        {
+          "name": "Configure and record deterministic desktop size",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-05T23:53:42Z",
+          "completed_at": "2026-11-05T23:53:54Z"
+        },
+        {
+          "name": "SDK tests and build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-05T23:53:54Z",
+          "completed_at": "2026-11-05T23:54:24Z"
+        },
+        {
+          "name": "Build owned native helpers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-05T23:54:24Z",
+          "completed_at": "2026-11-05T23:54:46Z"
+        },
+        {
+          "name": "Check out pinned MIT benchmark framework",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-05T23:54:46Z",
+          "completed_at": "2026-11-05T23:54:49Z"
+        },
+        {
+          "name": "Shared SDK V2 framework and original regression tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-05T23:54:49Z",
+          "completed_at": "2026-11-05T23:55:17Z"
+        },
+        {
+          "name": "Local services and actual Electron fixture panels",
+          "status": "completed",
+          "conclusion": "failure",
+          "number": 10,
+          "started_at": "2026-11-05T23:55:17Z",
+          "completed_at": "2026-11-05T23:57:57Z"
+        },
+        {
+          "name": "Restore pinned optional speech model",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-11-05T23:57:57Z",
+          "completed_at": "2026-11-05T23:57:57Z"
+        },
+        {
+          "name": "Build unsigned macOS application",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 12,
+          "started_at": "2026-11-05T23:57:57Z",
+          "completed_at": "2026-11-05T23:57:57Z"
+        },
+        {
+          "name": "Packaged host integration",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 13,
+          "started_at": "2026-11-05T23:57:57Z",
+          "completed_at": "2026-11-05T23:57:57Z"
+        },
+        {
+          "name": "Packaged native local services panel",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-11-05T23:57:57Z",
+          "completed_at": "2026-11-05T23:57:57Z"
+        },
+        {
+          "name": "Shared SDK browser suite on Wiek",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-11-05T23:57:57Z",
+          "completed_at": "2026-11-05T23:57:57Z"
+        },
+        {
+          "name": "Verify package and pinned upstream inputs",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 16,
+          "started_at": "2026-11-05T23:57:57Z",
+          "completed_at": "2026-11-05T23:57:57Z"
+        },
+        {
+          "name": "Upload validation evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-05T23:57:57Z",
+          "completed_at": "2026-11-05T23:57:58Z"
+        },
+        {
+          "name": "Post Check out pinned MIT benchmark framework",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 32,
+          "started_at": "2026-11-05T23:57:58Z",
+          "completed_at": "2026-11-05T23:57:59Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 33,
+          "started_at": "2026-11-05T23:57:59Z",
+          "completed_at": "2026-11-05T23:57:59Z"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 34,
+          "started_at": "2026-11-05T23:57:59Z",
+          "completed_at": "2026-11-05T23:57:59Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 35,
+          "started_at": "2026-11-05T23:57:59Z",
+          "completed_at": "2026-11-05T23:58:01Z"
+        }
+      ]
+    }
+  ]
+}

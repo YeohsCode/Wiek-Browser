@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# relink-wiek-browser selects the wiek or Wiek Browser helper through environment variables.
+#   WIEK_BROWSER_FLAVOR: wiek (default) | lite
+#   WIEK_BROWSER_LINK: symlink path, defaulting to ~/.local/bin/wiek-browser
+# Each run links the newest installed version, so rerun this script after app upgrades.
+
+set -euo pipefail
+
+link="${WIEK_BROWSER_LINK:-$HOME/.local/bin/wiek-browser}"
+flavor="${WIEK_BROWSER_FLAVOR:-wiek}"
+
+case "$flavor" in
+  lite|wiek-lite) app="/Applications/Wiek Browser.app" ;;
+  wiek|full)      app="/Applications/wiek.app"      ;;
+  *) echo "relink-wiek-browser: 未知 WIEK_BROWSER_FLAVOR='$flavor'（可选 wiek / lite）" >&2; exit 1 ;;
+esac
+
+versions="$app/Contents/Frameworks/wiek Framework.framework/Versions"
+
+if [ -e "$versions/Current/Helpers/wiek-browser" ]; then
+  target="$versions/Current/Helpers/wiek-browser"
+else
+  ver="$(ls "$versions" 2>/dev/null | grep -E '^[0-9]' | sort -V | tail -n1)"
+  target="$versions/$ver/Helpers/wiek-browser"
+fi
+
+if [ ! -x "$target" ]; then
+  echo "relink-wiek-browser: 找不到可执行目标 $target" >&2
+  exit 1
+fi
+
+ln -sfn "$target" "$link"
+echo "wiek-browser ($flavor) -> $target"

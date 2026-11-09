@@ -81,7 +81,7 @@ export type PageWaitForURLHooks = {
 };
 
 export class PageNavigationTimeoutError extends Error {
-  readonly code = "EGO_NAVIGATION_TIMEOUT";
+  readonly code = "WIEK_NAVIGATION_TIMEOUT";
   readonly committed: boolean;
   readonly url?: string;
   readonly readyState?: string;
@@ -744,7 +744,7 @@ async function currentDocumentState(
       "Runtime.evaluate",
       {
         expression:
-          "({ __egoNavigationState: true, url: location.href, readyState: document.readyState })",
+          "({ __wiekNavigationState: true, url: location.href, readyState: document.readyState })",
         returnByValue: true,
         timeout: 200,
       },

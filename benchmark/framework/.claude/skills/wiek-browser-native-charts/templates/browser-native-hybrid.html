@@ -1,0 +1,386 @@
+<section class="wiek-turns-hybrid" aria-label="{{CHART_ARIA_LABEL}}">
+  <style>
+    .wiek-turns-hybrid {
+      --blue: #2457ff;
+      --black: #161616;
+      --surface: #f6f6f3;
+      --line: #d8d8d3;
+      --muted: #777772;
+
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 920px;
+      margin: 26px auto;
+      overflow: hidden;
+      border: 1px solid var(--black);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--black);
+      font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    .wiek-turns-hybrid,
+    .wiek-turns-hybrid * {
+      box-sizing: border-box;
+    }
+
+    .wiek-turns-hybrid__chrome {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .wiek-turns-hybrid__controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .wiek-turns-hybrid__dot {
+      width: 7px;
+      height: 7px;
+      border: 1px solid #999994;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .wiek-turns-hybrid__tab {
+      min-width: 184px;
+      height: 23px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 9px;
+      border: 1px solid var(--line);
+      border-bottom-color: #fff;
+      border-radius: 5px 5px 0 0;
+      background: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 9px;
+      color: #4e4e4a;
+    }
+
+    .wiek-turns-hybrid__mark {
+      width: 6px;
+      height: 6px;
+      background: var(--blue);
+    }
+
+    .wiek-turns-hybrid__content {
+      padding: 15px 16px 14px;
+    }
+
+    .wiek-turns-hybrid__heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 13px;
+    }
+
+    .wiek-turns-hybrid__title {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.3;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .wiek-turns-hybrid__description {
+      margin: 3px 0 0;
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .wiek-turns-hybrid__model {
+      flex: none;
+      padding-top: 2px;
+      white-space: nowrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 8.5px;
+      color: var(--black);
+      font-weight: 600;
+    }
+
+    .wiek-turns-hybrid__main {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.35fr);
+      gap: 10px;
+    }
+
+    .wiek-turns-hybrid__panel {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--surface);
+    }
+
+    .wiek-turns-hybrid__panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .wiek-turns-hybrid__panel-title,
+    .wiek-turns-hybrid__panel-delta,
+    .wiek-turns-hybrid__value,
+    .wiek-turns-hybrid__level,
+    .wiek-turns-hybrid__numbers {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .wiek-turns-hybrid__panel-title {
+      font-size: 9px;
+      font-weight: 600;
+    }
+
+    .wiek-turns-hybrid__panel-delta {
+      font-size: 8.5px;
+      font-weight: 600;
+      color: var(--blue);
+    }
+
+    .wiek-turns-hybrid__primary {
+      padding: 13px 12px 11px;
+    }
+
+    .wiek-turns-hybrid__plot {
+      height: 174px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 40px;
+      padding: 10px 12px 0;
+      border-bottom: 1px solid #999994;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 41px,
+        #e3e3df 41px,
+        #e3e3df 42px
+      );
+    }
+
+    .wiek-turns-hybrid__bar-group {
+      width: min(74px, 34%);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .wiek-turns-hybrid__value {
+      margin-bottom: 5px;
+      font-size: 10px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wiek-turns-hybrid__bar {
+      width: 100%;
+      height: calc(var(--height) * 1%);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .wiek-turns-hybrid__bar--baseline {
+      border: 1px solid #a2a29d;
+      border-bottom: 0;
+      background: #dededa;
+    }
+
+    .wiek-turns-hybrid__bar--target {
+      background: var(--blue);
+    }
+
+    .wiek-turns-hybrid__labels {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      padding-top: 7px;
+    }
+
+    .wiek-turns-hybrid__label {
+      width: min(74px, 34%);
+      text-align: center;
+      font-size: 8.5px;
+      color: #555550;
+    }
+
+    .wiek-turns-hybrid__difficulty {
+      padding: 10px 11px;
+    }
+
+    .wiek-turns-hybrid__row {
+      display: grid;
+      grid-template-columns: 62px minmax(0, 1fr) 84px;
+      align-items: center;
+      gap: 9px;
+      padding: 11px 0;
+      border-top: 1px solid #dfdfdb;
+    }
+
+    .wiek-turns-hybrid__row:first-child {
+      border-top: 0;
+    }
+
+    .wiek-turns-hybrid__level {
+      font-size: 8.5px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .wiek-turns-hybrid__tracks {
+      display: grid;
+      gap: 5px;
+    }
+
+    .wiek-turns-hybrid__track {
+      height: 7px;
+      background: #e2e2de;
+    }
+
+    .wiek-turns-hybrid__fill {
+      width: var(--width);
+      height: 100%;
+    }
+
+    .wiek-turns-hybrid__fill--baseline {
+      border: 1px solid #999994;
+      background: #dededa;
+    }
+
+    .wiek-turns-hybrid__fill--target {
+      background: var(--blue);
+    }
+
+    .wiek-turns-hybrid__numbers {
+      text-align: right;
+      font-size: 8px;
+      line-height: 1.55;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wiek-turns-hybrid__numbers strong {
+      color: var(--blue);
+    }
+
+    .wiek-turns-hybrid__summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      margin-top: 10px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+    }
+
+    .wiek-turns-hybrid__stat {
+      padding: 9px 10px;
+      border-left: 1px solid var(--line);
+      background: #fff;
+    }
+
+    .wiek-turns-hybrid__stat:first-child {
+      border-left: 0;
+    }
+
+    @media (max-width: 680px) {
+      .wiek-turns-hybrid__heading {
+        flex-direction: column;
+      }
+
+      .wiek-turns-hybrid__main,
+      .wiek-turns-hybrid__summary {
+        grid-template-columns: 1fr;
+      }
+
+      .wiek-turns-hybrid__stat {
+        border-top: 1px solid var(--line);
+        border-left: 0;
+      }
+    }
+  </style>
+
+  <div class="wiek-turns-hybrid__chrome">
+    <div class="wiek-turns-hybrid__controls">
+      <span class="wiek-turns-hybrid__dot"></span>
+      <span class="wiek-turns-hybrid__dot"></span>
+      <span class="wiek-turns-hybrid__dot"></span>
+    </div>
+    <div class="wiek-turns-hybrid__tab">
+      <span class="wiek-turns-hybrid__mark"></span>
+      {{TAB_LABEL}}
+    </div>
+  </div>
+
+  <div class="wiek-turns-hybrid__content">
+    <header class="wiek-turns-hybrid__heading">
+      <div>
+        <h3 class="wiek-turns-hybrid__title">{{TITLE}}</h3>
+        <p class="wiek-turns-hybrid__description">{{DESCRIPTION}}</p>
+      </div>
+      <span class="wiek-turns-hybrid__model">{{MODEL_METADATA}}</span>
+    </header>
+
+    <div class="wiek-turns-hybrid__main">
+      <article class="wiek-turns-hybrid__panel">
+        <div class="wiek-turns-hybrid__panel-head">
+          <span class="wiek-turns-hybrid__panel-title">{{PRIMARY_METRIC}}</span>
+          <span class="wiek-turns-hybrid__panel-delta">{{PRIMARY_DELTA}}</span>
+        </div>
+        <div class="wiek-turns-hybrid__primary">
+          <div class="wiek-turns-hybrid__plot">
+            <div class="wiek-turns-hybrid__bar-group">
+              <span class="wiek-turns-hybrid__value">{{BASELINE_VALUE}}</span>
+              <div class="wiek-turns-hybrid__bar wiek-turns-hybrid__bar--baseline" style="--height: 100"></div>
+            </div>
+            <div class="wiek-turns-hybrid__bar-group">
+              <span class="wiek-turns-hybrid__value">{{TARGET_VALUE}}</span>
+              <div class="wiek-turns-hybrid__bar wiek-turns-hybrid__bar--target" style="--height: {{TARGET_HEIGHT}}"></div>
+            </div>
+          </div>
+          <div class="wiek-turns-hybrid__labels">
+            <span class="wiek-turns-hybrid__label">{{BASELINE_LABEL}}</span>
+            <span class="wiek-turns-hybrid__label">{{TARGET_LABEL}}</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="wiek-turns-hybrid__panel">
+        <div class="wiek-turns-hybrid__panel-head">
+          <span class="wiek-turns-hybrid__panel-title">{{SUBGROUP_TITLE}}</span>
+          <span class="wiek-turns-hybrid__panel-delta">{{DIRECTION_LABEL}}</span>
+        </div>
+        <div class="wiek-turns-hybrid__difficulty">
+          <!-- Repeat this row for each subgroup. -->
+          <div class="wiek-turns-hybrid__row">
+            <span class="wiek-turns-hybrid__level">{{GROUP_NAME}}</span>
+            <div class="wiek-turns-hybrid__tracks">
+              <div class="wiek-turns-hybrid__track">
+                <div class="wiek-turns-hybrid__fill wiek-turns-hybrid__fill--baseline" style="--width: 100%"></div>
+              </div>
+              <div class="wiek-turns-hybrid__track">
+                <div class="wiek-turns-hybrid__fill wiek-turns-hybrid__fill--target" style="--width: {{GROUP_TARGET_WIDTH}}"></div>
+              </div>
+            </div>
+            <span class="wiek-turns-hybrid__numbers">
+              {{GROUP_BASELINE}} / <strong>{{GROUP_TARGET}}</strong><br />
+              {{GROUP_DELTA}}
+            </span>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <div class="wiek-turns-hybrid__summary">
+      <!-- Add compact summary cells here. -->
+    </div>
+  </div>
+</section>

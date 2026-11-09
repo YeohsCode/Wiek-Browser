@@ -3,10 +3,10 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
 import { setOverrides, state } from "./state.js";
-import { buildEgoError, invokeEgo, probeAgentControl } from "./ego-errors.js";
+import { buildWiekError, invokeWiek, probeAgentControl } from "./wiek-errors.js";
 import { help as helpRuntime, formatHelp } from "./help-runtime.js";
 import { validatePublicApiOptions } from "./public-api-schema.js";
-import { createStaleEgoBrowserGuard } from "./skill-migration.js";
+import { createStaleWiekBrowserGuard } from "./skill-migration.js";
 import { bufferOutput } from "./output-sink.js";
 import { cdp, decodeUnserializableJsValue, js } from "./cdp-eval.js";
 import * as pointer from "./driver/pointer.js";
@@ -78,17 +78,17 @@ export { uploadFile } from "./driver/files.js";
 export { browserFetch, serverFetch } from "./http.js";
 
 /**
- * List Agent-owned and user-owned spaces exposed by Ego Lite.
+ * List Agent-owned and user-owned spaces exposed by Wiek Browser.
  * Use the numeric id as the stable locator; display names may be duplicated.
  * @returns {Promise<Array<{taskId:string,id:number,name:string,createdBy?:string,ownership?:string,profileId?:string,profileName?:string,recentTabTitles?:string[]}>>}
  */
 export async function listTaskSpaces() {
-  const ego = globalThis.ego;
-  if (!ego || typeof ego.listTaskSpaces !== "function") {
-    throw new Error("listTaskSpaces requires ego.listTaskSpaces");
+  const wiek = globalThis.wiek;
+  if (!wiek || typeof wiek.listTaskSpaces !== "function") {
+    throw new Error("listTaskSpaces requires wiek.listTaskSpaces");
   }
   return normalizeTaskSpaces(
-    await invokeEgo("listTaskSpaces", () => ego.listTaskSpaces()),
+    await invokeWiek("listTaskSpaces", () => wiek.listTaskSpaces()),
   );
 }
 
@@ -98,11 +98,11 @@ export async function listTaskSpaces() {
  * @returns {Promise<Array<{id:string,name:string,isDefault:boolean}>>}
  */
 export async function profiles() {
-  const ego = globalThis.ego;
-  if (!ego || typeof ego.listProfiles !== "function") {
-    throw new Error("profiles requires ego.listProfiles");
+  const wiek = globalThis.wiek;
+  if (!wiek || typeof wiek.listProfiles !== "function") {
+    throw new Error("profiles requires wiek.listProfiles");
   }
-  const result = await invokeEgo("profiles", () => ego.listProfiles());
+  const result = await invokeWiek("profiles", () => wiek.listProfiles());
   if (
     !Array.isArray(result?.profiles) ||
     !result.profiles.every(
@@ -127,7 +127,7 @@ export async function profiles() {
  * bridge when real commands run, not here. The rows below describe what each helper
  * does when the target space is user-owned:
  *
- *   taskSpace / useOrCreateTaskSpace    -> by name: throws EGO_TASK_SPACE_NAME_IN_USE;
+ *   taskSpace / useOrCreateTaskSpace    -> by name: throws WIEK_TASK_SPACE_NAME_IN_USE;
  *                                          by id: selects it unclaimed (user-control error surfaces)
  *   switchTaskSpace                     -> throws (agent-owned only)
  *   claimTaskSpace                      -> claims it (ownership transfers to the agent), then selects it
@@ -157,9 +157,9 @@ function isAgentOwned(ownership) {
  * @returns {Promise<{taskId:string,id:number,name:string,createdBy?:string,ownership?:string,recentTabTitles?:string[]}>}
  */
 export async function switchTaskSpace(nameOrId) {
-  const ego = globalThis.ego;
-  if (!ego || typeof ego.useTaskSpace !== "function") {
-    throw new Error("switchTaskSpace requires ego.useTaskSpace");
+  const wiek = globalThis.wiek;
+  if (!wiek || typeof wiek.useTaskSpace !== "function") {
+    throw new Error("switchTaskSpace requires wiek.useTaskSpace");
   }
   const space = await findTaskSpace(nameOrId, "switchTaskSpace");
   if (!isAgentOwned(space.ownership)) {
@@ -167,7 +167,7 @@ export async function switchTaskSpace(nameOrId) {
       `switchTaskSpace requires an agent-owned task space, got ownership ${JSON.stringify(space.ownership)}`,
     );
   }
-  return selectTaskSpace(ego, space, "switchTaskSpace");
+  return selectTaskSpace(wiek, space, "switchTaskSpace");
 }
 
 /**
@@ -186,24 +186,24 @@ async function createTaskSpaceResolution(
   profileId?: string,
   options: { select?: boolean } = {},
 ) {
-  const ego = globalThis.ego;
-  if (!ego || typeof ego.createTaskSpace !== "function") {
-    throw new Error("newTaskSpace requires ego.createTaskSpace");
+  const wiek = globalThis.wiek;
+  if (!wiek || typeof wiek.createTaskSpace !== "function") {
+    throw new Error("newTaskSpace requires wiek.createTaskSpace");
   }
   // Do not pass an explicit undefined: older native bindings reject extra
   // arguments, while newer builds accept profileId as the second argument.
   const created = normalizeTaskSpace(
-    await invokeEgo("newTaskSpace", () =>
+    await invokeWiek("newTaskSpace", () =>
       profileId === undefined
-        ? ego.createTaskSpace(name)
-        : ego.createTaskSpace(name, profileId),
+        ? wiek.createTaskSpace(name)
+        : wiek.createTaskSpace(name, profileId),
     ),
   );
   if (!created) {
     throw new Error("newTaskSpace returned an invalid task space");
   }
   taskSpaceNumericId(created, "newTaskSpace");
-  // The native create response currently omits ownership on some Ego Lite
+  // The native create response currently omits ownership on some Wiek Browser
   // builds. Creation through this Agent API is itself authoritative.
   const createdByAgent = {
     ...created,
@@ -212,7 +212,7 @@ async function createTaskSpaceResolution(
   const descriptor =
     options.select === false
       ? createdByAgent
-      : await selectTaskSpace(ego, createdByAgent, "newTaskSpace");
+      : await selectTaskSpace(wiek, createdByAgent, "newTaskSpace");
   return {
     descriptor,
     created: true,
@@ -221,9 +221,9 @@ async function createTaskSpaceResolution(
 
 /**
  * Use an existing agent-owned task space, or create it when missing. A name held
- * by a user-owned space fails with EGO_TASK_SPACE_NAME_IN_USE; a user-owned space
+ * by a user-owned space fails with WIEK_TASK_SPACE_NAME_IN_USE; a user-owned space
  * passed by numeric id is selected but not claimed (the
- * EGO_TASK_SPACE_USER_IN_CONTROL error surfaces). Call claimTaskSpace(id) to take
+ * WIEK_TASK_SPACE_USER_IN_CONTROL error surfaces). Call claimTaskSpace(id) to take
  * ownership once the user asks.
  * @param {string|number} nameOrId Task space name or numeric id.
  * @returns {Promise<{taskId:string,id:number,name:string,createdBy?:string,ownership?:string,recentTabTitles?:string[]}>}
@@ -254,7 +254,7 @@ async function resolveTaskSpace(
         options.select === false
           ? existing
           : await selectTaskSpace(
-              globalThis.ego,
+              globalThis.wiek,
               existing,
               "useOrCreateTaskSpace",
             ),
@@ -266,27 +266,27 @@ async function resolveTaskSpace(
     // task: the user is not "in control" of something the agent started. Report
     // it the way native createTaskSpace reports a duplicate name.
     if (typeof nameOrId === "string" && existing.name === nameOrId) {
-      throw buildEgoError(
+      throw buildWiekError(
         {
           error: [
             `A task space named ${JSON.stringify(nameOrId)} already exists and belongs to the user (id ${existing.id}).`,
             `Do not take it over on your own. Ask the user whether to work in it; only if they agree, call claimTaskSpace(${existing.id}).`,
             "Otherwise use a different task space name.",
           ].join("\n"),
-          error_code: "EGO_TASK_SPACE_NAME_IN_USE",
+          error_code: "WIEK_TASK_SPACE_NAME_IN_USE",
         },
         op,
       );
     }
     // Explicitly targeted by id: don't claim it here. Select it as-is; the user
-    // stays in control, so EGO_TASK_SPACE_USER_IN_CONTROL surfaces (as
-    // ego-browser's owned guidance, not the raw native text).
+    // stays in control, so WIEK_TASK_SPACE_USER_IN_CONTROL surfaces (as
+    // wiek-browser's owned guidance, not the raw native text).
     return {
       descriptor:
         options.select === false
           ? existing
           : await selectTaskSpace(
-              globalThis.ego,
+              globalThis.wiek,
               existing,
               "useOrCreateTaskSpace",
             ),
@@ -354,7 +354,7 @@ async function initializeResolvedTaskSpace(resolution) {
 /**
  * Claim a user-owned task space (ownership transfers to the agent) and select it
  * for the current Node invocation. Resolves the space by id/name, claims it via
- * ego.claimTaskSpace, then selects it.
+ * wiek.claimTaskSpace, then selects it.
  * @param {string|number} nameOrId Task space id or name.
  * @returns {Promise<import('./page-model.js').TaskSpace>}
  */
@@ -368,37 +368,37 @@ export async function claimTaskSpace(nameOrId) {
 }
 
 async function claimResolvedTaskSpace(space, op = "claimTaskSpace") {
-  const ego = globalThis.ego;
-  if (!ego || typeof ego.claimTaskSpace !== "function") {
-    throw new Error(`${op} requires ego.claimTaskSpace`);
+  const wiek = globalThis.wiek;
+  if (!wiek || typeof wiek.claimTaskSpace !== "function") {
+    throw new Error(`${op} requires wiek.claimTaskSpace`);
   }
   const id = taskSpaceNumericId(space, op);
   const claimed = normalizeTaskSpace(
-    await invokeEgo(op, () => ego.claimTaskSpace(id, space.name)),
+    await invokeWiek(op, () => wiek.claimTaskSpace(id, space.name)),
   );
   if (!claimed) {
     throw new Error(`${op} returned an invalid task space`);
   }
   taskSpaceNumericId(claimed, op);
-  return selectTaskSpace(ego, claimed, op);
+  return selectTaskSpace(wiek, claimed, op);
 }
 
-async function selectTaskSpace(ego, space, op: string) {
-  if (!ego || typeof ego.useTaskSpace !== "function") {
-    throw new Error(`${op} requires ego.useTaskSpace`);
+async function selectTaskSpace(wiek, space, op: string) {
+  if (!wiek || typeof wiek.useTaskSpace !== "function") {
+    throw new Error(`${op} requires wiek.useTaskSpace`);
   }
-  await invokeEgo(op, () => ego.useTaskSpace(taskSpaceNumericId(space, op)));
+  await invokeWiek(op, () => wiek.useTaskSpace(taskSpaceNumericId(space, op)));
   return space;
 }
 
 async function selectTaskSpaceIfProvided(
-  ego,
+  wiek,
   nameOrId?: string | number,
   op = "taskSpace",
 ) {
   if (nameOrId === undefined) return;
   const match = await findTaskSpace(nameOrId, op);
-  await selectTaskSpace(ego, match, op);
+  await selectTaskSpace(wiek, match, op);
 }
 
 /**
@@ -425,9 +425,9 @@ export async function completeTaskSpace(
   if (!options || typeof options.keep !== "boolean") {
     throw new Error("completeTaskSpace requires { keep: boolean }");
   }
-  const ego = globalThis.ego;
-  if (!ego) {
-    throw new Error("completeTaskSpace requires ego runtime");
+  const wiek = globalThis.wiek;
+  if (!wiek) {
+    throw new Error("completeTaskSpace requires wiek runtime");
   }
   const spaces = await listTaskSpaces();
   const match = findMatchingTaskSpace(spaces, nameOrId);
@@ -438,21 +438,21 @@ export async function completeTaskSpace(
     if (match.ownership === "user") {
       return { done: false, skipped: "user-owned" as const };
     }
-    await selectTaskSpace(ego, match, "completeTaskSpace");
-    if (typeof ego.completeTaskSpace !== "function") {
-      throw new Error("completeTaskSpace requires ego.completeTaskSpace");
+    await selectTaskSpace(wiek, match, "completeTaskSpace");
+    if (typeof wiek.completeTaskSpace !== "function") {
+      throw new Error("completeTaskSpace requires wiek.completeTaskSpace");
     }
-    await invokeEgo("completeTaskSpace", () => ego.completeTaskSpace());
+    await invokeWiek("completeTaskSpace", () => wiek.completeTaskSpace());
   } else {
     if (match.ownership === "user") {
       await claimResolvedTaskSpace(match, "completeTaskSpace");
     } else {
-      await selectTaskSpace(ego, match, "completeTaskSpace");
+      await selectTaskSpace(wiek, match, "completeTaskSpace");
     }
-    if (typeof ego.closeTaskSpace !== "function") {
-      throw new Error("completeTaskSpace requires ego.closeTaskSpace");
+    if (typeof wiek.closeTaskSpace !== "function") {
+      throw new Error("completeTaskSpace requires wiek.closeTaskSpace");
     }
-    await invokeEgo("completeTaskSpace", () => ego.closeTaskSpace());
+    await invokeWiek("completeTaskSpace", () => wiek.closeTaskSpace());
   }
   return { done: true };
 }
@@ -465,18 +465,18 @@ export async function completeTaskSpace(
  * @returns {Promise<{done: boolean, skipped?: "user-owned"}>} `{ done: true }` when control was handed off; `{ done: false, skipped: "user-owned" }` when nothing was done.
  */
 export async function handOffTaskSpace(nameOrId?: string | number) {
-  const ego = globalThis.ego;
-  if (!ego || typeof ego.handOffTaskSpace !== "function") {
-    throw new Error("handOffTaskSpace requires ego.handOffTaskSpace");
+  const wiek = globalThis.wiek;
+  if (!wiek || typeof wiek.handOffTaskSpace !== "function") {
+    throw new Error("handOffTaskSpace requires wiek.handOffTaskSpace");
   }
   if (nameOrId !== undefined) {
     const match = await findTaskSpace(nameOrId, "handOffTaskSpace");
     if (match.ownership === "user") {
       return { done: false, skipped: "user-owned" as const };
     }
-    await selectTaskSpace(ego, match, "handOffTaskSpace");
+    await selectTaskSpace(wiek, match, "handOffTaskSpace");
   }
-  await invokeEgo("handOffTaskSpace", () => ego.handOffTaskSpace());
+  await invokeWiek("handOffTaskSpace", () => wiek.handOffTaskSpace());
   return { done: true };
 }
 
@@ -486,16 +486,16 @@ export async function handOffTaskSpace(nameOrId?: string | number) {
  * @returns {Promise<import('./page-model.js').TaskSpace|void>} A TaskSpace when a name or id is provided; otherwise preserves the selected-space form's void result.
  */
 export async function takeOverTaskSpace(nameOrId?: string | number) {
-  const ego = globalThis.ego;
-  if (!ego || typeof ego.takeOverTaskSpace !== "function") {
-    throw new Error("takeOverTaskSpace requires ego.takeOverTaskSpace");
+  const wiek = globalThis.wiek;
+  if (!wiek || typeof wiek.takeOverTaskSpace !== "function") {
+    throw new Error("takeOverTaskSpace requires wiek.takeOverTaskSpace");
   }
   let descriptor;
   if (nameOrId !== undefined) {
     descriptor = await findTaskSpace(nameOrId, "takeOverTaskSpace");
-    await selectTaskSpace(ego, descriptor, "takeOverTaskSpace");
+    await selectTaskSpace(wiek, descriptor, "takeOverTaskSpace");
   }
-  await invokeEgo("takeOverTaskSpace", () => ego.takeOverTaskSpace());
+  await invokeWiek("takeOverTaskSpace", () => wiek.takeOverTaskSpace());
   if (descriptor) {
     const task = createTaskSpaceHandle({ ...descriptor, ownership: "agent" });
     // Repeatedly ensuring control over an already agent-controlled space is a
@@ -511,16 +511,16 @@ export async function takeOverTaskSpace(nameOrId?: string | number) {
 
 /**
  * Probe whether the agent currently holds control of the active task space.
- * Module-private; used by waitForAgentControl. Uses ego.snapshot, which
- * rejects under user-control (per ego-bindings spec) — a reliable
+ * Module-private; used by waitForAgentControl. Uses wiek.snapshot, which
+ * rejects under user-control (per wiek-bindings spec) — a reliable
  * synchronous-error signal that raw CDP sends can't provide. Other rejections
  * (task not found, internal errors) propagate so the caller fails fast instead
  * of busy-looping until timeout.
  */
 async function probeCurrentAgentControl() {
-  const ego = globalThis.ego;
-  if (!ego || typeof ego.snapshot !== "function") return false;
-  return probeAgentControl(() => ego.snapshot({ maxResultLength: 1 }));
+  const wiek = globalThis.wiek;
+  if (!wiek || typeof wiek.snapshot !== "function") return false;
+  return probeAgentControl(() => wiek.snapshot({ maxResultLength: 1 }));
 }
 
 /**
@@ -541,11 +541,11 @@ export async function waitForAgentControl(
   ) {
     throw new Error("waitForAgentControl requires a task space name or id");
   }
-  const ego = globalThis.ego;
-  if (!ego) {
-    throw new Error("waitForAgentControl requires ego runtime");
+  const wiek = globalThis.wiek;
+  if (!wiek) {
+    throw new Error("waitForAgentControl requires wiek runtime");
   }
-  await selectTaskSpaceIfProvided(ego, nameOrId, "waitForAgentControl");
+  await selectTaskSpaceIfProvided(wiek, nameOrId, "waitForAgentControl");
   const interval = typeof options.interval === "number" ? options.interval : 20;
   const timeout = typeof options.timeout === "number" ? options.timeout : 600;
   const deadline = Date.now() + timeout * 1000;
@@ -730,10 +730,10 @@ export function helperContext(
   };
   return {
     ...all,
-    // The formal 1.3 Skill starts through egoBrowser.*. Keep a narrow guard so
+    // The formal 1.3 Skill starts through wiekBrowser.*. Keep a narrow guard so
     // stale conversations get a recovery instruction instead of a ReferenceError.
-    egoBrowser: createStaleEgoBrowserGuard(),
-    // help() prints its text so `ego-browser nodejs -e 'help()'` shows it, and
+    wiekBrowser: createStaleWiekBrowserGuard(),
+    // help() prints its text so `wiek-browser nodejs -e 'help()'` shows it, and
     // still returns the text for scripts that already log or inspect it.
     help: (...names: string[]) => {
       const result = helpRuntime(all, ...names);

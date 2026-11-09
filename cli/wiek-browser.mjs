@@ -20,11 +20,15 @@ const defaultData = packaged
 const dataDir = resolve(process.env.VEK_DATA_DIR || defaultData);
 const runtimePath = join(dataDir, 'runtime.json');
 const args = process.argv.slice(2);
-const usage = `Wiek Browser — local browser and agent workspace\n\n  wiek-browser start                  Open the browser\n  wiek-browser status                 Show host status\n  wiek-browser translation install --python PATH  Install offline models [--pairs en-zh,zh-en,en-es,es-en]\n  wiek-browser automation memory --stdin  Replace memory for this scheduled run\n  wiek-browser automation result --json JSON  Report notify/silent for this run\n  wiek-browser scheduler tick         Run opted-in due CLI automations once while closed\n  wiek-browser api ACTION --json JSON Call the local workbench API\n  wiek-browser skill                  Print the agent API guide\n  wiek-browser nodejs [-e JavaScript]  Run a script (or read stdin)\n  wiek-browser nodejs --sdk-path PATH  Use an explicit compatible SDK\n  wiek-browser stop [--timeout-ms N]  Wait for this browser to exit (default 30000 ms)\n\nExample:\n  const task = await taskSpace('research');\n  const page = task.page('p1');\n  await page.goto('https://example.com');\n  console.log(await page.snapshot());\n\nWIEK_DATA_DIR selects an independent persistent browser data directory.\n`;
+const usage = `Wiek Browser — local browser and agent workspace\n\n  wiek-browser install                Register the command and agent Skills\n  wiek-browser upgrade                Show explicit update instructions\n  wiek-browser start                  Open the browser\n  wiek-browser status                 Show host status\n  wiek-browser translation install --python PATH  Install offline models [--pairs en-zh,zh-en,en-es,es-en]\n  wiek-browser automation memory --stdin  Replace memory for this scheduled run\n  wiek-browser automation result --json JSON  Report notify/silent for this run\n  wiek-browser scheduler tick         Run opted-in due CLI automations once while closed\n  wiek-browser api ACTION --json JSON Call the local workbench API\n  wiek-browser skill                  Print the agent API guide\n  wiek-browser nodejs [-e JavaScript]  Run a script (or read stdin)\n  wiek-browser nodejs --sdk-path PATH  Use an explicit compatible SDK\n  wiek-browser stop [--timeout-ms N]  Wait for this browser to exit (default 30000 ms)\n\nExample:\n  const task = await taskSpace('research');\n  const page = task.page('p1');\n  await page.goto('https://example.com');\n  console.log(await page.snapshot());\n\nWIEK_DATA_DIR selects an independent persistent browser data directory.\n`;
 let rpc;
 try {
   if (args.includes('--help') || args[0] === '-h') {
     process.stdout.write(usage);
+  } else if(args[0]==='install'){
+    const {installWiek}=await import('./install.mjs');process.stdout.write(JSON.stringify(await installWiek({root}),null,2)+'\n');
+  } else if(args[0]==='upgrade'){
+    process.stdout.write('Wiek Browser uses explicit local builds. Update your Wiek checkout, install locked dependencies, build the SDK and native helpers, then run npm run dist. No automatic installer is executed.\n');
   } else if(args[0]==='automation'){
     const {runAutomationContract}=await import('./automation-contract.mjs');process.stdout.write(JSON.stringify(await runAutomationContract(args.slice(1)),null,2)+'\n');
   } else if(args[0]==='translation'){
@@ -35,8 +39,8 @@ try {
     const controller=new AbortController(),abort=()=>controller.abort();process.once('SIGINT',abort);process.once('SIGTERM',abort);
     try {const {runSchedulerTick}=require('../app/scheduler-worker.cjs');const result=await runSchedulerTick({dataDir,timeoutMs:args.length===4?Number(args[3]):60000,signal:controller.signal});process.stdout.write(JSON.stringify(result,null,2)+'\n');if(['timed-out','cancelled'].includes(result.status))process.exitCode=2;}finally{process.removeListener('SIGINT',abort);process.removeListener('SIGTERM',abort);}
   } else if (args[0] === 'skill') {
-    const text = await readFile(join(root, 'packages/sdk/skill-body/SKILL.md'), 'utf8');
-    process.stdout.write(text.replaceAll('ego-browser', 'wiek-browser'));
+    const text = await readFile(join(root, 'packages/sdk/dist/out/wiek-browser/SKILL.md'), 'utf8');
+    process.stdout.write(text);
   } else if (args[0] === 'status') {
     rpc = await connect(false);
     process.stdout.write(JSON.stringify(await rpc.call('browserInfo'), null, 2) + '\n');
@@ -68,18 +72,18 @@ try {
     const source = parsed.expression ?? await readStdin();
     if (!source.trim()) throw new Error(usage);
     rpc = await connect(true);
-    process.env.EGO_BROWSER_STATE_DIR ||= join(dataDir, 'sdk-state');
-    process.env.EGO_BROWSER_AGENT_WORKSPACE ||= join(root, 'skills/ego-browser');
+    process.env.WIEK_BROWSER_STATE_DIR ||= join(dataDir, 'sdk-state');
+    process.env.WIEK_BROWSER_AGENT_WORKSPACE ||= join(root, 'skills/wiek-browser');
     process.env.VEK_BROWSER_INSTANCE_ID = rpc.runtime.browserInstanceId;
-    const ego = createEgoAdapter(rpc);
-    globalThis.ego = ego;
+    const wiek = createWiekAdapter(rpc);
+    globalThis.wiek = wiek;
     const sdkPath = resolve(parsed.sdkPath || join(root, 'packages/sdk/dist/out/index.js'));
     if (!existsSync(sdkPath)) throw new Error('SDK build missing. Run npm run build:sdk first.');
     const sdk = await import(pathToFileURL(sdkPath).href);
     try {
       process.exitCode = await sdk.runMain({ argv: [], stdinText: source });
     } finally {
-      await sdk.disposeEgoSdk?.();
+      await sdk.disposeWiekSdk?.();
     }
   }
 } catch (error) {
@@ -115,6 +119,7 @@ async function readStdin() {
 
 async function connect(autoStart) {
   try { return await connectExisting(); } catch (error) {
+    if (error.error_code === 'WIEK_HOST_UNRESPONSIVE') throw error;
     if (autoStart && process.env.VEK_BROWSER_AUTOSTART==='0') throw new Error('Browser auto-start is disabled in this automation worker');
     if (!autoStart) throw new Error(`Wiek Browser is not running (${error.message}). Run wiek-browser start.`);
   }
@@ -149,10 +154,17 @@ async function connectExisting() {
   const socket = new WebSocket(`ws://127.0.0.1:${runtime.port}/rpc?token=${encodeURIComponent(runtime.token)}`, {
     handshakeTimeout: 2000,
   });
-  await new Promise((res, rej) => {
-    socket.once('open', res);
-    socket.once('error', rej);
-  });
+  try {
+    await new Promise((res, rej) => {
+      socket.once('open', res);
+      socket.once('error', rej);
+    });
+  } catch {
+    socket.terminate();
+    const failure = new Error('Wiek Browser is already running but its local host is not responding. No second host was started.');
+    failure.error_code = 'WIEK_HOST_UNRESPONSIVE';
+    throw failure;
+  }
   let seq = 0;
   const pending = new Map();
   const listeners = new Set();
@@ -193,34 +205,34 @@ async function connectExisting() {
   };
 }
 
-function createEgoAdapter(rpc) {
+function createWiekAdapter(rpc) {
   let selectedSpace;
-  const ego = {};
+  const wiek = {};
   const noArg = new Set(['getBrowserVersion','listProfiles','listTabs','listTaskSpaces','closeTaskSpace','completeTaskSpace','handOffTaskSpace','takeOverTaskSpace']);
   for (const method of [
     'getBrowserVersion','listProfiles','createTab','listTabs','snapshot','listTaskSpaces',
     'createTaskSpace','claimTaskSpace','closeTaskSpace','completeTaskSpace','handOffTaskSpace',
     'takeOverTaskSpace','setAgentTaskState','animationHighlightMouseToPosition',
   ]) {
-    ego[method] = (...args) => {
+    wiek[method] = (...args) => {
       if (noArg.has(method) && args.length) throw invalid(`${method} accepts no arguments`);
       if (method === 'createTab' && (args.length !== 1 || typeof args[0] !== 'string')) throw invalid('createTab requires a URL string');
       return rpc.call(method, args, selectedSpace);
     };
   }
-  ego.useTaskSpace = (...args) => {
+  wiek.useTaskSpace = (...args) => {
     if (args.length !== 1 || !Number.isInteger(args[0]) || args[0] < 0) throw invalid('useTaskSpace requires a non-negative integer id');
     selectedSpace = args[0];
     return selectedSpace;
   };
-  ego.sendCDPMessage = (...args) => {
+  wiek.sendCDPMessage = (...args) => {
     if (args.length !== 1 || typeof args[0] !== 'string') throw invalid('sendCDPMessage requires a JSON string');
-    void rpc.call('sendCDPMessage', args, selectedSpace).catch(error => ego.onSendCDPMessageError?.(error.message, error.error_code || 'EGO_CDP_SEND_FAILED'));
+    void rpc.call('sendCDPMessage', args, selectedSpace).catch(error => wiek.onSendCDPMessageError?.(error.message, error.error_code || 'WIEK_CDP_SEND_FAILED'));
   };
   rpc.listen(msg => {
-    if (msg.event === 'cdp') ego.onCDPMessage?.(msg.payload);
-    if (msg.event === 'cdp-error') ego.onSendCDPMessageError?.(msg.message, msg.error_code);
+    if (msg.event === 'cdp') wiek.onCDPMessage?.(msg.payload);
+    if (msg.event === 'cdp-error') wiek.onSendCDPMessageError?.(msg.message, msg.error_code);
   });
-  return ego;
+  return wiek;
 }
-function invalid(message) { const e = new TypeError(message); e.error_code = 'EGO_INVALID_ARGUMENT'; return e; }
+function invalid(message) { const e = new TypeError(message); e.error_code = 'WIEK_INVALID_ARGUMENT'; return e; }

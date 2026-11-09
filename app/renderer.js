@@ -156,7 +156,7 @@ function settingsPanel(p) {
   for (const ext of state.extensions) { const row = text('div', '', 'row'); row.append(text('div', `${ext.name} · ${ext.version}${ext.error ? ` · ${ext.error}` : ''}`, 'row-main')); const toggle = text('button', ext.enabled === false ? 'Enable' : 'Disable'); toggle.onclick = () => act('extensions:toggle', ext.id); const del = text('button', 'Remove'); del.onclick = () => act('extensions:remove', ext.id); row.append(toggle, del); extensions.append(row); }
   const load = text('button', 'Load unpacked extension', 'subtle-button'); load.onclick = () => act('extensions:load'); extensions.append(load);
   card('Agent connection', 'Agent scripts connect to a token protected loopback bridge. Browser pages cannot read its token or access the browser’s Node.js environment.');
-  card('About Wiek Browser', `Version ${state.version}. Built with Electron and Chromium. The agent SDK is based on citrolabs/ego-lite under the MIT license.`);
+  card('About Wiek Browser', `Version ${state.version}. Built with Electron and Chromium. Third-party copyright and license notices are included with this application.`);
 }
 function spacesPanel(p){
   p.replaceChildren();const heading=text('div','','panel-heading');heading.append(text('h1','Manage Spaces'));const back=text('button','Back to browser','subtle-button');back.onclick=()=>{currentPanel=null;act('panel',false);};heading.append(back);p.append(heading);

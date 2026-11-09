@@ -104,7 +104,7 @@ function formatPageNotices(notices: UnhandledPageNotice[]): string {
     const url = oneLine(notice.url || "about:blank");
     return `Unhandled page ${notice.label}${source}: ${url}`;
   });
-  return `[ego-browser:pages]\n${lines.join("\n")}\n`;
+  return `[wiek-browser:pages]\n${lines.join("\n")}\n`;
 }
 
 function oneLine(value: string): string {

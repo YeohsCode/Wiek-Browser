@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "checkpoint": "0.23.0",
+  "clientDate": "2026-11-10",
+  "sourceRuntime": {
+    "passed": true,
+    "version": "0.23.0",
+    "filesChecked": 244,
+    "textFilesChecked": 232,
+    "scannedDirectories": [
+      "app",
+      "cli",
+      "skills",
+      "packages/sdk/dist",
+      "packages/sdk/skill-body",
+      "packages/sdk/src",
+      "packages/sdk/scripts"
+    ],
+    "violations": [],
+    "scope": "All owned runtime, SDK build output, available SDK sources, product Skills and package configuration. Original test inputs and legal notices are outside runtime scope."
+  },
+  "packagedRuntime": {
+    "passed": true,
+    "version": "0.23.0",
+    "filesChecked": 195,
+    "textFilesChecked": 183,
+    "scannedDirectories": [
+      "app",
+      "cli",
+      "skills",
+      "packages/sdk/dist",
+      "packages/sdk/skill-body"
+    ],
+    "violations": [],
+    "scope": "All owned runtime, SDK build output, available SDK sources, product Skills and package configuration. Original test inputs and legal notices are outside runtime scope."
+  },
+  "system": {
+    "retiredCommandRegistered": false,
+    "currentCommand": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist-validation/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs",
+    "currentCommandExists": true,
+    "retiredSkillRegistrations": 0,
+    "currentSkillRegistrations": 3,
+    "retiredRuntimeProcessCount": 0
+  },
+  "immutableSdkInputs": 81,
+  "frameworkTaskBytesUnchanged": true,
+  "paidModelCalls": 0,
+  "realAccountWrites": 0,
+  "runtimeIndependent": true,
+  "retainedProvenance": [
+    "Third-party MIT copyright/license notices",
+    "Immutable original test inputs; name adaptation occurs only in ignored test staging",
+    "Historical audit and research records outside the application package"
+  ],
+  "runningApplicationOverwritten": false,
+  "finalVerification": {
+    "sourceTests": 547,
+    "sdkTests": 532,
+    "frameworkTests": 336,
+    "packagedHostChecks": 197,
+    "packagedPanelChecks": 11,
+    "browserCases": 69,
+    "browserAssertions": 1248,
+    "fixtureHostStopped": true,
+    "releaseFilesMatch": 199
+  }
+}

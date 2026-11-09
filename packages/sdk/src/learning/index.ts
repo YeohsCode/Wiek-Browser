@@ -183,17 +183,17 @@ export async function loadBrowserToolSource(
 }
 
 export function wrapBrowserTool(source, args: any = {}) {
-  return `(async () => { const __egoBrowserTool = ${source}; return await __egoBrowserTool(${JSON.stringify(args || {})}); })()`;
+  return `(async () => { const __wiekBrowserTool = ${source}; return await __wiekBrowserTool(${JSON.stringify(args || {})}); })()`;
 }
 
 export { learningEntry };
 
 function siteSkillNotFoundError(siteId, searchedRoot) {
-  const workspace = process.env.EGO_BROWSER_AGENT_WORKSPACE || "unset";
+  const workspace = process.env.WIEK_BROWSER_AGENT_WORKSPACE || "unset";
   const lines = [
     `site skill not found: ${JSON.stringify(siteId)}`,
     `  searched: ${searchedRoot}`,
-    `  EGO_BROWSER_AGENT_WORKSPACE: ${workspace}`,
+    `  WIEK_BROWSER_AGENT_WORKSPACE: ${workspace}`,
     `  hint: ensure your write path begins with the searched root above`,
   ];
   return new Error(lines.join("\n"));

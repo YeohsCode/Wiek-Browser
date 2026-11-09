@@ -1,6 +1,7 @@
 node_modules/
 packages/sdk/node_modules/
 packages/sdk/dist/
+dist-validation/
 packages/sdk/artifacts/
 data/
 downloads/
@@ -59,6 +60,6 @@ __pycache__/
 !/skills/wiek-browser/references/
 !/skills/wiek-browser/references/*.md
 
-# SDK build inputs are source even though their directory is named references.
-!/skills/ego-browser/references/
-!/skills/ego-browser/references/*.md
+# Owned evaluation environments are disposable dependency caches.
+/benchmark/framework/.venv/
+/benchmark/framework/.pytest_cache/

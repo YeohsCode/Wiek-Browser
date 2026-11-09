@@ -16,13 +16,13 @@ import {
   resetSink,
 } from "./output-sink.js";
 import { runMain } from "./run.js";
-import { installStaleEgoBrowserGuard } from "./skill-migration.js";
+import { installStaleWiekBrowserGuard } from "./skill-migration.js";
 import { emitUpdateNotice } from "./update-notice.js";
 import { installPageContextGuard } from "./page-context-guard.js";
 import { disposeDownloadArtifacts } from "./driver/downloads.js";
 
 type HelperFunction = (...args: unknown[]) => unknown;
-type EgoRuntime = Record<string, unknown> & {
+type WiekRuntime = Record<string, unknown> & {
   helpers?: Record<string, HelperFunction>;
   learnings?: Record<string, unknown>;
   getBrowserVersion?: () => unknown | Promise<unknown>;
@@ -30,9 +30,9 @@ type EgoRuntime = Record<string, unknown> & {
   onSendCDPMessageError?: (message: unknown, errorCode?: string) => void;
 };
 type InstallTarget = Record<string, unknown> & {
-  ego?: EgoRuntime;
+  wiek?: WiekRuntime;
 };
-type InstallEgoSdkOptions = {
+type InstallWiekSdkOptions = {
   context?: Record<string, unknown>;
   ready?: unknown;
   cliLog?: HelperFunction;
@@ -42,19 +42,19 @@ export * from "./helpers.js";
 export { runMain } from "./run.js";
 
 /** Release native callbacks before the host discards an embedded Node context. */
-export async function disposeEgoSdk(target: InstallTarget = globalThis) {
+export async function disposeWiekSdk(target: InstallTarget = globalThis) {
   disposeDownloadArtifacts();
-  disposeBrowserRuntime(target.ego);
+  disposeBrowserRuntime(target.wiek);
 }
 
 const SYNC_HELPERS = new Set(["help"]);
-// Marks an ego runtime whose mutating methods have already been wrapped, so a
-// second installEgoSdk call cannot double-wrap createTab / task-space methods.
-const EGO_WRAPPED = Symbol.for("egoBrowser.sdkWrapped");
+// Marks an wiek runtime whose mutating methods have already been wrapped, so a
+// second installWiekSdk call cannot double-wrap createTab / task-space methods.
+const WIEK_WRAPPED = Symbol.for("wiekBrowser.sdkWrapped");
 
-export function installEgoSdk(
+export function installWiekSdk(
   target: InstallTarget = globalThis,
-  options: InstallEgoSdkOptions = {},
+  options: InstallWiekSdkOptions = {},
 ) {
   if (!target || typeof target !== "object") {
     return target;
@@ -91,7 +91,7 @@ export function installEgoSdk(
   // Non-function values are intentionally absent from the normal helper loop.
   // Install the 1.3 migration guard explicitly so embedded SDK execution and
   // the direct CLI produce the same actionable error.
-  installStaleEgoBrowserGuard(target);
+  installStaleWiekBrowserGuard(target);
   Object.defineProperty(target, "cliLog", {
     value: cliLogFn,
     writable: true,
@@ -115,30 +115,30 @@ export function installEgoSdk(
     resetSink();
     installLifecycleFlush(process.stdout);
   }
-  if (target.ego && typeof target.ego === "object") {
-    void emitUpdateNotice(target.ego, (line) => {
+  if (target.wiek && typeof target.wiek === "object") {
+    void emitUpdateNotice(target.wiek, (line) => {
       if (usingDefaultCliLog) bufferOutput(`${line}\n`);
       else cliLogFn(line);
     });
-    target.ego.helpers = installed;
-    target.ego.learnings = {};
-    if (!(target.ego as Record<symbol, unknown>)[EGO_WRAPPED]) {
+    target.wiek.helpers = installed;
+    target.wiek.learnings = {};
+    if (!(target.wiek as Record<symbol, unknown>)[WIEK_WRAPPED]) {
       const taskSelection: { spaceId?: unknown } = {};
-      wrapCreateTab(target.ego);
-      wrapUseTaskSpace(target.ego, taskSelection);
+      wrapCreateTab(target.wiek);
+      wrapUseTaskSpace(target.wiek, taskSelection);
       wrapInvalidating(
-        target.ego,
+        target.wiek,
         ["closeTaskSpace", "createTaskSpace", "claimTaskSpace"],
         () => {
           taskSelection.spaceId = undefined;
         },
       );
-      Object.defineProperty(target.ego, EGO_WRAPPED, {
+      Object.defineProperty(target.wiek, WIEK_WRAPPED, {
         value: true,
         enumerable: false,
       });
     }
-    exposeEgoMethods(target, target.ego);
+    exposeWiekMethods(target, target.wiek);
   }
   return target;
 }
@@ -153,7 +153,7 @@ if (isDirectCli()) {
     disposeDownloadArtifacts();
   }
 } else {
-  installEgoSdk();
+  installWiekSdk();
 }
 
 function createCliLog() {
@@ -171,19 +171,19 @@ function isDirectCli() {
 }
 
 function wrapInvalidating(
-  ego: EgoRuntime,
+  wiek: WiekRuntime,
   methodNames: string[],
   resetSelection: () => void = () => {},
 ) {
   for (const name of methodNames) {
-    const original = ego[name];
+    const original = wiek[name];
     if (typeof original !== "function") continue;
     const after = () => {
       resetSelection();
       invalidateSession();
       clearPreferredTarget();
     };
-    ego[name] = function (...args: unknown[]) {
+    wiek[name] = function (...args: unknown[]) {
       const result = original.apply(this, args);
       if (result && typeof result.then === "function") {
         return result.then((value) => {
@@ -197,11 +197,11 @@ function wrapInvalidating(
   }
 }
 
-function wrapUseTaskSpace(ego: EgoRuntime, selection: { spaceId?: unknown }) {
+function wrapUseTaskSpace(wiek: WiekRuntime, selection: { spaceId?: unknown }) {
   // File chooser waits and other event subscriptions span multiple Page calls.
   // Re-selecting the same space must preserve their CDP session; changing the
   // space still invalidates every session because native routing is global.
-  const original = ego.useTaskSpace;
+  const original = wiek.useTaskSpace;
   if (typeof original !== "function") return;
   const after = (spaceId: unknown, value: unknown) => {
     if (value && typeof value === "object" && Object.hasOwn(value, "error")) {
@@ -214,7 +214,7 @@ function wrapUseTaskSpace(ego: EgoRuntime, selection: { spaceId?: unknown }) {
     }
     return value;
   };
-  ego.useTaskSpace = function (...args: unknown[]) {
+  wiek.useTaskSpace = function (...args: unknown[]) {
     const result = original.apply(this, args);
     if (result && typeof result.then === "function") {
       return result.then((value) => after(args[0], value));
@@ -223,10 +223,10 @@ function wrapUseTaskSpace(ego: EgoRuntime, selection: { spaceId?: unknown }) {
   };
 }
 
-function wrapCreateTab(ego: EgoRuntime) {
-  const original = ego.createTab;
+function wrapCreateTab(wiek: WiekRuntime) {
+  const original = wiek.createTab;
   if (typeof original !== "function") return;
-  ego.createTab = function (...args: unknown[]) {
+  wiek.createTab = function (...args: unknown[]) {
     const result = original.apply(this, args);
     if (result && typeof result.then === "function") {
       return result.then((value) => {
@@ -239,7 +239,7 @@ function wrapCreateTab(ego: EgoRuntime) {
   };
 }
 
-function exposeEgoMethods(target: InstallTarget, ego: EgoRuntime) {
+function exposeWiekMethods(target: InstallTarget, wiek: WiekRuntime) {
   const skip = new Set([
     "helpers",
     "learnings",
@@ -248,12 +248,12 @@ function exposeEgoMethods(target: InstallTarget, ego: EgoRuntime) {
     "claimTaskSpace",
     "closeTaskSpace",
   ]);
-  for (const key of Object.keys(ego)) {
+  for (const key of Object.keys(wiek)) {
     if (skip.has(key)) continue;
     if (key in target) continue;
-    const value = ego[key];
+    const value = wiek[key];
     if (typeof value !== "function") continue;
-    const bound = value.bind(ego);
+    const bound = value.bind(wiek);
     Object.defineProperty(target, key, {
       value: bound,
       writable: true,

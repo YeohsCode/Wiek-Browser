@@ -23,13 +23,13 @@ const distDir = join(root, "dist");
 const outDir = join(distDir, "out");
 const bundledCliDir = outDir;
 const bundledCli = join(bundledCliDir, "index.js");
-// The usage guide printed by `ego-browser skill`, versioned with this SDK.
+// The usage guide printed by `wiek-browser skill`, versioned with this SDK.
 const guideSource = join(root, "skill-body", "SKILL.md");
-const bundledGuideDir = join(outDir, "ego-browser");
-// The entry Skill the browser installs into ~/.agents/skills/ego-browser. It
+const bundledGuideDir = join(outDir, "wiek-browser");
+// The entry Skill the browser installs into ~/.agents/skills/wiek-browser. It
 // carries the site learnings, which the runtime also reads from this copy.
-const entrySkillSourceDir = join(repoRoot, "skills", "ego-browser");
-const bundledEntrySkillDir = join(outDir, "agent-skills", "ego-browser");
+const entrySkillSourceDir = join(repoRoot, "skills", "wiek-browser");
+const bundledEntrySkillDir = join(outDir, "agent-skills", "wiek-browser");
 const entrySkillEntries = [
   "SKILL.md",
   "references",
@@ -47,7 +47,7 @@ try {
   lock = await open(buildLock, "wx");
 } catch (error) {
   if (error?.code === "EEXIST") {
-    throw new Error("another ego-browser-v2 build is already running");
+    throw new Error("another wiek-browser-v2 build is already running");
   }
   throw error;
 }
@@ -55,7 +55,7 @@ try {
 try {
   await rm(distDir, { recursive: true, force: true });
   await rm(join(root, "artifacts"), { recursive: true, force: true });
-  await rm(join(root, "ego-browser.js"), { force: true });
+  await rm(join(root, "wiek-browser.js"), { force: true });
   await rm(join(root, "bin"), { recursive: true, force: true });
   await mkdir(bundledCliDir, { recursive: true });
 
@@ -114,7 +114,7 @@ try {
 }
 
 // Replace the source frontmatter with the version line and end marker that
-// `ego-browser skill` prints verbatim; agents use the marker to detect truncation.
+// `wiek-browser skill` prints verbatim; agents use the marker to detect truncation.
 function renderGuide(source) {
   const match = /^---\n([\s\S]*?)\n---\n([\s\S]*)$/.exec(source);
   const version = match && /^version: "([^"]+)"$/m.exec(match[1])?.[1];
@@ -122,11 +122,11 @@ function renderGuide(source) {
     throw new Error(`${guideSource} needs frontmatter with a version`);
   }
   const guide = [
-    `[ego-browser:skill] ego-browser usage guide v${version}`,
+    `[wiek-browser:skill] wiek-browser usage guide v${version}`,
     "",
     match[2].trim(),
     "",
-    `[ego-browser:skill] end of guide v${version}`,
+    `[wiek-browser:skill] end of guide v${version}`,
     "",
   ].join("\n");
   if (guide.length > maxGuideLength) {

@@ -1,0 +1,13 @@
+✔ upstream summary parsing preserves pass, fail, skip and absent selected cases (0.832667ms)
+✔ startup failure creates no invented passing result (0.078333ms)
+✔ exact case names containing commas survive CLI selection (0.767ms)
+✔ standalone runner refuses external browser targets (0.069958ms)
+✔ single-browser Markdown leaves the counterpart unrun and documents evidence limitations (0.22875ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 89.045583

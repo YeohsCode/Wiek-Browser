@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Session Exporter"
+  short_description: "Export a Codex session path or ID as a standalone HTML report"
+  default_prompt: "Use $codex-session-exporter to export the specified Codex session as an HTML report."

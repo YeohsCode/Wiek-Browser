@@ -1,0 +1,26 @@
+{
+  "completed": true,
+  "registration": {
+    "installed": true,
+    "command": "/Users/andrewyeoh/.local/bin/wiek-browser",
+    "skill": "/Users/andrewyeoh/.agents/skills/wiek-browser",
+    "root": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app",
+    "changedEntries": [
+      "/Users/andrewyeoh/.local/bin/wiek-browser",
+      "/Users/andrewyeoh/.agents/skills/wiek-browser",
+      "/Users/andrewyeoh/.codex/skills/wiek-browser",
+      "/Users/andrewyeoh/.claude/skills/wiek-browser"
+    ]
+  },
+  "moved": [
+    {
+      "entry": ".local/bin/ego-browser",
+      "backup": "/Users/andrewyeoh/.local/share/wiek/migration-backup/1794159594120/.local--bin--ego-browser"
+    },
+    {
+      "entry": ".agents/skills/ego-browser",
+      "backup": "/Users/andrewyeoh/.local/share/wiek/migration-backup/1794159594120/.agents--skills--ego-browser"
+    }
+  ],
+  "personalBrowserDataChanged": false
+}

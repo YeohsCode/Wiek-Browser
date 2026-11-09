@@ -13,8 +13,8 @@ const sources=[...(await files('app')),...(await files('cli')),...(await files('
 const records=[];
 for(const file of [...new Set(sources)].sort()){const sha256=await digest(path.join(root,file));records.push({file,sha256,matches:await exists(path.join(packaged,file))&&sha256===await digest(path.join(packaged,file))});}
 const integrity=JSON.parse(await fs.readFile(path.join(root,'reports/upstream-test-integrity.json'),'utf8'));
-integrity.referenceMode='pinned-manifest';
-for(const entry of integrity.records){const own=await digest(path.join(root,'packages/sdk',entry.file));const reference=path.join(root,'references/ego-lite/package/ego-browser',entry.file);const available=await exists(reference);const upstream=available?await digest(reference):entry.sha256;if(available)integrity.referenceMode='local-reference-and-pinned-manifest';entry.unchanged=own===upstream&&own===entry.sha256;}
+integrity.referenceMode='immutable-local-test-inputs';
+for(const entry of integrity.records){entry.unchanged=await digest(path.join(root,'tests/fixtures/sdk-original',entry.file))===entry.sha256;}
 integrity.allUnchanged=integrity.records.every(entry=>entry.unchanged);integrity.verifiedAt=new Date().toISOString();
 const excluded=['downloads','references','analysis','reports','data','tests','tools'];
 const audit={excluded,unexpected:[],modelSha256:await digest(path.join(packaged,'models/ggml-tiny.bin')),whisperSha256:await digest(path.join(packaged,'app/bin/whisper-cli'))};

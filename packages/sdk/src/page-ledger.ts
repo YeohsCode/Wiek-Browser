@@ -48,7 +48,7 @@ type PageLedgerStoreOptions = {
 
 const DEFAULT_STALE_AFTER_MS = 30 * 24 * 60 * 60 * 1000;
 
-/** Stable across Agent rounds and Node-service restarts in one Ego Lite run. */
+/** Stable across Agent rounds and Node-service restarts in one Wiek Browser run. */
 export function runtimeInstanceId(parentPid = process.ppid): string {
   return process.env.VEK_BROWSER_INSTANCE_ID || `browser-host:${parentPid}`;
 }
@@ -81,8 +81,8 @@ export class PageLedgerStore {
   constructor(options: PageLedgerStoreOptions = {}) {
     this.rootDir =
       options.rootDir ||
-      process.env.EGO_BROWSER_STATE_DIR ||
-      join(homedir(), ".ego-browser", "state");
+      process.env.WIEK_BROWSER_STATE_DIR ||
+      join(homedir(), ".wiek-browser", "state");
     this.#browserInstanceId = options.browserInstanceId;
     this.#staleAfterMs =
       options.staleAfterMs === undefined

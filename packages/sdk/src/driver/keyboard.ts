@@ -407,7 +407,7 @@ async function installKeyProbe(
       "Runtime.evaluate",
       {
         expression: `(() => {
-      window.__egoBrowserInputProbes ||= {};
+      window.__wiekBrowserInputProbes ||= {};
       const probe = { seen: false, eventType: ${JSON.stringify(eventType)} };
       probe.handler = (event) => {
         if (
@@ -416,7 +416,7 @@ async function installKeyProbe(
         ) probe.seen = true;
       };
       document.addEventListener(probe.eventType, probe.handler, true);
-      window.__egoBrowserInputProbes[${JSON.stringify(id)}] = probe;
+      window.__wiekBrowserInputProbes[${JSON.stringify(id)}] = probe;
       return true;
     })()`,
         returnByValue: true,
@@ -450,7 +450,7 @@ async function finishKeyProbe(
       "Runtime.evaluate",
       {
         expression: `(() => {
-      const probes = window.__egoBrowserInputProbes || {};
+      const probes = window.__wiekBrowserInputProbes || {};
       const probe = probes[${JSON.stringify(id)}];
       if (!probe) return { seen: false, fallback: false };
       document.removeEventListener(probe.eventType, probe.handler, true);
@@ -556,7 +556,7 @@ async function finishKeyProbe(
 }
 
 function canProbeInputFallback() {
-  return Boolean((globalThis as any).ego?.sendCDPMessage);
+  return Boolean((globalThis as any).wiek?.sendCDPMessage);
 }
 
 function isKeyDispatchTimeout(error: unknown) {

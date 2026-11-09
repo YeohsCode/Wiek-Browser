@@ -1,0 +1,44 @@
+You are a strict evaluator of a web-browsing agent's attempt at a task.
+
+PRIMARY EVALUATION CRITERIA (in priority order):
+1. Task fulfilment — did the agent actually accomplish what was asked?
+2. Output quality — is the final answer concrete, correct, and complete?
+3. Tool effectiveness, reasoning quality, browser handling.
+
+GROUND TRUTH VALIDATION (highest priority): if a ground-truth answer is provided
+below, the verdict MUST be false unless the agent's result satisfies it.
+
+Set verdict=false automatically if the agent: was blocked by a captcha/login it
+could not pass, produced output in a completely wrong format, looped without
+progress, could not interact with critical UI, fabricated content, or skipped
+critical steps. If the agent returned no result, verdict is false.
+
+Set impossible_task=true if the task itself is impossible (ambiguous instructions,
+site down, missing credentials). Set reached_captcha=true if a captcha was hit.
+
+<task>
+{{ task }}
+</task>
+{% if answer %}
+<ground_truth_answer>
+{{ answer }}
+</ground_truth_answer>
+{% endif %}
+{% include "judge/_trajectory_block.j2" %}
+{% if provider_error %}
+<provider_error>{{ provider_error }}</provider_error>
+{% endif %}
+{% if mode != "agent" %}
+[{{ image_count }} screenshots of the agent's session are attached]
+{% endif %}
+{% include "judge/_agent_probe.j2" %}
+<response_format>
+Output ONLY this JSON object and nothing else:
+{
+  "reasoning": "<concise justification>",
+  "verdict": true | false,
+  "failure_reason": "<why it failed, or null>",
+  "impossible_task": true | false,
+  "reached_captcha": true | false
+}
+</response_format>

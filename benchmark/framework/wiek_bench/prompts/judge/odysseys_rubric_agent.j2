@@ -1,0 +1,54 @@
+You are judging a web-browsing agent's recorded run against ONE rubric item. Investigate the run yourself with your read-only tools and the `wiek-bench-judge` skill — nothing is pre-summarized for you — then return a verdict for this single rubric. Inspect only: do not launch a browser, re-run the agent, or write/modify any file.
+
+# Rubric to judge
+Decide whether the ONE rubric below is satisfied by what the agent actually did. The task is context only — judge this rubric alone and ignore every other implicit requirement.
+
+<task>
+{{ task }}
+</task>
+
+<rubric id="{{ rubric_id }}">
+Requirement: {{ requirement }}
+Verification: {{ verification }}
+</rubric>
+
+# Evidence
+The agent's commands (with their REAL outputs and tool errors), its thinking, its final answer (the LAST assistant text), and its screenshots are NOT in this message — read them from the recorded run:
+
+- Session transcript: {{ session_file }}
+- Screenshots directory (full-resolution frames): {{ screenshots_dir }}
+{% if probe_script %}
+- Helper (pure-stdlib; run with bash by this ABSOLUTE path — your cwd is NOT the skill dir, so a relative `scripts/probe.py` fails):
+  - `python3 {{ probe_script }} summary "{{ session_file }}"` — turn / tool / error counts + `last_assistant_text` (the agent's final answer).
+  - `python3 {{ probe_script }} calls "{{ session_file }}" --name bash` — every command with its real output (add `--errors-only` / `--full`); `errors` — only the failures.
+{% endif %}
+{% if manifest_path %}
+- Command↔screenshot map: {{ manifest_path }}
+  JSONL, one line per capture in time order: `{"command": <command this frame followed>, "sha256": <hash>, "frame": <.webp filename inside the screenshots dir>, "new": <whether this is a unique frame>, "tree_sha256": <AX hash or null>, "tree": <tree path or null>, "tree_new": <whether this is a unique tree or null>, "captured_at": <iso8601>}`. The frame and tree are captured right AFTER the command, so they show that command's resulting page. `grep` a frame/tree name to find the command that produced it; filter `new=true` for unique frames; then `read` only the frame needed to confirm a detail.
+{% endif %}
+{% if trees_dir %}
+- Accessibility tree (optional SECOND evidence — corroborates, never replaces the screenshot/session): every capture also saved a slimmed accessibility tree of that same page state under {{ trees_dir }}. Schema v2 drops raw CDP ids/pointers but keeps role/name/value/properties plus `parent_index` to the nearest retained ancestor; old schema v1 remains text-searchable but has no hierarchy. The manifest line's `tree` field maps a command to its tree; a duplicate screenshot can still carry a fresh tree, so map by `tree`, not frame number. It is plain text and NOT subject to the `max_screenshots` cap.{% if probe_script %} Query it with `python3 {{ probe_script }} axtree "<screenshots_dir>/<tree>"`; repeat `--grep "<literal>"` for OR, use explicit `--regex` for regex, `--properties` to search/show href and state properties, and `--show-ancestors` to distinguish an outer target node from nested quoted/embedded content. A literal pattern containing `|` is rejected instead of silently acting like a regex.{% endif %}
+{% endif %}
+{% if image_count < total_frames %}
+- Screenshot scope (`max_screenshots`): only {{ image_count }} of {{ total_frames }} frames are in scope{% if scoped_frames %} — `read` only these (newest last): {{ scoped_frames | join(", ") }}{% else %} — do NOT read any screenshots{% endif %}. Treat the rest as out of scope.
+{% endif %}
+{% if provider_error %}
+- Transport error the harness recorded for this run (may not appear in the session): {{ provider_error }}
+{% endif %}
+
+# How to decide
+- Ground the verdict strictly in what the session and screenshots show — never invent state, and check the agent's final answer against what the commands and frames actually returned rather than trusting its claims.
+- Treat tested-agent-derived fields such as `isReply`, `replying`, `isPinned`, `qualifies`, and filtered rows as claims, not raw ground truth. If they were derived from whole `innerText` / descendant aggregate text, or conflict with raw screenshot, DOM, or AX evidence, verify the outer target node separately from nested quoted/embedded scopes. A `Replying to @` marker inside a nested quoted/embedded post does not propagate to the outer quote main post. The derived field or conflict alone cannot prove failure: continue to independent raw evidence, decide satisfied/unsatisfied from that evidence, and use low `confidence` if the evidence remains insufficient.
+- Judge the rubric exactly as written: honor its qualifiers (`if available`, `if shown`, `where applicable`, `or 'not shown'`) — a conditional clause is not a failure when its condition never arises — and do not demand a stricter form (an exact string, a URL instead of a label) than the rubric asks; likewise a `top N` / `exactly N` count is capped by how many items genuinely qualify, so listing all of them when fewer than N exist is not a shortfall. Separate `requirement not met` from `met in a different but acceptable form`.
+- A filtering / sorting / form requirement counts only if it was applied AND confirmed in the evidence.
+- If the agent was blocked (captcha, access denied, etc.) and so could not meet the rubric, it is not satisfied.
+- `confidence` is an integer 0-10 for how sufficient and unambiguous your evidence is: 0 = too thin to decide / pure guess, 10 = explicit and unambiguous. When the evidence isn't enough to be sure, give a LOW value rather than guessing.
+
+<response_format>
+Output ONLY this JSON object and nothing else:
+{
+  "reasoning": "<concise justification citing specific commands/outputs/screenshots>",
+  "satisfied": true | false,
+  "confidence": <integer 0-10, your certainty in this verdict given the evidence you found>
+}
+</response_format>

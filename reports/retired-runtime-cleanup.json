@@ -1,0 +1,9 @@
+{
+  "requestedMainProcessStops": [
+    79681
+  ],
+  "stillRunningMainProcesses": [],
+  "signal": "SIGTERM",
+  "forceStopUsed": false,
+  "browserDataDeleted": false
+}

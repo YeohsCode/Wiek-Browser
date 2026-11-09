@@ -52,7 +52,7 @@ export function preparePageDownload(
     throw new Error(`${targetId} is already waiting for a download`);
   }
   activeDownloadTargets.add(targetId);
-  const directory = mkdtempSync(join(tmpdir(), "ego-browser-download-"));
+  const directory = mkdtempSync(join(tmpdir(), "wiek-browser-download-"));
   artifactDirectories.add(directory);
   const directoryPromise = Promise.resolve(directory);
   const configuredSessions = new Set<string>();

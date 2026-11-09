@@ -1,0 +1,15 @@
+✔ CLI retains explicit Wiek workspace/state overrides and ignores retired settings without another browser (87.67275ms)
+✔ an alive but unresponsive host never triggers a second browser startup (2066.323625ms)
+✔ upstream summary parsing preserves pass, fail, skip and absent selected cases (0.781583ms)
+✔ startup failure creates no invented passing result (0.078917ms)
+✔ exact case names containing commas survive CLI selection (0.711208ms)
+✔ standalone runner refuses external browser targets (0.071292ms)
+✔ single-browser Markdown leaves the counterpart unrun and documents evidence limitations (0.229291ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2229.084959

@@ -1,23 +1,33 @@
 ---
 name: wiek-browser
-description: Drive the local Wiek Browser using its JavaScript agent SDK, with persistent task spaces, page snapshots, input, downloads, and human handoff.
+description: Use Wiek Browser for browser automation, local web testing, screenshots, page extraction and collaboration with the user. Read this Skill before browser tasks and use the independently installed wiek-browser command.
+metadata:
+  version: "2.1.0"
+  date: "2026-10-08"
+  bootstrap: true
 ---
 
-# Wiek Browser
+# wiek-browser
 
-Run `wiek-browser skill` for the installed SDK reference. From a source checkout, use `node cli/wiek-browser.mjs skill` and `node cli/wiek-browser.mjs nodejs`.
+Before any browser task, run:
 
-The host starts automatically when a script runs. Use a named task space and the Page model:
-
-```sh
-wiek-browser nodejs <<'JS'
-const task = await taskSpace('research');
-const page = task.page('p1');
-await page.goto('https://example.com');
-console.log(await page.snapshot());
-JS
+```bash
+wiek-browser skill
 ```
 
-Restore the same task name and page label in later rounds. Page refs persist across rounds but must be refreshed after document changes. Use `await task.finish({keep: []})` to close managed pages and finish, or `await task.finish({keep:'all'})` to retain them for the user. Never claim or take over an existing user space without the user's authorization. Follow user instructions for publishing, payments, and other consequential actions.
+and follow its output. It prints the usage guide that matches the installed
+Wiek Browser version. Run it again after `wiek-browser upgrade`, or when any output
+says to.
 
-Use `VEK_DATA_DIR` for an isolated browser profile when testing. `wiek-browser status` describes the current host and `wiek-browser stop` closes it. This skill does not import personal browser data or install other skills automatically.
+The guide ends with a line starting `[wiek-browser:skill] end of guide`. If that
+line is missing, the output was truncated: save it to a file and read the file
+in parts, for example `wiek-browser skill > "$TMPDIR/wiek-browser-skill.md"`, or
+`wiek-browser skill > "$env:TEMP\wiek-browser-skill.md"` in PowerShell.
+
+## References
+
+- [Install or upgrade Wiek Browser](references/install.md) — read when
+  `wiek-browser` is not found, or `skill` is an unknown command.
+- [Clearing cookies, cache, and storage](references/clearing-state.md) — read
+  before clearing any cookie, cache, or storage; some clears reach the whole
+  browser profile.

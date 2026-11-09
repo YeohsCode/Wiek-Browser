@@ -1,0 +1,80 @@
+# wiek-browser-benchmark-framework behavior configuration.
+# Precedence: CLI arguments, config.yaml, then code defaults.
+# This file lists only overrides; omitted fields use wiek_bench/config.py defaults.
+
+run:
+  benchmark: real-world-bench
+  provider: pi                 # pi / codex
+  browser_tool: wiek-browser
+  browser_tool_mode: "off"     # Disable guards and isolation/cleanup injection by default.
+  output_dir: runs
+  concurrency: 1
+  iterations: 1
+  resume: true
+  retry_count: 2               # Retry errors or empty output, for up to three attempts.
+  auto_judge: true
+  auto_export_sessions: true
+
+sampling:
+  # null runs the whole benchmark; a list restricts the run to those task ids.
+  task_ids: null
+
+limits:
+  # Select either time or step limits with mode; time is the default.
+  mode: time
+  task_timeout_seconds: 600
+  # Step mode stops cleanly at max_turns for judging without retrying.
+  # It retains a wall-clock backstop through step_mode_backstop_seconds.
+  # max_turns: 50
+  # step_mode_backstop_seconds: 3600
+
+# Agent under test: pi-coding-agent using openai/gpt-5.6-sol by default.
+# tool_profile is full (read, write, edit, bash) or readonly (read, grep, find, ls).
+# allowed_tools is an explicit per-tool override.
+providers:
+  pi:
+    provider: openai
+    model: gpt-5.6-sol
+    thinking_level: medium
+    tool_profile: full
+  codex:
+    # Binary precedence: CODEX_BIN, PATH codex, then the SDK-bundled CLI.
+    codex_home: agent-home/.codex
+    model: gpt-5.6-sol
+    reasoning_effort: medium
+
+# The judge also runs through Pi. Agent mode uses readonly and bash tools plus the
+# wiek-bench-judge skill; single mode performs one tool-free turn. The model uses
+# Pi's provider/id form and must support image input.
+judge:
+  provider: pi
+  model: openai/gpt-5.6-terra
+  thinking_level: medium
+  concurrency: 8
+  image_concurrency: 4
+  # Limit judge input to the newest N screenshots; omit for all screenshots.
+  # frames/ always retains every deduplicated frame.
+  # max_screenshots: null
+
+# Browser tools. Only wiek-browser ships in the box; adding an entry here plus a
+# register_browser_tool call is the whole integration path for another framework.
+# The WebUI reads its browser_tool options from this mapping, so no frontend edit
+# is needed. See "Integrating another browser tool" in the README.
+# browser_tools:
+#   my-browser:
+#     bin_env: MY_BROWSER_BIN
+#     bin_default: my-browser
+#     skill_name: my-browser
+
+screenshots:
+  # Deduplicate incrementally into frames/ without raw staging.
+  dedup_method: sha256
+  capture_mode: cdp
+
+webui:
+  enabled: true
+  host: 127.0.0.1
+  port: 8365
+
+prompts:
+  task_template: default

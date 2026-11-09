@@ -28,10 +28,10 @@ export async function emitUpdateNotice(
       return;
     }
     emit(
-      `[ego-browser:notice] Ego Lite update is available ` +
+      `[wiek-browser:notice] Wiek Browser update is available ` +
         `(current ${info.currentVersion.trim()}). Finish the current browser task, ` +
-        "then ask the user before running `ego-browser upgrade`; re-read the " +
-        "ego-browser Skill afterward.",
+        "then ask the user before running `wiek-browser upgrade`; re-read the " +
+        "wiek-browser Skill afterward.",
     );
   } catch {
     // An optional update hint must never fail the browser task.

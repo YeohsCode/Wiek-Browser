@@ -1,7 +1,7 @@
 """Shared canonical SDK V2 integration for the pinned MIT benchmark framework.
 
 No model calls, website credentials, host-specific fallbacks or ownership changes.
-Installed alongside ego_browser.py by apply.py; legacy contracts stay upstream.
+Installed alongside wiek_browser.py by apply.py; legacy contracts stay upstream.
 """
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ def control_source() -> str:
 
 
 def parse_script(source: str, task_id: str | None = None) -> dict:
-    node = os.environ.get("EGO_BENCH_V2_NODE") or shutil.which("node")
+    node = os.environ.get("WIEK_BENCH_V2_NODE") or shutil.which("node")
     if not node:
         return {"ok": False, "error": "Node.js is required for the canonical V2 syntax guard"}
     try:
@@ -76,7 +76,7 @@ def validate_invocation(tool, command: str, task_id: str, mode: str) -> str | No
     # It lists existing spaces and resolves only this task, never creates one.
     if shlex.split(command) == shlex.split(tool.cleanup_command(task_id)):
         return None
-    from .ego_browser import _sdk_path_from_env
+    from .wiek_browser import _sdk_path_from_env
     if args.count("--sdk-path") != 1 or args[args.index("--sdk-path") + 1] != _sdk_path_from_env():
         return "Canonical V2 command must pin this run's SDK with --sdk-path"
     parsed = parse_script(source, task_id)
@@ -100,12 +100,12 @@ def mentions_release(tool, command: str) -> bool:
 def candidates(tool, instance_id: str | None) -> list:
     # A strict run may only capture/close its exact task. In off mode preserve
     # numeric IDs as numbers rather than silently treating them as task names.
-    if os.environ.get("EGO_BENCH_BROWSER_TOOL_MODE", "strict").lower() != "off":
+    if os.environ.get("WIEK_BENCH_BROWSER_TOOL_MODE", "strict").lower() != "off":
         if not instance_id:
             raise RuntimeError("Canonical V2 requires an exact task name")
         return [instance_id]
     values = []
-    state = os.environ.get("EGO_BENCH_BROWSER_STATE_PATH")
+    state = os.environ.get("WIEK_BENCH_BROWSER_STATE_PATH")
     if state and Path(state).is_file():
         for value in json.loads(Path(state).read_text()).get("taskspaces", []):
             if type(value) not in (str, int) or value in values:
@@ -119,7 +119,7 @@ def candidates(tool, instance_id: str | None) -> list:
 def close_js(values: list, marker: str = "") -> str:
     return control_source() + (
         f"const results=await control.close({json.dumps(values)});\n"
-        f"console.log(JSON.stringify({{egoBenchClose:results,canonicalMarker:{json.dumps(marker)}}}));\n"
+        f"console.log(JSON.stringify({{wiekBenchClose:results,canonicalMarker:{json.dumps(marker)}}}));\n"
     )
 
 
@@ -135,7 +135,7 @@ try {
     if(row.ok)result.closed.push(label);else result.failed.push({space:label,...row});
   }
 }catch(error){result.error=String(error.message||error);}
-console.log(JSON.stringify({egoBenchPurgeSpaces:result}));
+console.log(JSON.stringify({wiekBenchPurgeSpaces:result}));
 """
 
 
@@ -203,7 +203,7 @@ def close(tool, *, instance_id) -> CloseResult:
         marker = uuid.uuid4().hex
         proc = tool._run_nodejs(close_js(values, marker))
         receipt = marker_payload(proc, marker)
-        rows = receipt.get("egoBenchClose")
+        rows = receipt.get("wiekBenchClose")
         if not isinstance(rows, list) or len(rows) != len(values) or any(row.get("candidate") != value for row, value in zip(rows, values, strict=True)):
             raise RuntimeError("Canonical V2 close receipt scope mismatch")
         ok = all(row.get("ok") is True and (row.get("notFound") is True or row.get("receipt", {}).get("closedSpace") is True) for row in rows)

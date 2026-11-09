@@ -1,13 +1,13 @@
 import { state } from "./state.js";
 import {
-  buildEgoError,
-  invokeEgo,
-  isEgoUserControlError,
-} from "./ego-errors.js";
+  buildWiekError,
+  invokeWiek,
+  isWiekUserControlError,
+} from "./wiek-errors.js";
 
 const RESPONSE_TIMEOUT_MS = 15000;
 const SESSION_TTL_MS = 2000;
-// Upper bound for buffered CDP events. The runtime can be long-lived (installEgoSdk
+// Upper bound for buffered CDP events. The runtime can be long-lived (installWiekSdk
 // inside the browser); without a cap, undrained events grow without bound.
 const MAX_BUFFERED_EVENTS = 10000;
 const SESSION_LOST =
@@ -20,7 +20,7 @@ const OOPIF_AUTO_ATTACH_PARAMS = {
   autoAttach: true,
   waitForDebuggerOnStart: true,
   flatten: true,
-  // Ego Lite can pause an excluded dedicated worker without attaching it,
+  // Wiek Browser can pause an excluded dedicated worker without attaching it,
   // leaving no session through which the harness can resume that worker.
   filter: [
     { type: "iframe", exclude: false },
@@ -50,14 +50,14 @@ let defaultTargetId = null;
 let userControlProbeState: "idle" | "probing" | "stopped" = "idle";
 let userControlStopError: (Error & { error_code?: string }) | null = null;
 let userControlProbeGeneration = 0;
-type EgoCdpCallbackRuntime = {
+type WiekCdpCallbackRuntime = {
   onCDPMessage?: (payload: string) => void;
   onSendCDPMessageError?: (message: unknown, errorCode?: string) => void;
 };
-let callbackRuntime: EgoCdpCallbackRuntime | undefined;
+let callbackRuntime: WiekCdpCallbackRuntime | undefined;
 
 export class CdpRequestTimeoutError extends Error {
-  readonly code = "EGO_CDP_REQUEST_TIMEOUT";
+  readonly code = "WIEK_CDP_REQUEST_TIMEOUT";
   readonly method: string;
   readonly timeoutMs: number;
   readonly sessionId?: string;
@@ -78,7 +78,7 @@ export function isCdpRequestTimeoutError(
     error instanceof CdpRequestTimeoutError ||
     (Boolean(error) &&
       typeof error === "object" &&
-      (error as { code?: unknown }).code === "EGO_CDP_REQUEST_TIMEOUT")
+      (error as { code?: unknown }).code === "WIEK_CDP_REQUEST_TIMEOUT")
   );
 }
 
@@ -113,7 +113,7 @@ export function isRetryableFrameLifecycleError(
  * expose it in an action receipt or surface this error to the caller.
  */
 export class PageDialogOpenedError extends Error {
-  readonly code = "EGO_PAGE_DIALOG_OPENED";
+  readonly code = "WIEK_PAGE_DIALOG_OPENED";
   readonly method: string;
   readonly sessionId: string;
   readonly dialog: Record<string, unknown>;
@@ -152,7 +152,7 @@ export function isPageDialogOpenedError(
     error instanceof PageDialogOpenedError ||
     (Boolean(error) &&
       typeof error === "object" &&
-      (error as { code?: unknown }).code === "EGO_PAGE_DIALOG_OPENED")
+      (error as { code?: unknown }).code === "WIEK_PAGE_DIALOG_OPENED")
   );
 }
 
@@ -348,15 +348,15 @@ function capEvents(events) {
 
 export function isBrowserRuntime() {
   return Boolean(
-    globalThis.ego && typeof globalThis.ego.sendCDPMessage === "function",
+    globalThis.wiek && typeof globalThis.wiek.sendCDPMessage === "function",
   );
 }
 
-export function browserEgo() {
-  if (!globalThis.ego) {
+export function browserWiek() {
+  if (!globalThis.wiek) {
     throw new Error("browser runtime is not available");
   }
-  return globalThis.ego;
+  return globalThis.wiek;
 }
 
 /** Keep exceptions from crossing the native-to-JavaScript callback boundary. */
@@ -365,7 +365,7 @@ function guardNativeCallback(label: string, callback: () => void): void {
     callback();
   } catch (error) {
     try {
-      console.error(`[ego-browser] ${label} failed:`, error);
+      console.error(`[wiek-browser] ${label} failed:`, error);
     } catch {
       // Error reporting must not re-enter the native callback failure.
     }
@@ -382,7 +382,7 @@ function dispatchCdpSendError(message: unknown, errorCode?: string): void {
   );
 }
 
-function bindRuntimeCallbacks(runtime: EgoCdpCallbackRuntime): void {
+function bindRuntimeCallbacks(runtime: WiekCdpCallbackRuntime): void {
   if (callbackRuntime && callbackRuntime !== runtime) {
     releaseRuntimeCallbacks(callbackRuntime);
   }
@@ -393,7 +393,7 @@ function bindRuntimeCallbacks(runtime: EgoCdpCallbackRuntime): void {
 
 /** Release only callbacks installed by this runtime, preserving foreign owners. */
 export function releaseRuntimeCallbacks(
-  runtime: EgoCdpCallbackRuntime | undefined = callbackRuntime,
+  runtime: WiekCdpCallbackRuntime | undefined = callbackRuntime,
 ): void {
   if (!runtime) return;
   if (runtime.onCDPMessage === dispatchCdpMessage) {
@@ -407,10 +407,10 @@ export function releaseRuntimeCallbacks(
 
 /** Stop all runtime work before an embedded Node context is discarded. */
 export function disposeBrowserRuntime(
-  runtime: EgoCdpCallbackRuntime | undefined = callbackRuntime,
+  runtime: WiekCdpCallbackRuntime | undefined = callbackRuntime,
 ): void {
   releaseRuntimeCallbacks(runtime);
-  rejectAllPending(new Error("ego-browser runtime was disposed"));
+  rejectAllPending(new Error("wiek-browser runtime was disposed"));
   browserEventSubscribers.clear();
   pageEventSubscribers.clear();
   invalidateSession();
@@ -456,7 +456,7 @@ function rawCdp(
   sessionId = undefined,
   timeoutMs = RESPONSE_TIMEOUT_MS,
 ) {
-  const runtime = browserEgo();
+  const runtime = browserWiek();
   bindRuntimeCallbacks(runtime);
   const id = nextMessageId++;
   const payload = JSON.stringify({
@@ -499,7 +499,7 @@ function rawCdp(
     } catch (error) {
       clearTimeout(timer);
       pending.delete(id);
-      reject(buildEgoError(error));
+      reject(buildWiekError(error));
     }
   });
 }
@@ -602,8 +602,8 @@ export async function ensureSession(
 
   let targetId = requestedTargetId;
   if (!targetId) {
-    const result: any = await invokeEgo("listTabs", () =>
-      browserEgo().listTabs(),
+    const result: any = await invokeWiek("listTabs", () =>
+      browserWiek().listTabs(),
     );
     const tabs = result?.tabs || result?.targetInfos || [];
     const preferred = state.preferredTargetId
@@ -1044,7 +1044,7 @@ export function prepareFileChooser(
         const error: any = new Error(
           `page.waitForFileChooser timed out after ${timeoutMs}ms`,
         );
-        error.code = "EGO_FILE_CHOOSER_TIMEOUT";
+        error.code = "WIEK_FILE_CHOOSER_TIMEOUT";
         if (target.fileChooserInterception === interception) {
           target.fileChooserInterception = null;
           rejectEvent(error);
@@ -1321,16 +1321,16 @@ function recordNetworkEvent(targetId: string, target, data): void {
   }
 }
 
-// Local send failures for ego.sendCDPMessage() arrive here instead of as a CDP
+// Local send failures for wiek.sendCDPMessage() arrive here instead of as a CDP
 // response. The callback carries no request id, so task-level failures reject
 // every pending request. User-control failures first probe the native task state:
 // the CDP callback does not carry the permission reason, while ordinary native
-// calls may do so on newer Ego Lite builds.
+// calls may do so on newer Wiek Browser builds.
 function handleSendError(message, error_code) {
   if (pending.size === 0) return;
 
-  if (error_code !== "EGO_TASK_SPACE_USER_IN_CONTROL") {
-    rejectAllPending(buildEgoError({ error: message, error_code }));
+  if (error_code !== "WIEK_TASK_SPACE_USER_IN_CONTROL") {
+    rejectAllPending(buildWiekError({ error: message, error_code }));
     return;
   }
   if (userControlProbeState === "stopped" && userControlStopError) {
@@ -1350,7 +1350,7 @@ async function probeUserControlReason(
   generation: number,
 ): Promise<void> {
   const fallback = { error: message, error_code };
-  const runtime = browserEgo();
+  const runtime = browserWiek();
   if (typeof runtime.setAgentTaskState !== "function") {
     stopForUserControl(fallback, generation);
     return;
@@ -1359,7 +1359,7 @@ async function probeUserControlReason(
   try {
     const result = await runtime.setAgentTaskState("Waiting for the user");
     if (generation !== userControlProbeGeneration) return;
-    if (isEgoUserControlError(result)) {
+    if (isWiekUserControlError(result)) {
       stopForUserControl(result, generation);
       return;
     }
@@ -1376,7 +1376,7 @@ async function probeUserControlReason(
   } catch (error) {
     if (generation !== userControlProbeGeneration) return;
     stopForUserControl(
-      isEgoUserControlError(error) ? error : fallback,
+      isWiekUserControlError(error) ? error : fallback,
       generation,
     );
   }
@@ -1384,7 +1384,7 @@ async function probeUserControlReason(
 
 function stopForUserControl(errorLike: unknown, generation: number): void {
   if (generation !== userControlProbeGeneration) return;
-  userControlStopError = buildEgoError(errorLike);
+  userControlStopError = buildWiekError(errorLike);
   userControlProbeState = "stopped";
   rejectAllPending(userControlStopError);
 }

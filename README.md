@@ -4,9 +4,9 @@
 
 ![Wiek Browser](app/assets/wiek.svg)
 
-A local Chromium browser and agent workspace with task spaces, isolated browser profiles, file/Git tools, scheduled automations, and browser automation. Wiek has an independently implemented Electron host and local services. Third-party license and copyright details are retained in [NOTICE.md](NOTICE.md).
+A local Chromium browser and agent workspace with task spaces, isolated browser profiles, file/Git tools, scheduled automations, and browser automation. Wiek has an independently implemented Electron host and local services, plus its own standalone SDK build and runtime namespace. No separate browser installation or service is required. Third-party license and copyright details are retained in [NOTICE.md](NOTICE.md).
 
-**Current checkpoint: 0.22.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
+**Current checkpoint: 0.23.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
 
 ## Run locally
 
@@ -23,6 +23,7 @@ npm start
 The native helpers and the application distribution currently target macOS ARM64. Browser automation and local services do not require a cloud account. Model-backed agent turns require a separately configured provider.
 
 ```sh
+node cli/wiek-browser.mjs install
 node cli/wiek-browser.mjs start
 node cli/wiek-browser.mjs skill
 node cli/wiek-browser.mjs status

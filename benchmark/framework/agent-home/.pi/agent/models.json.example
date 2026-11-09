@@ -1,0 +1,133 @@
+{
+  "providers": {
+    "moonshot": {
+      "name": "Moonshot (Kimi)",
+      "baseUrl": "https://api.moonshot.cn/v1",
+      "api": "openai-completions",
+      "apiKey": "$MOONSHOT_API_KEY",
+      "authHeader": true,
+      "models": [
+        {
+          "id": "kimi-k3",
+          "name": "Kimi K3",
+          "contextWindow": 1048576,
+          "maxTokens": 131072,
+          "input": [
+            "text",
+            "image"
+          ],
+          "reasoning": true,
+          "cost": {
+            "input": 3,
+            "output": 15,
+            "cacheRead": 0.3,
+            "cacheWrite": 0
+          },
+          "compat": {
+            "supportsDeveloperRole": false,
+            "requiresReasoningContentOnAssistantMessages": true,
+            "thinkingFormat": "deepseek"
+          }
+        }
+      ]
+    },
+    "deepseek": {
+      "baseUrl": "https://api.deepseek.com",
+      "api": "openai-completions",
+      "apiKey": "$DEEPSEEK_API_KEY",
+      "models": [
+        {
+          "id": "deepseek-v4-pro",
+          "name": "DeepSeek V4 Pro",
+          "contextWindow": 1000000,
+          "maxTokens": 384000,
+          "input": [
+            "text"
+          ],
+          "reasoning": true,
+          "cost": {
+            "input": 1.74,
+            "output": 3.48,
+            "cacheRead": 0.145,
+            "cacheWrite": 0
+          },
+          "compat": {
+            "requiresReasoningContentOnAssistantMessages": true,
+            "thinkingFormat": "deepseek",
+            "reasoningEffortMap": {
+              "minimal": "high",
+              "low": "high",
+              "medium": "high",
+              "high": "high",
+              "xhigh": "max"
+            }
+          }
+        },
+        {
+          "id": "deepseek-v4-flash",
+          "name": "DeepSeek V4 Flash",
+          "contextWindow": 1000000,
+          "maxTokens": 384000,
+          "input": [
+            "text"
+          ],
+          "reasoning": true,
+          "cost": {
+            "input": 0.14,
+            "output": 0.28,
+            "cacheRead": 0.028,
+            "cacheWrite": 0
+          },
+          "compat": {
+            "requiresReasoningContentOnAssistantMessages": true,
+            "thinkingFormat": "deepseek",
+            "reasoningEffortMap": {
+              "minimal": "high",
+              "low": "high",
+              "medium": "high",
+              "high": "high",
+              "xhigh": "max"
+            }
+          }
+        }
+      ]
+    },
+    "bailian": {
+      "name": "Bailian (Qwen)",
+      "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "api": "openai-responses",
+      "apiKey": "$DASHSCOPE_API_KEY",
+      "authHeader": true,
+      "models": [
+        {
+          "id": "qwen3.7-max",
+          "name": "Qwen3.7 Max",
+          "contextWindow": 1000000,
+          "maxTokens": 65536,
+          "input": ["text"],
+          "reasoning": true,
+          "cost": {
+            "input": 12,
+            "output": 36,
+            "cacheRead": 2.4,
+            "cacheWrite": 0
+          }
+        },
+        {
+          "id": "qwen3.7-plus",
+          "name": "Qwen3.7 Plus",
+          "contextWindow": 1000000,
+          "maxTokens": 65536,
+          "input": ["text", "image"],
+          "reasoning": true,
+          "cost": {
+            "input": 2,
+            "output": 8,
+            "cacheRead": 0.4,
+            "cacheWrite": 0
+          }
+        }
+      ]
+    }
+  }
+}

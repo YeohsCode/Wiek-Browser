@@ -1,5 +1,7 @@
-# Install Wiek Browser
+# Install or update Wiek Browser
 
-Use the Wiek repository and its [current build instructions](../../../README.md). From a checkout: `npm ci`, `npm --prefix packages/sdk ci --ignore-scripts`, `npm run build:sdk`, then `npm start`. The canonical CLI is `node cli/wiek-browser.mjs`; the old `vek-browser` entry is a compatibility alias.
+From the Wiek checkout, run `node cli/wiek-browser.mjs install` to register the command and Skill. The application package also includes `cli/wiek-browser.mjs`; its install command uses that package as the runtime root. Ensure `~/.local/bin` is on PATH.
 
-This project does not provide an automatic updater or a signed public installer yet. Build the macOS application with `npm run dist`; restore the pinned optional speech model with `node tools/fetch-speech-model.mjs` before building a speech-enabled package. Do not download Ego as a replacement for Wiek.
+Build a local macOS ARM64 application with `npm ci`, `npm --prefix packages/sdk ci --ignore-scripts`, `npm run build:sdk`, `npm run build:desktop-native`, and `npm run dist`. Optional speech models are restored with `node tools/fetch-speech-model.mjs`.
+
+`wiek-browser upgrade` describes the explicit build/update process. It never downloads a different browser or runs an automatic installer. After rebuilding, run `wiek-browser skill` again.

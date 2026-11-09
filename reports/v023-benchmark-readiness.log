@@ -1,0 +1,19 @@
+{
+  "generatedAt": "2026-11-09T16:58:55.422Z",
+  "repositoryOwned": true,
+  "benchmarkRun": false,
+  "modelCalls": 0,
+  "accountActions": 0,
+  "tasks": {
+    "count": 31,
+    "sameOrderedIds": true,
+    "datasetSha256": "e1495bef65b83c7bcb4cf3bf7a6e515239c6763c620efe1d31749ad6d54f6200"
+  },
+  "sdkSha256": "6d1ef3537f56eea38ecb72c381b1267d8a489faf5d98c1455eace8ce3c67ef28",
+  "requirements": [
+    "Dedicated Stage A and Judge models with explicit limits",
+    "Dedicated account/login state",
+    "Explicit evaluation launch"
+  ],
+  "runtimeDependency": "Wiek Browser only"
+}

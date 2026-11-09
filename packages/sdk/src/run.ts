@@ -34,12 +34,12 @@ export type RunMainOptions = {
   stdinText?: string;
 };
 
-export const HELP = `ego-browser
+export const HELP = `wiek-browser
 
-Read the ego-browser skill for the default workflow and examples.
+Read the wiek-browser skill for the default workflow and examples.
 
 Typical usage:
-  ego-browser <<'JS'
+  wiek-browser <<'JS'
   const task = await taskSpace('demo')
   const page = task.page('p1')
   await page.goto('https://example.com')
@@ -50,7 +50,7 @@ Helpers are pre-imported and the browser connection is prepared automatically.
 `;
 
 export const USAGE = `Usage:
-  ego-browser <<'JS'
+  wiek-browser <<'JS'
   const task = await taskSpace('demo')
   const page = task.page('p1')
   await page.goto('https://example.com')
@@ -121,7 +121,7 @@ function userScriptSyntaxError(code: string, original: unknown): SyntaxError {
     // V8 omits source locations for Function-constructor syntax errors. Acorn
     // only runs after compilation fails and recovers the location in the
     // user's script; wrapping preserves top-level await support.
-    parse(`async function __egoBrowserUserScript__() {\n${code}\n}`, {
+    parse(`async function __wiekBrowserUserScript__() {\n${code}\n}`, {
       ecmaVersion: "latest",
       sourceType: "script",
     });
@@ -149,7 +149,7 @@ function userScriptSyntaxError(code: string, original: unknown): SyntaxError {
 export async function executionContext() {
   const agentHelpers = await helpers.loadAgentHelpers();
   // Single source of truth for the agent-facing surface: the same helperContext()
-  // that installEgoSdk() exposes in the browser runtime, so the CLI and SDK paths
+  // that installWiekSdk() exposes in the browser runtime, so the CLI and SDK paths
   // cannot drift apart (and `help` exists in both).
   const context: Record<string, any> = helpers.helperContext(agentHelpers);
   context.cliLog = (...args: unknown[]) => {

@@ -176,7 +176,7 @@ export async function resolveElementObjectId(
           "DOM.resolveNode",
           {
             backendNodeId: entry.backendNodeId,
-            objectGroup: "ego-browser",
+            objectGroup: "wiek-browser",
           },
           effectiveSessionId,
         );
@@ -206,7 +206,7 @@ export async function resolveElementObjectId(
     const result = await send(
       cdp,
       "DOM.resolveNode",
-      { backendNodeId, objectGroup: "ego-browser" },
+      { backendNodeId, objectGroup: "wiek-browser" },
       effectiveSessionId,
     );
     const objectId = result.object?.objectId;
@@ -249,7 +249,7 @@ export async function resolveElementObjectId(
       context,
       buildFindElementJs(selectorOrRef),
       false,
-      "ego-browser",
+      "wiek-browser",
     );
     if (result.exceptionDetails) {
       throw invalidSelectorError(selectorOrRef, result);
@@ -354,7 +354,7 @@ async function resolveRefObjectIdWithRecoveredFrame(
     "DOM.resolveNode",
     {
       backendNodeId: match.backendNodeId,
-      objectGroup: "ego-browser",
+      objectGroup: "wiek-browser",
     },
     match.sessionId,
   );
@@ -588,7 +588,7 @@ async function validateDomLocatorBackendNodes(
     }
     return total === 1 ? matchedContext : -1;
   });
-  const objectGroup = `ego-browser-snapshot-locators-${++snapshotLocatorBatchSequence}`;
+  const objectGroup = `wiek-browser-snapshot-locators-${++snapshotLocatorBatchSequence}`;
   const usedSessions = new Set<string>();
 
   try {
@@ -710,7 +710,7 @@ async function resolveRawSelectorObjectId(
       ? `(() => ${buildActionableElementsJs(buildRawSelectorElementsJs(selector), actionability)}[0] || null)()`
       : buildFindElementJs(selector.raw),
     false,
-    "ego-browser",
+    "wiek-browser",
   );
   if (result.exceptionDetails) {
     throw invalidSelectorError(selector.raw, result);
@@ -967,7 +967,7 @@ async function runtimePageContext(
       "Page.createIsolatedWorld",
       {
         frameId: context.frameId,
-        worldName: "ego-browser-locator",
+        worldName: "wiek-browser-locator",
         grantUniveralAccess: true,
       },
       context.sessionId,
@@ -1098,7 +1098,7 @@ async function resolveLocatorObjectId(
       "DOM.resolveNode",
       {
         backendNodeId: match.backendNodeId,
-        objectGroup: "ego-browser",
+        objectGroup: "wiek-browser",
       },
       match.sessionId,
     );
@@ -1129,7 +1129,7 @@ async function resolveLocatorObjectId(
       ? buildLocatorActionableFindJs(locator, options.actionability)
       : buildLocatorFindJs(locator),
     false,
-    "ego-browser",
+    "wiek-browser",
   );
   const objectId = result.result?.objectId;
   if (!objectId) {
@@ -1391,7 +1391,7 @@ async function roleMatchActionability(
       "DOM.resolveNode",
       {
         backendNodeId: match.backendNodeId,
-        objectGroup: "ego-browser",
+        objectGroup: "wiek-browser",
       },
       match.sessionId,
     );
@@ -1765,7 +1765,7 @@ function buildActionableElementsJs(
 ) {
   return `(() => {
             ${actionabilityRequiresPointer(actionability) ? HIT_TARGET_HELPERS : ACTION_TARGET_STATE_HELPERS}
-            const __egoActionableMatches = Array.from(${elementsExpression} || []).filter((element) => {
+            const __wiekActionableMatches = Array.from(${elementsExpression} || []).filter((element) => {
               if (!element?.isConnected || element.closest?.("[hidden], [inert]")) return false;
               const view = element.ownerDocument?.defaultView;
               if (!view) return false;
@@ -1785,7 +1785,7 @@ function buildActionableElementsJs(
               return Boolean(scrollRequestForPoint(element, point)) ||
                 !interceptingElementAtPoint(element, point);
             });
-            return __egoActionableMatches;
+            return __wiekActionableMatches;
           })()`;
 }
 
@@ -1899,7 +1899,7 @@ function buildLocatorElementsJs(locator) {
 function buildMatchDiagnosticsJs(elementsExpression) {
   return `(() => {
             ${ACTION_TARGET_STATE_HELPERS}
-            const __egoDescribeMatches = (values) => {
+            const __wiekDescribeMatches = (values) => {
               const elements = Array.from(values || []).filter(Boolean);
               const normalize = (value) =>
                 String(value ?? "").replace(/\\s+/g, " ").trim();
@@ -1937,7 +1937,7 @@ function buildMatchDiagnosticsJs(elementsExpression) {
                 candidates
               };
             };
-            return __egoDescribeMatches(${elementsExpression});
+            return __wiekDescribeMatches(${elementsExpression});
           })()`;
 }
 
@@ -2072,7 +2072,7 @@ function textElementsJs(locator) {
               "TEMPLATE",
               "TITLE"
             ]);
-            const elements = __egoQueryAllOpenShadow("*").filter(
+            const elements = __wiekQueryAllOpenShadow("*").filter(
               (element) => !excludedTags.has(element.tagName)
             );
 
@@ -2133,7 +2133,7 @@ function textElementsJs(locator) {
 // Query every reachable tree scope so those locators have the same meaning
 // when an action reuses them. XPath deliberately keeps document-only semantics.
 const OPEN_SHADOW_QUERY_HELPER = `
-  function __egoQueryAllOpenShadow(selector) {
+  function __wiekQueryAllOpenShadow(selector) {
     const matches = [];
     const roots = [document];
     while (roots.length) {
@@ -2152,21 +2152,21 @@ const OPEN_SHADOW_QUERY_HELPER = `
 function buildCssQueryAllJs(selector) {
   return `(() => {
             ${OPEN_SHADOW_QUERY_HELPER}
-            return __egoQueryAllOpenShadow(${JSON.stringify(selector)});
+            return __wiekQueryAllOpenShadow(${JSON.stringify(selector)});
           })()`;
 }
 
 function buildCssFindJs(selector) {
   return `(() => {
             ${OPEN_SHADOW_QUERY_HELPER}
-            return __egoQueryAllOpenShadow(${JSON.stringify(selector)})[0] || null;
+            return __wiekQueryAllOpenShadow(${JSON.stringify(selector)})[0] || null;
           })()`;
 }
 
 function buildCssCountJs(selector) {
   return `(() => {
             ${OPEN_SHADOW_QUERY_HELPER}
-            return __egoQueryAllOpenShadow(${JSON.stringify(selector)}).length;
+            return __wiekQueryAllOpenShadow(${JSON.stringify(selector)}).length;
           })()`;
 }
 

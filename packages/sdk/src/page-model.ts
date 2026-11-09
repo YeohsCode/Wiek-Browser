@@ -3,7 +3,7 @@ import { dirname, isAbsolute } from "node:path";
 
 import {
   browserCdp,
-  browserEgo,
+  browserWiek,
   drainPageEvents,
   ensureNetworkTracking,
   ensureSession,
@@ -84,7 +84,7 @@ import {
   type PageWaitForURLOptions,
 } from "./driver/page-waits.js";
 import { ElementResolutionError } from "./element-resolver.js";
-import { invokeEgo, probeAgentControl } from "./ego-errors.js";
+import { invokeWiek, probeAgentControl } from "./wiek-errors.js";
 import {
   withPage as defaultWithPage,
   withSpace as defaultWithSpace,
@@ -414,7 +414,7 @@ export type PageActionReceipt = {
 };
 
 export class PageEvaluationTimeoutError extends Error {
-  readonly code = "EGO_PAGE_EVALUATION_TIMED_OUT";
+  readonly code = "WIEK_PAGE_EVALUATION_TIMED_OUT";
   readonly timeoutMs: number;
   readonly executionStopped: boolean;
   readonly mayHaveLateEffects: boolean;
@@ -652,7 +652,7 @@ class PageKeyboard {
 }
 
 class PageBudgetError extends Error {
-  readonly code = "EGO_PAGE_BUDGET_REACHED";
+  readonly code = "WIEK_PAGE_BUDGET_REACHED";
   readonly spaceId: number;
   readonly limit: number;
 
@@ -682,8 +682,8 @@ const baseDefaultServices: Omit<PageModelServices, "ledger" | "pageBudget"> = {
   gate: defaultGate,
   pageRefs: defaultPageRefs,
   async createTab(url) {
-    const result = await invokeEgo("task.newPage", () =>
-      browserEgo().createTab(url),
+    const result = await invokeWiek("task.newPage", () =>
+      browserWiek().createTab(url),
     );
     const targetId = result?.targetId || result?.result?.targetId;
     if (typeof targetId !== "string" || targetId.length === 0) {
@@ -692,54 +692,54 @@ const baseDefaultServices: Omit<PageModelServices, "ledger" | "pageBudget"> = {
     return targetId;
   },
   async listTabs() {
-    const result = await invokeEgo("task.listTabs", () =>
-      browserEgo().listTabs(),
+    const result = await invokeWiek("task.listTabs", () =>
+      browserWiek().listTabs(),
     );
     return result?.tabs || result?.targetInfos || [];
   },
   async probeAgentControl() {
-    // Do not route this through invokeEgo: observing user control is the
+    // Do not route this through invokeWiek: observing user control is the
     // expected waiting state, not a hard-stop signal.
     return probeAgentControl(() =>
-      browserEgo().snapshot({ maxResultLength: 1 }),
+      browserWiek().snapshot({ maxResultLength: 1 }),
     );
   },
   async handOffTaskSpace() {
-    const ego = browserEgo();
-    if (typeof ego.handOffTaskSpace !== "function") {
-      throw new Error("task.handOff requires ego.handOffTaskSpace");
+    const wiek = browserWiek();
+    if (typeof wiek.handOffTaskSpace !== "function") {
+      throw new Error("task.handOff requires wiek.handOffTaskSpace");
     }
-    await invokeEgo("task.handOff", () => ego.handOffTaskSpace());
+    await invokeWiek("task.handOff", () => wiek.handOffTaskSpace());
   },
   async completeTaskSpace() {
-    const ego = browserEgo();
-    if (typeof ego.completeTaskSpace !== "function") {
-      throw new Error("task.finish requires ego.completeTaskSpace");
+    const wiek = browserWiek();
+    if (typeof wiek.completeTaskSpace !== "function") {
+      throw new Error("task.finish requires wiek.completeTaskSpace");
     }
-    await invokeEgo("task.finish", () => ego.completeTaskSpace());
+    await invokeWiek("task.finish", () => wiek.completeTaskSpace());
   },
   async closeTaskSpace() {
-    const ego = browserEgo();
-    if (typeof ego.closeTaskSpace !== "function") {
-      throw new Error("task.close requires ego.closeTaskSpace");
+    const wiek = browserWiek();
+    if (typeof wiek.closeTaskSpace !== "function") {
+      throw new Error("task.close requires wiek.closeTaskSpace");
     }
-    await invokeEgo("task.close", () => ego.closeTaskSpace());
+    await invokeWiek("task.close", () => wiek.closeTaskSpace());
   },
   async cdp(method, params = {}, sessionId, timeoutMs) {
     const response = await browserCdp(method, params, sessionId, timeoutMs);
     return response?.result || {};
   },
   async showAgentMousePosition(x, y) {
-    const ego = browserEgo();
-    if (typeof ego.animationHighlightMouseToPosition !== "function") return;
-    await invokeEgo("page.mouse.move", () =>
-      ego.animationHighlightMouseToPosition(x, y),
+    const wiek = browserWiek();
+    if (typeof wiek.animationHighlightMouseToPosition !== "function") return;
+    await invokeWiek("page.mouse.move", () =>
+      wiek.animationHighlightMouseToPosition(x, y),
     );
   },
   async showAgentTaskState(state) {
-    const ego = browserEgo();
-    if (typeof ego.setAgentTaskState !== "function") return;
-    await invokeEgo("page.mouse.label", () => ego.setAgentTaskState(state));
+    const wiek = browserWiek();
+    if (typeof wiek.setAgentTaskState !== "function") return;
+    await invokeWiek("page.mouse.label", () => wiek.setAgentTaskState(state));
   },
   withTemporaryClipboardText,
   snapshot: snapshotRaw,
@@ -788,7 +788,7 @@ export function createTaskSpaceHandle(
   if (!descriptor || !Number.isInteger(descriptor.id)) {
     throw new TypeError("TaskSpace requires a numeric id");
   }
-  // Ego Lite imports the SDK before it evaluates the submitted script. Resolve
+  // Wiek Browser imports the SDK before it evaluates the submitted script. Resolve
   // environment-backed settings lazily so SDK callers can configure a round
   // before their first taskSpace() call.
   defaultLedger ||= new PageLedgerStore({
@@ -1261,7 +1261,7 @@ class TaskSpace {
         });
       } catch (error) {
         // A tab without a committed label cannot be returned safely. Close it
-        // only when createTab produced a new target. Ego Lite may reuse a blank
+        // only when createTab produced a new target. Wiek Browser may reuse a blank
         // anchor tab; closing a pre-existing target on a ledger error could
         // destroy a page the runtime does not own.
         if (!existedBeforeCreate) {
@@ -3071,7 +3071,7 @@ async function evaluateInSession<T>(
     response = await services.cdp(
       "Runtime.evaluate",
       {
-        expression: `(async function __egoPageEvaluate() {
+        expression: `(async function __wiekPageEvaluate() {
         return await ${pageFunctionCallExpression(
           source,
           hasArgument,
@@ -3136,10 +3136,10 @@ function waitForFunctionExpression(
   serializedArgument: unknown,
 ): string {
   if (typeof expression === "string") {
-    return `(async function __egoWaitForFunction() { return { matched: Boolean(await (${expression})), url: location.href, title: document.title }; })()`;
+    return `(async function __wiekWaitForFunction() { return { matched: Boolean(await (${expression})), url: location.href, title: document.title }; })()`;
   }
   const source = expression.toString();
-  return `(async function __egoWaitForFunction() { return { matched: Boolean(await ${pageFunctionCallExpression(
+  return `(async function __wiekWaitForFunction() { return { matched: Boolean(await ${pageFunctionCallExpression(
     source,
     hasArgument,
     serializedArgument,
@@ -3209,7 +3209,7 @@ function isRuntimeEvaluateTransportTimeout(error: unknown): boolean {
 function isEvaluationExecutionDeadlineError(error: unknown): boolean {
   return (
     error instanceof Error &&
-    (error as Error & { code?: string }).code === "EGO_PAGE_EXECUTION_DEADLINE"
+    (error as Error & { code?: string }).code === "WIEK_PAGE_EXECUTION_DEADLINE"
   );
 }
 
@@ -3237,7 +3237,7 @@ function normalizeProtocolExecutionTimeout(
 ): unknown {
   if (!isProtocolExecutionTimeout(error, elapsedMs, timeoutMs)) return error;
   if (error instanceof Error) {
-    (error as Error & { code?: string }).code = "EGO_PAGE_EXECUTION_DEADLINE";
+    (error as Error & { code?: string }).code = "WIEK_PAGE_EXECUTION_DEADLINE";
   }
   return error;
 }
@@ -3550,7 +3550,7 @@ function unhandledFileChooserError(): Error & { code: string } {
       "Use page.setInputFiles() for an existing file input, or call " +
       "page.waitForFileChooser() before the action when the input is created dynamically.",
   ) as Error & { code: string };
-  error.code = "EGO_FILE_CHOOSER_OPENED";
+  error.code = "WIEK_FILE_CHOOSER_OPENED";
   return error;
 }
 
@@ -3575,7 +3575,7 @@ function matchingPopupWaitError(
       `The triggering action already succeeded; do not repeat it. Continue with ` +
       `task.page(${JSON.stringify(popup.label)}).`,
   ) as Error & { code: string };
-  error.code = "EGO_URL_OPENED_IN_POPUP";
+  error.code = "WIEK_URL_OPENED_IN_POPUP";
   return error;
 }
 
@@ -3694,6 +3694,6 @@ function compactPageTitle(value: string): string {
 }
 
 function configuredPageBudget(): number {
-  const configured = Number(process.env.EGO_BROWSER_PAGE_BUDGET || 8);
+  const configured = Number(process.env.WIEK_BROWSER_PAGE_BUDGET || 8);
   return Number.isInteger(configured) && configured > 0 ? configured : 8;
 }

@@ -1,21 +1,20 @@
 {
-  "name": "ego-browser-v2",
+  "name": "wiek-browser-sdk",
   "version": "0.1.0",
-  "description": "A TypeScript single-file build of the ego-browser CDP harness.",
+  "description": "Standalone Wiek Browser CDP automation runtime",
   "type": "module",
   "bin": {
-    "ego-browser": "./dist/out/index.js"
+    "wiek-sdk": "./dist/out/index.js"
   },
   "scripts": {
     "clean": "rm -rf dist artifacts",
     "build": "node scripts/build.mjs",
     "check:skill-translation": "node scripts/check-skill-translation.mjs",
-    "e2e": "node scripts/run-real-browser-e2e.mjs",
-    "prepare": "if [ \"$CI\" = \"true\" ]; then exit 0; fi; cd ../.. && lefthook install",
+    "e2e": "node ../../tools/run-sdk-regression.mjs --browser",
     "style:check": "prettier --check \"src/**/*.{ts,mjs,js}\" \"scripts/**/*.{ts,mjs,js}\" package.json README.md",
     "typecheck": "tsc --noEmit",
-    "test": "npm run build && npm run check:skill-translation && npm run typecheck && node --test \"src/**/*.test.mjs\"",
-    "validate:site-skills": "npm run build && EGO_BROWSER_AGENT_WORKSPACE=../../skills/ego-browser node dist/scripts/validate-site-skills.js"
+    "test": "npm run build && npm run check:skill-translation && npm run typecheck && node ../../tools/run-sdk-regression.mjs",
+    "validate:site-skills": "npm run build && WIEK_BROWSER_AGENT_WORKSPACE=../../skills/wiek-browser node dist/scripts/validate-site-skills.js"
   },
   "engines": {
     "node": ">=22"

@@ -1,7 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
-import { browserEgo, ensureSession } from "./browser-runtime.js";
-import { invokeEgo } from "./ego-errors.js";
+import { browserWiek, ensureSession } from "./browser-runtime.js";
+import { invokeWiek } from "./wiek-errors.js";
 
 type SpaceScope = {
   spaceId: number;
@@ -27,7 +27,7 @@ type GateOwnership = SpaceScope & {
 };
 
 /**
- * Serializes native operations that rely on Ego Lite's process-wide selected
+ * Serializes native operations that rely on Wiek Browser's process-wide selected
  * task space. The queue covers the entire async operation, so another caller
  * cannot change the selected space while a request is still in flight.
  */
@@ -129,11 +129,11 @@ function assertSpaceId(spaceId: number): void {
 
 const defaultGate = new NativeOperationGate({
   async selectSpace(spaceId) {
-    const ego = browserEgo();
-    if (typeof ego.useTaskSpace !== "function") {
-      throw new Error("withSpace requires ego.useTaskSpace");
+    const wiek = browserWiek();
+    if (typeof wiek.useTaskSpace !== "function") {
+      throw new Error("withSpace requires wiek.useTaskSpace");
     }
-    await invokeEgo("withSpace", () => ego.useTaskSpace(spaceId));
+    await invokeWiek("withSpace", () => wiek.useTaskSpace(spaceId));
   },
   ensureSession,
 });

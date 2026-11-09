@@ -224,7 +224,7 @@ async function installClickProbe(point: Point) {
       {
         expression: `(() => {
         const target = document.elementFromPoint(${JSON.stringify(point.x)}, ${JSON.stringify(point.y)});
-        window.__egoBrowserInputProbes ||= {};
+        window.__wiekBrowserInputProbes ||= {};
         const probe = { seen: false, target };
         probe.handler = (event) => {
           if (event.isTrusted && target && (event.target === target || target.contains(event.target))) {
@@ -232,7 +232,7 @@ async function installClickProbe(point: Point) {
           }
         };
         document.addEventListener("click", probe.handler, true);
-        window.__egoBrowserInputProbes[${JSON.stringify(id)}] = probe;
+        window.__wiekBrowserInputProbes[${JSON.stringify(id)}] = probe;
         return Boolean(target);
       })()`,
         returnByValue: true,
@@ -258,7 +258,7 @@ async function finishClickProbe(
       "Runtime.evaluate",
       {
         expression: `(() => {
-        const probes = window.__egoBrowserInputProbes || {};
+        const probes = window.__wiekBrowserInputProbes || {};
         const probe = probes[${JSON.stringify(id)}];
         if (!probe) return { seen: false, fallback: false };
         document.removeEventListener("click", probe.handler, true);
@@ -303,7 +303,7 @@ async function installMouseUpProbe(point: Point) {
       {
         expression: `(() => {
         const target = document.elementFromPoint(${JSON.stringify(point.x)}, ${JSON.stringify(point.y)});
-        window.__egoBrowserInputProbes ||= {};
+        window.__wiekBrowserInputProbes ||= {};
         const probe = { seen: false, target };
         probe.handler = (event) => {
           if (event.isTrusted && target && (event.target === target || target.contains(event.target))) {
@@ -311,7 +311,7 @@ async function installMouseUpProbe(point: Point) {
           }
         };
         document.addEventListener("mouseup", probe.handler, true);
-        window.__egoBrowserInputProbes[${JSON.stringify(id)}] = probe;
+        window.__wiekBrowserInputProbes[${JSON.stringify(id)}] = probe;
         return Boolean(target);
       })()`,
         returnByValue: true,
@@ -334,7 +334,7 @@ async function installHoverProbe(point: Point) {
       {
         expression: `(() => {
         const target = document.elementFromPoint(${JSON.stringify(point.x)}, ${JSON.stringify(point.y)});
-        window.__egoBrowserInputProbes ||= {};
+        window.__wiekBrowserInputProbes ||= {};
         const probe = { seen: false, target };
         probe.handler = (event) => {
           if (event.isTrusted && target && (event.target === target || target.contains(event.target))) {
@@ -343,7 +343,7 @@ async function installHoverProbe(point: Point) {
         };
         document.addEventListener("mousemove", probe.handler, true);
         document.addEventListener("mouseover", probe.handler, true);
-        window.__egoBrowserInputProbes[${JSON.stringify(id)}] = probe;
+        window.__wiekBrowserInputProbes[${JSON.stringify(id)}] = probe;
         return Boolean(target);
       })()`,
         returnByValue: true,
@@ -365,7 +365,7 @@ async function finishHoverProbe(point: Point, id: string | null) {
       "Runtime.evaluate",
       {
         expression: `(() => {
-        const probes = window.__egoBrowserInputProbes || {};
+        const probes = window.__wiekBrowserInputProbes || {};
         const probe = probes[${JSON.stringify(id)}];
         if (!probe) return { seen: false, fallback: false };
         document.removeEventListener("mousemove", probe.handler, true);
@@ -412,7 +412,7 @@ async function finishDragProbe(
       "Runtime.evaluate",
       {
         expression: `(() => {
-        const probes = window.__egoBrowserInputProbes || {};
+        const probes = window.__wiekBrowserInputProbes || {};
         const probe = probes[${JSON.stringify(id)}];
         if (!probe) return { seen: false, fallback: false };
         document.removeEventListener("mouseup", probe.handler, true);
@@ -451,7 +451,7 @@ async function finishDragProbe(
 }
 
 function canProbeInputFallback() {
-  return Boolean((globalThis as any).ego?.sendCDPMessage);
+  return Boolean((globalThis as any).wiek?.sendCDPMessage);
 }
 
 /**
@@ -503,7 +503,7 @@ export async function scroll(
       hasWarnedAboutWheelFallback = true;
       const message = error instanceof Error ? error.message : String(error);
       process.stderr.write(
-        `[ego-browser] scroll(): wheel dispatch unsupported on this target (${message}); ` +
+        `[wiek-browser] scroll(): wheel dispatch unsupported on this target (${message}); ` +
           `falling back to DOM scrollBy(). Wheel-only behaviors (virtualized lists, inner scroll panes) may not trigger.\n`,
       );
     }
@@ -589,11 +589,11 @@ export async function scrollToBottomUntil(
 }
 
 function maybeHighlight(point: Point, label?: string) {
-  const ego = (globalThis as any).ego;
-  if (!ego) return;
-  ego.animationHighlightMouseToPosition?.(point.x, point.y);
+  const wiek = (globalThis as any).wiek;
+  if (!wiek) return;
+  wiek.animationHighlightMouseToPosition?.(point.x, point.y);
   if (label) {
-    ego.setAgentTaskState?.(label);
+    wiek.setAgentTaskState?.(label);
   }
 }
 

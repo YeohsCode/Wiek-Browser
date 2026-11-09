@@ -15,7 +15,7 @@ for(const base of [root,...(packaged?[packaged]:[])])for(const dir of ['app','sk
 }
 const appIcon=sha(await readFile(join(root,'app/assets/wiek.png')));
 const mappings=[];
-for(const base of [root,...(packaged?[packaged]:[])])for(const skill of ['wiek-browser','ego-browser']){
+for(const base of [root,...(packaged?[packaged]:[])])for(const skill of ['wiek-browser']){
   const actual=sha(await readFile(join(base,'skills',skill,'assets/logo.png')));
   mappings.push({base,skill,matches:actual===appIcon});
 }

@@ -29,12 +29,12 @@ type ClipboardHostMessage = {
 };
 
 export class ClipboardRestoreError extends Error {
-  readonly code = "EGO_CLIPBOARD_RESTORE_FAILED";
+  readonly code = "WIEK_CLIPBOARD_RESTORE_FAILED";
   readonly pasteCompleted = true;
 
   constructor(cause: unknown) {
     super(
-      "The paste completed, but ego-browser could not restore the clipboard. Do not retry the paste.",
+      "The paste completed, but wiek-browser could not restore the clipboard. Do not retry the paste.",
       { cause },
     );
     this.name = "ClipboardRestoreError";
@@ -88,7 +88,7 @@ export async function withTemporaryClipboardText<T>(
       if (restoreError !== undefined) {
         throw new AggregateError(
           [actionError, restoreError],
-          "The paste action failed and ego-browser could not restore the clipboard.",
+          "The paste action failed and wiek-browser could not restore the clipboard.",
         );
       }
       throw actionError;
@@ -436,7 +436,7 @@ ObjC.import("Foundation");
 
 const pasteboard = $.NSPasteboard.generalPasteboard;
 const transactionLock = $.NSDistributedLock.alloc.initWithPath(
-  $(ObjC.unwrap($.NSTemporaryDirectory()) + "ego-browser-clipboard.lock")
+  $(ObjC.unwrap($.NSTemporaryDirectory()) + "wiek-browser-clipboard.lock")
 );
 
 function acquireTransactionLock() {
@@ -451,7 +451,7 @@ function acquireTransactionLock() {
       continue;
     }
     if (Date.now() >= deadline) {
-      throw new Error("another ego-browser process is using the clipboard");
+      throw new Error("another wiek-browser process is using the clipboard");
     }
     $.NSThread.sleepForTimeInterval(0.02);
   }
@@ -562,10 +562,10 @@ function Send-HostMessage($message) {
 # GetClipboardSequenceNumber plays the role of NSPasteboard.changeCount.
 # Reflection.Emit binds it without Add-Type, which would spawn the C# compiler.
 $nativeAssembly = [AppDomain]::CurrentDomain.DefineDynamicAssembly(
-  [System.Reflection.AssemblyName]::new('EgoBrowserClipboard'),
+  [System.Reflection.AssemblyName]::new('WiekBrowserClipboard'),
   [System.Reflection.Emit.AssemblyBuilderAccess]::Run)
-$nativeBuilder = $nativeAssembly.DefineDynamicModule('EgoBrowserClipboard').DefineType(
-  'EgoBrowserClipboardNative', 'Public, Class')
+$nativeBuilder = $nativeAssembly.DefineDynamicModule('WiekBrowserClipboard').DefineType(
+  'WiekBrowserClipboardNative', 'Public, Class')
 $sequenceMethod = $nativeBuilder.DefinePInvokeMethod(
   'GetClipboardSequenceNumber',
   'user32.dll',
@@ -612,7 +612,7 @@ function Restore-Clipboard($saved) {
   }
 }
 
-$mutex = [System.Threading.Mutex]::new($false, 'Local\ego-browser-clipboard')
+$mutex = [System.Threading.Mutex]::new($false, 'Local\wiek-browser-clipboard')
 $locked = $false
 $exitCode = 0
 try {
@@ -624,7 +624,7 @@ try {
   } catch [System.Threading.AbandonedMutexException] {
     $locked = $true
   }
-  if (-not $locked) { throw 'another ego-browser process is using the clipboard' }
+  if (-not $locked) { throw 'another wiek-browser process is using the clipboard' }
 
   $saved = Save-Clipboard
   try {

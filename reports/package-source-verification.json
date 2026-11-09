@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-11-05T23:51:34.884Z",
-  "version": "0.22.0",
+  "generatedAt": "2026-11-09T17:02:58.754Z",
+  "version": "0.23.0",
   "versionMatches": true,
-  "checkedFiles": 204,
+  "checkedFiles": 199,
   "allMatch": true,
-  "sdkSha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+  "sdkSha256": "6d1ef3537f56eea38ecb72c381b1267d8a489faf5d98c1455eace8ce3c67ef28",
   "sdkMatchesCompared": true,
   "files": [
     {
       "file": "NOTICE.md",
-      "sha256": "1d058a694c622d26f0d6061f71d94cc7733baf126f74e8f202775a9bc5b0bbe0",
+      "sha256": "ce1d275e6cec4074c66bc7173e138c3c6c2a24cc6b1a062182187dfd06e4228a",
       "matches": true
     },
     {
@@ -224,7 +224,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "df4029b41ae60eb14a14d5c7404c3a26c350d427fc4b62e4f364131262b50478",
+      "sha256": "1db1b655fe4e07ee202ce2a8d1341aceb44b29ea0fce5a32f81449ab0b5f75ae",
       "matches": true
     },
     {
@@ -334,7 +334,7 @@
     },
     {
       "file": "app/renderer.js",
-      "sha256": "0a28c6458124fcdaff7fe8390726576f81d8f87a50e49f913ed081cf40f87385",
+      "sha256": "d1ea2b7fbf0042a667080ad5a0d9414d2753f39a567ea7a32e2589b6f28bfbe5",
       "matches": true
     },
     {
@@ -404,7 +404,7 @@
     },
     {
       "file": "app/snapshot.cjs",
-      "sha256": "4d363687ee3f69426f6526979c3e34f52b0fd86ea29b8770c51d08561f4273f9",
+      "sha256": "963be8c4b2af2e2e2df0bb76064d379de5d7f809f0905e9afc2279be2b8b6f13",
       "matches": true
     },
     {
@@ -488,6 +488,11 @@
       "matches": true
     },
     {
+      "file": "cli/install.mjs",
+      "sha256": "54f613b5201e6abd34f0eb33d8481bfc0e999fa46e8818862d96e7b0416dcc06",
+      "matches": true
+    },
+    {
       "file": "cli/translation-install.mjs",
       "sha256": "6c65bd241e7d11c67662e891580dc4496c1e9dc9a2ef8cb8385cbaa17206101b",
       "matches": true
@@ -499,7 +504,7 @@
     },
     {
       "file": "cli/wiek-browser.mjs",
-      "sha256": "8b679e84ba18bf316077eacf7383d0e2e7bf338e98e61ed3cbdc2897a6eece71",
+      "sha256": "87e69290c96fff68e2690fe8701edda06d18dc8450e3733762c4ba08dc9a6241",
       "matches": true
     },
     {
@@ -523,123 +528,123 @@
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/SKILL.md",
-      "sha256": "ae3ebd9a80c882793e7e6a52821a1ca093fdfa792460d5f62cd8d35c5f39df89",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/SKILL.md",
+      "sha256": "c760320c1d777644a41f742283632c76dc72e3c09f521f6002e59a0b0dac9f6d",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/agents/openai.yaml",
-      "sha256": "27ee97b51b9f7d3892cde0fd92560c33fb752020579ca4d54774b6621a6203e3",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/agents/openai.yaml",
+      "sha256": "5ec5fab97a9c46a23ebb4169b2a457b72eec1954bf690697ef19bb70aa494ce1",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/assets/composer-icon.png",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/assets/composer-icon.png",
       "sha256": "a0e2b82638b6b31ab3cec507a28dacbcddc245060f66c915a8649291d637efd8",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/assets/logo.png",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/assets/logo.png",
       "sha256": "7745c483a647d384e991392a7ff282544933590980a8dd5098e380d7468dc630",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/github/browser-tools/repo-stats.js",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/github/browser-tools/repo-stats.js",
       "sha256": "99f5de2388ebbd24646f43e438587a161988c54f5dab23a7ab23de6c8c8f6bd5",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/github/manifest.json",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/github/manifest.json",
       "sha256": "a5d459ccb7849a4fa9a8086a0a7452886465f7e46cf4afcce12a998d6e140e3c",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/github/notes/overview.md",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/github/notes/overview.md",
       "sha256": "2f5ff75d91526b232d725a8f1c89be7f846fdb334324fa92054fcf868cbba22e",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/github/tools/open-issues.js",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/github/tools/open-issues.js",
       "sha256": "54405d5b5a213372aa2541cd8f6dc141b30ab97fc13072135e466f5f14e996a4",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/github/tools/search-repos.js",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/github/tools/search-repos.js",
       "sha256": "6fcbffbebba96d690187d9123d5226846da60e82991e9f0ec0bbf1568cd9c4be",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/google/browser-tools/autocomplete.js",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/google/browser-tools/autocomplete.js",
       "sha256": "95ad95f370533bf56a554e7d79ac39f16f860d1ca4d8c6eb01876fd120beb146",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/google/manifest.json",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/google/manifest.json",
       "sha256": "639e61238ccdb0ee06855fb8ce2585f6f3e9fcfff86ccafc54c20a48c6e00f74",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/google/notes/overview.md",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/google/notes/overview.md",
       "sha256": "78771e9a1f6960efa5e91261dfe44ec5dde7f485a1b181334912a2e45f751865",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/google/tools/search-extract.js",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/google/tools/search-extract.js",
       "sha256": "96350a2d6657f8efc79b639b397ba74d9b5af218f12b6261df1f92e0cb493d34",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/x-com/browser-tools/extract-post.js",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/x-com/browser-tools/extract-post.js",
       "sha256": "338db35bdf4d83258f5b646e67d38fb7f63bdbd243bac2e94236bb348b6ff64f",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/x-com/manifest.json",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/x-com/manifest.json",
       "sha256": "4eb12fecbaa37cc41e8b556e3eea1dc006d6ee587368fb318eca6dd3910fd896",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/x-com/notes/overview.md",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/x-com/notes/overview.md",
       "sha256": "23ef996495cf14b24809e29d5bcdfb3d049bb97fa26b5eebda3e035f1ed6ed1d",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/x-com/notes/timeline.md",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/x-com/notes/timeline.md",
       "sha256": "1a1cde5c3f432329b8dee566a65415c2ed5fd93ed556b541bc20e05234889278",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/x-com/tools/search-users.js",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/x-com/tools/search-users.js",
       "sha256": "b780616e32761f80e9524375c144b053e920109d49e550281950d0a7fcbd0f74",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/learnings/x-com/tools/timeline.js",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/learnings/x-com/tools/timeline.js",
       "sha256": "6ac5b706a3cc32ea73ffb80d766c0cd78b63489d4f985563fa78d534a28825f7",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/references/clearing-state.md",
-      "sha256": "c9a022df55f396607ec8b7dc486ab452f1a133fd04fd954a2ff3f86c4df9458c",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/references/clearing-state.md",
+      "sha256": "6f1ee9ab9b0ba7e4f73261ce5d6d32226a84bac4c88b0faeece8a867adc8d74e",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/references/install.md",
-      "sha256": "f5f9b1d351a84ac17737fd6aa0e88b04bf1d8b28ae14218dec37fb73a8a94e67",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/references/install.md",
+      "sha256": "61e7fb0cfb52548c9659d55d0b20e221503d636373459e2708928cd7d79fd200",
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/out/agent-skills/ego-browser/scripts/install.sh",
-      "sha256": "0dcfb371dc37c61fb61cf31747d9c97f72f5b071147815857734d2096db9d2a3",
-      "matches": true
-    },
-    {
-      "file": "packages/sdk/dist/out/ego-browser/SKILL.md",
-      "sha256": "fda27e8639c68c6745e63e49199ac39c8aa93d083303512376f9f27577edb25d",
+      "file": "packages/sdk/dist/out/agent-skills/wiek-browser/scripts/install.sh",
+      "sha256": "b206f0f95e7b6e21c614dc9d852565f608f60719b08dce11ac1e4fd0cfeacb74",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/out/index.js",
-      "sha256": "b4ddb96154c2e06ff775daae91a8dfd2df03bcff924c2c5e803bf88ec50fec13",
+      "sha256": "6d1ef3537f56eea38ecb72c381b1267d8a489faf5d98c1455eace8ce3c67ef28",
+      "matches": true
+    },
+    {
+      "file": "packages/sdk/dist/out/wiek-browser/SKILL.md",
+      "sha256": "c845b9fda77385558fda800c3fc750b127980c6cd9387c937c41d9bed23f07bb",
       "matches": true
     },
     {
@@ -649,17 +654,17 @@
     },
     {
       "file": "packages/sdk/dist/src/browser-runtime.js",
-      "sha256": "8efffb4fa69c62e982384028e3ed2e80b0e804a4c2bf2ddcb45a5dc70c49bb01",
+      "sha256": "a52ae4c4a258ed66a127e94822755e031c877802f0c8fcf235a8ea80e413ccf0",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/src/cdp-eval.js",
-      "sha256": "9126a63bbba74789f5cb8e11c52699be42d4b5198e724eb3e46928ba76c99b1a",
+      "sha256": "9fb2343f4512b000d4296cffe8467e20b4fdde945c11723eb34aaa42d44a1f7e",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/src/clipboard.js",
-      "sha256": "4268ce526674f6d9f557ad796bb58ec782f3e88ee24607ac7852640cdefbd3ed",
+      "sha256": "d9b0ecb67a24000dd749e4c7164fc5f6d6a3c8464cde0ccd6bea5a7fcdee081c",
       "matches": true
     },
     {
@@ -669,7 +674,7 @@
     },
     {
       "file": "packages/sdk/dist/src/driver/downloads.js",
-      "sha256": "9057ac81a7538a86e474ba82cc8be1207da19db538ad1c24c55c517c33111d05",
+      "sha256": "eacce5c1ee9bbe19f5e18bbb11294e548ab91561887a4deff1a6d6042127ef82",
       "matches": true
     },
     {
@@ -684,7 +689,7 @@
     },
     {
       "file": "packages/sdk/dist/src/driver/keyboard.js",
-      "sha256": "e0b744192953726ef4c40037fe2c602189958a6c31cdd62971481016b3c8aaf1",
+      "sha256": "10f0403202784b324ff7a662769911183e5ddf079a20dfcbcedb00336d7f8a20",
       "matches": true
     },
     {
@@ -694,17 +699,17 @@
     },
     {
       "file": "packages/sdk/dist/src/driver/nav.js",
-      "sha256": "0cd7740557a79d15d8cb4e8ea80a56aeeefb383b8f1438923212a48ead8e8710",
+      "sha256": "892688405c6c9ac607224b5780d7b8c5f35d43e2a3390025f5efa23c5497710e",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/src/driver/observe.js",
-      "sha256": "c4a85a0e59774ac06c63f9354fe639fd28b45af3487bff2ed742ffdb1bc62649",
+      "sha256": "7fa9f69b90aa1278847556ca559925bdba706ceb0f4b91c0daef088411b62fab",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/src/driver/page-actions.js",
-      "sha256": "97c7e133413aa6618ea943fbbe0d497f13245fe1b301fa431d8a7196f7ed5af8",
+      "sha256": "2f89d6b23b8f4204c67616e61318d7bfce9ffd2667f1e323a40b975306a2e6c6",
       "matches": true
     },
     {
@@ -719,12 +724,12 @@
     },
     {
       "file": "packages/sdk/dist/src/driver/page-waits.js",
-      "sha256": "af416e4de280283e507b44df201ceae2fa481f43214b16fac2449b127e3ed51b",
+      "sha256": "e1b9c935f8b5e1d79b0f9e1c9ea8baf38714cbd5bfda8d8d5526aa55ca807827",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/src/driver/pointer.js",
-      "sha256": "9ddf7cfcacfaaeb2ea618a134f10adda50a68f02277b035acdf56d9e8cf0da23",
+      "sha256": "b5f0e2fcdc0be8577ce66a89705b68ed2f6c8046d8beb3303cb8dc745cf1c428",
       "matches": true
     },
     {
@@ -738,18 +743,13 @@
       "matches": true
     },
     {
-      "file": "packages/sdk/dist/src/ego-errors.js",
-      "sha256": "763005da7447dd7257e666bb3928e527556a44e6f9cdd9fd4ecb6917a1b565eb",
-      "matches": true
-    },
-    {
       "file": "packages/sdk/dist/src/element-resolver.js",
-      "sha256": "0ffb4871ee455e492766ec55a6a421fa8cddaa8b1d3c3bcc4ff330f6080c4e4c",
+      "sha256": "d09bcc8d371086e3260ef78ff771cd35c4873641c0a99e518c8954aaea38660b",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/src/env.js",
-      "sha256": "1d8c9e0df9d838a43b83ef0cdc994259256ca8db44d3db677ffb0e44cf3814a5",
+      "sha256": "c3eaa3a953086b8f0d4fa91007535e329134a8fddd06c5fd74290e1868d81656",
       "matches": true
     },
     {
@@ -764,7 +764,7 @@
     },
     {
       "file": "packages/sdk/dist/src/helpers.js",
-      "sha256": "f94715918d2564357191e30f579526a53e23aa2f51e9874cc41c4efda86977a0",
+      "sha256": "1f96bb7fd3fd4671f3499f689c0de97780f8ac79beeb843e19c246f93d2d7d78",
       "matches": true
     },
     {
@@ -774,7 +774,7 @@
     },
     {
       "file": "packages/sdk/dist/src/index.js",
-      "sha256": "7b1d904bb1e0661e7af31a4364949016e9e40b325e91e2a46441ddc3df504312",
+      "sha256": "accbdd80ee4003f930fd0b3f49d18c423a11470344c43a24310f47f23bac81c0",
       "matches": true
     },
     {
@@ -784,7 +784,7 @@
     },
     {
       "file": "packages/sdk/dist/src/learning/index.js",
-      "sha256": "650d436d897386ea96838ea44d47de982a5e70b8378d21ff7be568e8938bf5d9",
+      "sha256": "7ade7d18cf3e64e9e5bfa9698dccc08fbd44a55f3a8a142d96d1435799f5a1ac",
       "matches": true
     },
     {
@@ -794,12 +794,12 @@
     },
     {
       "file": "packages/sdk/dist/src/native-gate.js",
-      "sha256": "cddba9b1207e5feb1f9cf4eaf5e97372fd0a59b7f03740e27415e430d411bbec",
+      "sha256": "b0acf93a734b1c82c112320abca5c2f7232126fec5d18269a3454b4af8bab243",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/src/output-sink.js",
-      "sha256": "e26a088dce11c974d4ff56d247d26ae50a0ecdec2d631ffdc0234fee7a07761a",
+      "sha256": "57f51990a689d7fc1e22f4f1c8bf74d05f6a2ed8b6a0cbcbfda65ea2ed52bf8d",
       "matches": true
     },
     {
@@ -814,12 +814,12 @@
     },
     {
       "file": "packages/sdk/dist/src/page-ledger.js",
-      "sha256": "3479d10bb9d9e27b49e57fd75cf47e4bac09bec9b7fbad52b1fabb6b90fb5be9",
+      "sha256": "8c636573c90fb41ba7dbb45358cee5ac9c20f42c4cc0fa0191ddbfd4014e59e1",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/src/page-model.js",
-      "sha256": "202d976dd21219a66a86637e7a9bbb4342f58626b666663754a7158dfb94da9d",
+      "sha256": "73eb729538cfe43c67a24ddd1945547637cdbab20f502d1dc67b8291f8ad6d11",
       "matches": true
     },
     {
@@ -829,7 +829,7 @@
     },
     {
       "file": "packages/sdk/dist/src/public-api-schema.js",
-      "sha256": "f445a144c87be0d049f4a908092ba04cba5f4f691a0e7511a7f82a860bdf095b",
+      "sha256": "1df4f8aba36a226c0681812f4be2f8355a1a4a08a205f6667c2318ac188bf6ac",
       "matches": true
     },
     {
@@ -844,12 +844,12 @@
     },
     {
       "file": "packages/sdk/dist/src/run.js",
-      "sha256": "198f2c5382f7f10a4d0ae756dcda775940a6f2de62b71085148d2124ba725b9e",
+      "sha256": "68018c63c23ecfaf4881a333354ff00572e8c3ceee8f7fb17260548dab9b796b",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/src/skill-migration.js",
-      "sha256": "a834fa59652492f6ca7ba3a2d4dec7f3d40cf28300642b2bfde5bdc12e763d9f",
+      "sha256": "a31af26bf5f2f1004f4db5d50c52d5cf7f6490d86e8e23f22954e25d228679cf",
       "matches": true
     },
     {
@@ -859,127 +859,22 @@
     },
     {
       "file": "packages/sdk/dist/src/state.js",
-      "sha256": "6c1cd905c50537170df86e584fa22fc180849df6dce7eaff99dfb7176326a3cf",
+      "sha256": "fbcfa8611945792d926df8cde2604096a0d94264a694a7a22b41ba28c2214eae",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/src/update-notice.js",
-      "sha256": "6b70fcb9de5f9ce95a9c68fb03bf539b51191f00e7336fa14a29804657d3edbe",
+      "sha256": "d8b3c77933a197e7f7581238dd8f240cf1e9c5e2e0d1da2180bd84672d9a431a",
+      "matches": true
+    },
+    {
+      "file": "packages/sdk/dist/src/wiek-errors.js",
+      "sha256": "70883542cb585ff03d02b36144aafbd82baf259445929556cc26b7595383571f",
       "matches": true
     },
     {
       "file": "packages/sdk/skill-body/SKILL.md",
-      "sha256": "580aca2a16ccafb46f127201b2ba629560bbf1292c2e50acd6015b54250cf018",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/SKILL.md",
-      "sha256": "ae3ebd9a80c882793e7e6a52821a1ca093fdfa792460d5f62cd8d35c5f39df89",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/agents/openai.yaml",
-      "sha256": "27ee97b51b9f7d3892cde0fd92560c33fb752020579ca4d54774b6621a6203e3",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/assets/composer-icon.png",
-      "sha256": "a0e2b82638b6b31ab3cec507a28dacbcddc245060f66c915a8649291d637efd8",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/assets/logo.png",
-      "sha256": "7745c483a647d384e991392a7ff282544933590980a8dd5098e380d7468dc630",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/github/browser-tools/repo-stats.js",
-      "sha256": "99f5de2388ebbd24646f43e438587a161988c54f5dab23a7ab23de6c8c8f6bd5",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/github/manifest.json",
-      "sha256": "a5d459ccb7849a4fa9a8086a0a7452886465f7e46cf4afcce12a998d6e140e3c",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/github/notes/overview.md",
-      "sha256": "2f5ff75d91526b232d725a8f1c89be7f846fdb334324fa92054fcf868cbba22e",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/github/tools/open-issues.js",
-      "sha256": "54405d5b5a213372aa2541cd8f6dc141b30ab97fc13072135e466f5f14e996a4",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/github/tools/search-repos.js",
-      "sha256": "6fcbffbebba96d690187d9123d5226846da60e82991e9f0ec0bbf1568cd9c4be",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/google/browser-tools/autocomplete.js",
-      "sha256": "95ad95f370533bf56a554e7d79ac39f16f860d1ca4d8c6eb01876fd120beb146",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/google/manifest.json",
-      "sha256": "639e61238ccdb0ee06855fb8ce2585f6f3e9fcfff86ccafc54c20a48c6e00f74",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/google/notes/overview.md",
-      "sha256": "78771e9a1f6960efa5e91261dfe44ec5dde7f485a1b181334912a2e45f751865",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/google/tools/search-extract.js",
-      "sha256": "96350a2d6657f8efc79b639b397ba74d9b5af218f12b6261df1f92e0cb493d34",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/x-com/browser-tools/extract-post.js",
-      "sha256": "338db35bdf4d83258f5b646e67d38fb7f63bdbd243bac2e94236bb348b6ff64f",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/x-com/manifest.json",
-      "sha256": "4eb12fecbaa37cc41e8b556e3eea1dc006d6ee587368fb318eca6dd3910fd896",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/x-com/notes/overview.md",
-      "sha256": "23ef996495cf14b24809e29d5bcdfb3d049bb97fa26b5eebda3e035f1ed6ed1d",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/x-com/notes/timeline.md",
-      "sha256": "1a1cde5c3f432329b8dee566a65415c2ed5fd93ed556b541bc20e05234889278",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/x-com/tools/search-users.js",
-      "sha256": "b780616e32761f80e9524375c144b053e920109d49e550281950d0a7fcbd0f74",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/learnings/x-com/tools/timeline.js",
-      "sha256": "6ac5b706a3cc32ea73ffb80d766c0cd78b63489d4f985563fa78d534a28825f7",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/references/clearing-state.md",
-      "sha256": "c9a022df55f396607ec8b7dc486ab452f1a133fd04fd954a2ff3f86c4df9458c",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/references/install.md",
-      "sha256": "f5f9b1d351a84ac17737fd6aa0e88b04bf1d8b28ae14218dec37fb73a8a94e67",
-      "matches": true
-    },
-    {
-      "file": "skills/ego-browser/scripts/install.sh",
-      "sha256": "0dcfb371dc37c61fb61cf31747d9c97f72f5b071147815857734d2096db9d2a3",
+      "sha256": "72d7584e828b69811841351125720cbe603a4a6ed91815192c37d1f9513be9d0",
       "matches": true
     },
     {
@@ -999,7 +894,7 @@
     },
     {
       "file": "skills/wiek-browser/SKILL.md",
-      "sha256": "cdcf7f11f758b245c31dfe14fd6f3398801bcecdaaf1d1200f5afce391816507",
+      "sha256": "c760320c1d777644a41f742283632c76dc72e3c09f521f6002e59a0b0dac9f6d",
       "matches": true
     },
     {
@@ -1018,13 +913,93 @@
       "matches": true
     },
     {
+      "file": "skills/wiek-browser/learnings/github/browser-tools/repo-stats.js",
+      "sha256": "99f5de2388ebbd24646f43e438587a161988c54f5dab23a7ab23de6c8c8f6bd5",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/github/manifest.json",
+      "sha256": "a5d459ccb7849a4fa9a8086a0a7452886465f7e46cf4afcce12a998d6e140e3c",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/github/notes/overview.md",
+      "sha256": "2f5ff75d91526b232d725a8f1c89be7f846fdb334324fa92054fcf868cbba22e",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/github/tools/open-issues.js",
+      "sha256": "54405d5b5a213372aa2541cd8f6dc141b30ab97fc13072135e466f5f14e996a4",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/github/tools/search-repos.js",
+      "sha256": "6fcbffbebba96d690187d9123d5226846da60e82991e9f0ec0bbf1568cd9c4be",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/google/browser-tools/autocomplete.js",
+      "sha256": "95ad95f370533bf56a554e7d79ac39f16f860d1ca4d8c6eb01876fd120beb146",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/google/manifest.json",
+      "sha256": "639e61238ccdb0ee06855fb8ce2585f6f3e9fcfff86ccafc54c20a48c6e00f74",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/google/notes/overview.md",
+      "sha256": "78771e9a1f6960efa5e91261dfe44ec5dde7f485a1b181334912a2e45f751865",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/google/tools/search-extract.js",
+      "sha256": "96350a2d6657f8efc79b639b397ba74d9b5af218f12b6261df1f92e0cb493d34",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/x-com/browser-tools/extract-post.js",
+      "sha256": "338db35bdf4d83258f5b646e67d38fb7f63bdbd243bac2e94236bb348b6ff64f",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/x-com/manifest.json",
+      "sha256": "4eb12fecbaa37cc41e8b556e3eea1dc006d6ee587368fb318eca6dd3910fd896",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/x-com/notes/overview.md",
+      "sha256": "23ef996495cf14b24809e29d5bcdfb3d049bb97fa26b5eebda3e035f1ed6ed1d",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/x-com/notes/timeline.md",
+      "sha256": "1a1cde5c3f432329b8dee566a65415c2ed5fd93ed556b541bc20e05234889278",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/x-com/tools/search-users.js",
+      "sha256": "b780616e32761f80e9524375c144b053e920109d49e550281950d0a7fcbd0f74",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/learnings/x-com/tools/timeline.js",
+      "sha256": "6ac5b706a3cc32ea73ffb80d766c0cd78b63489d4f985563fa78d534a28825f7",
+      "matches": true
+    },
+    {
       "file": "skills/wiek-browser/references/clearing-state.md",
       "sha256": "6f1ee9ab9b0ba7e4f73261ce5d6d32226a84bac4c88b0faeece8a867adc8d74e",
       "matches": true
     },
     {
       "file": "skills/wiek-browser/references/install.md",
-      "sha256": "9a5805c42898378eef4261787403a961faf4b0cb4c563559c5d66e7fbc8485ab",
+      "sha256": "61e7fb0cfb52548c9659d55d0b20e221503d636373459e2708928cd7d79fd200",
+      "matches": true
+    },
+    {
+      "file": "skills/wiek-browser/scripts/install.sh",
+      "sha256": "b206f0f95e7b6e21c614dc9d852565f608f60719b08dce11ac1e4fd0cfeacb74",
       "matches": true
     }
   ]

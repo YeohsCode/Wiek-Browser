@@ -1,0 +1,12 @@
+✔ owned runtime and all shipped SDK/Skill outputs contain no retired runtime dependency (142.009875ms)
+✔ SDK initializes and disposes using only the Wiek runtime global (70.668917ms)
+✔ system registration creates three Wiek Skills and a usable command, and is idempotent (186.70925ms)
+✔ system registration preserves an existing user entry in a backup outside Skill discovery (4.841958ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 489.483083

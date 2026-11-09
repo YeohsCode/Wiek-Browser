@@ -409,6 +409,7 @@
       "unchanged": true
     }
   ],
-  "verifiedAt": "2026-11-05T23:51:34.846Z",
-  "referenceMode": "local-reference-and-pinned-manifest"
+  "verifiedAt": "2026-11-09T17:02:58.718Z",
+  "referenceMode": "immutable-local-test-inputs",
+  "storageRoot": "tests/fixtures/sdk-original"
 }

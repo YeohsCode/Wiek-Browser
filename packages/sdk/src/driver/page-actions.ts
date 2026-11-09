@@ -1541,7 +1541,7 @@ async function ensureFrameOwnerInView(
   }
   const resolved = await services.cdp(
     "DOM.resolveNode",
-    { backendNodeId, objectGroup: "ego-browser" },
+    { backendNodeId, objectGroup: "wiek-browser" },
     ownerSessionId,
   );
   const objectId = resolved?.object?.objectId;

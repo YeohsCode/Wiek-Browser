@@ -3,22 +3,22 @@ version: "2.1.0"
 date: "2026-10-08"
 ---
 
-# ego-browser
+# wiek-browser
 
 Call `help()` or `help("page.click")` to print signatures and uncommon options
 of APIs named below; it prints by itself, so do not wrap it in `console.log`.
 For installation or connection problems, read `references/install.md` in the
-ego-browser Skill directory.
+wiek-browser Skill directory.
 
 ## Run browser scripts
 
-Pass the script to `ego-browser nodejs`. The form depends on the shell that runs
+Pass the script to `wiek-browser nodejs`. The form depends on the shell that runs
 the command: heredoc is Bash/Zsh syntax and does not exist in PowerShell or cmd.
 
 ### Bash, Zsh, Git Bash
 
 ```bash
-ego-browser nodejs <<'EOF'
+wiek-browser nodejs <<'EOF'
 const task = await taskSpace("inspect example page");
 const page = task.page("p1");
 await page.goto("https://example.com");
@@ -33,7 +33,7 @@ the code and double quotes for JavaScript strings; single quotes within the code
 require shell quoting.
 
 ```bash
-ego-browser nodejs -e '
+wiek-browser nodejs -e '
 const task = await taskSpace("inspect example page");
 await task.page("p1").goto("https://example.com");
 console.log(task.spaceId);
@@ -49,7 +49,7 @@ several lines to `-e`. Write it to a UTF-8 `.mjs` file instead and evaluate an
 ASCII-only one-line entry point, which needs no double quotes of its own:
 
 ```powershell
-ego-browser nodejs -e "await import('file:///C:/Users/<name>/ego/task.mjs')"
+wiek-browser nodejs -e "await import('file:///C:/Users/<name>/wiek/task.mjs')"
 ```
 
 The imported module runs with the same helpers and `console` as an inline
@@ -67,7 +67,7 @@ cmd has no heredoc, but it does support input redirection, so it can run the
 same `.mjs` file directly:
 
 ```bat
-ego-browser nodejs < C:\Users\<name>\ego\task.mjs
+wiek-browser nodejs < C:\Users\<name>\wiek\task.mjs
 ```
 
 ### Later rounds with a script file
@@ -76,7 +76,7 @@ Each run is a new process, and earlier rounds have already run. Write a new,
 complete file for every round (`round-01.mjs`, `round-02.mjs`, ...) instead of
 editing the previous one, which would replay old steps. Keep one goal's files in
 a new directory named for the goal plus the date and time, such as
-`C:/Users/<name>/ego/laptop-prices-20260922-1405/`, and only run files written
+`C:/Users/<name>/wiek/laptop-prices-20260922-1405/`, and only run files written
 in this conversation. Create files with your file tool, not PowerShell
 `Set-Content`, `Out-File`, or `>`, which write ANSI or UTF-16 on 5.1.
 
@@ -98,9 +98,9 @@ with dynamic imports such as `await import("node:fs/promises")`. The script
 does not run in your shell's working directory, so use absolute paths for every
 file it reads or writes. It also does not inherit your shell's environment
 variables: `process.env` will not contain values you set before running
-`ego-browser`, so write every input directly into the script.
+`wiek-browser`, so write every input directly into the script.
 
-Ego-browser deliberately exposes a small custom API. It is not Playwright, even
+Wiek-browser deliberately exposes a small custom API. It is not Playwright, even
 where method names and options look similar. Use only the TaskSpace, Page,
 FileChooser, mouse, and keyboard APIs explicitly listed in this Skill. Do not
 infer Playwright methods such as `locator()`, `getByRole()`, `context()`,
@@ -117,7 +117,7 @@ as `fill()`, `press()`, `focus()`, `selectOption()`, `waitForSelector()`,
 The `label` in `selectOption(selector, { label })` is different: it selects the
 option whose visible text matches.
 
-When the user explicitly asks for ego-browser, start with a real browser command
+When the user explicitly asks for wiek-browser, start with a real browser command
 and diagnose the CLI or installation only if it fails.
 
 ## Spaces, rounds, and pages
@@ -127,7 +127,7 @@ and diagnose the CLI or installation only if it fails.
   only when the user explicitly requests them.
 - Task space names are unique. `taskSpace(name)` resumes your own space with
   that name instead of creating a second one. If the name belongs to a
-  user-owned space, it fails with `EGO_TASK_SPACE_NAME_IN_USE`: ask the user
+  user-owned space, it fails with `WIEK_TASK_SPACE_NAME_IN_USE`: ask the user
   whether to work in that space (then `claimTaskSpace(id)`), or pick another
   name.
 - Never use a new TaskSpace to recover from a stuck, blocked, timed-out, or
@@ -148,7 +148,7 @@ await source.goto("https://example.com/releases");
 ```
 
 Do not inspect or select profiles unless the user explicitly requests a
-particular Ego Lite profile. A `profileId` applies only when creating a space;
+particular Wiek Browser profile. A `profileId` applies only when creating a space;
 use `help("profiles")` for the exact workflow.
 
 Supported TaskSpace API:
@@ -189,7 +189,7 @@ as user-owned when deciding whether a Page may be closed.
 
 ## Page operations
 
-ego-browser provides the following Page API:
+wiek-browser provides the following Page API:
 
 - State and observation: `label`, `spaceId`, `openedBy`, `targetId`, `url()`,
   `title()`, `info()`, `snapshot()`, `screenshot()`
@@ -338,7 +338,7 @@ console.log({ screenshot: path });
 `path` must be absolute; relative paths are rejected. Omit `path` to write
 into the system temporary directory and use the returned file path. On
 Windows, write paths with forward slashes, such as
-`C:/Users/<name>/ego-shots/before.png`, because backslashes are escape
+`C:/Users/<name>/wiek-shots/before.png`, because backslashes are escape
 characters inside JavaScript strings.
 
 Inspect the screenshot with an image-viewing tool. Coordinates use CSS pixels;
@@ -539,13 +539,13 @@ list the Pages to keep instead.
 Use `page.close()` only while the task is still in progress. Do not call
 `finish()` when the task stops for user control or an error.
 
-If the final output contains `[ego-browser:notice]`, finish the current browser
-task, tell the user an Ego Lite update is available, and run
-`ego-browser upgrade` only with their approval. Run `ego-browser skill` again
+If the final output contains `[wiek-browser:notice]`, finish the current browser
+task, tell the user an Wiek Browser update is available, and run
+`wiek-browser upgrade` only with their approval. Run `wiek-browser skill` again
 after the upgrade.
 
 ## Clearing cookies, cache, and storage
 
 Before clearing any cookie, cache, or storage, read
-`references/clearing-state.md` in the ego-browser Skill directory. Some clears
+`references/clearing-state.md` in the wiek-browser Skill directory. Some clears
 reach the whole browser profile.

@@ -1,0 +1,938 @@
+
+== WIEK comparison run ==
+CLI: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs
+Selection: all cases
+== build ==
+
+> wiek-browser-sdk@0.1.0 build
+> node scripts/build.mjs
+
+
+  dist/src/page-model.js                         86.7kb
+  dist/src/element-resolver.js                   69.6kb
+  dist/src/driver/page-actions.js                46.4kb
+  dist/src/browser-runtime.js                    41.6kb
+  dist/src/public-api-schema.js                  23.9kb
+  dist/src/driver/page-waits.js                  20.6kb
+  dist/src/driver/page-keyboard.js               18.5kb
+  dist/src/driver/pointer.js                     18.3kb
+  dist/src/helpers.js                            18.3kb
+  dist/src/clipboard.js                          17.0kb
+  dist/src/page-ledger.js                        16.3kb
+  dist/src/driver/keyboard.js                    14.9kb
+  dist/src/driver/action-target.js               14.2kb
+  dist/src/snapshot-result.js                    10.3kb
+  dist/src/learning/validate-learning-format.js   8.9kb
+  dist/src/help-runtime.js                        8.4kb
+  dist/src/driver/downloads.js                    8.2kb
+  dist/src/wiek-errors.js                         6.5kb
+  dist/src/learning/index.js                      6.2kb
+  dist/src/index.js                               6.1kb
+  ...and 25 more output files...
+
+⚡ Done in 20ms
+== E2E (real browser helpers) ==
+fixture: http://127.0.0.1:56804
+task: wiek-lite real browser e2e 1794160185064-cb866aff821f48
+cli: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs
+sdk: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js
+-- environment initialization
+{"ok":true,"assertions":24}
+-- environment initialization passed (44.8s, 24 assertions)
+-- helper surface
+profiles
+
+List browser profiles available for new task spaces.
+
+await profiles()
+
+listTaskSpaces
+
+List Agent-owned and user-owned spaces available to reuse or claim.
+
+await listTaskSpaces()
+
+taskSpace
+
+Reuse or create an Agent-owned task space; a name held by a user-owned space fails with WIEK_TASK_SPACE_NAME_IN_USE. A new space starts with managed Page p1, and profileId applies only when creating it. Options: profileId: Browser profile id returned by profiles(); new spaces only.
+
+await taskSpace(nameOrId, { profileId? })
+
+claimTaskSpace
+
+Claim a user-owned or inactive space after user approval and return TaskSpace.
+
+await claimTaskSpace(spaceId)
+
+takeOverTaskSpace
+
+Resume an Agent-owned space after user approval and return TaskSpace.
+
+await takeOverTaskSpace(spaceId)
+
+TaskSpace.spaceId
+
+Stable numeric identifier for this task space.
+
+task.spaceId
+
+TaskSpace.name
+
+Human-readable task-space name.
+
+task.name
+
+TaskSpace.ownership
+
+Ownership state captured when this TaskSpace was created.
+
+task.ownership
+
+TaskSpace.page
+
+Create a lazy handle for an existing managed Page label; it neither creates a Page nor checks that the label exists.
+
+task.page(label)
+
+TaskSpace.userPage
+
+Return the tab active at the claim/takeover boundary, when one was captured.
+
+task.userPage()
+
+TaskSpace.pages
+
+List the managed Page handles in this space.
+
+await task.pages()
+
+TaskSpace.tabs
+
+List managed Pages and unmanaged tabs in this space.
+
+await task.tabs()
+
+TaskSpace.newPage
+
+Create and durably label a blank Page.
+
+await task.newPage()
+
+TaskSpace.adopt
+
+Bring an unmanaged tab under the Page lifecycle. Options: as: Permanent Page label.
+
+await task.adopt(unmanagedPage, { as? })
+
+TaskSpace.release
+
+Stop managing an unknown-origin Page without closing it.
+
+await task.release(label)
+
+TaskSpace.waitForControl
+
+Wait for Agent control without taking it from the user. Options: interval: Polling interval in milliseconds. timeout: Maximum duration in milliseconds.
+
+await task.waitForControl({ interval?, timeout? })
+
+TaskSpace.handOff
+
+Give control of this space to the user.
+
+await task.handOff()
+
+TaskSpace.finish
+
+Finish the task and return a receipt with retained and closed managed Page labels; an empty list closes the space when no protected tabs remain. Options: keep: Required Page retention policy: "all" or an array of managed Page labels.
+
+await task.finish({ keep })
+
+TaskSpace.cdp
+
+Send a Target or Browser domain CDP command. Options: timeout: Maximum duration in milliseconds.
+
+await task.cdp(method, params?, { timeout? })
+
+Page.label
+
+Durable Page label used to restore the tab across rounds.
+
+page.label
+
+Page.spaceId
+
+Numeric identifier of the Page's task space.
+
+page.spaceId
+
+Page.openedBy
+
+Conservative origin attribution for this Page.
+
+page.openedBy
+
+Page.targetId
+
+Internal browser target identifier for advanced Target-domain CDP only.
+
+page.targetId
+
+Page.goto
+
+Navigate this Page in place. Timeout errors report whether the new document committed, plus its URL and readyState when available. Options: referer: HTTP Referer header for the navigation. timeout: Maximum duration in milliseconds. waitUntil (commit | domcontentloaded | load | networkidle): Completion state; defaults to load. networkidle requires 500ms without network activity.
+
+await page.goto(url, { referer?, timeout?, waitUntil? })
+
+Page.reload
+
+Reload this Page and wait for the selected navigation state. Options: timeout: Maximum duration in milliseconds. waitUntil (commit | domcontentloaded | load | networkidle): Completion state; defaults to load. networkidle requires 500ms without network activity.
+
+await page.reload({ timeout?, waitUntil? })
+
+Page.snapshot
+
+Return a semantic snapshot of the current viewport, full Page, or one snapshot-ref subtree with Page provenance. Options: scope (full_page | only_within_viewport | subtree): Snapshot scope; defaults to only_within_viewport, including visible iframe content returned by the browser. Use subtree with an iframe root ref to focus on that frame. root: Valid Page snapshot ref such as @21; required only when scope is subtree. Partial snapshots preserve existing node identities. includeActionMarks: Include action marks. includeStableLocator: Include stable locators.
+
+await page.snapshot({ scope?, root?, includeActionMarks?, includeStableLocator? })
+
+Page.screenshot
+
+Capture this Page to a PNG file. Options: path: Absolute output path; missing parent directories are created. fullPage: Capture the full scrollable page. clip: CSS-pixel clipping rectangle. scale (css): Output scale mode; css uses CSS-pixel sizing and is the default. raw: Bypass device-pixel-ratio correction.
+
+await page.screenshot({ path?, fullPage?, clip?, scale?, raw? })
+
+Page.url
+
+Read this Page's current URL.
+
+await page.url()
+
+Page.waitForURL
+
+Wait for an exact URL, Playwright-style glob, RegExp, or synchronous predicate receiving a URL object. Options: timeout: Maximum duration in milliseconds.
+
+await page.waitForURL(urlMatcher, { timeout? })
+
+Page.waitForEvent
+
+Wait for this Page's next "popup" or "download"; arm the promise before the triggering action. Options: timeout: Maximum duration in milliseconds.
+
+await page.waitForEvent(event, { timeout? })
+
+Download.page
+
+Return the Page that started this download.
+
+download.page()
+
+Download.url
+
+Return the download URL.
+
+download.url()
+
+Download.suggestedFilename
+
+Return Chromium's suggested file name.
+
+download.suggestedFilename()
+
+Download.saveAs
+
+Wait for completion and copy the download to an absolute path, creating missing parent directories.
+
+await download.saveAs(absolutePath)
+
+Download.path
+
+Wait for completion and return the round-local temporary file path.
+
+await download.path()
+
+Download.failure
+
+Wait for completion and return null or the failure reason.
+
+await download.failure()
+
+Download.cancel
+
+Cancel this download by its Chromium download identifier.
+
+await download.cancel()
+
+Download.delete
+
+Delete this download's round-local temporary files.
+
+await download.delete()
+
+Page.waitForTimeout
+
+Wait a fixed number of milliseconds without activating this Page.
+
+await page.waitForTimeout(timeout)
+
+Page.title
+
+Read this Page's current title.
+
+await page.title()
+
+Page.info
+
+Read URL, title, viewport, scroll, and dialog state.
+
+await page.info()
+
+Page.acceptDialog
+
+Accept this Page's JavaScript dialog, optionally supplying prompt text; return false when none is open.
+
+await page.acceptDialog(promptText?)
+
+Page.dismissDialog
+
+Dismiss this Page's JavaScript dialog; return false when none is open.
+
+await page.dismissDialog()
+
+Page.evaluate
+
+Run JavaScript in this Page; callbacks receive JSON data but cannot capture Node.js variables. Safety-timeout errors report executionStopped, pageResponsive, and mayHaveLateEffects.
+
+await page.evaluate(fnOrString, argument?)
+
+Page.waitForFunction
+
+Wait until a Page function or expression returns a truthy value. Options: timeout: Maximum duration in milliseconds. polling: Polling interval in milliseconds; defaults to 100.
+
+await page.waitForFunction(fnOrString, argument?, { timeout?, polling? })
+
+Page.fetch
+
+Run window.fetch in this Page, obey browser CORS, and return a structured response. Options: timeout: Maximum duration in milliseconds. saveAs: Write the response body to this absolute path without text conversion. method: HTTP method. headers: Request headers. body: Request body. cache (default | no-store | reload | no-cache | force-cache | only-if-cached): Fetch cache mode. credentials (omit | same-origin | include): Fetch credentials mode. integrity: Subresource integrity value. keepalive: Allow the request to outlive the page. mode (cors | no-cors | same-origin): Fetch request mode. redirect (follow | error | manual): Redirect handling mode. referrer: Request referrer. referrerPolicy: Request referrer policy.
+
+await page.fetch(url, options?)
+
+Page.cdp
+
+Send a CDP command through this Page's target session. Options: timeout: Maximum duration in milliseconds.
+
+await page.cdp(method, params?, { timeout? })
+
+Page.waitForSelector
+
+Wait for an element state in this Page. Options: timeout: Maximum duration in milliseconds. state (attached | detached | visible | hidden): Required element state.
+
+await page.waitForSelector(selector, { timeout?, state? })
+
+Page.waitForLoadState
+
+Wait for DOM content, load, or network-idle state; no state defaults to load. Options: timeout: Maximum duration in milliseconds. idleMs: Required network-idle window in milliseconds.
+
+await page.waitForLoadState(state?, { timeout?, idleMs? })
+
+Page.events
+
+Read and clear CDP events buffered for this Page.
+
+await page.events()
+
+Page.click
+
+Click an element with native CDP input. Options: button (left | middle | right): Mouse button. clickCount: Number of clicks. delay: Input delay in milliseconds. position: CSS-pixel offset from the element's top-left corner. force: Bypass pointer interception checks. timeout: Maximum wait for the element to become usable in milliseconds; defaults to 3000. label: Concise user-visible action description shown with the native mouse highlight.
+
+await page.click(selector, { button?, clickCount?, delay?, position?, force?, timeout?, label? })
+
+Page.dblclick
+
+Double-click an element with native CDP input. Options: button (left | middle | right): Mouse button. delay: Input delay in milliseconds. position: CSS-pixel offset from the element's top-left corner. force: Bypass pointer interception checks. timeout: Maximum wait for the element to become usable in milliseconds; defaults to 3000. label: Concise user-visible action description shown with the native mouse highlight.
+
+await page.dblclick(selector, { button?, delay?, position?, force?, timeout?, label? })
+
+Page.hover
+
+Move the mouse over an element. Options: position: CSS-pixel offset from the element's top-left corner. force: Bypass pointer interception checks. timeout: Maximum wait for the element to become usable in milliseconds; defaults to 3000. label: Concise user-visible action description shown with the native mouse highlight.
+
+await page.hover(selector, { position?, force?, timeout?, label? })
+
+Page.dragAndDrop
+
+Drag from one element to another. Options: button (left | middle | right): Mouse button. sourcePosition: CSS-pixel offset from the element's top-left corner. targetPosition: CSS-pixel offset from the element's top-left corner. force: Bypass pointer interception checks. timeout: Maximum wait for the element to become usable in milliseconds; defaults to 3000. label: Concise user-visible action description shown with the native mouse highlight.
+
+await page.dragAndDrop(source, target, { button?, sourcePosition?, targetPosition?, force?, timeout?, label? })
+
+Page.fill
+
+Fill the selected field, its editing host, or its unique fillable descendant, then confirm editing took effect. Options: clearFirst: Clear the current value before filling. timeout: Maximum wait for the element to become usable in milliseconds; defaults to 3000.
+
+await page.fill(selector, value, { clearFirst?, timeout? })
+
+Page.selectOption
+
+Select by a value-or-label string or { value?, label?, index? }; arrays select multiple options, while null or [] clears the selection. The select must be enabled, but disabled options remain programmatically selectable. Options: timeout: Maximum wait for the element to become usable in milliseconds; defaults to 3000.
+
+await page.selectOption(selector, valueOrValues, { timeout? })
+
+Page.focus
+
+Focus the element, its nearest interactive ancestor, or its unique editable descendant. Options: timeout: Maximum wait for the element to become usable in milliseconds; defaults to 3000.
+
+await page.focus(selector, { timeout? })
+
+Page.press
+
+Focus one element and press a key or shortcut chord. Named keys are case-insensitive; single-character keys preserve case. Options: delay: Input delay in milliseconds. timeout: Maximum wait for the element to become usable in milliseconds; defaults to 3000.
+
+await page.press(selector, chord, { delay?, timeout? })
+
+Page.setInputFiles
+
+Set files on a file input resolved from the input, its label, or a unique descendant.
+
+await page.setInputFiles(selector, pathOrPaths)
+
+Page.waitForFileChooser
+
+Wait for a dynamically created file chooser. Options: timeout: Maximum duration in milliseconds.
+
+page.waitForFileChooser({ timeout? })
+
+FileChooser.isMultiple
+
+Report whether the chooser accepts multiple files.
+
+fileChooser.isMultiple()
+
+FileChooser.setFiles
+
+Set files on an intercepted chooser and return any JavaScript dialog opened by the upload.
+
+await fileChooser.setFiles(pathOrPaths)
+
+Page.close
+
+Close this Page after confirming its tab disappeared.
+
+await page.close()
+
+Page.mouse.click
+
+Click CSS-pixel coordinates with native CDP input. Options: button (left | middle | right): Mouse button. clickCount: Number of clicks. delay: Input delay in milliseconds. label: Concise user-visible action description shown with the native mouse highlight.
+
+await page.mouse.click(x, y, { button?, clickCount?, delay?, label? })
+
+Page.mouse.move
+
+Move the mouse to CSS-pixel coordinates. Options: steps: Number of movement steps. label: Concise user-visible action description shown with the native mouse highlight.
+
+await page.mouse.move(x, y, { steps?, label? })
+
+Page.mouse.down
+
+Press a mouse button at the current Page position. Options: button (left | middle | right): Mouse button. clickCount: Click count reported to the page.
+
+await page.mouse.down({ button?, clickCount? })
+
+Page.mouse.up
+
+Release a mouse button at the current Page position. Options: button (left | middle | right): Mouse button. clickCount: Click count reported to the page.
+
+await page.mouse.up({ button?, clickCount? })
+
+Page.mouse.wheel
+
+Perform a short wheel-input motion at the current Page position; move or click over the intended scroll container first in each process. Options: label: Concise user-visible action description shown with the native mouse highlight.
+
+await page.mouse.wheel(deltaX, deltaY, { label? })
+
+Page.keyboard.down
+
+Press and hold a keyboard key.
+
+await page.keyboard.down(key)
+
+Page.keyboard.up
+
+Release a keyboard key.
+
+await page.keyboard.up(key)
+
+Page.keyboard.press
+
+Press and release a key or portable shortcut chord. Named keys are case-insensitive; single-character keys preserve case. Options: delay: Input delay in milliseconds.
+
+await page.keyboard.press(chord, { delay? })
+
+Page.keyboard.type
+
+Type text using physical keys where possible. Options: delay: Input delay in milliseconds.
+
+await page.keyboard.type(text, { delay? })
+
+Page.keyboard.insertText
+
+Insert text without synthesizing key presses.
+
+await page.keyboard.insertText(text)
+
+Page.keyboard.paste
+
+Send native paste with a string or { text, html? }, then restore the clipboard.
+
+await page.keyboard.paste(textOrContent)
+Unknown helper: TaskSpace.listPages
+Legacy helper hidden from default help: click. Use help("legacy", "click").
+Click a mouse target.
+@param target: MouseTarget — CSS selector, @ref, viewport point, or selector-relative point.
+@param options? (default: {})
+@returns Promise<void>
+
+click(target, options?) → Promise<void>
+Unknown helper: missingHelperForE2E
+{"ok":true,"assertions":67}
+-- helper surface passed (290ms, 67 assertions)
+-- task spaces and control
+{"ok":true,"assertions":58}
+-- task spaces and control passed (32.6s, 58 assertions)
+-- TaskSpace profile selection
+{"ok":true,"assertions":19}
+-- TaskSpace profile selection passed (393ms, 19 assertions)
+-- v2 cross-space routing
+{"ok":true,"assertions":4}
+-- v2 cross-space routing passed (671ms, 4 assertions)
+-- navigation helpers
+[FAIL] navigation helpers (45.0s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js timed out after 45000ms
+-- observation helpers
+[FAIL] observation helpers (45.0s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js timed out after 45000ms
+-- pointer and scroll helpers
+[FAIL] pointer and scroll helpers (45.0s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js timed out after 45000ms
+-- keyboard and file helpers
+{"keyboardStep":"contentEditable"}
+{"keyboardStep":"rapid backspace"}
+{"ok":true,"assertions":22}
+-- keyboard and file helpers passed (21.4s, 22 assertions)
+-- keyboard regression
+{"ok":true,"assertions":14}
+-- keyboard regression passed (8.5s, 14 assertions)
+-- wait, fetch, cdp, js, help
+[wiek-browser] js() received a function and auto-wrapped it (() => document.title).
+  js() is a thin wrapper over CDP Runtime.evaluate; it takes a string expression,
+  not a Puppeteer/Playwright-style callable. Auto-wrap does NOT capture closure
+  variables and has NO args channel.
+  Prefer:
+    js(`<expression>`)  // pure expression or explicit IIFE
+Click a mouse target.
+@param target: MouseTarget — CSS selector, @ref, viewport point, or selector-relative point.
+@param options? (default: {})
+@returns Promise<void>
+
+click(target, options?) → Promise<void>
+
+Focus an input, optionally clear it, type text, and fire input/change events.
+@param selector: string — CSS selector / @ref / loc= / xpath= for the input-like element.
+@param text: string — Text to write.
+@param options? (default: {})
+@returns Promise<void>
+
+fillInput(selector, text, options?) → Promise<void>
+Unknown helper: missingHelperForE2E
+{"ok":true,"assertions":42}
+-- wait, fetch, cdp, js, help passed (9.8s, 42 assertions)
+-- runtime regression
+[wiek-browser] js() received a function and auto-wrapped it (function () {\n      return typeof outer;\n    }).
+  js() is a thin wrapper over CDP Runtime.evaluate; it takes a string expression,
+  not a Puppeteer/Playwright-style callable. Auto-wrap does NOT capture closure
+  variables and has NO args channel.
+  Prefer:
+    js(`<expression>`)  // pure expression or explicit IIFE
+{"ok":true,"assertions":20}
+-- runtime regression passed (3.7s, 20 assertions)
+-- target-scoped event isolation
+{"ok":true,"assertions":4}
+-- target-scoped event isolation passed (6.6s, 4 assertions)
+-- page labels: create
+{"ok":true,"assertions":13}
+-- page labels: create passed (1.6s, 13 assertions)
+-- page labels: restore and reuse
+{"ok":true,"assertions":14}
+-- page labels: restore and reuse passed (815ms, 14 assertions)
+-- page labels: close and do not reuse
+{"ok":true,"assertions":10}
+-- page labels: close and do not reuse passed (639ms, 10 assertions)
+-- page labels: persist before hard stop
+-- page labels: persist before hard stop passed (382ms, expected termination)
+-- page labels: restore after hard stop
+{"ok":true,"assertions":3}
+-- page labels: restore after hard stop passed (444ms, 3 assertions)
+-- page inventory and budget
+{"ok":true,"assertions":9}
+-- page inventory and budget passed (923ms, 9 assertions)
+-- page adoption and release
+{"ok":true,"assertions":19}
+-- page adoption and release passed (589ms, 19 assertions)
+-- page basic operations
+{"ok":true,"assertions":53}
+-- page basic operations passed (2.1s, 53 assertions)
+-- page complex evaluate
+{"ok":true,"assertions":23}
+-- page complex evaluate passed (703ms, 23 assertions)
+-- page fetch
+{"ok":true,"assertions":25}
+-- page fetch passed (772ms, 25 assertions)
+-- page actions and popup adoption
+{"ok":true,"assertions":57}
+-- page actions and popup adoption passed (4.8s, 57 assertions)
+-- Page click hit target
+{"ok":true,"assertions":17}
+-- Page click hit target passed (3.7s, 17 assertions)
+-- Page action motion tolerance
+{"ok":true,"assertions":6}
+-- Page action motion tolerance passed (1.2s, 6 assertions)
+-- Page drag and canvas drawing
+{"ok":true,"assertions":15}
+-- Page drag and canvas drawing passed (1.0s, 15 assertions)
+-- Page JavaScript dialog handling
+{"ok":true,"assertions":34}
+-- Page JavaScript dialog handling passed (1.2s, 34 assertions)
+-- Page media playback
+{"ok":false,"assertions":0,"error":"page.goto timed out after 15000ms waiting for load"}
+PageNavigationTimeoutError: real browser e2e: page.goto timed out after 15000ms waiting for load
+    at navigationTimeout (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js:16738:12)
+    at navigateInPage (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js:16617:19)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js:18533:13
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js:19247:29
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js:16940:28
+[FAIL] Page media playback (15.5s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page scrolled screenshot
+{"ok":false,"assertions":1,"error":"CDP request timed out: Page.captureScreenshot"}
+CdpRequestTimeoutError: real browser e2e: CDP request timed out: Page.captureScreenshot
+    at Timeout._onTimeout (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js:8200:19)
+    at listOnTimeout (node:internal/timers:605:17)
+    at process.processTimers (node:internal/timers:541:7)
+[FAIL] Page scrolled screenshot (20.5s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page snapshot locator quality
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page snapshot locator quality (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page snapshot iframe viewport
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page snapshot iframe viewport (28.7s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page snapshot subtree
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page snapshot subtree (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page ref identity across partial snapshots
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page ref identity across partial snapshots (28.5s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page refs across rounds: prepare
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page refs across rounds: prepare (28.7s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page refs across rounds: resume
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page refs across rounds: resume (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page refs in dialog workflows
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page refs in dialog workflows (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page refs after failed actions: prepare
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page refs after failed actions: prepare (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page refs after failed actions: resume
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page refs after failed actions: resume (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page refs after upload: prepare
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page refs after upload: prepare (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page refs after upload: resume
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page refs after upload: resume (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page snapshot lazy iframe
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page snapshot lazy iframe (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page snapshot sibling iframes
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page snapshot sibling iframes (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page snapshot nested iframes
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page snapshot nested iframes (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page snapshot replaced iframe
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page snapshot replaced iframe (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page open Shadow DOM locators
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page open Shadow DOM locators (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page text locators
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page text locators (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page Playwright selector compatibility
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page Playwright selector compatibility (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page popup waiter and URL diagnostic
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page popup waiter and URL diagnostic (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page download lifecycle
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page download lifecycle (28.5s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Concurrent TaskSpace downloads
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Concurrent TaskSpace downloads (28.7s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page Chromium PDF viewer download
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page Chromium PDF viewer download (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page download across rounds: prepare
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page download across rounds: prepare (28.7s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page download across rounds: resume
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page download across rounds: resume (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page OOPIF actions
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page OOPIF actions (28.7s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page OOPIF restore and close
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page OOPIF restore and close (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page load states
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page load states (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page dedicated Worker startup
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page dedicated Worker startup (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page API alignment
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page API alignment (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page actionability
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page actionability (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page evaluate timeout recovery
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page evaluate timeout recovery (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page delayed popup: schedule
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page delayed popup: schedule (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page delayed popup: resume
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page delayed popup: resume (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- v1 and v2 action parity
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] v1 and v2 action parity (28.5s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- portable keyboard workflow
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] portable keyboard workflow (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- Page keyboard interface
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] Page keyboard interface (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- pure CDP workflow
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] pure CDP workflow (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- snapshot workflow
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] snapshot workflow (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+-- visual workflow
+Error: Wiek Browser did not start: Opening handshake has timed out. See /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/v023-browser-suite-final/browser.log
+    at connect (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:146:9)
+    at async file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek%20Browser.app/Contents/Resources/app/cli/wiek-browser.mjs:74:11
+[FAIL] visual workflow (28.6s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+
+== E2E Summary ==
+  Passed:   25/69  (36%)
+  Failed:   44/69
+  Total time: 1437.1s
+  Assertions: 574
+
+  Cases:
+    environment initialization                    44.8s    24 assertions  PASS
+    helper surface                                290ms    67 assertions  PASS
+    task spaces and control                       32.6s    58 assertions  PASS
+    TaskSpace profile selection                   393ms    19 assertions  PASS
+    v2 cross-space routing                        671ms    4 assertions  PASS
+    navigation helpers                            45.0s    0 assertions  FAIL
+    observation helpers                           45.0s    0 assertions  FAIL
+    pointer and scroll helpers                    45.0s    0 assertions  FAIL
+    keyboard and file helpers                     21.4s    22 assertions  PASS
+    keyboard regression                            8.5s    14 assertions  PASS
+    wait, fetch, cdp, js, help                     9.8s    42 assertions  PASS
+    runtime regression                             3.7s    20 assertions  PASS
+    target-scoped event isolation                  6.6s    4 assertions  PASS
+    page labels: create                            1.6s    13 assertions  PASS
+    page labels: restore and reuse                815ms    14 assertions  PASS
+    page labels: close and do not reuse           639ms    10 assertions  PASS
+    page labels: persist before hard stop         382ms    1 assertions  PASS
+    page labels: restore after hard stop          444ms    3 assertions  PASS
+    page inventory and budget                     923ms    9 assertions  PASS
+    page adoption and release                     589ms    19 assertions  PASS
+    page basic operations                          2.1s    53 assertions  PASS
+    page complex evaluate                         703ms    23 assertions  PASS
+    page fetch                                    772ms    25 assertions  PASS
+    page actions and popup adoption                4.8s    57 assertions  PASS
+    Page click hit target                          3.7s    17 assertions  PASS
+    Page action motion tolerance                   1.2s    6 assertions  PASS
+    Page drag and canvas drawing                   1.0s    15 assertions  PASS
+    Page JavaScript dialog handling                1.2s    34 assertions  PASS
+    Page media playback                           15.5s    0 assertions  FAIL
+    Page scrolled screenshot                      20.5s    1 assertions  FAIL
+    Page snapshot locator quality                 28.6s    0 assertions  FAIL
+    Page snapshot iframe viewport                 28.7s    0 assertions  FAIL
+    Page snapshot subtree                         28.6s    0 assertions  FAIL
+    Page ref identity across partial snapshots    28.5s    0 assertions  FAIL
+    Page refs across rounds: prepare              28.7s    0 assertions  FAIL
+    Page refs across rounds: resume               28.6s    0 assertions  FAIL
+    Page refs in dialog workflows                 28.6s    0 assertions  FAIL
+    Page refs after failed actions: prepare       28.6s    0 assertions  FAIL
+    Page refs after failed actions: resume        28.6s    0 assertions  FAIL
+    Page refs after upload: prepare               28.6s    0 assertions  FAIL
+    Page refs after upload: resume                28.6s    0 assertions  FAIL
+    Page snapshot lazy iframe                     28.6s    0 assertions  FAIL
+    Page snapshot sibling iframes                 28.6s    0 assertions  FAIL
+    Page snapshot nested iframes                  28.6s    0 assertions  FAIL
+    Page snapshot replaced iframe                 28.6s    0 assertions  FAIL
+    Page open Shadow DOM locators                 28.6s    0 assertions  FAIL
+    Page text locators                            28.6s    0 assertions  FAIL
+    Page Playwright selector compatibility        28.6s    0 assertions  FAIL
+    Page popup waiter and URL diagnostic          28.6s    0 assertions  FAIL
+    Page download lifecycle                       28.5s    0 assertions  FAIL
+    Concurrent TaskSpace downloads                28.7s    0 assertions  FAIL
+    Page Chromium PDF viewer download             28.6s    0 assertions  FAIL
+    Page download across rounds: prepare          28.7s    0 assertions  FAIL
+    Page download across rounds: resume           28.6s    0 assertions  FAIL
+    Page OOPIF actions                            28.7s    0 assertions  FAIL
+    Page OOPIF restore and close                  28.6s    0 assertions  FAIL
+    Page load states                              28.6s    0 assertions  FAIL
+    Page dedicated Worker startup                 28.6s    0 assertions  FAIL
+    Page API alignment                            28.6s    0 assertions  FAIL
+    Page actionability                            28.6s    0 assertions  FAIL
+    Page evaluate timeout recovery                28.6s    0 assertions  FAIL
+    Page delayed popup: schedule                  28.6s    0 assertions  FAIL
+    Page delayed popup: resume                    28.6s    0 assertions  FAIL
+    v1 and v2 action parity                       28.5s    0 assertions  FAIL
+    portable keyboard workflow                    28.6s    0 assertions  FAIL
+    Page keyboard interface                       28.6s    0 assertions  FAIL
+    pure CDP workflow                             28.6s    0 assertions  FAIL
+    snapshot workflow                             28.6s    0 assertions  FAIL
+    visual workflow                               28.6s    0 assertions  FAIL
+
+  Failures:
+    - navigation helpers: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js timed out after 45000ms
+    - observation helpers: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js timed out after 45000ms
+    - pointer and scroll helpers: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js timed out after 45000ms
+    - Page media playback: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page scrolled screenshot: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page snapshot locator quality: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page snapshot iframe viewport: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page snapshot subtree: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page ref identity across partial snapshots: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page refs across rounds: prepare: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page refs across rounds: resume: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page refs in dialog workflows: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page refs after failed actions: prepare: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page refs after failed actions: resume: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page refs after upload: prepare: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page refs after upload: resume: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page snapshot lazy iframe: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page snapshot sibling iframes: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page snapshot nested iframes: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page snapshot replaced iframe: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page open Shadow DOM locators: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page text locators: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page Playwright selector compatibility: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page popup waiter and URL diagnostic: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page download lifecycle: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Concurrent TaskSpace downloads: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page Chromium PDF viewer download: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page download across rounds: prepare: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page download across rounds: resume: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page OOPIF actions: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page OOPIF restore and close: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page load states: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page dedicated Worker startup: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page API alignment: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page actionability: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page evaluate timeout recovery: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page delayed popup: schedule: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page delayed popup: resume: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - v1 and v2 action parity: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - portable keyboard workflow: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - Page keyboard interface: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - pure CDP workflow: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - snapshot workflow: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+    - visual workflow: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js exited with code 1
+
+-- cleanup
+[FAIL] cleanup (20.0s): /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs nodejs --sdk-path /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js timed out after 20000ms
+
+Comparison saved to /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/reports/comparison.md

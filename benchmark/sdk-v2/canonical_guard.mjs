@@ -19,7 +19,7 @@ try {
     if(taskId!==null&&node.type==='Identifier'){
       const property=parent?.type==='MemberExpression'&&parent.property===node&&!parent.computed;
       if(node.name==='taskSpace'&&!(parent?.type==='CallExpression'&&parent.callee===node))throw new Error('taskSpace must be called directly with the literal task name');
-      if(!property&&['ego','globalThis','eval','Function','require','taskSpaces','useOrCreateTaskSpace','newTaskSpace','switchTaskSpace','claimTaskSpace','takeOverTaskSpace','handOffTaskSpace','completeTaskSpace'].includes(node.name))throw new Error(`Unsupported control surface in strict V2 script: ${node.name}`);
+      if(!property&&['wiek','globalThis','eval','Function','require','taskSpaces','useOrCreateTaskSpace','newTaskSpace','switchTaskSpace','claimTaskSpace','takeOverTaskSpace','handOffTaskSpace','completeTaskSpace'].includes(node.name))throw new Error(`Unsupported control surface in strict V2 script: ${node.name}`);
     }
     if(taskId!==null&&node.type==='ImportExpression')throw new Error('Imports are outside the strict inline guard contract');
     for(const [key,value] of Object.entries(node)){

@@ -1,0 +1,260 @@
+........................................................................ [ 21%]
+.........................F.............................................. [ 43%]
+..FF......................................................F............. [ 65%]
+...................................................F.................F.. [ 86%]
+............................................                             [100%]
+=================================== FAILURES ===================================
+________________ test_codex_prompt_contains_only_managed_skill _________________
+
+tmp_path = PosixPath('/private/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/pytest-of-andrewyeoh/pytest-6/test_codex_prompt_contains_onl0')
+
+    def test_codex_prompt_contains_only_managed_skill(tmp_path: Path) -> None:
+        codex_bin = resolve_codex_runtime(None).executable
+        home = tmp_path / ".codex"
+        home.mkdir()
+        source_config = Path(__file__).parents[1] / "agent-home" / ".codex" / "config.toml"
+        shutil.copy2(source_config, home / "config.toml")
+        skill = _write_skill(tmp_path / "source-skills", "only-skill")
+        prepare_codex_home(home, skill)
+        workdir = home / "workspace"
+        (workdir / CODEX_PROJECT_MARKER).write_text("managed root\n", encoding="utf-8")
+    
+>       verify_codex_context_isolation(
+            codex_bin=codex_bin,
+            codex_home=home,
+            workdir=workdir,
+            real_home=str(Path.home()),
+            expected_skill_name="only-skill",
+        )
+
+benchmark/framework/tests/test_codex_provider.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+codex_bin = '/Users/andrewyeoh/.local/lib/node_modules/@openai/codex/bin/codex.js'
+codex_home = PosixPath('/private/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/pytest-of-andrewyeoh/pytest-6/test_codex_prompt_contains_onl0/.codex')
+workdir = PosixPath('/private/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/pytest-of-andrewyeoh/pytest-6/test_codex_prompt_contains_onl0/.codex/workspace')
+real_home = '/Users/andrewyeoh', expected_skill_name = 'only-skill'
+
+    def verify_codex_context_isolation(
+        *,
+        codex_bin: str,
+        codex_home: str | Path,
+        workdir: str | Path,
+        real_home: str,
+        expected_skill_name: str,
+    ) -> None:
+        """Fail before a measured run if Codex's model-visible prompt is contaminated."""
+        home = Path(codex_home).resolve()
+        isolated_home = home / "isolated-home"
+        command = [codex_bin, "-C", str(Path(workdir).resolve())]
+        for override in build_codex_config_overrides(real_home):
+            command.extend(["--config", override])
+        command.extend(["debug", "prompt-input", "context isolation probe"])
+        completed = subprocess.run(
+            command,
+            cwd=workdir,
+            env={
+                **dict(os.environ),
+                "CODEX_HOME": str(home),
+                "HOME": str(isolated_home),
+            },
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        if completed.returncode != 0:
+            detail = completed.stderr.strip() or completed.stdout.strip()
+            raise RuntimeError(f"Codex context probe failed: {detail}")
+        try:
+            payload = json.loads(completed.stdout)
+        except json.JSONDecodeError as exc:
+            raise RuntimeError("Codex context probe returned invalid JSON") from exc
+    
+        strings: list[str] = []
+    
+        def _collect(value: Any) -> None:
+            if isinstance(value, str):
+                strings.append(value)
+            elif isinstance(value, list):
+                for child in value:
+                    _collect(child)
+            elif isinstance(value, dict):
+                for child in value.values():
+                    _collect(child)
+    
+        _collect(payload)
+        prompt = "\n".join(strings)
+        skill_blocks = [value for value in strings if "<skills_instructions>" in value]
+        if len(skill_blocks) != 1:
+            raise RuntimeError(f"Codex context probe found {len(skill_blocks)} skills blocks")
+        found = re.findall(r"(?m)^- ([^:\n]+): .*?\(file: ([^)]+)\)$", skill_blocks[0])
+        names = [name for name, _path in found]
+        if names != [expected_skill_name]:
+            raise RuntimeError(f"Codex context probe expected [{expected_skill_name}], found {names}")
+        skill_root = (home / "skills").resolve()
+        for _name, value in found:
+            path = Path(value).resolve()
+            if not path.is_relative_to(skill_root):
+>               raise RuntimeError(f"Codex context probe exposed skill outside managed home: {path}")
+E               RuntimeError: Codex context probe exposed skill outside managed home: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/r0/only-skill/SKILL.md
+
+benchmark/framework/wiek_bench/providers/codex_sdk.py:236: RuntimeError
+_______________ test_header_subtitle_describes_model_comparison ________________
+
+    def test_header_subtitle_describes_model_comparison() -> None:
+        root = ElementTree.parse(HEADER).getroot()
+        text = ["".join(node.itertext()).strip() for node in root.findall("{*}text")]
+    
+>       assert "Run, Judge, and Compare Models on Browser Tasks" in text
+E       AssertionError: assert 'Run, Judge, and Compare Models on Browser Tasks' in []
+
+benchmark/framework/tests/test_header_asset.py:16: AssertionError
+_______________ test_header_icon_has_beta_badge_at_its_top_right _______________
+
+    def test_header_icon_has_beta_badge_at_its_top_right() -> None:
+        root = ElementTree.parse(HEADER).getroot()
+        badge = root.find(".//*[@id='header-beta-badge']")
+        icon = root.find(".//*[@id='header-icon']")
+    
+>       assert badge is not None
+E       assert None is not None
+
+benchmark/framework/tests/test_header_asset.py:25: AssertionError
+_____________ test_templates_exist_for_every_untracked_local_file ______________
+
+    def test_templates_exist_for_every_untracked_local_file() -> None:
+        """Every ignored credential or local config file keeps a tracked template beside it."""
+        missing = [
+            f"{path}.example" for path in TEMPLATED_FILES if not _tracked_files(f"{path}.example")
+        ]
+    
+>       assert not missing, "missing tracked templates: " + ", ".join(missing)
+E       AssertionError: missing tracked templates: agent-home/.pi/agent/auth.json.example, agent-home/.codex/auth.json.example, agent-home/.pi/agent/models.json.example
+E       assert not ['agent-home/.pi/agent/auth.json.example', 'agent-home/.codex/auth.json.example', 'agent-home/.pi/agent/models.json.example']
+
+benchmark/framework/tests/test_repository_conventions.py:251: AssertionError
+_____________ test_codex_tool_failures_include_code_zero_wrappers ______________
+
+tmp_path = PosixPath('/private/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/pytest-of-andrewyeoh/pytest-6/test_codex_tool_failures_inclu0')
+
+    def test_codex_tool_failures_include_code_zero_wrappers(tmp_path: Path) -> None:
+        session = tmp_path / "codex-rollout.jsonl"
+        cases = [
+            (
+                "exec_command",
+                {"cmd": "false"},
+                "Process exited with code 1\nOutput:\nfailed",
+            ),
+            (
+                "exec_command",
+                {"cmd": "wiek-browser nodejs"},
+                "Process exited with code 0\nOutput:\nego's nodejs process exited with code 1.",
+            ),
+            (
+                "write_stdin",
+                {"chars": "document.body.innerText\n"},
+                (
+                    "Process running with session ID 42\nOutput:\n"
+                    "Uncaught ReferenceError: document is not defined\r\nrepl> "
+                ),
+            ),
+            (
+                "exec_command",
+                {"cmd": "pdftotext missing.pdf -"},
+                (
+                    "Process exited with code 0\nOutput:\n"
+                    "I/O Error: Couldn't open file 'missing.pdf': No such file or directory."
+                ),
+            ),
+            (
+                "write_stdin",
+                {"chars": "\u0003"},
+                "write_stdin failed: stdin is closed for this session",
+            ),
+            (
+                "exec_command",
+                {"cmd": "wiek-browser nodejs"},
+                "SyntaxError: await is only valid in async functions",
+            ),
+            (
+                "exec_command",
+                {"cmd": "printf ok"},
+                "Process exited with code 0\nOutput:\nok",
+            ),
+            (
+                "write_stdin",
+                {"chars": "retryClick()\n"},
+                "click err ElementResolutionError: matched 0 elements\nrecovered with fallback",
+            ),
+        ]
+        entries: list[dict[str, Any]] = [
+            {
+                "timestamp": "2026-01-01T00:00:00Z",
+                "type": "session_meta",
+                "payload": {"id": "codex-tool-errors"},
+            }
+        ]
+        for index, (name, arguments, output) in enumerate(cases, 1):
+            call_id = f"call-{index}"
+            entries.extend(
+                [
+                    {
+                        "timestamp": f"2026-01-01T00:00:{index:02d}Z",
+                        "type": "response_item",
+                        "payload": {
+                            "type": "function_call",
+                            "name": name,
+                            "call_id": call_id,
+                            "arguments": json.dumps(arguments),
+                        },
+                    },
+                    {
+                        "timestamp": f"2026-01-01T00:01:{index:02d}Z",
+                        "type": "response_item",
+                        "payload": {
+                            "type": "function_call_output",
+                            "call_id": call_id,
+                            "output": output,
+                        },
+                    },
+                ]
+            )
+        _write_jsonl(session, entries)
+    
+        stats = safe_parse(session)
+        actions = bash_actions_from_session(session)
+    
+        assert stats.tool_calls == 8
+>       assert stats.tool_failures == 6
+E       AssertionError: assert 5 == 6
+E        +  where 5 = SessionStats(session_id='codex-tool-errors', session_file='/private/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/py...ens=0, cache_creation_tokens=0, cost_usd=None, cost_is_estimate=False, cost_source=None, parse_error=None, warnings=[]).tool_failures
+
+benchmark/framework/tests/test_session_parser_tool_failures.py:105: AssertionError
+________ test_public_beta_version_is_consistent_across_release_surfaces ________
+
+    def test_public_beta_version_is_consistent_across_release_surfaces() -> None:
+        project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        frontend = json.loads((ROOT / "frontend/package.json").read_text(encoding="utf-8"))
+    
+        assert project["project"]["version"] == PYTHON_BETA_VERSION
+        assert __version__ == PYTHON_BETA_VERSION
+        assert create_app().version == PYTHON_BETA_VERSION
+        assert frontend["version"] == SEMVER_BETA_VERSION
+    
+        badge = "Version-0.1.0--beta.1-FFD166"
+        release = "releases/tag/v0.1.0-beta.1"
+        for readme in ("README.md", "README.zh-CN.md"):
+            text = (ROOT / readme).read_text(encoding="utf-8")
+>           assert badge in text
+E           AssertionError: assert 'Version-0.1.0--beta.1-FFD166' in '# Wiek local evaluation framework\n\nRepository-owned, offline-buildable framework for the same pinned 31-task datase... use Wiek only. Model/account runs remain explicit. Third-party notices are retained in LICENSE and the root NOTICE.\n'
+
+benchmark/framework/tests/test_version_metadata.py:29: AssertionError
+=========================== short test summary info ============================
+FAILED benchmark/framework/tests/test_codex_provider.py::test_codex_prompt_contains_only_managed_skill
+FAILED benchmark/framework/tests/test_header_asset.py::test_header_subtitle_describes_model_comparison
+FAILED benchmark/framework/tests/test_header_asset.py::test_header_icon_has_beta_badge_at_its_top_right
+FAILED benchmark/framework/tests/test_repository_conventions.py::test_templates_exist_for_every_untracked_local_file
+FAILED benchmark/framework/tests/test_session_parser_tool_failures.py::test_codex_tool_failures_include_code_zero_wrappers
+FAILED benchmark/framework/tests/test_version_metadata.py::test_public_beta_version_is_consistent_across_release_surfaces
+6 failed, 326 passed in 4.01s

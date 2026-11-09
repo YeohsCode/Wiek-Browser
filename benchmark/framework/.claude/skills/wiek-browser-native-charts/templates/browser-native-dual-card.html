@@ -1,0 +1,315 @@
+<section class="wiek-benchmark-browser" aria-label="{{CHART_ARIA_LABEL}}">
+  <style>
+    .wiek-benchmark-browser {
+      --wiek-blue: #2457ff;
+      --wiek-black: #161616;
+      --wiek-surface: #f6f6f3;
+      --wiek-line: #d8d8d3;
+      --wiek-muted: #777772;
+
+      box-sizing: border-box;
+      width: 100%;
+      max-width: 920px;
+      margin: 26px auto;
+      overflow: hidden;
+      border: 1px solid var(--wiek-black);
+      border-radius: 10px;
+      background: #fff;
+      color: var(--wiek-black);
+      font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    }
+
+    .wiek-benchmark-browser,
+    .wiek-benchmark-browser * {
+      box-sizing: border-box;
+    }
+
+    .wiek-benchmark-browser__chrome {
+      height: 34px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      border-bottom: 1px solid var(--wiek-line);
+      background: var(--wiek-surface);
+    }
+
+    .wiek-benchmark-browser__controls {
+      display: flex;
+      gap: 5px;
+    }
+
+    .wiek-benchmark-browser__dot {
+      width: 7px;
+      height: 7px;
+      border: 1px solid #9b9b96;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .wiek-benchmark-browser__tab {
+      min-width: 150px;
+      height: 23px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 9px;
+      border: 1px solid var(--wiek-line);
+      border-bottom-color: #fff;
+      border-radius: 5px 5px 0 0;
+      background: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 9px;
+      color: #4e4e4a;
+    }
+
+    .wiek-benchmark-browser__tab-mark {
+      width: 6px;
+      height: 6px;
+      background: var(--wiek-blue);
+    }
+
+    .wiek-benchmark-browser__content {
+      padding: 15px 16px 14px;
+    }
+
+    .wiek-benchmark-browser__heading {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 20px;
+      margin-bottom: 13px;
+    }
+
+    .wiek-benchmark-browser__title {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.25;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .wiek-benchmark-browser__description {
+      margin: 3px 0 0;
+      font-size: 10px;
+      line-height: 1.5;
+      color: var(--wiek-muted);
+    }
+
+    .wiek-benchmark-browser__status {
+      flex: none;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+      padding-top: 1px;
+      white-space: nowrap;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 8.5px;
+      line-height: 1.4;
+    }
+
+    .wiek-benchmark-browser__model {
+      color: var(--wiek-black);
+      font-weight: 600;
+    }
+
+    .wiek-benchmark-browser__run-meta {
+      color: var(--wiek-muted);
+    }
+
+    .wiek-benchmark-browser__grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .wiek-benchmark-browser__card {
+      overflow: hidden;
+      border: 1px solid var(--wiek-line);
+      border-radius: 7px;
+      background: var(--wiek-surface);
+    }
+
+    .wiek-benchmark-browser__card-top {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 11px;
+      border-bottom: 1px solid var(--wiek-line);
+      background: #fff;
+    }
+
+    .wiek-benchmark-browser__metric,
+    .wiek-benchmark-browser__value {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-weight: 600;
+    }
+
+    .wiek-benchmark-browser__metric {
+      font-size: 9.5px;
+    }
+
+    .wiek-benchmark-browser__delta {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--wiek-blue);
+    }
+
+    .wiek-benchmark-browser__chart {
+      padding: 12px 12px 10px;
+    }
+
+    .wiek-benchmark-browser__plot {
+      height: 138px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 44px;
+      padding: 8px 14px 0;
+      border-bottom: 1px solid #9f9f9a;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 33px,
+        #e5e5e1 33px,
+        #e5e5e1 34px
+      );
+    }
+
+    .wiek-benchmark-browser__bar-group {
+      width: min(86px, 34%);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .wiek-benchmark-browser__value {
+      margin-bottom: 5px;
+      font-size: 9.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .wiek-benchmark-browser__bar {
+      width: 100%;
+      height: calc(var(--height) * 1%);
+      min-height: 10px;
+      border-radius: 2px 2px 0 0;
+    }
+
+    .wiek-benchmark-browser__bar--baseline {
+      border: 1px solid #aaa9a4;
+      border-bottom: 0;
+      background: #dededa;
+    }
+
+    .wiek-benchmark-browser__bar--target {
+      background: var(--wiek-blue);
+    }
+
+    .wiek-benchmark-browser__labels {
+      display: flex;
+      justify-content: center;
+      gap: 44px;
+      padding: 7px 14px 0;
+    }
+
+    .wiek-benchmark-browser__label {
+      width: min(86px, 34%);
+      text-align: center;
+      font-size: 9px;
+      color: #555550;
+    }
+
+    .wiek-benchmark-browser__footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 9px;
+      border-top: 1px solid #ecece8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 8.5px;
+      color: var(--wiek-muted);
+    }
+
+    .wiek-benchmark-browser__footer strong {
+      color: var(--wiek-blue);
+    }
+
+    @media (max-width: 640px) {
+      .wiek-benchmark-browser__heading {
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .wiek-benchmark-browser__status {
+        align-items: flex-start;
+      }
+
+      .wiek-benchmark-browser__grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <div class="wiek-benchmark-browser__chrome">
+    <div class="wiek-benchmark-browser__controls">
+      <span class="wiek-benchmark-browser__dot"></span>
+      <span class="wiek-benchmark-browser__dot"></span>
+      <span class="wiek-benchmark-browser__dot"></span>
+    </div>
+    <div class="wiek-benchmark-browser__tab">
+      <span class="wiek-benchmark-browser__tab-mark"></span>
+      {{TAB_LABEL}}
+    </div>
+  </div>
+
+  <div class="wiek-benchmark-browser__content">
+    <header class="wiek-benchmark-browser__heading">
+      <div>
+        <h3 class="wiek-benchmark-browser__title">{{TITLE}}</h3>
+        <p class="wiek-benchmark-browser__description">{{DESCRIPTION}}</p>
+      </div>
+      <div class="wiek-benchmark-browser__status">
+        <span class="wiek-benchmark-browser__model">{{MODEL_METADATA}}</span>
+        <span class="wiek-benchmark-browser__run-meta">{{RUN_METADATA}}</span>
+      </div>
+    </header>
+
+    <div class="wiek-benchmark-browser__grid">
+      <!-- Duplicate this article for metric 2. -->
+      <article class="wiek-benchmark-browser__card">
+        <div class="wiek-benchmark-browser__card-top">
+          <span class="wiek-benchmark-browser__metric">{{METRIC_1}}</span>
+          <span class="wiek-benchmark-browser__delta">{{DELTA_1}}</span>
+        </div>
+        <div class="wiek-benchmark-browser__chart">
+          <div class="wiek-benchmark-browser__plot">
+            <div class="wiek-benchmark-browser__bar-group">
+              <span class="wiek-benchmark-browser__value">{{BASELINE_VALUE_1}}</span>
+              <div class="wiek-benchmark-browser__bar wiek-benchmark-browser__bar--baseline" style="--height: 100"></div>
+            </div>
+            <div class="wiek-benchmark-browser__bar-group">
+              <span class="wiek-benchmark-browser__value">{{TARGET_VALUE_1}}</span>
+              <div class="wiek-benchmark-browser__bar wiek-benchmark-browser__bar--target" style="--height: {{TARGET_HEIGHT_1}}"></div>
+            </div>
+          </div>
+          <div class="wiek-benchmark-browser__labels">
+            <span class="wiek-benchmark-browser__label">{{BASELINE_LABEL}}</span>
+            <span class="wiek-benchmark-browser__label">{{TARGET_LABEL}}</span>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <footer class="wiek-benchmark-browser__footer">
+      <span>{{FOOTER_CONTEXT}}</span>
+      <strong>{{DIRECTION_LABEL}}</strong>
+    </footer>
+  </div>
+</section>

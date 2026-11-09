@@ -41,14 +41,14 @@ class Fixture(BaseHTTPRequestHandler):
         pass
 
 
-def run(reference: Path, browsers: list[str], ego_binary: Path | None) -> dict:
+def run(reference: Path, browsers: list[str], reference_binary: Path | None) -> dict:
     from apply import install
     installed = install(reference)
     sys.path.insert(0, str(reference.resolve()))
-    from ego_bench.browser_tools import get_browser_tool
-    from ego_bench.browser_tools.ego_browser import probe_runtime_contract, validate_skill_runtime_contract
-    from ego_bench.hooks import pi_extension_helper as hook
-    from ego_bench.browser_tools.canonical_v2 import marker_payload
+    from wiek_bench.browser_tools import get_browser_tool
+    from wiek_bench.browser_tools.wiek_browser import probe_runtime_contract, validate_skill_runtime_contract
+    from wiek_bench.hooks import pi_extension_helper as hook
+    from wiek_bench.browser_tools.canonical_v2 import marker_payload
     sdk = ROOT / "packages/sdk/dist/out/index.js"
     report = {"onlineBenchmark": False, "modelCalls": 0, "accountActions": 0,
               "sdkSha256": sha(sdk.read_bytes()), "adapter": installed,
@@ -60,47 +60,24 @@ def run(reference: Path, browsers: list[str], ego_binary: Path | None) -> dict:
         for browser in browsers:
             own = ROOT / "data/benchmark-framework-v2" / uuid.uuid4().hex
             own.mkdir(parents=True)
-            binary = ROOT / "cli/wiek-browser.mjs" if browser == "wiek" else ROOT / "tools/ego-reference-cli"
+            binary = ROOT / "cli/wiek-browser.mjs"
             run_report = {"browser": browser, "passed": False, "cliSha256": sha(binary.read_bytes()), "checks": []}
             report["runs"].append(run_report)
             process = None
             task_id = "framework-smoke-" + uuid.uuid4().hex
-            values = {"EGO_BROWSER_BIN": str(binary), "EGO_BENCH_TASK_ID": task_id,
-                      "EGO_BENCH_BROWSER_TOOL": "ego-browser", "EGO_BENCH_BROWSER_TOOL_MODE": "strict",
-                      "EGO_BENCH_EGO_BROWSER_RUNTIME_CONTRACT": "canonical-sdk-v2",
-                      "EGO_BENCH_EGO_BROWSER_SDK_PATH": str(sdk), "WIEK_DATA_DIR": str(own / "wiek"), "VEK_DATA_DIR": str(own / "wiek"),
-                      "WIEK_REFERENCE_VERSION": "0.6.2.7", "EGO_BENCH_BROWSER_STATE_PATH": str(own / "state.json"),
-                      "EGO_BENCH_SCREENSHOT_FRAMES_DIR": str(own / "frames")}
+            values = {"WIEK_BROWSER_BIN": str(binary), "WIEK_BENCH_TASK_ID": task_id,
+                      "WIEK_BENCH_BROWSER_TOOL": "wiek-browser", "WIEK_BENCH_BROWSER_TOOL_MODE": "strict",
+                      "WIEK_BENCH_WIEK_BROWSER_RUNTIME_CONTRACT": "canonical-sdk-v2",
+                      "WIEK_BENCH_WIEK_BROWSER_SDK_PATH": str(sdk), "WIEK_DATA_DIR": str(own / "wiek"), "VEK_DATA_DIR": str(own / "wiek"),
+                      "WIEK_REFERENCE_VERSION": "0.6.2.7", "WIEK_BENCH_BROWSER_STATE_PATH": str(own / "state.json"),
+                      "WIEK_BENCH_SCREENSHOT_FRAMES_DIR": str(own / "frames")}
             with environment(values):
                 try:
-                    if browser == "ego":
-                        if not ego_binary or not ego_binary.is_file(): raise RuntimeError("Explicit Ego application binary required")
-                        # A private named instance/profile prevents the framework from
-                        # ever attaching to the user's default browser session.
-                        # This explicit fixture profile was initialized for earlier
-                        # reference tests. A brand-new profile stops at onboarding
-                        # (rc=0 without executing JS); never bypass that gate.
-                        profile = ROOT / "data/ego-reference"
-                        if not profile.is_dir(): raise RuntimeError("Initialized dedicated Ego fixture profile required")
-                        run_report["referenceProfile"] = "data/ego-reference"
-                        arguments = [str(ego_binary), "--user-data-dir=" + str(profile), "--ego-server-name=vek-reference", "--no-first-run"]
-                        log = (own / "ego-launch.log").open("w")
-                        process = subprocess.Popen(arguments, stdout=log, stderr=subprocess.STDOUT)
-                        log.close()
-                        for attempt in range(20):
-                            if process.poll() is not None: raise RuntimeError("Owned Ego process exited during startup")
-                            try:
-                                contract = probe_runtime_contract(bin_path=str(binary), sdk_path=sdk, timeout_seconds=5)
-                                break
-                            except RuntimeError:
-                                if attempt == 19: raise
-                                time.sleep(.5)
-                    else:
-                        contract = probe_runtime_contract(bin_path=str(binary), sdk_path=sdk)
+                    contract = probe_runtime_contract(bin_path=str(binary), sdk_path=sdk)
                     assert contract.value == "canonical-sdk-v2", contract
-                    os.environ["EGO_BENCH_EGO_BROWSER_RUNTIME_CONTRACT"] = contract.value
-                    validate_skill_runtime_contract(skill_path=sdk.parent / "ego-browser/SKILL.md", sdk_path=sdk, runtime_contract=contract)
-                    tool = get_browser_tool("ego-browser")
+                    os.environ["WIEK_BENCH_WIEK_BROWSER_RUNTIME_CONTRACT"] = contract.value
+                    validate_skill_runtime_contract(skill_path=sdk.parent / "wiek-browser/SKILL.md", sdk_path=sdk, runtime_contract=contract)
+                    tool = get_browser_tool("wiek-browser")
                     def execute(source):
                         marker = uuid.uuid4().hex
                         code = "const __run=async()=>{" + source + "\n};const result=await __run();console.log(JSON.stringify({canonicalMarker:" + json.dumps(marker) + ",result}));"
@@ -109,7 +86,7 @@ def run(reference: Path, browsers: list[str], ego_binary: Path | None) -> dict:
                     probe_runtime_contract(bin_path=str(binary), sdk_path=sdk)
                     assert execute("return (await listTaskSpaces()).length;") == before
                     run_report["checks"].append({"probe": contract.value, "zeroMutation": True, "pairedSkill": True})
-                    create = f"const task=await taskSpace({json.dumps(task_id)});await task.page('p1').goto({json.dumps(url)});return {{id:task.id,version:await ego.getBrowserVersion(),layout:await task.page('p1').cdp('Page.getLayoutMetrics',{{}})}};"
+                    create = f"const task=await taskSpace({json.dumps(task_id)});await task.page('p1').goto({json.dumps(url)});return {{id:task.id,version:await wiek.getBrowserVersion(),layout:await task.page('p1').cdp('Page.getLayoutMetrics',{{}})}};"
                     created = execute(create)
                     run_report["hostVersion"] = created["version"]
                     source = f"const task=await taskSpace({json.dumps(task_id)});console.log(await task.page('p1').title());"
@@ -143,7 +120,7 @@ def run(reference: Path, browsers: list[str], ego_binary: Path | None) -> dict:
                     run_report["error"] = str(exc)
                 finally:
                     try:
-                        cleanup = get_browser_tool("ego-browser").close_targets(instance_id=task_id)
+                        cleanup = get_browser_tool("wiek-browser").close_targets(instance_id=task_id)
                         run_report["finalCleanup"] = {"ok": cleanup.ok, "error": cleanup.error}
                     except Exception as exc:
                         run_report["cleanupError"] = str(exc)
@@ -163,10 +140,10 @@ def run(reference: Path, browsers: list[str], ego_binary: Path | None) -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("reference", type=Path)
-    parser.add_argument("--browser", choices=["wiek", "ego", "both"], required=True)
-    parser.add_argument("--ego-binary", type=Path)
+    parser.add_argument("--browser", choices=["wiek"], required=True)
+    parser.set_defaults(reference_binary=None)
     args = parser.parse_args()
-    report = run(args.reference, ["ego", "wiek"] if args.browser == "both" else [args.browser], args.ego_binary)
+    report = run(args.reference, ["wiek"], args.reference_binary)
     (ROOT / "reports/p4-sdk-v2-framework-smoke.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
     sys.exit(0 if report["passed"] else 1)

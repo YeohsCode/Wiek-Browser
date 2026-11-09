@@ -16,14 +16,14 @@ const fixture='<!doctype html><meta charset="utf-8"><title>Shared SDK V2 fixture
 const server=createServer((req,res)=>{res.writeHead(200,{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'});res.end(fixture);});
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const url=`http://127.0.0.1:${server.address().port}/`;
-const option=process.argv.slice(2);if(option.length!==2||option[0]!=='--browser'||!['wiek','ego','both'].includes(option[1])){server.close();throw new Error('Use --browser wiek|ego|both');}
+const option=process.argv.slice(2);if(option.length!==2||option[0]!=='--browser'||option[1]!=='wiek'){server.close();throw new Error('Use --browser wiek');}
 const wiekData=join(root,'data/benchmark-v2-smoke',randomUUID());
-const targets=option[1]==='both'?['ego','wiek']:[option[1]];
+const targets=['wiek'];
 const report={generatedAt:new Date().toISOString(),onlineBenchmark:false,modelCalls:0,accountActions:0,sdkSha256:sha(await readFile(sdk)),controlSha256:sha(source),fixtureSha256:sha(fixture),runs:[]};
 function execute(browser,code){return new Promise((resolve,reject)=>{
   const marker=randomUUID();
   const program=`const __benchmarkRun=async()=>{${code}\n};const result=await __benchmarkRun();console.log(JSON.stringify({benchmarkSmoke:${JSON.stringify(marker)},result}));`;
-  const cli=browser==='ego'?[process.env.WIEK_BENCH_EGO_CLI||join(root,'tools/ego-reference-cli'),...(process.env.WIEK_BENCH_EGO_CLI?['--ego-server-name=vek-reference']:[])]:[process.execPath,join(root,'cli/wiek-browser.mjs')];
+  const cli=[process.execPath,join(root,'cli/wiek-browser.mjs')];
   const env={...process.env};if(browser==='wiek'){env.WIEK_DATA_DIR=wiekData;env.VEK_DATA_DIR=env.WIEK_DATA_DIR;}
   const child=spawn(cli[0],[...cli.slice(1),'nodejs','--sdk-path',sdk,'-e',program],{cwd:root,env,stdio:['ignore','pipe','pipe']});
   let stdout='',stderr='',overflow=false,timedOut=false;
@@ -37,11 +37,11 @@ function execute(browser,code){return new Promise((resolve,reject)=>{
 try{
   for(const browser of targets){
     const name=`benchmark-v2-local-${randomUUID()}`;let createdId,cleanupNeeded=false;
-    const cliPath=browser==='ego'?(process.env.WIEK_BENCH_EGO_CLI||join(root,'tools/ego-reference-cli')):join(root,'cli/wiek-browser.mjs');
+    const cliPath=join(root,'cli/wiek-browser.mjs');
     const run={browser,cli:cliPath,taskName:name,passed:false,checks:[]};report.runs.push(run);
     try{
       run.cliSha256=sha(await readFile(cliPath));
-      const probe=await execute(browser,`const fs=await import('node:fs');const crypto=await import('node:crypto');return {canonical:typeof taskSpace==='function'&&typeof listTaskSpaces==='function',globalCanonical:typeof globalThis.taskSpace==='function',runtimeSdkSha256:crypto.createHash('sha256').update(fs.readFileSync(${JSON.stringify(sdk)})).digest('hex'),hostVersion:await globalThis.ego.getBrowserVersion()};`);
+      const probe=await execute(browser,`const fs=await import('node:fs');const crypto=await import('node:crypto');return {canonical:typeof taskSpace==='function'&&typeof listTaskSpaces==='function',globalCanonical:typeof globalThis.taskSpace==='function',runtimeSdkSha256:crypto.createHash('sha256').update(fs.readFileSync(${JSON.stringify(sdk)})).digest('hex'),hostVersion:await globalThis.wiek.getBrowserVersion()};`);
       if(probe.runtimeSdkSha256!==report.sdkSha256)throw new Error('Runtime SDK identity mismatch');
       if(!probe.canonical)throw new Error('Canonical lexical SDK helpers unavailable');run.checks.push({probe});
       cleanupNeeded=true;const created=await execute(browser,`const task=await taskSpace(${JSON.stringify(name)});await task.page('p1').goto(${JSON.stringify(url)});return {spaceId:task.id};`);

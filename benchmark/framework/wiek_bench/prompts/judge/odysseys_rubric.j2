@@ -1,0 +1,20 @@
+User Task (context only): {{ task }}
+
+Evaluate ONLY this rubric item:
+Rubric ID: {{ rubric_id }}
+Requirement: {{ requirement }}
+Verification: {{ verification }}
+
+Full Action History:
+{{ trajectory }}
+
+Agent's Final Answer:
+{{ final_result }}
+{% if provider_error %}
+
+Transport error the harness recorded for this run (may not appear in the action history): {{ provider_error }}
+{% endif %}
+
+Screenshots attached below: {{ image_count }} (in chronological order).
+
+Decide whether the rubric ({{ rubric_id }}) is satisfied. Output ONLY the required JSON object.

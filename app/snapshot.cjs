@@ -217,7 +217,7 @@ function stableLocator(node, doc) {
 
 function snapshotError(message) {
   const error = new Error(message);
-  error.error_code = 'EGO_SNAPSHOT_FAILED';
+  error.error_code = 'WIEK_SNAPSHOT_FAILED';
   return error;
 }
 

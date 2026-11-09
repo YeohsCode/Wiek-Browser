@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Session Analyzer"
+  short_description: "Analyze Codex rollout and benchmark run execution paths"
+  default_prompt: "Use $codex-session-analyzer to analyze failures, timing, and tool-call paths in the specified Codex run."

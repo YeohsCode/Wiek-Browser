@@ -1,5 +1,5 @@
 node_modules/
 dist/
-ego-browser.js
+wiek-browser.js
 bin/
 .build.lock

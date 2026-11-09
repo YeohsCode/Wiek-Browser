@@ -1,0 +1,84 @@
+{
+  "onlineBenchmark": false,
+  "modelCalls": 0,
+  "accountActions": 0,
+  "sdkSha256": "6d1ef3537f56eea38ecb72c381b1267d8a489faf5d98c1455eace8ce3c67ef28",
+  "adapter": {
+    "repositoryOwned": true,
+    "datasetSha256": "e1495bef65b83c7bcb4cf3bf7a6e515239c6763c620efe1d31749ad6d54f6200",
+    "files": {
+      "wiek_bench/browser_tools/wiek_browser.py": "01ac84613117518e4f3d9066bff0928dda5fd0ec333d738010c350e288809207",
+      "wiek_bench/browser_tools/canonical_v2.py": "ba4c2d326f53d0bf6e129bf6533f0877d2b8104e3a1fb0f1fd563e4d7bb7b172",
+      "wiek_bench/browser_tools/_canonical_control.mjs": "f2230adfd231c226ead5625eddbe50ee6b01e3c70158311a46d52965a24f65e1",
+      "data/real_world_bench.json": "e1495bef65b83c7bcb4cf3bf7a6e515239c6763c620efe1d31749ad6d54f6200"
+    },
+    "modelCalls": 0,
+    "accountActions": 0
+  },
+  "fixtureSha256": "caf1c8d3a411fa2d75faaa7578aae60c2fa7308193f50d39e57946cc3bd0532e",
+  "runs": [
+    {
+      "browser": "wiek",
+      "passed": true,
+      "cliSha256": "87e69290c96fff68e2690fe8701edda06d18dc8450e3733762c4ba08dc9a6241",
+      "checks": [
+        {
+          "probe": "canonical-sdk-v2",
+          "zeroMutation": true,
+          "pairedSkill": true
+        },
+        {
+          "strictHook": true,
+          "screenshotHook": true,
+          "pngSha256": "53ae9031bd3348a4d08cedb5d1df7ed6831fb725602dd882c08107fa0a251dfa",
+          "pngBytes": 12806,
+          "ax": true,
+          "viewportRestored": true,
+          "receipt": {
+            "canonicalMarker": "2719fbe37f7a42399139e67796fcd058",
+            "spaceId": 2,
+            "targetId": "8A2662944A2C7166D8F9DE254B985CC1",
+            "viewport": {
+              "width": 1280,
+              "height": 800,
+              "deviceScaleFactor": 1,
+              "mobile": false
+            },
+            "axError": null,
+            "sha256": "53ae9031bd3348a4d08cedb5d1df7ed6831fb725602dd882c08107fa0a251dfa"
+          }
+        },
+        {
+          "closed": {
+            "wiekBenchClose": [
+              {
+                "candidate": "framework-smoke-faf09e3497414734978553c619db4d95",
+                "ok": true,
+                "receipt": {
+                  "spaceId": 2,
+                  "closedSpace": true,
+                  "keptManagedLabels": [],
+                  "closedManagedLabels": [
+                    "p1"
+                  ],
+                  "preservedUnmanagedCount": 0
+                }
+              }
+            ],
+            "canonicalMarker": "4efa75ce760f4921a8ca6692315cfd06"
+          },
+          "missingCleanupIdempotent": true
+        }
+      ],
+      "hostVersion": {
+        "currentVersion": "0.23.0",
+        "updateAvailable": false
+      },
+      "finalCleanup": {
+        "ok": true,
+        "error": null
+      }
+    }
+  ],
+  "passed": true
+}

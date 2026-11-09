@@ -40,7 +40,7 @@ export function addPageContextHint(error: unknown): unknown {
 
 /**
  * Install an SDK-only guard so the embedding host can print the same hint even
- * though it, rather than ego-browser's CLI wrapper, executes the heredoc.
+ * though it, rather than wiek-browser's CLI wrapper, executes the heredoc.
  */
 export function installPageContextGuard(target: Record<string, unknown>): void {
   for (const globalName of PAGE_ONLY_GLOBALS) {

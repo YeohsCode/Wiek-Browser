@@ -1,0 +1,4 @@
+
+> wiek-browser-sdk@0.1.0 check:skill-translation
+> node scripts/check-skill-translation.mjs
+

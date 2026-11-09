@@ -5,13 +5,13 @@ import { tmpdir } from "node:os";
 import { state } from "../state.js";
 import { cdp, runtimeValue } from "../cdp-eval.js";
 import {
-  browserEgo,
+  browserWiek,
   browserSnapshotRefsToRefMap,
   drainBrowserEvents,
   ensureSession,
   isBrowserRuntime,
 } from "../browser-runtime.js";
-import { invokeEgo } from "../ego-errors.js";
+import { invokeWiek } from "../wiek-errors.js";
 import { resolveElementCenter } from "../element-resolver.js";
 import { compactSnapshotResult } from "../snapshot-result.js";
 import {
@@ -50,8 +50,8 @@ export async function drainEvents() {
 }
 
 export async function snapshot(options: SnapshotOptions = {}) {
-  const result: any = await invokeEgo("snapshot", () =>
-    browserEgo().snapshot(options),
+  const result: any = await invokeWiek("snapshot", () =>
+    browserWiek().snapshot(options),
   );
   compactSnapshotResult(result);
   browserSnapshotRefsToRefMap(browserRefMap, result.refs || []);
@@ -113,7 +113,7 @@ export async function captureScreenshotForSession(
   assertScreenshotScale(options.scale);
   const outputPath =
     path ??
-    join(tmpdir(), `ego-browser-shot-${process.pid}-${++screenshotSeq}.png`);
+    join(tmpdir(), `wiek-browser-shot-${process.pid}-${++screenshotSeq}.png`);
   const full = options.full ?? false;
   // CSS-pixel sizing is the default and the only declarative scale mode. Keep
   // the legacy raw flag as an internal compatibility escape hatch.

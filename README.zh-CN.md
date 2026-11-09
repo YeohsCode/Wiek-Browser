@@ -4,9 +4,9 @@
 
 ![Wiek Browser](app/assets/wiek.svg)
 
-本地 Chromium 浏览器与 Agent 工作区，提供任务 Space、隔离 Profile、文件/Git 工具、自动化调度与浏览器控制。Electron 宿主和本地服务采用独立实现；第三方许可与署名保留在 [NOTICE.md](NOTICE.md)。
+本地 Chromium 浏览器与 Agent 工作区，提供任务 Space、隔离 Profile、文件/Git 工具、自动化调度与浏览器控制。Electron 宿主和本地服务采用独立实现，SDK 使用自身构建与 Wiek 运行命名空间，无需安装其他浏览器；第三方许可与署名保留在 [NOTICE.md](NOTICE.md)。
 
-**当前检查点：0.22.0。功能覆盖与验收仍在推进。** 参见[计划](PLAN.md)、[能力矩阵](analysis/implementation-matrix.md)和[验证结果](reports/RESULTS.md)。
+**当前检查点：0.23.0。功能覆盖与验收仍在推进。** 参见[计划](PLAN.md)、[能力矩阵](analysis/implementation-matrix.md)和[验证结果](reports/RESULTS.md)。
 
 ## 本地运行
 
@@ -23,6 +23,7 @@ npm start
 原生 helper 与当前发行包面向 macOS ARM64。浏览器控制与本地工具不需要云端账号；模型驱动的 Agent turn 需要独立配置 provider。
 
 ```sh
+node cli/wiek-browser.mjs install
 node cli/wiek-browser.mjs start
 node cli/wiek-browser.mjs skill
 node cli/wiek-browser.mjs status

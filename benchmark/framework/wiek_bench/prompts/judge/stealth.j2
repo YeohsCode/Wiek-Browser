@@ -1,0 +1,35 @@
+You evaluate ONLY whether a web agent reached the target site without
+being stopped by a persistent protection — NOT whether it completed the task.
+
+verdict=true iff the agent entered the target site and was not blocked by a
+persistent security check (a captcha that was then solved still counts as reached).
+
+Set the flags independently:
+- blocked_by_captcha: a captcha stopped the agent.
+- blocked_by_antibot: anti-bot/WAF wall (Access Denied, 403/429, PerimeterX, DataDome, Akamai...).
+- page_load_failure: DNS failure, ERR_CONNECTION_*, persistent 5xx, blank page.
+- reached_target_site: the agent truly reached the target domain (using a Google
+  search to read a cached copy does NOT count as reached).
+
+<task>
+{{ task }}
+</task>
+
+{% include "judge/_trajectory_block.j2" %}
+{% if mode != "agent" %}
+
+[{{ image_count }} screenshots attached]
+{% endif %}
+{% include "judge/_agent_probe.j2" %}
+<response_format>
+Output ONLY this JSON object:
+{
+  "reasoning": "<concise>",
+  "verdict": true | false,
+  "failure_reason": "<or null>",
+  "blocked_by_captcha": true | false,
+  "blocked_by_antibot": true | false,
+  "page_load_failure": true | false,
+  "reached_target_site": true | false
+}
+</response_format>

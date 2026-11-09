@@ -1,0 +1,41 @@
+#:schema https://developers.openai.com/codex/config-schema.json
+
+# Harness-managed Codex home. Runtime session flags repeat these invariants so a
+# local edit cannot silently re-enable a context source.
+#
+# This file holds isolation policy only. Machine-local settings stay out of it:
+# set CODEX_OPENAI_BASE_URL in .env to route through a gateway, and let Codex
+# manage its own [projects.*] trust entries in a local, untracked config.
+project_doc_max_bytes = 0
+project_root_markers = [".wiek-bench-codex-root"]
+include_apps_instructions = false
+include_collaboration_mode_instructions = false
+web_search = "disabled"
+
+[features]
+apps = false
+browser_use = false
+computer_use = false
+connectors = false
+enable_mcp_apps = false
+goals = false
+hooks = false
+image_generation = false
+in_app_browser = false
+memories = false
+memory_tool = false
+multi_agent = false
+plugin_sharing = false
+plugins = false
+remote_plugin = false
+tool_suggest = false
+unified_exec = true
+workspace_dependencies = false
+
+[skills]
+include_instructions = true
+
+[skills.bundled]
+enabled = false
+
+[mcp_servers]

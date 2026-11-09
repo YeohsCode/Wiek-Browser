@@ -4,7 +4,7 @@ import { agentWorkspace, loadEnv } from "./env.js";
 
 loadEnv();
 
-export const NAME = process.env.EGO_BROWSER_NAME || "default";
+export const NAME = process.env.WIEK_BROWSER_NAME || "default";
 
 export const state = {
   cdpOverride: null,

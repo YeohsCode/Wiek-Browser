@@ -33,25 +33,25 @@ test("startup failure creates no invented passing result", () => {
 });
 
 test("exact case names containing commas survive CLI selection", () => {
-  const options = parseArguments(["--browser", "vek", "--only", "wait, fetch, cdp, js, help"]);
+  const options = parseArguments(["--browser", "wiek", "--only", "wait, fetch, cdp, js, help"]);
   assert.deepEqual(options.selectedNames, ["wait, fetch, cdp, js, help"]);
   assert.deepEqual(JSON.parse(options.selection), options.selectedNames);
   assert.throws(() => parseArguments(["--only", "wait"]), /exact case name/);
-  assert.throws(() => parseArguments(["--browser", "other"]), /requires reference, wiek, or both/);
+  assert.throws(() => parseArguments(["--browser", "other"]), /requires wiek/);
 });
-test('public browser selectors preserve compatibility with saved run identifiers',()=>{
-  assert.equal(parseArguments(['--browser','wiek']).browser,'vek');
-  assert.equal(parseArguments(['--browser','reference']).browser,'ego');
-  assert.equal(parseArguments(['--browser','both']).browser,'both');
+test('standalone runner refuses external browser targets',()=>{
+  assert.equal(parseArguments(['--browser','wiek']).browser,'wiek');
+  assert.throws(()=>parseArguments(['--browser','reference']),/standalone/);
+  assert.throws(()=>parseArguments(['--browser','both']),/standalone/);
 });
 
 test("single-browser Markdown leaves the counterpart unrun and documents evidence limitations", () => {
   const parsed = parseSuiteOutput("", ["helper surface"]);
   const report = { generatedAt: "2026-10-30T00:00:00Z", comparable: false,
-    selectedNames: ["helper surface"], runs: [{ browser: "vek", status: "fail", ...parsed,
+    selectedNames: ["helper surface"], runs: [{ browser: "wiek", status: "fail", ...parsed,
       wallTimeMs: 0, exitCode: null, cli: null, sdkSha256: null, error: "missing executable" }] };
   const markdown = comparisonMarkdown(report);
-  assert.match(markdown, /helper surface \| not_run \| not_run/);
+  assert.match(markdown, /helper surface \| not_run/);
   assert.match(markdown, /SKIP 和未运行均不计为通过/);
   assert.match(markdown, /未运行（blocked）/);
 });

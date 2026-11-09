@@ -1,0 +1,26 @@
+{% if mode == "agent" %}
+<investigation>
+The agent's action history, final answer, and screenshots are NOT attached — investigate the recorded run yourself with your read-only tools and the `wiek-bench-judge` skill, then decide against the criteria above. Inspect only: do not launch a browser, re-run the agent, or write/modify any file. Read the session transcript, and open only the screenshots you actually need.
+
+Evidence:
+- Session transcript — every command with its REAL output, tool errors (`isError`), the agent's thinking, and its final answer as the LAST assistant text: {{ session_file }}
+- Screenshots directory (full-resolution frames): {{ screenshots_dir }}
+{% if probe_script %}
+- Helper (pure-stdlib; run with bash by this ABSOLUTE path — your cwd is NOT the skill dir, so a relative `scripts/probe.py` fails):
+  - `python3 {{ probe_script }} summary "{{ session_file }}"` — turn / tool / error counts + `last_assistant_text` (the agent's final answer).
+  - `python3 {{ probe_script }} calls "{{ session_file }}" --name bash` — every command with its real output (add `--errors-only` / `--full`); `errors` — only the failures.
+{% endif %}
+{% if manifest_path %}
+- Command↔screenshot map: {{ manifest_path }}
+  JSONL, one line per capture in time order: `{"command": <command this frame followed>, "sha256": <hash>, "frame": <.webp filename inside the screenshots dir>, "new": <whether this is a unique frame>, "tree_sha256": <AX hash or null>, "tree": <tree path or null>, "tree_new": <whether this is a unique tree or null>, "captured_at": <iso8601>}`. The frame and tree are captured right AFTER the command, so they show that command's resulting page. `grep` a frame/tree name to find the command that produced it; filter `new=true` for unique frames; then `read` only the frame needed to confirm a detail.
+{% endif %}
+{% if trees_dir %}
+- Accessibility tree (optional SECOND evidence — corroborates, never replaces the screenshot/session): every capture also saved a slimmed accessibility tree of that same page state under {{ trees_dir }}. Schema v2 drops raw CDP ids/pointers but keeps role/name/value/properties plus `parent_index` to the nearest retained ancestor; old schema v1 remains text-searchable but has no hierarchy. The manifest line's `tree` field maps a command to its tree; a duplicate screenshot can still carry a fresh tree, so map by `tree`, not frame number. It is plain text and NOT subject to the `max_screenshots` cap.{% if probe_script %} Query it with `python3 {{ probe_script }} axtree "<screenshots_dir>/<tree>"`; repeat `--grep "<literal>"` for OR, use explicit `--regex` for regex, `--properties` to search/show href and state properties, and `--show-ancestors` to distinguish an outer target node from nested quoted/embedded content. A literal pattern containing `|` is rejected instead of silently acting like a regex.{% endif %}
+{% endif %}
+{% if image_count < total_frames %}
+- Screenshot scope (`max_screenshots`): only {{ image_count }} of {{ total_frames }} frames are in scope{% if scoped_frames %} — `read` only these (newest last): {{ scoped_frames | join(", ") }}{% else %} — do NOT read any screenshots{% endif %}. Treat the rest as out of scope.
+{% endif %}
+
+Verify against this evidence — not the agent's claims: whether commands actually succeeded, the real error details, whether the final answer matches what the session and screenshots show, and which frame maps to which step. Fields computed by the tested agent (for example `isReply`, `replying`, `isPinned`, `qualifies`, or filtered rows) are claims, not raw page facts. If such a field came from whole-element `innerText` / descendant aggregate text or conflicts with raw screenshot/DOM/AX evidence, inspect the outer target node and nested quoted/embedded scope; a nested label does not automatically classify its outer container. The derived field or conflict alone cannot prove failure: continue to independent raw evidence, decide the verdict from that evidence, and use low confidence if the response schema requests it and evidence remains insufficient. When done, stop calling tools and output ONLY the JSON below.
+</investigation>
+{% endif %}

@@ -1,0 +1,13 @@
+{
+  "lastChangelogVersion": "0.70.6",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-sonnet-4-6",
+  "defaultThinkingLevel": "medium",
+  "images": {
+    "blockImages": false
+  },
+  "enableSkillCommands": false,
+  "retry": {
+    "enabled": true
+  }
+}

@@ -32,6 +32,8 @@ jobs:
         run: |
           swift tools/configure-ci-display.swift > reports/ci-display.log 2>&1
           swift tools/configure-ci-display.swift --verify-only > reports/ci-display-verify.log 2>&1
+      - name: Verify tracked evaluation inputs
+        run: node tools/verify-framework-inputs.mjs > reports/ci-framework-inputs.log 2>&1
       - name: SDK tests and build
         # Original assertions include small wall-clock budgets. Keep all tests
         # and thresholds, but avoid unrelated parallel files stalling timers.

@@ -1,0 +1,113 @@
+Collecting uv==0.11.19
+  Downloading uv-0.11.19-py3-none-macosx_11_0_arm64.whl.metadata (11 kB)
+Downloading uv-0.11.19-py3-none-macosx_11_0_arm64.whl (21.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 21.8/21.8 MB 77.6 MB/s  0:00:00
+Installing collected packages: uv
+Successfully installed uv-0.11.19
+
+[notice] A new release of pip is available: 26.2.2 -> 26.3
+[notice] To update, run: /Users/runner/work/Wiek-Browser/Wiek-Browser/data/benchmark-bootstrap/bin/python3.15 -m pip install --upgrade pip
+Downloading cpython-3.13.13-macos-aarch64-none (download) (23.9MiB)
+ Downloaded cpython-3.13.13-macos-aarch64-none (download)
+Using CPython 3.13.13
+Creating virtual environment at: benchmark/framework/.venv
+Downloading pygments (1.2MiB)
+Downloading openai-codex-cli-bin (111.1MiB)
+Downloading uvloop (1.3MiB)
+Downloading ruff (10.1MiB)
+Downloading pillow (4.5MiB)
+Downloading pydantic-core (1.8MiB)
+ Downloaded pydantic-core
+ Downloaded ruff
+ Downloaded uvloop
+ Downloaded openai-codex-cli-bin
+ Downloaded pillow
+ Downloaded pygments
+Prepared 38 packages in 2.38s
+Installed 38 packages in 71ms
+ + annotated-doc==0.0.4
+ + annotated-types==0.7.0
+ + anyio==4.13.0
+ + certifi==2026.5.20
+ + charset-normalizer==3.4.7
+ + click==8.1.8
+ + fastapi==0.136.1
+ + h11==0.16.0
+ + httptools==0.7.1
+ + idna==3.13
+ + iniconfig==2.3.0
+ + jinja2==3.1.6
+ + loguru==0.7.3
+ + markupsafe==3.0.3
+ + openai-codex==0.144.4
+ + openai-codex-cli-bin==0.144.4
+ + packaging==26.2
+ + pillow==12.2.0
+ + pluggy==1.6.0
+ + pydantic==2.12.5
+ + pydantic-core==2.41.5
+ + pygments==2.20.0
+ + pytest==9.1.0
+ + python-dotenv==1.2.2
+ + pyyaml==6.0.3
+ + regex==2026.5.9
+ + requests==2.34.2
+ + ruff==0.15.21
+ + starlette==1.0.0
+ + tiktoken==0.13.0
+ + tqdm==4.67.3
+ + typing-extensions==4.15.0
+ + typing-inspection==0.4.2
+ + urllib3==2.7.0
+ + uvicorn==0.46.0
+ + uvloop==0.22.1
+ + watchfiles==1.1.1
+ + websockets==16.0
+........................................................................ [ 21%]
+........................................................................ [ 42%]
+........................................................................ [ 64%]
+............................................................F........... [ 85%]
+................................................                         [100%]
+=================================== FAILURES ===================================
+_______________ test_local_site_resolves_to_the_site_host_origin _______________
+
+    def test_local_site_resolves_to_the_site_host_origin() -> None:
+        task = next(
+            t
+>           for t in get_adapter("real-world-bench", DATA_DIR).load()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            if task_resources.declared_site(t)
+        )
+
+benchmark/framework/tests/test_task_resources.py:91: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+benchmark/framework/wiek_bench/datasets/base.py:98: in load
+    raw = json.loads(self.source_path.read_text(encoding="utf-8"))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/pathlib/_local.py:546: in read_text
+    return PathBase.read_text(self, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/pathlib/_abc.py:632: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/Users/runner/work/Wiek-Browser/Wiek-Browser/benchmark/framework/data/real_world_bench.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+>       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/Users/runner/work/Wiek-Browser/Wiek-Browser/benchmark/framework/data/real_world_bench.json'
+
+../../../.local/share/uv/python/cpython-3.13.13-macos-aarch64-none/lib/python3.13/pathlib/_local.py:537: FileNotFoundError
+=========================== short test summary info ============================
+FAILED benchmark/framework/tests/test_task_resources.py::test_local_site_resolves_to_the_site_host_origin - FileNotFoundError: [Errno 2] No such file or directory: '/Users/runner/work/Wiek-Browser/Wiek-Browser/benchmark/framework/data/real_world_bench.json'
+1 failed, 335 passed in 10.84s

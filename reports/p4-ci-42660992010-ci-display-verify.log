@@ -1,0 +1,62 @@
+{
+  "after" : {
+    "height" : 1200,
+    "width" : 1600
+  },
+  "availableModes" : [
+    {
+      "height" : 600,
+      "width" : 800
+    },
+    {
+      "height" : 540,
+      "width" : 960
+    },
+    {
+      "height" : 576,
+      "width" : 1024
+    },
+    {
+      "height" : 768,
+      "width" : 1024
+    },
+    {
+      "height" : 720,
+      "width" : 1280
+    },
+    {
+      "height" : 960,
+      "width" : 1280
+    },
+    {
+      "height" : 756,
+      "width" : 1344
+    },
+    {
+      "height" : 1008,
+      "width" : 1344
+    },
+    {
+      "height" : 900,
+      "width" : 1600
+    },
+    {
+      "height" : 1200,
+      "width" : 1600
+    },
+    {
+      "height" : 1080,
+      "width" : 1920
+    },
+    {
+      "height" : 480,
+      "width" : 640
+    }
+  ],
+  "before" : {
+    "height" : 1200,
+    "width" : 1600
+  },
+  "errorCode" : 0,
+  "verifyOnly" : true
+}

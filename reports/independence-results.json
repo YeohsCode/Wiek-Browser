@@ -54,7 +54,7 @@
   ],
   "runningApplicationOverwritten": false,
   "finalVerification": {
-    "sourceTests": 547,
+    "sourceTests": 548,
     "sdkTests": 532,
     "frameworkTests": 336,
     "packagedHostChecks": 197,
@@ -62,6 +62,8 @@
     "browserCases": 69,
     "browserAssertions": 1248,
     "fixtureHostStopped": true,
-    "releaseFilesMatch": 199
+    "releaseFilesMatch": 199,
+    "trackedFrameworkInputs": 263,
+    "cleanCheckoutFrameworkTests": 336
   }
 }

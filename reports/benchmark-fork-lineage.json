@@ -760,6 +760,22 @@
       "sha256": "38d9b711f29b63f651db2eafc84fd1706bbb8ca99a953baf895b5bcba1305529"
     },
     {
+      "file": ".claude/skills/browser-bench-task/references/authoring.md",
+      "sha256": "39a8846e412d5444ec833c6d1b971515a33e9b7af12e705c3f07ed6314f239f6"
+    },
+    {
+      "file": ".claude/skills/browser-bench-task/references/schema.md",
+      "sha256": "71f06332246e3aa320f637445037e28da74655baa7d73060795762840184cff5"
+    },
+    {
+      "file": ".claude/skills/browser-bench-task/references/site-selection.md",
+      "sha256": "b40b0399c962613657ae5dc4aeba2e7a8a9f8af6f99bd0f88ef38d49bb59b30c"
+    },
+    {
+      "file": ".claude/skills/browser-bench-task/references/wiek-browser-testing.md",
+      "sha256": "8713676b73bdc0f4f70a885b73c7ec10ef0808d91399264dc7fa6fe5dd281fe5"
+    },
+    {
       "file": ".claude/skills/codex-session-analyzer/SKILL.md",
       "sha256": "890ed45b823a9d59e929cb16e4bcc7062860e13703ecf1f1a2287cd6e722c01d"
     },
@@ -836,6 +852,14 @@
       "sha256": "fca394b1611ba5121844ec584d4bf91002535704f72d4f618ac6970f2558b688"
     },
     {
+      "file": ".claude/skills/keel/references/diagnostics.md",
+      "sha256": "7c4e3a40cda057ee8daa95703dada5bdaf20cd37213ec47aac1d2e49056d56f2"
+    },
+    {
+      "file": ".claude/skills/keel/references/source-observations.md",
+      "sha256": "f234b20fae472b48c61a09652acf05a2f2e837758b041e53b6f29124179ab782"
+    },
+    {
       "file": ".claude/skills/pi-session-analyzer/SKILL.md",
       "sha256": "178f196bb802b82a2e42bc33e67f0c6b108040f07c15bab27bdf89c99c4a70c3"
     },
@@ -890,6 +914,10 @@
     {
       "file": ".claude/skills/runs-metrics-compare/SKILL.md",
       "sha256": "c048c6176461a2411a7e054a5e8dcec077eee0f763148b62bf5c4da6b49e89a3"
+    },
+    {
+      "file": ".claude/skills/runs-metrics-compare/references/helper_taxonomy.md",
+      "sha256": "d72c1650f21e2ee40e3929773364758d356e3b2bfd3db76cf8201595124a16ec"
     },
     {
       "file": ".claude/skills/runs-metrics-compare/scripts/runs_compare.py",
@@ -1106,6 +1134,42 @@
     {
       "file": "config.yaml",
       "sha256": "9a1a4b4d3d9169f5c2652425b425a70f0e52f59599b84c4ba3bccdaf08600d4c"
+    },
+    {
+      "file": "data/BU_Bench_V1.json",
+      "sha256": "d097f13df80be16a98426c41e2bb8f4f1edb040893df6b45ada6cfb05222a42f"
+    },
+    {
+      "file": "data/Online_Mind2Web.json",
+      "sha256": "50d330ee9f347c5ae136e52421516590033b146df305ab091c5a36b199b14aa4"
+    },
+    {
+      "file": "data/README.md",
+      "sha256": "57a13880270d56ee8dc2fa51ce7dfb35b470549184a7c80d9eb6c357438354c9"
+    },
+    {
+      "file": "data/Stealth_Bench_V1.json",
+      "sha256": "d7d674f2a44c258e0c9d5d55875a64d707e05341a79e9604d54a2e052111eb7f"
+    },
+    {
+      "file": "data/attachments/resume-cloud-infra.html",
+      "sha256": "26e8b35b977dd4ea09c7fcd94c9edb583103a30d5e9cff9b4b753d5a93d9cedc"
+    },
+    {
+      "file": "data/attachments/resume-cloud-infra.pdf",
+      "sha256": "297009a5a66a31286c6d853e4e44769fe92d047808cce5a05311c756525b91a5"
+    },
+    {
+      "file": "data/odysseys.json",
+      "sha256": "0bb7081d740eb6237b72e7e33524cc9489e769c5e236ec54879a8eb06ebc48e0"
+    },
+    {
+      "file": "data/real_world_bench.json",
+      "sha256": "e1495bef65b83c7bcb4cf3bf7a6e515239c6763c620efe1d31749ad6d54f6200"
+    },
+    {
+      "file": "data/test-sites.md",
+      "sha256": "a3583dc6d101808595a6c689f46d418f0c490b4c9cbc17d0fcbfe3d988963c8a"
     },
     {
       "file": "frontend/.gitignore",

@@ -18,14 +18,14 @@
 |---|---|---|
 | SDK隔离回归 | 532/532，0失败/跳过 | [SDK日志](v023-sdk-tests-final.log) |
 | 类型/指南/站点学习资料 | 均通过 | [类型](v023-sdk-typecheck.log)、[指南](v023-guide-check.log)、[资料](v023-site-learning.log) |
-| 本地完整回归 | 547/547，0失败/跳过 | [最终日志](v023-source-tests-final.log) |
+| 本地完整回归 | 548/548，0失败/跳过 | [最终日志](v023-source-tests-after-ci.log) |
 | 独立运行和安装 | 4/4；CLI配置隔离和无响应宿主2/2 | [安装与SDK](v023-independent-tests-final.log)、[CLI隔离](v023-cli-isolation-final.log) |
 | 仓库内评估框架 | 336/336（完整框架及适配器）；截图/AX/清理hook通过 | [回归](v023-framework-all-tests.log)、[实际hook](v023-framework-smoke.log) |
 | 打包宿主 | 197项通过，0.23.0 | [宿主](v023-package-workbench.log) |
 | 打包本地服务面板 | 11项检查通过 | [面板](v023-package-local-server-panel.log) |
 | 浏览器完整回归 | 最终69/69、1,248断言，0失败/跳过；宿主已退出 | [首次身份](v023-browser-initial.json)、[最终运行日志](v023-browser-suite-final.log) |
 | 最终包独立性/源身份 | 195份运行文件零旧依赖；199份发行文件与源身份一致 | [独立性](v023-independent-package.log)、[发行身份](v023-package-identity.log) |
-| 本轮远端CI | 待提交执行 | 后续补实际链接与代码SHA |
+| 本轮远端CI | 首次失败：框架输入被忽略；已补齐，待补充提交重跑 | [保留失败](https://github.com/YeohsCode/Wiek-Browser/actions/runs/42660992010) |
 
 浏览器回归执行时旧CLI已不在PATH，原进程为零，旧环境变量指向不可用位置。另有纯loopback测试确认显式Wiek工作区/状态设置仍生效，旧设置被忽略，没有连接其他浏览器。
 
@@ -36,6 +36,8 @@
 此前完整浏览器重跑为25通过/44失败，宿主无响应时自动启动产生锁冲突；失败记录保留在[v023-browser-failed-wiek-e2e.json](v023-browser-failed-wiek-e2e.json)。CLI新增无响应宿主保护；测试改用全新隔离目录并负责退出，打包前拒绝覆盖运行中的应用。本轮使用独立打包目录，当前用户实例保持运行。
 
 评估框架扩展回归初次326通过/6失败，保留[首次完整日志](v023-framework-all-tests-initial.log)。修正了品牌与版本表面检查、失败日志夹具和当前Skill路径别名支持；新增4条路径边界检查。原始SDK测试输入没有修改。
+
+本轮首次远端CI中，335项框架测试通过、1项因任务数据未提交而失败。根目录忽略规则误排除了嵌套的框架数据和参考说明；现已加入精确例外。新增跟踪输入检查，验证263份文件已进入Git且摘要一致，并用干净检出重跑336项框架/适配器回归通过。见[干净检出](v023-clean-checkout-framework.log)和[输入身份](v023-clean-checkout-inputs.log)。
 
 原0.22远端CI失败，记录在[原始状态](p4-ci-42132702954-status.json)。不把旧检查点的远端通过结果套到当前代码。
 

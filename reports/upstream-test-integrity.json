@@ -409,7 +409,7 @@
       "unchanged": true
     }
   ],
-  "verifiedAt": "2026-11-09T17:02:58.718Z",
+  "verifiedAt": "2026-11-09T23:56:52.986Z",
   "referenceMode": "immutable-local-test-inputs",
   "storageRoot": "tests/fixtures/sdk-original"
 }

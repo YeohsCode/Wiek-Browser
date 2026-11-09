@@ -9,10 +9,10 @@
   "runtimeIndependent": true,
   "independenceEvidence": "independence-results.json",
   "localTests": {
-    "pass": 547,
+    "pass": 548,
     "fail": 0,
     "skip": 0,
-    "log": "v023-source-tests-final.log"
+    "log": "v023-source-tests-after-ci.log"
   },
   "sdkTests": {
     "pass": 532,
@@ -74,7 +74,8 @@
     "evidence": "p4-sdk-v2-framework-smoke.json"
   },
   "ci": {
-    "currentCheckpointStatus": "pending-commit",
+    "currentCheckpointStatus": "pending-followup-push",
+    "failedStandaloneAttempt": 42660992010,
     "previousCheckpointFailedRun": 42132702954
   },
   "remaining": {
@@ -103,6 +104,15 @@
   "retainedFailureEvidence": [
     "v023-source-tests.log",
     "v023-browser-failed-wiek-e2e.json",
-    "v023-framework-all-tests-initial.log"
-  ]
+    "v023-framework-all-tests-initial.log",
+    "p4-ci-42660992010-status.json"
+  ],
+  "frameworkInputs": {
+    "tracked": 263,
+    "cleanCheckoutVerified": true,
+    "evidence": [
+      "v023-clean-checkout-inputs.log",
+      "v023-clean-checkout-framework.log"
+    ]
+  }
 }

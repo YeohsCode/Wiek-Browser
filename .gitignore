@@ -63,3 +63,9 @@ __pycache__/
 # Owned evaluation environments are disposable dependency caches.
 /benchmark/framework/.venv/
 /benchmark/framework/.pytest_cache/
+
+# Pinned framework task data and documentation are source inputs, not runtime caches.
+!/benchmark/framework/data/
+!/benchmark/framework/data/**
+!/benchmark/framework/.claude/skills/**/references/
+!/benchmark/framework/.claude/skills/**/references/**

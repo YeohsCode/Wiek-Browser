@@ -74,9 +74,27 @@
     "evidence": "p4-sdk-v2-framework-smoke.json"
   },
   "ci": {
-    "currentCheckpointStatus": "pending-followup-push",
+    "currentCheckpointStatus": "success",
     "failedStandaloneAttempt": 42660992010,
-    "previousCheckpointFailedRun": 42132702954
+    "previousCheckpointFailedRun": 42132702954,
+    "run": 42724506570,
+    "sourceCommit": "d6d3be9d6e254b9b2305abae0254039c5ed0fdcc",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/42724506570",
+    "status": "completed",
+    "conclusion": "success",
+    "remoteCounts": {
+      "sdk": 532,
+      "source": 548,
+      "framework": 336,
+      "packagedHost": 197,
+      "packagedPanel": 11,
+      "browser": 69,
+      "browserAssertions": 1248,
+      "trackedFrameworkInputs": 263,
+      "releaseFiles": 199,
+      "immutableSdkInputs": 81
+    },
+    "evidenceOnlyFollowup": true
   },
   "remaining": {
     "otherProviders": "Deferred per priority",

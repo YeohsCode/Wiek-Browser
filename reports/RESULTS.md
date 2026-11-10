@@ -25,9 +25,11 @@
 | 打包本地服务面板 | 11项检查通过 | [面板](v023-package-local-server-panel.log) |
 | 浏览器完整回归 | 最终69/69、1,248断言，0失败/跳过；宿主已退出 | [首次身份](v023-browser-initial.json)、[最终运行日志](v023-browser-suite-final.log) |
 | 最终包独立性/源身份 | 195份运行文件零旧依赖；199份发行文件与源身份一致 | [独立性](v023-independent-package.log)、[发行身份](v023-package-identity.log) |
-| 本轮远端CI | 首次失败：框架输入被忽略；已补齐，待补充提交重跑 | [保留失败](https://github.com/YeohsCode/Wiek-Browser/actions/runs/42660992010) |
+| 本轮远端CI | 全部通过；源码提交 `d6d3be9` | [完整CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/42724506570) |
 
 浏览器回归执行时旧CLI已不在PATH，原进程为零，旧环境变量指向不可用位置。另有纯loopback测试确认显式Wiek工作区/状态设置仍生效，旧设置被忽略，没有连接其他浏览器。
+
+远端实际结果同样为532项SDK、548项源码、336项框架/适配器、197项打包宿主、11项面板、69项浏览器/1,248断言；263份框架输入、199份发行文件和81份原始测试输入身份通过。原始日志统一保留为 `p4-ci-42724506570-ci-*.log`，状态见[CI身份](p4-ci-42724506570-status.json)。后续证据提交只更新文档与日志，运行代码保持上述已验证提交的身份。
 
 ## 验证边界与保留的失败
 

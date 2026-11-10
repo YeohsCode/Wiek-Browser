@@ -1,0 +1,20 @@
+{
+  "generatedAt": "2026-11-10T00:03:35.576Z",
+  "version": "0.23.0",
+  "checked": 374,
+  "originalEgoLogoHits": [],
+  "skillMappings": [
+    {
+      "base": "/Users/runner/work/Wiek-Browser/Wiek-Browser/",
+      "skill": "wiek-browser",
+      "matches": true
+    },
+    {
+      "base": "/Users/runner/work/Wiek-Browser/Wiek-Browser/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app",
+      "skill": "wiek-browser",
+      "matches": true
+    }
+  ],
+  "packagedIconMatches": true,
+  "scope": "Exact SHA-256 check of two original Ego PNGs; independently authored Wiek SVG is the brand source."
+}

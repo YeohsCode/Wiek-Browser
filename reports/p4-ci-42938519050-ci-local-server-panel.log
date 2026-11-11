@@ -1,0 +1,10 @@
+{"ok":true,"checks":15,"realElectronIPC":true,"realNativeDiscovery":true,"realReviewedProcessStop":true,"realAnonymousTitleRead":true,"modelCalls":0,"accountActions":0}
+✔ actual workspace panel refresh, open dispatch, review, cancel and confirmed stop use a real disposable server (2353.401292ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2404.947416

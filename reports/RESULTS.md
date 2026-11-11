@@ -23,7 +23,9 @@
 | 实际包图标与独立运行扫描 | 通过 | [图标](terminology-brand-package.log)、[扫描](terminology-independent-package.log) |
 | 69项浏览器同集 | 69/69，1,248断言，零失败/跳过，独立宿主退出 | [运行日志](v024-browser-suite.log)、[结果](comparison.md) |
 | 实际包源码与原始输入身份 | 204份发行文件一致，81份原始输入不变，包中SDK与同集执行字节一致 | [身份](v024-package-identity.log) |
-| 当前提交远端CI | 待远端验收 | 后续更新 |
+| 当前提交远端CI | 全部通过，源码提交 `646421e` | [完整CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/42938519050)、[验收状态](p4-ci-42938519050-status.json) |
+
+远端验收包括532项SDK、608项源码、336项框架、198项打包宿主、17项打包恢复检查、69项浏览器/1,248条断言和204份发行文件身份。面板、迁移、后台启动器、固定输入与图标检查同样通过。原始CI日志保留为 `p4-ci-42938519050-ci-*.log`。本次归档提交仅更新文档和证据，运行代码对应上述CI提交。
 
 ## 当前功能专项
 

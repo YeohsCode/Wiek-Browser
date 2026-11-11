@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "version": "0.24.0",
+  "nodeVersion": "24.19.0",
+  "exactReviewedArgvExecuted": true,
+  "emptyFixtureTickCompleted": true,
+  "attempted": 0,
+  "jobCleanupConfirmed": true,
+  "osJobOperations": "fixture-only",
+  "realOSRegistration": false,
+  "physicalSleepWakeTested": false,
+  "modelCalls": 0,
+  "accountActions": 0
+}

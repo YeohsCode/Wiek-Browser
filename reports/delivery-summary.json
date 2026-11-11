@@ -1,7 +1,7 @@
 {
   "schemaVersion": 5,
   "clientDate": "2026-11-11",
-  "generatedAt": "2026-11-11T01:19:47.022120+00:00",
+  "generatedAt": "2026-11-11T01:33:09.251044+00:00",
   "project": "Wiek Browser",
   "version": "0.24.0",
   "repository": "https://github.com/YeohsCode/Wiek-Browser",
@@ -60,7 +60,12 @@
     "result": "comparison.json"
   },
   "ci": {
-    "status": "pending"
+    "status": "completed",
+    "conclusion": "success",
+    "runId": 42938519050,
+    "testedCommit": "646421ea710bf65ff8e7a2ea546c44d6dc49f3cd",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/42938519050",
+    "evidence": "p4-ci-42938519050-status.json"
   },
   "paidModelCalls": 0,
   "externalAccountActions": 0,
@@ -72,5 +77,10 @@
     "immutableInputs": 81,
     "sdkMatchesCompared": true,
     "log": "v024-package-identity.log"
+  },
+  "frameworkTests": {
+    "pass": 336,
+    "fail": 0,
+    "log": "p4-ci-42938519050-ci-benchmark-adapter.log"
   }
 }

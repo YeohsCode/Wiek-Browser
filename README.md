@@ -57,7 +57,7 @@ console.log(await page.snapshot());
 JS
 ```
 
-Reuse the task name and page label across turns. Local workspace APIs are documented in the [API guide](skills/wiek-browser/API.md).
+While the browser stays running, reuse the task ID and page label for the same task. Use unique names and isolated data directories for independent tests. After a browser restart, identify the reopened tabs again. See the [terminology guide](docs/terminology.md), [usability audit](reports/usability-audit.md), and [project tools API](skills/wiek-browser/API.md).
 
 ## Optional local models
 
@@ -94,5 +94,3 @@ Remaining work includes broader profile migration, additional MCP flows, semanti
 ## License
 
 Wiek's original implementation uses the MIT license. Bundled SDK, runtime, decoder and model components retain their own notices and licenses. Runtime data, credentials, dependencies, builds, model weights, reference artifacts and full research records are excluded from Git.
-
-User-facing terms and automation continuation are described in the [terminology guide](docs/terminology.md) and [usability audit](reports/usability-audit.md).

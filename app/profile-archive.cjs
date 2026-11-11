@@ -4,9 +4,10 @@ const { randomBytes, scrypt, createCipheriv, createDecipheriv } = require('node:
 const { promisify } = require('node:util');
 const { TextDecoder } = require('node:util');
 const derive = promisify(scrypt);
+const { validateIndexedDb } = require('./profile-indexeddb-data.cjs');
 const { ENCODING, LIMITS: STORAGE_LIMITS, validateArea } = require('./profile-storage-data.cjs');
 // The on-disk identifier is retained so existing encrypted archives still decode.
-const FORMAT = 'vek-browser-profile', MIME_TYPE = 'application/vnd.vek.profile+json', VERSION = 2;
+const FORMAT = 'vek-browser-profile', MIME_TYPE = 'application/vnd.vek.profile+json', VERSION = 3;
 const KDF = 'scrypt-131072-8-1', CIPHER = 'aes-256-gcm';
 const DEFAULT_MAX_BYTES = 32 * 1024 * 1024;
 const SCRYPT = Object.freeze({ N: 131072, r: 8, p: 1, maxmem: 256 * 1024 * 1024 });
@@ -65,7 +66,7 @@ function plainClone(value, maxBytes) {
 }
 function normalizePayload(input, maxBytes, version = VERSION) {
   const source = plainClone(input, maxBytes);
-  object(source, ['profile','spaces','bookmarks','history','cookies','passwords','extensionsMetadata',...(version>=2?['webStorage']:[])], 'profile payload', ['profile']);
+  object(source, ['profile','spaces','bookmarks','history','cookies','passwords','extensionsMetadata',...(version>=2?['webStorage']:[]),...(version>=3?['indexedDB']:[])], 'profile payload', ['profile']);
   const profile = object(source.profile, ['id','name'], 'profile', ['name']);
   const out = { profile: { name: string(profile.name, 'profile name', 1024, false) }, spaces: [], bookmarks: [], history: [], cookies: [], passwords: [], extensionsMetadata: [] };
   optionalText(out.profile, profile, 'id', 128);
@@ -111,6 +112,7 @@ function normalizePayload(input, maxBytes, version = VERSION) {
     if(source.webStorage.encoding!==ENCODING)throw error('Unsupported web storage encoding');const seen=new Set();
     out.webStorage={encoding:ENCODING,localStorage:array(source.webStorage.localStorage,'local storage origins',STORAGE_LIMITS.origins).map(row=>{const area=validateArea(row,storageBudget);if(seen.has(area.origin))throw error('Duplicate local storage origin');seen.add(area.origin);return area;})};
   }
+  if(Object.hasOwn(source,'indexedDB'))out.indexedDB=validateIndexedDb(source.indexedDB);
   if (Buffer.byteLength(JSON.stringify(out)) > maxBytes) throw error('Archive data exceeds the size limit','VEK_PROFILE_ARCHIVE_LIMIT');
   return out;
 }
@@ -156,7 +158,7 @@ function createProfileArchive({maxBytes=DEFAULT_MAX_BYTES}={}) {
       envelope=plainClone(envelope,maxBytes);
       object(envelope,[...headerFields,'tag','data'],'archive envelope',[...headerFields,'tag','data']);
       if(envelope.format!==FORMAT||envelope.mimeType!==MIME_TYPE)throw error('Unrecognized Wiek profile archive format or MIME type');
-      if(![1,VERSION].includes(envelope.version))throw error('Unsupported Wiek profile archive version','VEK_PROFILE_ARCHIVE_VERSION');
+      if(![1,2,VERSION].includes(envelope.version))throw error('Unsupported Wiek profile archive version','VEK_PROFILE_ARCHIVE_VERSION');
       if(envelope.kdf!==KDF||envelope.cipher!==CIPHER)throw error('Unsupported archive encryption parameters');
       date(envelope.createdAt,'archive creation date');if(envelope.expiresAt!==null)date(envelope.expiresAt,'archive expiry');
       const salt=base64(envelope.salt,'salt',16,16),iv=base64(envelope.iv,'IV',12,12),tag=base64(envelope.tag,'tag',16,16),data=base64(envelope.data,'ciphertext',null,maxBytes);

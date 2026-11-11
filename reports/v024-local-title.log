@@ -1,0 +1,20 @@
+✔ metadata priority, attribute forms, entities and Unicode are preserved as inert bounded text (1.597208ms)
+✔ comments, raw text, hidden templates, foreign titles and body metadata cannot impersonate the head (0.099708ms)
+✔ long valueless metadata attributes are consumed without losing the subsequent title fields (1.241958ms)
+✔ an actual loopback read sends one anonymous request and does not request embedded assets (11.186541ms)
+✔ redirect responses do not supply a title or cause a follow-up request (3.35375ms)
+✔ JSON responses do not supply a title or cause a follow-up request (1.057167ms)
+✔ compressed responses do not supply a title or cause a follow-up request (1.00275ms)
+✔ unknown charset responses do not supply a title or cause a follow-up request (0.987417ms)
+✔ error status responses do not supply a title or cause a follow-up request (0.651375ms)
+✔ response prefix limits terminate a streaming body without waiting for its end (0.7455ms)
+✔ timeouts and cancellation terminate real pending HTTP requests (42.983791ms)
+✔ unsafe URLs and unbounded options are rejected before network access (0.247083ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 149.430958

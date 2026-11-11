@@ -1,0 +1,32 @@
+✔ prompt listing and preview stay inert with legacy stdio (47.837958ms)
+✔ prompt listing and preview stay inert with modern stdio (45.369166ms)
+✔ invalid prompt descriptors are rejected --duplicate-prompts (45.269708ms)
+✔ invalid prompt descriptors are rejected --repeat-cursor (44.657791ms)
+✔ invalid prompt descriptors are rejected --bad-arguments (46.827792ms)
+✔ prompt list change races are rejected and in-flight prompt previews become stale (89.04075ms)
+✔ legacy prompt list notifications invalidate cached definitions (44.546667ms)
+✔ prompt previews reject system authority and disconnect clears all cached prompts (46.488292ms)
+✔ HTTP prompt discovery and reads work in per-request mode (9.895208ms)
+✔ HTTP prompt discovery and reads work in session mode (5.112042ms)
+✔ modern HTTP prompt-list notifications require an explicitly acknowledged stream (3.402041ms)
+✔ modern stdio discovers without initialization and sends metadata on every request (48.622792ms)
+✔ modern stdio keeps interleaved list/resource streams scoped and invalidates only explicit lists (47.639584ms)
+✔ modern stdio ignores unsolicited list changes and unregistered subscription ids (47.706083ms)
+✔ modern stdio rejects invalid subscription establishment --before-ack (46.034834ms)
+✔ modern stdio rejects invalid subscription establishment --extra-filter (43.88525ms)
+✔ modern stdio rejects invalid subscription establishment --silent-ack (146.826917ms)
+✔ modern stdio enforces acknowledged partial filters and preserves unrelated resource subscription (53.247834ms)
+✔ modern stdio graceful stream close invalidates caches and requires explicit resubscribe (45.80725ms)
+✔ modern stdio sends request cancellation and never replays late results (43.970417ms)
+✔ modern stdio refuses server-initiated requests without exposing roots (44.918875ms)
+✔ modern stdio rejects malformed discovery without legacy fallback (44.762916ms)
+✔ modern stdio rejects a tool-list notification race instead of caching outdated definitions (45.11325ms)
+✔ modern stdio service configuration, prompt reads and notification state stay in scope and out of persistence (49.565625ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1286.921958

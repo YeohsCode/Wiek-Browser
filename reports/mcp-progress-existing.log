@@ -1,0 +1,40 @@
+✔ 2026 HTTP uses server discovery, per-request metadata and required mirrored headers without legacy traffic (12.601667ms)
+✔ modern header encoding prevents whitespace/control/sentinel injection and validates integer values (3.9815ms)
+✔ modern stream cancellation closes the response without a legacy cancelled notification (66.949708ms)
+✔ unsupported versions and unconfigured MRTR inputs fail explicitly without replay or model call (2.415459ms)
+✔ modern resources use per-request envelope, pagination, inert text and binary without legacy traffic (14.738791ms)
+✔ explicit modern list and URI streams correlate acknowledgment and only mark changes without rereading (11.919917ms)
+✔ concurrent modern read remains stale when an update arrives before its response (14.237166ms)
+✔ modern lists are explicitly refreshed without reusing stale protocol caches (1.54075ms)
+✔ modern subscription rejects early before accepting any update (7.67375ms)
+✔ modern subscription rejects wrongid before accepting any update (7.423666ms)
+✔ modern subscription rejects wrongfilter before accepting any update (7.949417ms)
+✔ server acknowledgment may decline a requested subscription without leaving an active stream (7.501625ms)
+✔ unrequested notification or wrong stream metadata loses only that stream and never refetches (13.243208ms)
+✔ graceful completion and abrupt loss remain visible with no automatic replay or relisten (46.882166ms)
+✔ ack timeout and AbortSignal close pending HTTP streams without cancellation notifications (311.055375ms)
+✔ stream lives beyond request timeout and supports over a thousand bounded events (348.48025ms)
+✔ malformed UTF-8 and oversized subscription frames close safely without poisoning the client (19.322291ms)
+✔ capability and stream capacity limits reject locally; explicit cancellation frees capacity (9.057458ms)
+✔ MRTR inputs and missing complete discriminant never become successful resource content (1.2145ms)
+✔ scope isolation, disconnect and restart clear streams without persisting resource contents (17.985166ms)
+✔ partial acknowledged list filter permits only its honored types (7.320292ms)
+✔ notification race rejects an outdated modern tool list and a subsequent explicit refresh succeeds (14.312458ms)
+✔ modern one-off responses cannot deliver unsolicited notifications (0.878667ms)
+✔ HTTP subscription authorization failure is surfaced once without retries (0.956875ms)
+✔ MCP stdio initializes, paginates tools, isolates thread processes and answers roots/list (93.587792ms)
+✔ known credential values are transient, redacted in results/keys and never forwarded implicitly (64.639292ms)
+✔ MCP tool tasks time out, cancel, reject foreign reads and ignore late replies (120.743167ms)
+✔ malformed and oversized MCP stdout fail pending tasks; unknown tools are rejected (177.362834ms)
+✔ invalid initialize versions and initialization timeouts disconnect cleanly (146.014ms)
+✔ closing MCP records interrupted tasks and releases the persistent store lock (49.896834ms)
+✔ loopback gateway pairs once, binds scopes, forwards real tools and revokes tokens (82.232083ms)
+✔ HTTP cancellation owns its request and disconnected stdio servers reconnect (125.364167ms)
+ℹ tests 32
+ℹ suites 0
+ℹ pass 32
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2032.182375

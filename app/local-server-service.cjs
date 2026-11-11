@@ -2,6 +2,7 @@
 // Independent project-scoped listener discovery and explicitly reviewed stop.
 const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {spawn}=require('node:child_process');
+const {readLocalTitle}=require('./local-server-title.cjs');
 const fail=(message,code='WIEK_LOCAL_SERVER_INVALID')=>Object.assign(new Error(message),{error_code:code});
 const allowed=new Set(['node','bun','deno','ruby','php','java','dotnet','uvicorn','gunicorn','go','air','python','python3','python3.11','python3.12','python3.13','python3.14']);
 const contains=(root,cwd)=>cwd===root||cwd.startsWith(root+path.sep);
@@ -56,8 +57,8 @@ function createNativeServerProbe({platform=process.platform,helper=path.join(__d
 }
 const identity=row=>crypto.createHash('sha256').update(JSON.stringify([row.pid,row.uid,row.started,row.executable,row.cwd])).digest('hex');
 const endpoints=rows=>JSON.stringify(rows.map(({address,port})=>({address,port})).sort((a,b)=>a.port-b.port||a.address.localeCompare(b.address)));
-function createLocalServerService({probe=createNativeServerProbe(),signal=(pid,value)=>process.kill(pid,value),now=Date.now,pause=ms=>new Promise(resolve=>setTimeout(resolve,ms)),settleMs=1500}={}){
-  const reviews=new Map();let closed=false;
+function createLocalServerService({probe=createNativeServerProbe(),signal=(pid,value)=>process.kill(pid,value),now=Date.now,pause=ms=>new Promise(resolve=>setTimeout(resolve,ms)),settleMs=1500,fetchTitle=readLocalTitle}={}){
+  const reviews=new Map(),titleReads=new Set();let closed=false;
   const ensure=()=>{if(closed)throw fail('Local service manager is closed');};
   function expire(){for(const [id,review]of reviews)if(review.expires<=now())reviews.delete(id);}
   async function list(ctx){
@@ -84,6 +85,19 @@ function createLocalServerService({probe=createNativeServerProbe(),signal=(pid,v
   async function dispatch(action,payload,ctx,authority={}){
     ensure();
     if(action==='workspace:servers:list')return list(ctx);
+    if(action==='workspace:servers:title'){
+      if(!authority.interactive)throw fail('Use the local service controls to read a title','WIEK_LOCAL_SERVER_INTERACTIVE');
+      if(titleReads.size>=4)throw fail('Too many title reads','WIEK_LOCAL_SERVER_CAPACITY');
+      const controller=new AbortController();titleReads.add(controller);
+      try{
+        const row=(await list(ctx)).servers.find(row=>row.pid===payload.pid);
+        if(!row||row.fingerprint!==payload.fingerprint||!row.urls.includes(payload.url))throw fail('The service changed; refresh the list','WIEK_LOCAL_SERVER_STALE');
+        const result=await fetchTitle(payload.url,{signal:controller.signal});ensure();
+        const current=(await list(ctx)).servers.find(item=>item.pid===row.pid);
+        if(!current||current.fingerprint!==row.fingerprint||endpoints(current.ports)!==endpoints(row.ports))throw fail('The service changed during the title read','WIEK_LOCAL_SERVER_STALE');
+        return {pid:row.pid,url:payload.url,...result};
+      }finally{titleReads.delete(controller);}
+    }
     if(!authority.interactive)throw fail('Use the local service controls to review and stop a process','WIEK_LOCAL_SERVER_INTERACTIVE');
     if(action==='workspace:servers:cancel'){const review=reviews.get(payload.reviewId);if(review&&review.projectId===ctx.project.id)reviews.delete(payload.reviewId);return {cancelled:true};}
     if(action==='workspace:servers:prepare-stop'){
@@ -111,6 +125,6 @@ function createLocalServerService({probe=createNativeServerProbe(),signal=(pid,v
     }
     return {pid:row.pid,stopped:false,signal:'SIGTERM',message:'Stop signal sent; process is still running. No force stop was sent.'};
   }
-  return {available:probe.available,dispatch,close(){closed=true;reviews.clear();}};
+  return {available:probe.available,dispatch,close(){closed=true;reviews.clear();for(const controller of titleReads)controller.abort();titleReads.clear();}};
 }
 module.exports={createLocalServerService,createNativeServerProbe,parseListeners};

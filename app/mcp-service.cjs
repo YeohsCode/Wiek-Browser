@@ -10,6 +10,9 @@ const { prepareInput, validateResponses } = require('./mcp-input.cjs');
 const { createClientDocument } = require('./mcp-client-identity.cjs');
 const { createMcpOAuth } = require('./mcp-oauth.cjs');
 const { methods: resourceMethods, resetResources, resourceNotification } = require('./mcp-resources.cjs');
+const {methods:promptMethods,resetPrompts,promptNotification}=require('./mcp-prompts.cjs');
+const {createSubscriptionMethods}=require('./mcp-subscriptions.cjs');
+const {methods:stdioModernMethods}=require('./mcp-stdio-modern.cjs');
 const { createHttpClientClass, validateHttpConfig } = require('./mcp-http-client.cjs');
 const PROTOCOLS = ['2025-11-25', '2025-06-18', '2025-03-26', '2024-11-05'];
 const fail = (message, code = 'VEK_MCP_INVALID_REQUEST') => Object.assign(new Error(message), { error_code: code });
@@ -26,18 +29,20 @@ function redact(value, secrets) { if (typeof value === 'string') return safeText
 class StdioClient {
   constructor({ config, cwd, credentials = {}, onChange = () => {}, maxMessageBytes = 1024 * 1024, timeoutMs = 15000 }) {
     this.config = config; this.cwd = cwd; this.credentials = credentials; this.onChange = onChange; this.maxMessageBytes = maxMessageBytes; this.timeoutMs = timeoutMs;
-    this.pending = new Map(); this.nextId = 1; this.buffer = ''; this.state = 'connecting'; this.tools = null; this.stderr = ''; this.secrets = Object.values(credentials).filter(Boolean); this.stopped = false; resetResources(this);
+    this.pending = new Map(); this.nextId = 1; this.buffer = ''; this.state = 'connecting'; this.tools = null; this.stderr = ''; this.secrets = Object.values(credentials).filter(Boolean); this.stopped = false; this.modern=config.protocolVersion==='2026-07-28';this.toolHeaders=new Map();this.notificationStreams=new Map();this.toolListRevision=0;resetResources(this);resetPrompts(this);
   }
   async start() {
     const env = {}; for (const key of ['PATH', 'HOME', 'USER', 'TMPDIR', 'TMP', 'TEMP', 'SystemRoot', 'LANG', 'LC_ALL']) if (process.env[key]) env[key] = process.env[key];
     Object.assign(env, this.credentials);
     this.child = spawn(this.config.command, this.config.args, { cwd: this.cwd, env, shell: false, detached: process.platform !== 'win32', windowsHide: true, stdio: ['pipe', 'pipe', 'pipe'] });
-    this.child.stdin.on('error', () => {}); this.child.stdout.setEncoding('utf8'); this.child.stderr.setEncoding('utf8');
-    this.child.stdout.on('data', chunk => this.consume(chunk));
+    this.child.stdin.on('error', () => {});this.child.stderr.setEncoding('utf8');
+    if(this.modern){const decoder=new TextDecoder('utf-8',{fatal:true});const consume=(chunk,final=false)=>{try{this.consume(decoder.decode(chunk,{stream:!final}));}catch{this.break(fail('Malformed MCP stdout UTF-8','VEK_MCP_PROTOCOL_ERROR'));void this.stop();}};this.child.stdout.on('data',chunk=>consume(chunk));this.child.stdout.once('end',()=>consume(undefined,true));}
+    else{this.child.stdout.setEncoding('utf8');this.child.stdout.on('data',chunk=>this.consume(chunk));}
     this.child.stderr.on('data', chunk => { this.stderrBytes = (this.stderrBytes || 0) + Buffer.byteLength(chunk); this.stderr = `Server diagnostic output received (${this.stderrBytes} bytes; content is not retained)`; this.notifyChange(); });
     this.child.on('error', error => this.break(fail(`MCP process could not start: ${safeText(error.message, this.secrets)}`, 'VEK_MCP_PROCESS_FAILED')));
     this.child.once('close', (code, signal) => { this.exit = { code, signal }; this.break(fail('MCP process exited', 'VEK_MCP_DISCONNECTED')); });
     try {
+      if(this.modern){const result=await this.request('server/discover');if(!Array.isArray(result?.supportedVersions)||!result.supportedVersions.includes('2026-07-28')||!result.capabilities||typeof result.capabilities!=='object'||Array.isArray(result.capabilities))throw fail('Invalid modern MCP discovery response');this.info={protocolVersion:'2026-07-28',capabilities:result.capabilities,serverInfo:result._meta?.['io.modelcontextprotocol/serverInfo']||{name:'Local MCP server'}};this.state='connected';this.notifyChange();return this;}
       const result = await this.request('initialize', { protocolVersion: PROTOCOLS[0], capabilities: { roots: { listChanged: false } }, clientInfo: { name: 'wiek-browser', version: '0.1.0' } }, { timeoutMs: this.timeoutMs });
       if (!result || !PROTOCOLS.includes(result.protocolVersion) || !result.serverInfo || typeof result.serverInfo.name !== 'string' || !result.capabilities || typeof result.capabilities !== 'object') throw fail('Invalid MCP initialize response', 'VEK_MCP_PROTOCOL_ERROR');
       this.info = redact(result, this.secrets); this.notify('notifications/initialized'); this.state = 'connected'; this.notifyChange(); return this;
@@ -54,26 +59,30 @@ class StdioClient {
       let message;
       try { if (Buffer.byteLength(line) > this.maxMessageBytes) throw new Error(); message = JSON.parse(line); if (!message || Array.isArray(message) || message.jsonrpc !== '2.0') throw new Error(); }
       catch { this.break(fail('Malformed MCP stdout message', 'VEK_MCP_PROTOCOL_ERROR')); this.stop(); return; }
+      if(Object.hasOwn(message,'method')&&typeof message.method!=='string'){this.break(fail('Malformed MCP method','VEK_MCP_PROTOCOL_ERROR'));this.stop();return;}
+      if(this.modern&&this.consumeModernSubscription(message))continue;
       if (Object.hasOwn(message, 'method')) {
-        if (typeof message.method !== 'string') { this.break(fail('Malformed MCP method', 'VEK_MCP_PROTOCOL_ERROR')); this.stop(); return; }
+        if(this.modern){if(Object.hasOwn(message,'id')){this.break(fail('Modern MCP servers cannot initiate requests'));this.stop();return;}continue;}
         if (Object.hasOwn(message, 'id')) {
           if (message.method === 'ping') this.write({ jsonrpc: '2.0', id: message.id, result: {} });
           else if (message.method === 'roots/list') this.write({ jsonrpc: '2.0', id: message.id, result: { roots: [{ uri: require('node:url').pathToFileURL(this.cwd).href, name: path.basename(this.cwd) }] } });
           else this.write({ jsonrpc: '2.0', id: message.id, error: { code: -32601, message: 'Client method is not supported' } });
-        } else if (resourceNotification(this, message)) { /* Connection-local invalidation only. */ }
-        else if (message.method === 'notifications/tools/list_changed') { this.tools = null; this.notifyChange(); }
+        } else if (resourceNotification(this, message)||promptNotification(this,message)) { /* Connection-local invalidation only. */ }
+        else if (message.method === 'notifications/tools/list_changed') { this.toolListRevision++;this.tools = null; this.notifyChange(); }
         continue;
       }
       if (!Object.hasOwn(message, 'id') || Number(Object.hasOwn(message, 'result')) + Number(Object.hasOwn(message, 'error')) !== 1) { this.break(fail('Malformed MCP response', 'VEK_MCP_PROTOCOL_ERROR')); this.stop(); return; }
       const pending = this.pending.get(message.id); if (!pending) continue; // Ignore a late cancelled response.
       this.pending.delete(message.id); clearTimeout(pending.timer); pending.cleanup?.();
+      if(this.modern&&!message.error&&message.result?.resultType!=='complete'&&!(pending.allowInput&&message.result?.resultType==='input_required')){pending.reject(fail('Unsupported or invalid modern MCP result type','VEK_MCP_UNSUPPORTED_CAPABILITY'));continue;}
       if (message.error) pending.reject(fail(safeText(message.error.message || 'MCP request failed', this.secrets), 'VEK_MCP_REMOTE_ERROR'));
       else pending.resolve(redact(message.result, this.secrets));
     }
   }
-  write(message) { if (this.stopped || !this.child?.stdin.writable) throw fail('MCP connection is closed', 'VEK_MCP_DISCONNECTED'); this.child.stdin.write(JSON.stringify(message) + '\n'); }
+  write(message) { if (this.stopped || !this.child?.stdin.writable) throw fail('MCP connection is closed', 'VEK_MCP_DISCONNECTED'); const line=JSON.stringify(message);if(this.modern&&Buffer.byteLength(line)>this.maxMessageBytes)throw fail('MCP stdio request exceeds the size limit','VEK_MCP_CAPACITY');this.child.stdin.write(line + '\n'); }
   notify(method, params) { this.write({ jsonrpc: '2.0', method, ...(params === undefined ? {} : { params }) }); }
-  request(method, params = {}, { timeoutMs = this.timeoutMs, signal } = {}) {
+  request(method, params = {}, { timeoutMs = this.timeoutMs, signal, allowInput=false } = {}) {
+    allowInput=allowInput===true&&this.modern&&method==='tools/call';if(this.modern)params=this.modernParams(params,allowInput);
     if (this.pending.size >= 64) return Promise.reject(fail('Too many pending MCP requests', 'VEK_MCP_CAPACITY'));
     if (signal?.aborted) return Promise.reject(fail('MCP request cancelled', 'VEK_MCP_CANCELLED'));
     const id = this.nextId++;
@@ -87,24 +96,25 @@ class StdioClient {
       const abort = () => finishError('MCP request cancelled', 'VEK_MCP_CANCELLED');
       const timer = setTimeout(() => finishError('MCP request timed out', 'VEK_MCP_TIMEOUT'), timeoutMs);
       const cleanup = () => signal?.removeEventListener('abort', abort);
-      this.pending.set(id, { resolve, reject, timer, cleanup }); signal?.addEventListener('abort', abort, { once: true });
+      this.pending.set(id, { resolve, reject, timer, cleanup, allowInput }); signal?.addEventListener('abort', abort, { once: true });
       try { this.write({ jsonrpc: '2.0', id, method, params }); } catch (error) { this.pending.delete(id); clearTimeout(timer); cleanup(); reject(error); }
     });
   }
   async listTools({ signal } = {}) {
     if (!this.info?.capabilities?.tools) return [];
-    if (this.tools) return this.tools;
+    if (this.tools&&!this.modern) return this.tools;
+    const revision=this.toolListRevision;
     const tools = []; let cursor; const seen = new Set();
     for (let page = 0; page < 50; page++) {
       const result = await this.request('tools/list', cursor ? { cursor } : {}, { signal });
       if (!Array.isArray(result?.tools) || result.tools.some(tool => !tool || typeof tool.name !== 'string' || !tool.inputSchema || typeof tool.inputSchema !== 'object')) throw fail('Invalid tools/list response', 'VEK_MCP_PROTOCOL_ERROR');
       for (const tool of result.tools) { if (seen.has(tool.name)) throw fail('Duplicate MCP tool name', 'VEK_MCP_PROTOCOL_ERROR'); seen.add(tool.name); tools.push(tool); }
-      if (!result.nextCursor) { this.tools = tools; return tools; }
+      if (!result.nextCursor) {if(revision!==this.toolListRevision)throw fail('MCP tool list changed during listing; refresh again');this.tools = tools; return tools; }
       cursor = nonempty(result.nextCursor, 'nextCursor');
     }
     throw fail('MCP tools pagination exceeded the limit', 'VEK_MCP_PROTOCOL_ERROR');
   }
-  break(error) { if (this.state !== 'disconnected') { this.state = 'disconnected'; resetResources(this); this.error = safeText(error.message, this.secrets); for (const p of this.pending.values()) { clearTimeout(p.timer); p.cleanup?.(); p.reject(error); } this.pending.clear(); this.notifyChange(); } }
+  break(error) { if (this.state !== 'disconnected') { this.state = 'disconnected';this.cancelModernStreams?.();this.tools=null;resetResources(this);resetPrompts(this); this.error = safeText(error.message, this.secrets); for (const p of this.pending.values()) { clearTimeout(p.timer); p.cleanup?.(); p.reject(error); } this.pending.clear(); this.notifyChange(); } }
   async stop() {
     if (this.stopped) return; this.stopped = true; this.break(fail('MCP connection stopped', 'VEK_MCP_DISCONNECTED'));
     const child = this.child; if (!child || child.exitCode !== null || child.signalCode) return;
@@ -114,7 +124,8 @@ class StdioClient {
   }
 }
 
-Object.assign(StdioClient.prototype, resourceMethods);
+const stdioSubscriptions=createSubscriptionMethods();delete stdioSubscriptions.openSubscription;
+Object.assign(StdioClient.prototype,resourceMethods,promptMethods,stdioSubscriptions,stdioModernMethods);
 const HttpClient = createHttpClientClass(StdioClient);
 
 // No raw CDP or token is exposed. The host supplies only selected callbacks and
@@ -159,7 +170,7 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
   let oauthManager;try{oauthManager=createMcpOAuth({dataDir,...oauthOptions,onChange:publish,onSecret:value=>{if(secrets.has(value))return;if(secrets.size>=2048)throw fail('OAuth credential redaction capacity reached; restart before authorizing again','VEK_MCP_CAPACITY');const control=JSON.stringify([state.integrations,state.grants.map(({tokenHash,...row})=>row),state.tasks.map(({id,integrationId,scope,name,grantId})=>({id,integrationId,scope,name,grantId}))]);if(control.includes(value)||control.includes(JSON.stringify(value).slice(1,-1)))throw fail('OAuth token collides with public control data','VEK_MCP_OAUTH');secrets.add(value);}});}catch(error){fs.unlinkSync(lockPath);throw error;}
   for (const task of state.tasks) if (['queued', 'running', 'awaiting_input'].includes(task.status)) { task.status = 'interrupted'; task.completedAt = new Date().toISOString(); }
   function publicTask(task) { const review=activeTasks.get(task.id)?.review;return redact({...task,...(review?{inputReview:{id:review.id,round:review.round,expiresAt:review.expiresAt,forms:review.forms}}:{}),...(runtimeResults.has(task.id)?{result:runtimeResults.get(task.id)}:{})}, secrets); }
-  function snapshot() { return redact({ integrations: state.integrations, tasks: state.tasks.map(publicTask), grants: state.grants.map(({ tokenHash, ...grant }) => grant), connections: [...connections.values()].map(c => ({ integrationId: c.integrationId, scope: c.scope, status: c.client?.state || 'connecting', serverInfo: c.client?.info?.serverInfo, error: c.client?.error, stderr: c.client?.stderr || '', tools: c.client?.tools || [], notificationStreams:c.client?.subscriptionSnapshot?.(), resourceCapabilities: c.client?.info?.capabilities?.resources || null, resources: c.client?.resources, resourceTemplates: c.client?.resourceTemplates, resourceSubscriptions: [...(c.client?.resourceSubscriptions?.values() || [])] })), oauth:oauthManager?.snapshot(), gateway: gateway ? { url: gateway.url } : null }, secrets); }
+  function snapshot() { return redact({ integrations: state.integrations, tasks: state.tasks.map(publicTask), grants: state.grants.map(({ tokenHash, ...grant }) => grant), connections: [...connections.values()].map(c => ({ integrationId: c.integrationId, scope: c.scope, status: c.client?.state || 'connecting', serverInfo: c.client?.info?.serverInfo, error: c.client?.error, stderr: c.client?.stderr || '', tools: c.client?.tools || [], notificationStreams:c.client?.subscriptionSnapshot?.(), promptCapabilities:c.client?.info?.capabilities?.prompts||null,prompts:c.client?.prompts,resourceCapabilities: c.client?.info?.capabilities?.resources || null, resources: c.client?.resources, resourceTemplates: c.client?.resourceTemplates, resourceSubscriptions: [...(c.client?.resourceSubscriptions?.values() || [])] })), oauth:oauthManager?.snapshot(), gateway: gateway ? { url: gateway.url } : null }, secrets); }
   function publish() { if (closed) return; const tmp = `${stateFile}.${randomUUID()}.tmp`; fs.writeFileSync(tmp, JSON.stringify(redact(state, secrets), null, 2), { mode: 0o600, flag: 'wx' }); fs.renameSync(tmp, stateFile); try { onChange(snapshot()); } catch {} }
   function ensureOpen() { if (closed || closing) throw fail('MCP service is closed', 'VEK_MCP_CLOSED'); }
   async function scopeFor(value) { const scope = normalizeScope(value); const resolved = await resolveScope(scope); if (!resolved || resolved.projectId !== scope.projectId || (scope.threadId && resolved.threadId !== scope.threadId) || !path.isAbsolute(resolved.projectPath || '') || !fs.statSync(resolved.projectPath).isDirectory()) throw fail('Unknown or unavailable project/thread scope', 'VEK_MCP_FORBIDDEN'); return { scope, resolved }; }
@@ -249,7 +260,8 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
         if(p.oauth!==undefined)throw fail('OAuth applies to HTTP integrations only');
         if (!Array.isArray(p.args) || p.args.length > 128 || p.args.some(arg => typeof arg !== 'string' || arg.includes('\0') || arg.length > 65536)) throw fail('args must be an array of strings');
         if (p.headerRefs !== undefined || p.url !== undefined) throw fail('Select HTTP transport to configure an endpoint');
-        transportConfig = { transport: 'stdio', command: nonempty(p.command, 'command'), args: [...p.args], credentialRefs };
+        if(p.protocolVersion!==undefined&&!['2025-11-25','2026-07-28'].includes(p.protocolVersion))throw fail('Unsupported configured stdio MCP protocol version');
+        transportConfig = { transport: 'stdio',protocolVersion:p.protocolVersion||'2025-11-25', command: nonempty(p.command, 'command'), args: [...p.args], credentialRefs };
       }
       const config = { id: p.id || randomUUID(), name: nonempty(p.name, 'name', 200), ...transportConfig, scope, enabled: p.enabled !== false };
       const old = state.integrations.find(item => item.id === config.id); if (p.id && !old) throw fail('MCP integration not found', 'VEK_MCP_NOT_FOUND'); if (old) {await disconnect(old.id);if(old.url!==config.url||JSON.stringify(old.oauth)!==JSON.stringify(config.oauth)||scopeKey(old.scope)!==scopeKey(config.scope))oauthManager.forget(old);}
@@ -259,8 +271,10 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
     if (action === 'mcp:integrations:remove') { await disconnect(p.id);const old=state.integrations.find(item=>item.id===p.id);if(old)oauthManager.forget(old); state.integrations = state.integrations.filter(item => item.id !== p.id); publish(); return snapshot(); }
     if (action === 'mcp:integrations:connect') { await connect(p.id, p.scope); return snapshot(); }
     if (action === 'mcp:integrations:disconnect') { await disconnect(p.id, p.scope ? normalizeScope(p.scope) : null); return snapshot(); }
-    if (action === 'mcp:subscriptions:watch' || action === 'mcp:subscriptions:stop') { const client=await connect(p.integrationId,p.scope); if(!client.modern)throw fail('List streams require the 2026 HTTP protocol','VEK_MCP_UNSUPPORTED_CAPABILITY'); await client.watchLists(action.endsWith(':watch')); return snapshot(); }
+    if (action === 'mcp:subscriptions:watch' || action === 'mcp:subscriptions:stop') { const client=await connect(p.integrationId,p.scope); if(!client.modern)throw fail('List streams require the 2026 MCP protocol','VEK_MCP_UNSUPPORTED_CAPABILITY'); await client.watchLists(action.endsWith(':watch')); return snapshot(); }
     if (action === 'mcp:tools:list') return { tools: await (await connect(p.integrationId, p.scope)).listTools() };
+    if(action==='mcp:prompts:list')return {prompts:await (await connect(p.integrationId,p.scope)).listPrompts()};
+    if(action==='mcp:prompts:get')return (await connect(p.integrationId,p.scope)).getPrompt(p.name,p.arguments);
     if (action === 'mcp:resources:list' || action === 'mcp:resources:templates') return { [action.endsWith(':templates') ? 'resourceTemplates' : 'resources']: await (await connect(p.integrationId, p.scope)).listResources({ templates: action.endsWith(':templates') }) };
     if (action === 'mcp:resources:read') return (await connect(p.integrationId, p.scope)).readResource(p.uri);
     if (action === 'mcp:resources:subscribe' || action === 'mcp:resources:unsubscribe') { await (await connect(p.integrationId, p.scope)).setResourceSubscription(p.uri, action.endsWith(':subscribe')); return snapshot(); }

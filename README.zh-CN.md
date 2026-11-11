@@ -4,9 +4,9 @@
 
 ![Wiek Browser](app/assets/wiek.svg)
 
-本地 Chromium 浏览器与 Agent 工作区，提供任务 Space、隔离 Profile、文件/Git 工具、自动化调度与浏览器控制。Electron 宿主和本地服务采用独立实现，SDK 使用自身构建与 Wiek 运行命名空间，无需安装其他浏览器；第三方许可与署名保留在 [NOTICE.md](NOTICE.md)。
+本地 Chromium 浏览器与 Agent 工作区，提供自动化标签组、隔离的浏览器用户配置、文件/Git 工具、自动化调度与浏览器控制。Electron 宿主和本地服务采用独立实现，SDK 使用自身构建与 Wiek 运行命名空间，无需安装其他浏览器；第三方许可与署名保留在 [NOTICE.md](NOTICE.md)。
 
-**当前检查点：0.23.0。功能覆盖与验收仍在推进。** 参见[计划](PLAN.md)、[能力矩阵](analysis/implementation-matrix.md)和[验证结果](reports/RESULTS.md)。
+**当前检查点：0.24.0。功能覆盖与验收仍在推进。** 参见[计划](PLAN.md)、[能力矩阵](analysis/implementation-matrix.md)和[验证结果](reports/RESULTS.md)。
 
 ## 本地运行
 
@@ -20,7 +20,7 @@ npm run build:desktop-native
 npm start
 ```
 
-原生 helper 与当前发行包面向 macOS ARM64。浏览器控制与本地工具不需要云端账号；模型驱动的 Agent turn 需要独立配置 provider。
+原生 helper 与当前发行包面向 macOS ARM64。浏览器控制与本地工具不需要云端账号；模型驱动的 Agent 执行需要独立配置 Agent 程序。
 
 ```sh
 node cli/wiek-browser.mjs install
@@ -34,14 +34,15 @@ node cli/wiek-browser.mjs stop
 
 ## 功能
 
-- 标签、任务 Space、隔离 Profile、书签、历史、下载、站点权限和用户接管。
+- 标签、自动化标签组、隔离的浏览器用户配置、书签、历史、下载、站点权限和用户接管。
 - JavaScript SDK：snapshot、locator、输入、iframe、截图、上传/下载与 CDP。
 - Agent 工作区：审批、附件、会话分支、已接入的原生适配器与模型目录。
-- 项目文件、Git、审核式远程操作及支持 linked worktree 隔离的文件 checkpoint。
-- **项目本地服务**：刷新监听进程、打开回环地址、审核并确认停止。停止前复核启动身份、目录、可执行文件和端口；发现过程不请求网页、不读取进程参数或环境。
-- MCP 连接、作用域工具/资源、订阅、审核式 OAuth 与有界输入续传。
+- 项目文件、Git、审核式远程操作及支持 linked worktree 隔离的项目文件备份。
+- **项目本地服务**：刷新监听进程、打开回环地址、显式读取页面标题、审核并确认停止。停止前复核启动身份、目录、可执行文件和端口；发现过程不请求网页、不读取进程参数或环境。
+- MCP 传统/现代 stdio 与 HTTP 连接、作用域工具/资源、订阅、只读提示预览、审核式 OAuth 与有界输入续传。
+- 加密浏览器数据备份，显式迁移 local/session storage 与有界 IndexedDB；旧版归档保持可读。
 - 自动化调度、显式后台作业、执行模式、忙碌延期、运行记忆/结果和崩溃恢复。
-- Collections、截图标注、网页/指定应用录制、显式桌面采集、本地转写与离线翻译。
+- 收藏文件夹、截图标注、网页/指定应用操作记录、显式桌面采集、本地转写与离线翻译。
 
 本地服务发现需要 macOS helper，只列出目录属于所选项目的监听进程。受保护进程及未支持的 runtime 不能停止；忽略终止信号的进程仍显示为运行，不自动升级为强制停止。
 
@@ -56,7 +57,7 @@ console.log(await page.snapshot());
 JS
 ```
 
-跨轮次复用任务名和页面标签。本地工作区接口参见 [API 指南](skills/wiek-browser/API.md)。
+同一任务在浏览器持续运行时复用任务 ID 与页面标识。独立测试可使用不同任务名和隔离数据目录。重启后重新识别标签页。术语与具体操作见[术语表](docs/terminology.md)及[易用性审计](reports/usability-audit.md)。本地工作区接口参见 [API 指南](skills/wiek-browser/API.md)。
 
 ## 可选本地模型
 

@@ -6,7 +6,7 @@ async function createFixture(settings={}){
  const json=(res,id,result)=>{res.writeHead(200,{'content-type':'application/json'});res.end(JSON.stringify({jsonrpc:'2.0',id,result:{resultType:'complete',...result}}));};
  const event=(stream,message)=>stream.res.write('data: '+JSON.stringify({jsonrpc:'2.0',...message})+'\r\n\r\n');
  const notification=(stream,method,params={})=>event(stream,{method,params:{...params,_meta:{'io.modelcontextprotocol/subscriptionId':stream.message.id}}});
- const emit=(method,params={})=>{for(const stream of streams){const f=stream.accepted;if(method==='notifications/tools/list_changed'&&f.toolsListChanged||method==='notifications/resources/list_changed'&&f.resourcesListChanged||method==='notifications/resources/updated'&&f.resourceSubscriptions?.includes(params.uri))notification(stream,method,params);}};
+ const emit=(method,params={})=>{for(const stream of streams){const f=stream.accepted;if(method==='notifications/tools/list_changed'&&f.toolsListChanged||method==='notifications/prompts/list_changed'&&f.promptsListChanged||method==='notifications/resources/list_changed'&&f.resourcesListChanged||method==='notifications/resources/updated'&&f.resourceSubscriptions?.includes(params.uri))notification(stream,method,params);}};
  const server=http.createServer(async(req,res)=>{
   let body='';for await(const b of req)body+=b;let m;try{m=JSON.parse(body);}catch{res.writeHead(400).end();return;}calls.push({message:m,method:req.method,headers:req.headers});
   if(m.method==='server/discover')return json(res,m.id,{supportedVersions:['2026-07-28'],capabilities:settings.capabilities||{tools:{listChanged:true},resources:{subscribe:true,listChanged:true}},_meta:{'io.modelcontextprotocol/serverInfo':{name:'Offline modern resource fixture',version:'1'}}});
@@ -21,6 +21,8 @@ async function createFixture(settings={}){
    if(settings.listenMode==='early-update'&&accepted.resourceSubscriptions)notification(stream,'notifications/resources/updated',{uri:accepted.resourceSubscriptions[0]});
    return;
   }
+  if(m.method==='prompts/list')return json(res,m.id,{prompts:[{name:'inert',arguments:[{name:'subject',required:true}]}]});
+  if(m.method==='prompts/get')return json(res,m.id,{messages:[{role:'user',content:{type:'text',text:'Inert prompt '+m.params.arguments.subject}}]});
   if(m.method==='resources/list'){
    const rows=[{uri:'fixture:///notes',name:'Notes <script id="untrusted">x</script>'},{uri:'fixture:///binary',name:'Binary'}];
    return json(res,m.id,{resources:settings.listMode==='paged'?[rows[m.params.cursor?1:0]]:rows,...(settings.listMode==='paged'&&!m.params.cursor?{nextCursor:'page-2'}:{}),ttlMs:0,cacheScope:'private'});

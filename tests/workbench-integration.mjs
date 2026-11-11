@@ -47,6 +47,7 @@ try {
   check((await fs.readFile(path.join(directory,'note.txt'),'utf8'))==='after\n','workspace writes real file');
   await assert.rejects(action('workspace:write',{projectId,path:'note.txt',content:'stale\n',expectedHash:before.hash}),/conflict|changed/i);checks++;
   await assert.rejects(action('workspace:read',{projectId,path:'../outside'}));checks++;
+  await assert.rejects(action('workspace:servers:title',{projectId,pid:process.pid,fingerprint:'untrusted',url:'http://127.0.0.1:1/',interactive:true}),/local service controls/);checks++;
   execFileSync('git',['init','-q',directory]);execFileSync('git',['-C',directory,'config','user.name','Wiek fixture']);execFileSync('git',['-C',directory,'config','user.email','fixture@localhost']);execFileSync('git',['-C',directory,'add','--','note.txt']);execFileSync('git',['-C',directory,'commit','-qm','Local fixture']);
   const checkpoint=(await action('workspace:git:checkpoint:create',{projectId,name:'Host fixture'})).checkpoint;
   const note=await action('workspace:read',{projectId,path:'note.txt'});await action('workspace:write',{projectId,path:'note.txt',content:'changed after checkpoint\n',expectedHash:note.hash});

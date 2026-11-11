@@ -1,0 +1,24 @@
+✔ real Electron panel renders literal messages and dispatches advanced controls without model calls (692.8185ms)
+{"ok":true,"checks":17,"realCLI":true,"isolatedData":true,"modelCalls":0,"accountActions":0}
+✔ real CLI distinguishes reopening tabs, continuing scripts, completed tasks and user handoff (3673.762708ms)
+{"ok":true,"checks":17,"realElectronIPC":true,"fixtureCaptureOnly":true,"actualOSCapture":false,"modelCalls":0}
+✔ actual Electron desktop controls require opt-in and app scope, show native action preview, stop and recover deletion (323.80925ms)
+{"ok":true,"checks":20,"realElectronIPC":true,"fixtureCaptureOnly":true,"actualOSCapture":false,"modelCalls":0}
+✔ actual Electron desktop panel previews before copy/save and transfers PNG to the real Library editor (315.43125ms)
+✔ resource and memory panels operate through Electron IPC with real services and inert text (570.0135ms)
+✔ preferences defaults do not collect content and patches persist with owner permissions (18.804083ms)
+✔ shortcut aliases normalize and actual platform chords detect app/system conflicts (14.294708ms)
+✔ invalid shortcut syntax, unknown fields and oversized UTF-8 instructions never mutate state (8.710041ms)
+✔ shortcut reset checks collisions and global reset restores privacy defaults (24.937667ms)
+✔ state symlinks and invalid stored shortcuts are rejected instead of silently replaced (6.018375ms)
+✔ real Electron recorder panel previews one requested image and wires explicit record/export/soft-delete controls (346.836833ms)
+{"ok":true,"checks":13,"actualElectronIPC":true,"realLocalBareGit":true,"syntheticGh":true,"remoteAccountWrites":0,"modelCalls":0}
+✔ remote workspace review, confirmation and PR text operate through actual isolated Electron IPC (6786.81325ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 13246.914917

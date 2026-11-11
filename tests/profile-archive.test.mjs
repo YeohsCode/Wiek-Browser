@@ -20,7 +20,7 @@ test('profile archive writes only ciphertext to a temporary file and restores al
  const root=await fs.mkdtemp(path.join(os.tmpdir(),'vek-archive-'));t.after(()=>fs.rm(root,{recursive:true,force:true}));const archive=createProfileArchive(),data=payload(),json=await archive.encode(data,passphrase),file=path.join(root,'fixture.vek-profile.json');await fs.writeFile(file,json,{mode:0o600});
  for(const secret of ['Portable fixture','fixture.test','cookie-only-secret','password-only-secret','fixture-user',passphrase])assert.equal(json.includes(secret),false);
  const envelope=JSON.parse(json);assert.equal(envelope.mimeType,MIME_TYPE);assert.equal(envelope.kdf,'scrypt-131072-8-1');assert.equal(envelope.cipher,'aes-256-gcm');assert.equal(Buffer.from(envelope.tag,'base64').length,16);
- const result=await archive.decode(await fs.readFile(file),passphrase);assert.deepEqual(result.payload,archive.validate(data));assert.equal(result.metadata.version,2);assert.equal(result.metadata.expiresAt,null);assert.equal((await fs.stat(file)).mode&0o777,0o600);
+ const result=await archive.decode(await fs.readFile(file),passphrase);assert.deepEqual(result.payload,archive.validate(data));assert.equal(result.metadata.version,3);assert.equal(result.metadata.expiresAt,null);assert.equal((await fs.stat(file)).mode&0o777,0o600);
  const other=await archive.encode(data,passphrase);assert.notEqual(JSON.parse(other).salt,envelope.salt);assert.notEqual(JSON.parse(other).iv,envelope.iv);assert.notEqual(JSON.parse(other).data,envelope.data);
 });
 test('wrong passphrase and every authenticated header/cipher component fail without returning data',async()=>{
@@ -30,7 +30,7 @@ test('wrong passphrase and every authenticated header/cipher component fail with
 });
 test('expired archives and unknown versions, algorithms and MIME types are explicit failures',async()=>{
  const archive=createProfileArchive(),expiry=new Date(Date.now()+30000).toISOString(),json=await archive.encode(payload(),passphrase,{expiresAt:expiry}),now=Date.now;Date.now=()=>now()+60000;try{await assert.rejects(archive.decode(json,passphrase),hasCode('VEK_PROFILE_ARCHIVE_EXPIRED'));}finally{Date.now=now}
- for(const [field,value]of[['version',3],['kdf',{N:2**30,r:128,p:99}],['cipher','aes-256-cbc'],['mimeType','text/html']]){const changed=JSON.parse(json);changed[field]=value;await assert.rejects(archive.decode(JSON.stringify(changed),passphrase),/Unsupported|Unrecognized/);}
+ for(const [field,value]of[['version',4],['kdf',{N:2**30,r:128,p:99}],['cipher','aes-256-cbc'],['mimeType','text/html']]){const changed=JSON.parse(json);changed[field]=value;await assert.rejects(archive.decode(JSON.stringify(changed),passphrase),/Unsupported|Unrecognized/);}
  await assert.rejects(archive.encode(payload(),passphrase,{expiresAt:'2020-01-01T00:00:00.000Z'}),hasCode('VEK_PROFILE_ARCHIVE_EXPIRED'));
 });
 test('validation rejects pollution keys, nonplain JSON, accessors and unsupported data fields before encryption',async()=>{

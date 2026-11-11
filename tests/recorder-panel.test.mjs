@@ -35,7 +35,7 @@ test('real Electron recorder panel previews one requested image and wires explic
         document.querySelector('.vr-event').click(); await new Promise(resolve => setTimeout(resolve, 15));
         const preview = document.querySelector('.vr-preview img')?.src === 'data:image/png;base64,' + pngBase64;
         const geometry = document.body.textContent.includes('width 50, height 40');
-        await click('Export native JSON'); await click('Delete recording');
+        await click('Export action history (JSON)'); await click('Delete recording');
         const softDeleted = document.body.textContent.includes('Soft deleted');
         await click('Restore recording'); await click('Start recording current page'); await click('Stop recording');
         return { literal, noAutoRecord, preview, geometry, softDeleted, calls, recording: state.recording };

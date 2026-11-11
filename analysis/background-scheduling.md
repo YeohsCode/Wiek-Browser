@@ -37,3 +37,16 @@ Main在Agent/workspace/checkpoint收尾后才释放foreground gate；worker接�
 首次包内真实OS测试还在上一进程未idle时kickstart，no-op等待超时；fixture改为每次kickstart前确认OS状态无活跃PID，原不重复断言保留，最终包测试成功且清理确认。初次记录中未到达的默认false不代表观察到重复或卸载失败，详见[原生QA](../reports/v160-native-ui-qa.md)。产品实现没有因此修改。
 
 本轮边界：没有实测logout/login、物理sleep/wake、OS background-item撤销、所有runtime安装布局或所有CLI认证环境。P3 cooldown/defer、completion contract及0.14 OS采集正向仍有缺口。下一阶段优先P2 MCP现代请求/订阅，DCR和明确来源完整迁移保留，P1继续暂缓。
+
+## 0.24 安装布局与代码身份增量
+
+新增8项布局验收，连同既有job/control/worker专项共40/40通过，见[本轮日志](../reports/v024-scheduler-layouts.log)。所有launchctl调用均由夹具记录，没有注册、启用或移除真实系统登录项。
+
+- 打包目录、资料目录和登录文件目录包含空格、中文及XML特殊字符时，plist解析后的argv仍是精确的两项路径；可执行文件、应用根目录和资料目录入口的符号链接按canonical路径审核。
+- 指向同一资料目录的入口共用一个job身份；重新打开设置不自动安装第二份。审核后重定向应用或可执行入口也不改变此前明确审核的canonical目标。
+- 移动已审核的运行目录后，稳定launcher返回needs-review，不能自动追随新位置；先关闭旧执行授权、重新审核新位置才可恢复。移动资料目录后，旧安装凭据不能自动获得新位置的登录任务权限，设置明确阻止更改。
+- 修复了一处代码收据缺口：仅筛选isFile会把源目录中的代码符号链接排除在摘要之外。现在审核阶段拒绝非普通或非canonical源文件，launcher也在加载worker之前拒绝新增代码符号链接。实际夹具验证外部模块的标记文件不会被执行写入；package.json的链接同样在审核前拒绝。
+
+这些结果证明有界安装路径和代码身份行为，不证明物理sleep/wake、logout/login、OS撤权或所有第三方CLI安装/认证布局均已验收。系统级场景继续保留为未完成。
+
+最终包可另行执行 `node tests/scheduler-packaged-runtime.mjs /absolute/Resources/app /absolute/MacOS/Wiek\ Browser`：以夹具OS回调创建临时收据，再用包内Electron的Node模式执行精确审核的bootstrap argv。它只运行空资料目录的一次tick，检查实际记录与自有文件清理，不调用真实launchctl。初次工具链检查针对0.23旧包通过，保存为baseline；0.24最终包结果必须另行验证。

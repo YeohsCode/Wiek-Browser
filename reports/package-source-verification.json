@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-09T23:56:53.023Z",
-  "version": "0.23.0",
+  "generatedAt": "2026-11-11T01:21:59.169Z",
+  "version": "0.24.0",
   "versionMatches": true,
-  "checkedFiles": 199,
+  "checkedFiles": 204,
   "allMatch": true,
-  "sdkSha256": "6d1ef3537f56eea38ecb72c381b1267d8a489faf5d98c1455eace8ce3c67ef28",
+  "sdkSha256": "1c4e8428e8c66b612f59d333f99fbdd2cd45dbf617d85e681ea3387c68d695ff",
   "sdkMatchesCompared": true,
   "files": [
     {
@@ -29,7 +29,7 @@
     },
     {
       "file": "app/agent-panel.js",
-      "sha256": "7af6edcd7810acd99575abf26799a8e19ff552580cf320a5bdbd8112075ad846",
+      "sha256": "eea27489da60fb341cb4b3519b1787cf1c37112578355726828802b2867ccb9c",
       "matches": true
     },
     {
@@ -189,7 +189,7 @@
     },
     {
       "file": "app/desktop-panel.js",
-      "sha256": "db82d843b703447a4cdae3f4a0847189ecd4261b254dd160c2567ea12ea9f796",
+      "sha256": "f292334eff4f2cf1d176d13c9b80229ea5be1ed11cab96ad8c1732a6b310729b",
       "matches": true
     },
     {
@@ -199,7 +199,7 @@
     },
     {
       "file": "app/index.html",
-      "sha256": "9db51c3d437685e75983772aed1f9b13eaf576d4d62c2660bcc3f1a23b68eca0",
+      "sha256": "8cdf0727f1e94afb39fe170cddd8d6eba6de8ee950916f82a07cf44bafa8ec2b",
       "matches": true
     },
     {
@@ -209,7 +209,7 @@
     },
     {
       "file": "app/library-panel.js",
-      "sha256": "dc9a8a8930f46d77026665aa2d0fe46e20662f707db6756e37f336a6c858594b",
+      "sha256": "43f56a968fc603aa98dcafabd67b7ff6cc2cc5ff7ab15f61c26f7ddf788859ed",
       "matches": true
     },
     {
@@ -219,12 +219,17 @@
     },
     {
       "file": "app/local-server-service.cjs",
-      "sha256": "bae123321646b46d08503b357f22638d47563156603379349723e2b975db5cda",
+      "sha256": "4353866d428b94ba189203553471c3dca36c5cd7c86483cf33c6583359e55202",
+      "matches": true
+    },
+    {
+      "file": "app/local-server-title.cjs",
+      "sha256": "1784d64bd61ddca310d2790f0e9cc364cf57075b8135c077a95de185b4e0a747",
       "matches": true
     },
     {
       "file": "app/main.cjs",
-      "sha256": "1db1b655fe4e07ee202ce2a8d1341aceb44b29ea0fce5a32f81449ab0b5f75ae",
+      "sha256": "e8cb01a78f3ab8848710abaaf4c20be9f747bb38e6969008a373337643d15d8f",
       "matches": true
     },
     {
@@ -234,7 +239,7 @@
     },
     {
       "file": "app/mcp-http-client.cjs",
-      "sha256": "55708b34c1eab896d9b0f27eb96f15147d721c43b5a67c8be3c4fbd68265c917",
+      "sha256": "7e092d7186cdde6f76ac56a290e46d21aab29df185a036c6c47380e661061ffe",
       "matches": true
     },
     {
@@ -254,7 +259,12 @@
     },
     {
       "file": "app/mcp-panel.js",
-      "sha256": "c8eee218fa39427aaabe3141903d6e23d533d75689b349a0a7fc44f7db676766",
+      "sha256": "7826c80aade45cff619db7dfbe16c57e67d3dbd23c371cf64bf46cbe4bca2aaf",
+      "matches": true
+    },
+    {
+      "file": "app/mcp-prompts.cjs",
+      "sha256": "dc617b8ac3982e2c4e9e52c08db44f1b1965f7952c19419279e90cf97c58e35e",
       "matches": true
     },
     {
@@ -264,12 +274,17 @@
     },
     {
       "file": "app/mcp-service.cjs",
-      "sha256": "ad0626a27383d404c99cbbd95879848e9ddac898c36fb4cb72c4a8b52683f789",
+      "sha256": "b630ee8df4fe356f6346c53901aa315d67027823019a67c3820346105d0b526b",
+      "matches": true
+    },
+    {
+      "file": "app/mcp-stdio-modern.cjs",
+      "sha256": "c423ad1c4e10faa43cb248235172e6d062a2699a035fcf721ea1dd6de77a0048",
       "matches": true
     },
     {
       "file": "app/mcp-subscriptions.cjs",
-      "sha256": "f328fd870029977768cea4e2b797399fd43248b5fb244a880e30d1bac9b40ade",
+      "sha256": "741468e3706d51b71cf57beef06a01e09b701861ad5b9816571b5deac9160246",
       "matches": true
     },
     {
@@ -289,12 +304,12 @@
     },
     {
       "file": "app/preferences-panel.js",
-      "sha256": "f43866f1997a12bbbf4edfa5077bf827a01785aa7a8d8eee49c271b28e9c7b4f",
+      "sha256": "dea692e8d0bdd90a964375ce0d9406a69877fb75620f23f24b0a33c5dda336e4",
       "matches": true
     },
     {
       "file": "app/preferences-service.cjs",
-      "sha256": "b04de94180ff10041b7e6d8152797d629d632e55088d8448da1c12615849ef2f",
+      "sha256": "550954a92256912b78edd2563949923dad903a9edcbf9f6fe75a8dedd1e33783",
       "matches": true
     },
     {
@@ -304,12 +319,22 @@
     },
     {
       "file": "app/profile-archive.cjs",
-      "sha256": "298728edfe2dc80ad94bb512f313bf5768fb0dd78919c438b390fcf2fba6bb5a",
+      "sha256": "10bddde0c4db738f5e32374a6880c3e255abbe9b9ac19a7a9166c177c410e468",
       "matches": true
     },
     {
       "file": "app/profile-import.cjs",
       "sha256": "650a5bae3a57bb4ccc50f9262cf47b1fa453fd950940fbd735de54eb6472afd6",
+      "matches": true
+    },
+    {
+      "file": "app/profile-indexeddb-data.cjs",
+      "sha256": "dadfbd6949fdb3f1eddfe6c5e717580578a1e3303156310e5cd96542f192c649",
+      "matches": true
+    },
+    {
+      "file": "app/profile-indexeddb.cjs",
+      "sha256": "8ddfcf7228cdee9058c5f1ab53a267156a9f3094e7428c70a478cdd11ac9dbe3",
       "matches": true
     },
     {
@@ -319,7 +344,7 @@
     },
     {
       "file": "app/profile-web-storage.cjs",
-      "sha256": "84cb6b996ce7984e08419863c4461a42797e523fa114620b5f2c71bbcd61d24e",
+      "sha256": "74da0f1a21a8d81e7a66a808aa487b012d54f23667f1e179cfc370b12b5651f4",
       "matches": true
     },
     {
@@ -329,12 +354,12 @@
     },
     {
       "file": "app/recorder-panel.js",
-      "sha256": "94c83ea8b92a75bc52d63626a2275b2315ac76291128daf0f80ea30e1958e2ac",
+      "sha256": "1fec0b3e18af80470636e649a9a7ec59828167f62ad8aa412ee421823f1ed387",
       "matches": true
     },
     {
       "file": "app/renderer.js",
-      "sha256": "d1ea2b7fbf0042a667080ad5a0d9414d2753f39a567ea7a32e2589b6f28bfbe5",
+      "sha256": "519d6a060e880e3012ee6561d516695f6f0bbfc2498f5f6130e3a467672e73b7",
       "matches": true
     },
     {
@@ -349,12 +374,12 @@
     },
     {
       "file": "app/scheduler-job.cjs",
-      "sha256": "8842f22cf3edf209572d414b5eade22a22cab537cf1bd59e40f63e47723f7fae",
+      "sha256": "670099b69dad51c6cad481ebdad6a8d2c9cce0305ec88da024d9ab35a824e211",
       "matches": true
     },
     {
       "file": "app/scheduler-launch.cjs",
-      "sha256": "235c5ba4753e867e252bc40fb49bfbc10503c117bd81392c0867434e55219983",
+      "sha256": "afd58619aa03b3f72d5421fd88ad93af2af79cbae418a9842d9a9dca5b5c2e76",
       "matches": true
     },
     {
@@ -419,7 +444,7 @@
     },
     {
       "file": "app/space-window.js",
-      "sha256": "d62edffe67a4b2950d27a3c2b5545c037c0b6cec15a2b2f99ff4848cfc0d8b27",
+      "sha256": "10d9b7fde128122d2a5ff01cb4c7d91774523d475904885366bf4379debb29c3",
       "matches": true
     },
     {
@@ -464,7 +489,7 @@
     },
     {
       "file": "app/workspace-panel.js",
-      "sha256": "11ca9591596f293e29e154172b80362717c93f3ef086e22e9ea5bd85f35dadaa",
+      "sha256": "a723cd47d64dd9b577f3bfbe61c37e65fa968791ff68479f8d1c3ec460d9ef30",
       "matches": true
     },
     {
@@ -639,12 +664,12 @@
     },
     {
       "file": "packages/sdk/dist/out/index.js",
-      "sha256": "6d1ef3537f56eea38ecb72c381b1267d8a489faf5d98c1455eace8ce3c67ef28",
+      "sha256": "1c4e8428e8c66b612f59d333f99fbdd2cd45dbf617d85e681ea3387c68d695ff",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/out/wiek-browser/SKILL.md",
-      "sha256": "c845b9fda77385558fda800c3fc750b127980c6cd9387c937c41d9bed23f07bb",
+      "sha256": "8155b338159030d655a200aa2a0a33d315c4502119cfbc9f881992597cb94eb7",
       "matches": true
     },
     {
@@ -764,7 +789,7 @@
     },
     {
       "file": "packages/sdk/dist/src/helpers.js",
-      "sha256": "1f96bb7fd3fd4671f3499f689c0de97780f8ac79beeb843e19c246f93d2d7d78",
+      "sha256": "156ef1189a029e31e8fe1b7e9103e1fc6e63ff4472c4ebac63c55b64c802cd5e",
       "matches": true
     },
     {
@@ -869,12 +894,12 @@
     },
     {
       "file": "packages/sdk/dist/src/wiek-errors.js",
-      "sha256": "70883542cb585ff03d02b36144aafbd82baf259445929556cc26b7595383571f",
+      "sha256": "d2b964635522df33585bb6cf4a508c10b199a239f351a4bcaba9f14756df215e",
       "matches": true
     },
     {
       "file": "packages/sdk/skill-body/SKILL.md",
-      "sha256": "72d7584e828b69811841351125720cbe603a4a6ed91815192c37d1f9513be9d0",
+      "sha256": "fc91db8f2f8c69a1b72d2e16025abe81511fe8ed7bb2cdab81a42ced900a0ed0",
       "matches": true
     },
     {
@@ -889,7 +914,7 @@
     },
     {
       "file": "skills/wiek-browser/API.md",
-      "sha256": "f64905dd4356746d3bf006a356c2dce3177735e8d3c7bff644a1dd71221403b4",
+      "sha256": "c5916bb496999375b1b1d814efe4ed8f6f31a311706d145659ad262358cf9875",
       "matches": true
     },
     {

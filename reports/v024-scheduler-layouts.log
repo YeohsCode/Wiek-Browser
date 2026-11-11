@@ -1,0 +1,48 @@
+✔ foreground gate defaults to no worker start and is released only by its owner (13.059667ms)
+✔ foreground handoff settles a real worker/provider before releasing its writer lease (292.793833ms)
+✔ simultaneous foreground claims elect one live owner without replacing its token (6.631083ms)
+✔ stale foreground claims recover under an exclusive guard; unknown recovery guards are preserved (5.855334ms)
+✔ worker control is loopback/token protected and rejects browser origins or malformed requests (11.507125ms)
+✔ acknowledgement is not settlement; a stuck worker is not force-killed or stolen (110.902125ms)
+✔ symlinked foreground metadata and foreign active Agent services fail without changing their files (23.788833ms)
+✔ actual browser startup takes over from an active worker and clean stop releases its foreground gate (1439.587084ms)
+✔ default is off; remote APIs cannot prepare/enable/disable OS jobs (6.665125ms)
+✔ prepare/cancel/expiry are review-only and never create a login file (101.71125ms)
+✔ reviewed enable writes private escaped plist with fixed argv and no inherited credentials (119.391916ms)
+✔ disable removes the login file and unloads, while remove clears only its own setup and preserves history (127.043167ms)
+✔ bootstrap failure rolls back execution consent and owned login files (121.704875ms)
+✔ unload failure remains explicit with consent off and a retryable owned receipt (118.288584ms)
+✔ changed or foreign setup files and symlinks are never overwritten or removed (204.179667ms)
+✔ runtime changes invalidate the exact review before any OS install (89.65375ms)
+✔ stable launcher checks consent and code receipt before loading a worker, and records bounded status (114.538125ms)
+✔ unsupported platforms and invalid runtime timeouts do not install jobs (1.740083ms)
+✔ damaged optional job settings remain read-only without preventing creation of the browser settings service (2.242291ms)
+✔ external removal or OS revocation is visible as unavailable without silent reinstallation (107.617ms)
+✔ packaged layouts with Unicode, spaces and XML characters preserve literal reviewed paths (124.394583ms)
+✔ canonical data aliases share one job identity and never install a second job on reopen (109.046959ms)
+✔ retargeting an installation alias never changes the canonical runtime accepted by the review (109.131708ms)
+✔ a moved profile never inherits installation authority at a new canonical destination (108.557083ms)
+✔ moving a reviewed runtime fails closed and requires a fresh explicit review (218.813375ms)
+✔ symlinked runtime code cannot be omitted from the reviewed runtime receipt (2.190875ms)
+✔ a code symlink added after enable stops the launcher before any unreviewed module can run (109.662625ms)
+✔ symlinked package metadata is rejected during review before login setup is written (2.401ms)
+✔ a closed-app tick never consumes unapproved or future schedules and never starts a browser (179.203167ms)
+✔ actual CLI workers persist a dedicated conversation across invocations and do not replay a due occurrence (571.123875ms)
+✔ worker context disables CLI browser autostart and stdout does not expose provider body (322.6605ms)
+✔ an active browser/service lock is never stolen by the worker (120.0065ms)
+✔ stale locks are not reaped by a worker and symlinked lock paths fail closed (192.299583ms)
+✔ simultaneous real workers produce one run; SIGTERM waits for actual provider exit and releases the lease (335.004083ms)
+✔ worker timeout settles an actual child and a newly due schedule is left for a later tick (816.345708ms)
+✔ closed-app generated runs retain real before/after Git checkpoint associations (848.293042ms)
+✔ provider reconfiguration to a native protocol is skipped without consuming its due reservation (180.198417ms)
+✔ a real failing provider records failure and stop-on-failure without replaying its reservation (366.366292ms)
+✔ worker setup failures release the Agent lock and never run a provider (147.108625ms)
+✔ revoking the reviewed execution guard interrupts an already running fixture and waits for its exit (181.99875ms)
+ℹ tests 40
+ℹ suites 0
+ℹ pass 40
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 8355.871583

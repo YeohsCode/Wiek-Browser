@@ -74,6 +74,36 @@ test('native probe uses bounded literal argv and rejects nonmatching process ide
   const calls=[];const probe=createNativeServerProbe({platform:'darwin',run:async(command,args,options)=>{calls.push({command,args,input:options?.input});return command.endsWith('lsof')?{code:0,out:'p42\ncnode\nn*:4000\n'}:{code:0,out:JSON.stringify([{pid:43,ppid:1,uid:process.getuid(),started:'1:2',cwd:'/project',executable:'/bin/node',zombie:false}])};}});
   assert.equal((await probe.listeners())[0].port,4000);assert.equal(calls[0].command,'/usr/sbin/lsof');assert.equal(calls[0].args.includes('-nP'),true);await assert.rejects(probe.inspect([42]),/identity response/);
 });
+test('titles require a trusted local action and the exact listed process, fingerprint and URL',async()=>{
+  const reads=[],f=fixture({fetchTitle:async url=>{reads.push(url);return {title:'Fixture',status:'read'};}});
+  const row=(await f.act('list')).servers[0],payload={pid:row.pid,fingerprint:row.fingerprint,url:row.urls[0]};
+  assert.deepEqual(reads,[]);
+  await assert.rejects(f.act('title',payload,ctx,{}),/controls/);
+  for(const changed of [{...payload,pid:pid+1},{...payload,fingerprint:'stale'},{...payload,url:'http://192.0.2.1/'},{...payload,url:payload.url+'admin'}])await assert.rejects(f.act('title',changed),/changed/);
+  assert.deepEqual(reads,[]);assert.equal((await f.act('title',payload)).title,'Fixture');
+  assert.deepEqual(reads,[row.urls[0]]);f.service.close();
+});
+for(const [name,mutate]of [
+  ['process identity',f=>{f.records[0].started='2:42';}],
+  ['listening endpoints',f=>{f.listeners.push({pid,address:'*',port:5000});}],
+  ['project membership',f=>{f.records[0].cwd='/elsewhere';}],
+])test(`a title is discarded when ${name} changes during its HTTP read`,async()=>{
+  let f;f=fixture({fetchTitle:async()=>{mutate(f);return {title:'Stale',status:'read'};}});
+  const row=(await f.act('list')).servers[0];await assert.rejects(f.act('title',{pid,fingerprint:row.fingerprint,url:row.urls[0]}),/changed/);f.service.close();
+});
+test('title reads are bounded and service close cancels all owned reads without stopping processes',async()=>{
+  const signals=[],f=fixture({fetchTitle:async(_url,{signal})=>new Promise((_resolve,reject)=>{signals.push(signal);signal.addEventListener('abort',()=>reject(Error('Read cancelled')),{once:true});})});
+  const row=(await f.act('list')).servers[0],payload={pid,fingerprint:row.fingerprint,url:row.urls[0]};
+  const reads=Array.from({length:4},()=>assert.rejects(f.act('title',payload),/cancelled|closed/));
+  await assert.rejects(f.act('title',payload),/Too many/);
+  while(signals.length<4)await new Promise(resolve=>setImmediate(resolve));
+  f.service.close();await Promise.all(reads);assert.equal(signals.every(signal=>signal.aborted),true);assert.deepEqual(f.signals,[]);
+});
+test('late title completions after service close never produce a successful result',async()=>{
+  let complete,started;const entered=new Promise(resolve=>started=resolve),f=fixture({fetchTitle:async()=>{started();return new Promise(resolve=>complete=resolve);}});
+  const row=(await f.act('list')).servers[0],read=assert.rejects(f.act('title',{pid,fingerprint:row.fingerprint,url:row.urls[0]}),/closed/);
+  await entered;f.service.close();complete({title:'Late',status:'read'});await read;
+});
 test('actual temporary TCP servers are discovered by native identity and only the reviewed project process stops',{skip:process.platform!=='darwin'},async t=>{
   const base=await fs.mkdtemp(path.join(os.tmpdir(),'wiek-local-services-')),project=path.join(base,'project $literal'),other=path.join(base,'other');await fs.mkdir(project);await fs.mkdir(other);
   const children=[];t.after(async()=>{for(const child of children)if(child.exitCode===null&&!child.signalCode){child.kill('SIGKILL');await once(child,'close');}await fs.rm(base,{recursive:true,force:true});});

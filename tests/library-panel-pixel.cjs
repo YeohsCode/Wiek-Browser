@@ -39,7 +39,7 @@ app.whenReady().then(async()=>{
     await click('Crop');canvas=await ready();pointer(canvas,'pointerdown',10,10);pointer(canvas,'pointermove',250,150);pointer(canvas,'pointerup',250,150);await click('Export PNG');await ready();
     await click('Apply crop');canvas=await ready();check(canvas.width===240&&canvas.height===140,'Crop dimensions');check(red(pixel(canvas,10,30)),'Crop preserves image coordinates');
     await click('Undo');canvas=await ready();check(canvas.width===320&&canvas.height===180,'Undo restores original dimensions');await click('Redo');canvas=await ready();check(canvas.width===240,'Redo restores crop');
-    await click('Export PNG');await ready();await click('Save to Library');
+    await click('Export PNG');await ready();await click('Save item');
     const snapshot=await invoke('library:snapshot');check(snapshot.counts.active===1,'Persistent image saved');check(snapshot.items[0].image.width===240&&snapshot.items[0].image.height===140,'Persisted PNG dimensions');
     const saved=await invoke('library:items:read',{id:snapshot.items[0].id});check(saved.dataUrl.startsWith('data:image/png;base64,'),'Saved real PNG bytes');
     const image=new Image();await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;image.src=saved.dataUrl});const probe=document.createElement('canvas');probe.width=image.width;probe.height=image.height;probe.getContext('2d').drawImage(image,0,0);check(pixel(probe,0,0).slice(0,3).every(v=>v===255),'Crop guides excluded from saved PNG');

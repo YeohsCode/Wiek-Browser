@@ -1,6 +1,7 @@
 'use strict';
-// Explicit 2026 HTTP notification streams. No replay, reconnect or resource fetch.
+// Explicit 2026 notification streams. No replay, reconnect or resource fetch.
 const {uri,capability,resourceNotification}=require('./mcp-resources.cjs');
+const {promptNotification}=require('./mcp-prompts.cjs');
 const fail=(message,code='VEK_MCP_PROTOCOL_ERROR')=>Object.assign(new Error(message),{error_code:code});
 const META='io.modelcontextprotocol/subscriptionId';
 const object=value=>value&&typeof value==='object'&&!Array.isArray(value);
@@ -11,7 +12,7 @@ function validateFilter(value,requested){
   if(key==='resourceSubscriptions'){
    if(!Array.isArray(entry)||entry.length>128||new Set(entry).size!==entry.length||entry.some(v=>typeof v!=='string'||!requested.resourceSubscriptions?.includes(v)))throw fail('Subscription acknowledged an unrequested resource');
    accepted[key]=entry;
-  }else if(['toolsListChanged','resourcesListChanged'].includes(key)){
+  }else if(['toolsListChanged','resourcesListChanged','promptsListChanged'].includes(key)){
    if(typeof entry!=='boolean'||entry===true&&requested[key]!==true)throw fail('Subscription acknowledged an unrequested notification');
    if(entry)accepted[key]=true;
   }else throw fail('Subscription acknowledged an unsupported notification');
@@ -22,7 +23,7 @@ function createSubscriptionMethods(SseDecoder){return {
  subscriptionSnapshot(){return {lists:this.listStream?{status:this.listStream.status,notifications:this.listStream.accepted||{},error:this.listStream.error||''}:null,activeStreams:this.notificationStreams?.size||0};},
  cancelModernStreams(){for(const stream of this.notificationStreams?.values()||[])stream.cancel();},
  async watchLists(enabled,{signal}={}){
-  if(!this.modern)throw fail('List streams require the 2026 HTTP protocol','VEK_MCP_UNSUPPORTED_CAPABILITY');
+  if(!this.modern)throw fail('List streams require the 2026 MCP protocol','VEK_MCP_UNSUPPORTED_CAPABILITY');
   if(this.state!=='connected'||this.stopped)throw fail('MCP connection is disconnected','VEK_MCP_DISCONNECTED');
   if(this.listOperation)throw fail('List subscription is already changing','VEK_MCP_BUSY');
   this.listOperation=true;
@@ -30,12 +31,12 @@ function createSubscriptionMethods(SseDecoder){return {
    if(this.listStream?.status==='subscribed'&&enabled)return this.subscriptionSnapshot();
    if(this.listStream){this.listStream.cancel();await this.listStream.done;this.listStream=null;}
    if(enabled){
-    const notifications={};if(this.info?.capabilities?.tools?.listChanged===true)notifications.toolsListChanged=true;if(this.info?.capabilities?.resources?.listChanged===true)notifications.resourcesListChanged=true;
+    const notifications={};if(this.info?.capabilities?.tools?.listChanged===true)notifications.toolsListChanged=true;if(this.info?.capabilities?.resources?.listChanged===true)notifications.resourcesListChanged=true;if(this.info?.capabilities?.prompts?.listChanged===true)notifications.promptsListChanged=true;
     if(!Object.keys(notifications).length)throw fail('Server does not advertise list changes','VEK_MCP_UNSUPPORTED_CAPABILITY');
     const stream=this.openSubscription(notifications,{signal,onEvent:message=>{
      if(message.method==='notifications/tools/list_changed'){this.toolListRevision=(this.toolListRevision||0)+1;this.tools=null;this.toolHeaders.clear();this.notifyChange();}
-     else resourceNotification(this,message,true);
-    },onEnd:()=>{this.toolListRevision=(this.toolListRevision||0)+1;this.tools=null;this.toolHeaders.clear();this.resourceListRevision++;this.resources=null;this.resourceTemplates=null;}});
+     else if(!promptNotification(this,message,true))resourceNotification(this,message,true);
+    },onEnd:()=>{this.toolListRevision=(this.toolListRevision||0)+1;this.tools=null;this.toolHeaders.clear();this.resourceListRevision++;this.resources=null;this.resourceTemplates=null;this.promptListRevision++;this.prompts=null;}});
     this.listStream=stream;await stream.ready;
    }
    this.notifyChange();return this.subscriptionSnapshot();
@@ -92,7 +93,7 @@ function createSubscriptionMethods(SseDecoder){return {
       completed=true;return;
      }
      const method=message.method,filter=stream.accepted;
-     if(method==='notifications/tools/list_changed'&&filter.toolsListChanged||method==='notifications/resources/list_changed'&&filter.resourcesListChanged||method==='notifications/resources/updated'&&filter.resourceSubscriptions?.includes(message.params?.uri))onEvent(message);
+     if(method==='notifications/tools/list_changed'&&filter.toolsListChanged||method==='notifications/prompts/list_changed'&&filter.promptsListChanged||method==='notifications/resources/list_changed'&&filter.resourcesListChanged||method==='notifications/resources/updated'&&filter.resourceSubscriptions?.includes(message.params?.uri))onEvent(message);
      else throw fail('MCP subscription delivered an unrequested notification');
     };
     const parser=new SseDecoder({maxBytes:this.maxMessageBytes,maxEvents:Infinity,onMessage:handle,onCursor:()=>{}});
@@ -111,4 +112,4 @@ function createSubscriptionMethods(SseDecoder){return {
   })();stream.done=operation;this.operations.add(operation);void operation.finally(()=>this.operations.delete(operation));this.notifyChange();return stream;
  }
 };}
-module.exports={createSubscriptionMethods};
+module.exports={createSubscriptionMethods,validateFilter};

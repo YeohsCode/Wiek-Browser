@@ -261,9 +261,9 @@
     if (['running', 'discovering'].includes(t.status)) list.append(make('div', 'Agent is running…', 'va-running-note'));
     return list;
   }
-  function configureCheckpoints(item){openEditor('Project turn snapshots',[
-    {key:'notice',type:'notice',label:'Save project files and the Git index before and after each Agent turn. Requires a supported Git repository (2 MiB per file, 32 MiB total). Capture failure prevents the provider from starting. File restore always has a separate preview and confirmation.'},
-    {key:'enabled',label:'Automatic turn snapshots',type:'select',options:[['false','Off'],['true','On for this project']],value:String(item.checkpointsEnabled===true)}
+  function configureCheckpoints(item){openEditor('Automatic file backups',[
+    {key:'notice',type:'notice',label:'Back up project files and staged changes before and after each Agent reply. Requires a supported Git repository (2 MiB per file, 32 MiB total). Capture failure prevents the provider from starting. Restoring files requires a preview and confirmation.'},
+    {key:'enabled',label:'Back up files for each message',type:'select',options:[['false','Off'],['true','On for this project']],value:String(item.checkpointsEnabled===true)}
   ],values=>action('agents:projects:checkpoints',{id:item.id,enabled:values.enabled==='true'},true));}
   async function showFileChanges(t,run,previewTarget){
     const payload={id:t.id,...(run?{runId:run.id}:{scope:'thread'}),...(previewTarget?{target:previewTarget}:{})};
@@ -274,16 +274,16 @@
     const overlay=make('div','','va-modal'),form=make('form','','va-dialog va-file-changes');form.setAttribute('role','dialog');form.setAttribute('aria-modal','true');form.setAttribute('aria-label','Project file changes');
     const current=fileChanges,data=current.data;form.append(make('h2',current.mode==='preview'?'Preview file restore':current.mode==='restored'?'Files restored':'Project file changes'));
     if(error)form.append(make('p',error,'va-error'));
-    if(current.mode==='restored')form.append(make('p',`Files and index were restored. Protection checkpoint: ${data.backupCheckpoint.name} (${data.backupCheckpoint.id}).`));
+    if(current.mode==='restored')form.append(make('p',`Files and index were restored. Backup of the previous files: ${data.backupCheckpoint.name} (${data.backupCheckpoint.id}).`));
     else{
-      form.append(make('p',current.mode==='preview'?`Restore saved project state: ${data.checkpoint.name}. This changes real files and the staged index. A protection checkpoint preserves the current state.`:data.notice,'va-hint'));
+      form.append(make('p',current.mode==='preview'?`Restore project files from backup: ${data.checkpoint.name}. This changes real files and the staged index. A backup preserves the current files before restoring.`:data.notice,'va-hint'));
       if(data.headChanged)form.append(make('p','HEAD changed during this span. Snapshot diff is available; restoring an earlier HEAD is refused.','va-hint'));
       const list=make('div','','va-file-change-list');for(const row of data.changes||[])list.append(make('div',`${row.kind} · ${row.path}${row.staged?' · index':''}${row.worktree?' · files':''}`));if(!data.changes?.length)list.append(make('p','No file content changes.'));form.append(list);
       for(const [key,label]of [['worktreeDiff',current.mode==='preview'?'Saved working state':'Working-file diff'],['stagedDiff',current.mode==='preview'?'Saved staged state':'Staged-index diff']]){const details=make('details');details.append(make('summary',label),make('pre',data[key]||'No diff.'));form.append(details);}
     }
     const actions=make('div','','va-dialog-actions');actions.append(button('Close',()=>{fileChanges=null;error='';render();}));
     if(current.mode==='preview'){
-      const label=make('label',`Type “${data.checkpoint.name}” to confirm`),input=make('input');input.setAttribute('aria-label','Confirm snapshot name');input.dataset.focus='restore-snapshot';input.value=current.confirmation;label.append(input);form.append(label);
+      const label=make('label',`Type “${data.checkpoint.name}” to confirm`),input=make('input');input.setAttribute('aria-label','Confirm backup name');input.dataset.focus='restore-snapshot';input.value=current.confirmation;label.append(input);form.append(label);
       const restore=button('Restore files and index',async()=>{if(current.confirmation!==data.checkpoint.name)return;const result=await action('agents:changes:restore',{id:current.threadId,runId:current.runId,target:current.target,expectedState:data.expectedState,confirm:true});if(result){fileChanges={mode:'restored',data:result};render();}},'va-danger');restore.disabled=pending||current.confirmation!==data.checkpoint.name;input.oninput=()=>{current.confirmation=input.value;restore.disabled=pending||input.value!==data.checkpoint.name;};actions.append(restore);
     }
     form.onsubmit=event=>event.preventDefault();form.onkeydown=event=>{if(event.key==='Escape'&&!pending){event.preventDefault();fileChanges=null;render();}};form.append(actions);overlay.append(form);root.append(overlay);
@@ -324,7 +324,7 @@
     if (t.revisions?.length) { const history = make('details', '', 'va-run-details'); history.append(make('summary', `${t.revisions.length} transcript revisions`)); for (const revision of [...t.revisions].reverse()) { const entry = make('details'); entry.append(make('summary', `${revision.kind} · ${date(revision.createdAt)}`), make('pre', revision.messages.map(message => `${message.role}: ${message.content}`).join('\n\n'))); history.append(entry); } main.append(history); }
     const runs = t.runs || []; const latest = runs[runs.length - 1];
     if(runs.some(run=>run.fileChanges)){
-      const history=make('details','','va-run-details');history.append(make('summary','Turn file snapshots'));
+      const history=make('details','','va-run-details');history.append(make('summary','File backups for each message'));
       for(const [index,run]of runs.entries())if(run.fileChanges){const changes=run.fileChanges,row=make('section','','va-turn-snapshot');row.append(make('strong',`Turn ${index+1} · ${run.status} · ${changes.status}`));if(changes.error)row.append(make('p',changes.error,'va-hint'));const actions=make('div','','va-actions');if(changes.before&&changes.after)actions.append(button('View file changes',()=>showFileChanges(t,run)));if(!['running','discovering'].includes(t.status)){if(changes.before)actions.append(button('Restore before…',()=>showFileChanges(t,run,'before')));if(changes.after)actions.append(button('Restore after…',()=>showFileChanges(t,run,'after')));}row.append(actions);history.append(row);}main.append(history);
     }
     if (t.claudeHistory || t.codexHistory || runs.some(run => run.toolEvents?.length || run.subagents?.length)) {

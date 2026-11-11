@@ -52,19 +52,19 @@ const WIEK_ERROR_MESSAGES: Partial<Record<WiekErrorCode, string>> = {
   // actions in the browser. Keep this wording neutral about the cause.
   WIEK_TASK_SPACE_INACTIVE: [
     "This task space is no longer assigned to the agent: its task has ended, either through task.finish() or by the user, so browser commands are paused.",
-    "This is a hard stop, not an obstacle to route around — do not retry and do not take ownership back on your own. takeOverTaskSpace() cannot resume an ended task.",
-    "Wait until the user explicitly asks you to continue in this space, then claim it and resume:",
+    "takeOverTaskSpace() cannot resume an ended task. For a new authorized test, create a fresh taskSpace with a unique run name.",
+    "If the user already authorized continuing in these pages, claim the group by id. Otherwise ask before using their pages:",
     "  const task = await claimTaskSpace(spaceId)",
     "",
-    `Offer the user choices like "Continue" or "Done" if your harness supports it; otherwise tell them: "This task has ended and the space is yours. Reply 'continue' if you want me to resume in it."`,
+    "After claiming, list task.tabs() and adopt the intended unlabeled tab. Finished tasks have ended their previous Page labels.",
   ].join("\n"),
   WIEK_TASK_SPACE_USER_IN_CONTROL: [
     "Control of this task space is with the user, either through task.handOff() or a takeover in the browser, so browser commands are paused.",
-    "This is a hard stop, not an obstacle to route around — do not retry and do not take control back on your own.",
-    "Wait until the user explicitly asks you to continue, then take control back and resume:",
+    "Pause actions in this group while the user is interacting with it.",
+    "After the user authorizes returning control, take it back with:",
     "  const task = await takeOverTaskSpace(spaceId)",
     "",
-    `Offer the user choices like "Continue" or "Finish task" if your harness supports it; otherwise tell them: "You now control this task space. Reply 'continue' when ready and I will resume."`,
+    "Existing instructions to resume are sufficient. Permission prompts and device choosers still require the user to handle them.",
   ].join("\n"),
 };
 

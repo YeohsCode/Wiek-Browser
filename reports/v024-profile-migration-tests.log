@@ -1,0 +1,34 @@
+✔ profile archive writes only ciphertext to a temporary file and restores all supported categories (630.394166ms)
+✔ wrong passphrase and every authenticated header/cipher component fail without returning data (1664.52175ms)
+✔ expired archives and unknown versions, algorithms and MIME types are explicit failures (411.228166ms)
+✔ validation rejects pollution keys, nonplain JSON, accessors and unsupported data fields before encryption (0.716584ms)
+✔ portable URLs, cookie metadata, exact password origins and primitive types are validated (0.975666ms)
+✔ limits reject oversized files, payloads, category counts and structural depth (212.835334ms)
+✔ independent operations are reusable and decoded objects never alias input or one another (416.728292ms)
+✔ portable IndexedDB codec preserves UTF-16, dates, binary, special numbers and inert property names (2.588625ms)
+✔ IndexedDB schema rejects origin widening, auto generators, duplicates and invalid primary keys (1.092667ms)
+✔ v3 encrypted archive carries validated IndexedDB values without plaintext data (418.321959ms)
+✔ IndexedDB capture refuses navigated and partitioned origins before reading any records (0.681709ms)
+{"ok":true,"checks":22,"bootstrapNetworkRequests":0,"sourceProfileUnchanged":true,"realBrowserIndexedDB":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron transfers explicit selected-origin IndexedDB offline, excludes unsupported data and rolls back failures (1264.068125ms)
+✔ v3 ciphertext roundtrip preserves exact UTF-16 storage keys and independent tab sessions (650.166792ms)
+✔ v1 archived fixture from 0.12 decodes without inventing web storage (207.524667ms)
+✔ storage schema refuses origin widening, ambiguous duplicate keys/origins and unbounded code units (10.501042ms)
+✔ aggregate storage budget covers both local origins and per-tab sessions (33.034166ms)
+✔ v2 archived fixture remains readable with exact storage data and no invented IndexedDB (208.160958ms)
+✔ web storage capture is opt-in and sends no CDP commands by default (0.745917ms)
+✔ navigated, closed and partitioned tabs retain only their URL with explicit skipped-storage warnings (0.870167ms)
+✔ oversized storage is omitted without corrupting the portable tab inventory (0.663792ms)
+✔ cancelled capture yields no partially assembled archive (0.202791ms)
+{"ok":true,"checks":34,"bootstrapNetworkRequests":0,"realBrowserSessions":true,"sourceProfileUnchanged":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron migrates two tab sessions before site scripts, with no bootstrap network and bounded failure cleanup (1433.426083ms)
+{"ok":true,"checks":37,"actualApplicationIPC":true,"injectedNativeDialogs":true,"realPassphraseModal":true,"bootstrapNetworkRequests":0,"modelCalls":0,"externalAccountActions":0}
+✔ actual application exports and restores through trusted IPC and passphrase UI; cancellations create no profile (2877.131833ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 10701.498875

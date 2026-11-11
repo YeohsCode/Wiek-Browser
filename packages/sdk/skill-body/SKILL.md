@@ -120,21 +120,30 @@ option whose visible text matches.
 When the user explicitly asks for wiek-browser, start with a real browser command
 and diagnose the CLI or installation only if it fails.
 
-## Spaces, rounds, and pages
+## Tab groups, script calls, and pages
 
-- Use exactly one TaskSpace for the entire user goal. Create it once, print its
-  `spaceId`, and resume that same space in later rounds. Use multiple spaces
-  only when the user explicitly requests them.
-- Task space names are unique. `taskSpace(name)` resumes your own space with
-  that name instead of creating a second one. If the name belongs to a
-  user-owned space, it fails with `WIEK_TASK_SPACE_NAME_IN_USE`: ask the user
-  whether to work in that space (then `claimTaskSpace(id)`), or pick another
-  name.
-- Never use a new TaskSpace to recover from a stuck, blocked, timed-out, or
-  unexpected Page. Recover within the existing space; if it cannot continue,
-  stop and ask the user.
-- Every invocation starts a new Node.js process. Task spaces, tabs, and Page labels
-  persist; JavaScript variables do not.
+A TaskSpace is a tab group used by an automation task. Continuing a script in
+that group is separate from reopening tabs after a browser restart.
+
+- Reuse a TaskSpace while continuing the same active task. Independent tests and
+  new runs may create their own groups with unique names without asking again.
+  `WIEK_DATA_DIR=/absolute/path` selects an isolated persistent browser instance
+  for a test run. Use the same directory for all calls in that run.
+- Task space names are unique. `taskSpace(name)` resumes an agent-owned group
+  with that name. A user-owned name produces `WIEK_TASK_SPACE_NAME_IN_USE`.
+  For a fresh test, choose a unique run name. Claim an existing group by numeric
+  id when the user's instructions authorize working in its pages.
+- Recover ordinary failures within the current group by inspecting its tabs,
+  reloading the affected page, or creating a replacement page as needed. If the
+  group was deleted or finished, an authorized test may create a fresh group.
+  An explicit user takeover or a permission/device prompt requires a handoff.
+- Every invocation starts a new Node.js process. While the browser stays running,
+  tab groups, tabs, and Page labels persist. JavaScript variables do not.
+- After a browser restart, saved URLs reopen with new browser target identities.
+  Old Page labels and snapshot refs are invalid. On an authorized, controllable
+  group, list `await task.tabs()`, choose the intended tab by URL or title, and
+  use `await task.adopt(tab.page)` for an unlabeled tab. Take a fresh snapshot.
+  A new isolated test can instead start a fresh group with its own `p1`.
 - A new task space starts with Page `p1`; navigate it instead of opening
   another Page.
 - Reuse a Page with `goto()` instead of opening a new Page for every URL.
@@ -500,8 +509,9 @@ const userPage = task.userPage();
 ```
 
 Adopt `userPage` if it is unmanaged. Use `waitForControl()` only when the current
-script must wait in place. Claim a user-owned or inactive space only when the
-user explicitly asks; this includes a space you finished with kept Pages, which
+script must wait in place. Claim a user-owned or inactive group when the user's
+instructions authorize continuing in those pages. Existing authorization is
+sufficient. This includes a group you finished with kept Pages, which
 `takeOverTaskSpace()` cannot resume. Find its numeric id first; names may be
 duplicated. `listTaskSpaces()` entries expose that id as `id` (`spaceId` exists
 only on a TaskSpace handle), so pass `entry.id` to `claimTaskSpace()` or

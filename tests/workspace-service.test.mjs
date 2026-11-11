@@ -100,9 +100,10 @@ test('Git rejects parent repository scope and option/pathspec injection', async 
 test('project watchers report changes and close without leaking handles', async t => {
   const f = await fixture(t); const watching = await f.call('watch'); assert.equal(watching.watches.length, 1);
   await fs.writeFile(path.join(f.root, 'watched.txt'), 'changed');
-  const deadline = Date.now() + 2500;
-  while (!f.events.some(event => event.lastEvent?.type === 'files-changed') && Date.now() < deadline) await new Promise(resolve => setTimeout(resolve, 40));
-  assert.equal(f.events.some(event => event.lastEvent?.changes?.some(item => item.path === 'watched.txt')), true);
+  const changed = () => f.events.some(event => event.lastEvent?.type === 'files-changed' && event.lastEvent.changes?.some(item => item.path === 'watched.txt'));
+  const deadline = performance.now() + 2500;
+  while (!changed() && performance.now() < deadline) await new Promise(resolve => setTimeout(resolve, 40));
+  assert.equal(changed(), true, JSON.stringify(f.events.map(event => event.lastEvent)));
   assert.equal((await f.call('watch', { enabled: false })).watches.length, 0);
   await f.service.close(); await assert.rejects(f.call('read', { path: 'watched.txt' }), /closed/);
 });

@@ -30,7 +30,7 @@
   function render() {
     if (!root?.isConnected) return;
     root.classList.add('vek-recorder-panel'); root.replaceChildren();
-    const head = element('header', undefined, 'vr-header'); const title = element('div'); title.append(element('h1', 'Action recorder'), element('p', 'Record a selected page’s clicks, navigation keys, and scrolls with local screenshots.'));
+    const head = element('header', undefined, 'vr-header'); const title = element('div'); title.append(element('h1', 'Page action history'), element('p', 'Record a selected page’s clicks, navigation keys, and scrolls with local screenshots.'));
     const controls = element('div', undefined, 'vr-actions'); controls.append(element('span', state.recording ? '● Recording current target' : 'Recording is off', state.recording ? 'vr-recording' : 'vr-off'), button(state.recording ? 'Stop recording' : 'Start recording current page', () => action(state.recording ? 'recorder:stop' : 'recorder:start'), state.recording ? 'vr-stop' : 'vr-primary')); head.append(title, controls); root.append(head);
     root.append(element('p', 'Only the page selected at start is recorded while it remains current. Typed text, password/payment field events, clipboard contents, URL query strings, and fragments are excluded. Screenshots can contain visible page data and are kept locally until you delete or export the recording.', 'vr-notice'));
     if (failure) { const node = element('p', failure, 'vr-error'); node.setAttribute('role', 'alert'); root.append(node); }
@@ -47,7 +47,7 @@
     if (!current) main.append(element('div', 'Start a recording on the page you want to inspect.', 'vr-empty'));
     else {
       const heading = element('div', undefined, 'vr-session-heading'), info = element('div'); info.append(element('h2', current.name), element('p', current.url || 'No URL metadata'), element('p', `${current.title || ''} · ${current.status}${current.stopReason ? ` · ${current.stopReason}` : ''}`));
-      const actions = element('div', undefined, 'vr-actions'); actions.append(button('Export native JSON', () => action('recorder:file:export', { id: current.id })), button(current.deletedAt ? 'Restore recording' : 'Delete recording', () => action(current.deletedAt ? 'recorder:restore' : 'recorder:delete', { id: current.id }), current.deletedAt ? '' : 'vr-danger')); heading.append(info, actions); main.append(heading);
+      const actions = element('div', undefined, 'vr-actions'); actions.append(button('Export action history (JSON)', () => action('recorder:file:export', { id: current.id })), button(current.deletedAt ? 'Restore recording' : 'Delete recording', () => action(current.deletedAt ? 'recorder:restore' : 'recorder:delete', { id: current.id }), current.deletedAt ? '' : 'vr-danger')); heading.append(info, actions); main.append(heading);
       const stats = element('p', `${(current.events || []).length}/${state.limits?.maxEvents || 200} actions · ${(Number(current.imageBytes || 0) / 1048576).toFixed(2)} MiB of screenshots · ${(Number(state.limits?.maxTotalImageBytes || 52428800) / 1048576).toFixed(0)} MiB per session maximum`, 'vr-hint'); main.append(stats);
       if (current.deletedAt) main.append(element('p', 'Soft deleted. The local recording and screenshots remain recoverable.', 'vr-notice'));
       const content = element('div', undefined, 'vr-content'), timeline = element('ol', undefined, 'vr-timeline'); timeline.setAttribute('aria-label', 'Recorded actions');

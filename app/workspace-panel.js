@@ -89,7 +89,7 @@
   async function loadServers(){const mine=generation;const result=await request('workspace:servers:list');if(mine===generation)localServers=result;}
   function serversView(body){
     const section=node('section','','vw-wide');
-    section.append(node('h2','Project local services'),node('p','Refresh to find listening processes in this project. Page contents and process arguments are not inspected.','vw-hint'));
+    section.append(node('h2','Project local services'),node('p','Refresh to find listening processes in this project. Choose Read title to identify a local page.','vw-hint'));
     const refresh=button('Refresh local services',()=>perform(async()=>{serverReview=null;serverNotice='';await loadServers();}));
     if(state.capabilities?.localServers===false){refresh.disabled=true;section.append(node('p','Native local service discovery is unavailable on this installation.','vw-hint'));}
     section.append(refresh);
@@ -99,7 +99,20 @@
       const card=node('article','','vw-server-row');card.dataset.serverPid=String(row.pid);
       card.append(node('h3',`${row.name} · PID ${row.pid}`),node('code',row.cwd),node('p',row.ports.map(item=>`${item.address}:${item.port}`).join(' · '),'vw-hint'));
       const actions=node('div','','vw-actions');
-      for(const url of row.urls)actions.append(button(`Open ${new URL(url).port}`,()=>invoke('navigate',url)));
+      for(const url of row.urls){
+        const port=new URL(url).port||'80';
+        actions.append(button(`Open ${port}`,()=>invoke('navigate',url)),button(`Read title ${port}`,()=>perform(async()=>{
+          const mine=generation,result=await request('workspace:servers:title',{pid:row.pid,fingerprint:row.fingerprint,url});
+          if(mine===generation&&localServers?.servers.includes(row)){
+            row.titles||=new Map();row.titles.set(url,result);
+          }
+        })));
+        const result=row.titles?.get(url);
+        if(result){
+          const title=node('p',`${port}: ${result.title|| (result.status==='unsupported'?'This address did not return supported HTML.':'No title found.')}`,'vw-server-title');
+          title.dataset.serverUrl=url;card.append(title);
+        }
+      }
       const stop=button('Review stop',()=>perform(async()=>{const mine=generation,review=await request('workspace:servers:prepare-stop',{pid:row.pid});if(mine===generation)serverReview=review;}));
       stop.disabled=busy>0||!row.isStoppable;stop.title=row.stopDisabledReason||'';actions.append(stop);card.append(actions);section.append(card);
     }
@@ -232,21 +245,21 @@
     const diffHead = node('div', '', 'vw-section-heading'); diffHead.append(node('h3', staged ? 'Staged diff' : 'Working tree diff'), button(staged ? 'Show unstaged' : 'Show staged', () => perform(async () => { staged = !staged; git.diff = await request('workspace:git:diff', { staged }); }))); section.append(diffHead, node('pre', git.diff?.stdout || 'No diff in this view.', 'vw-diff'));
     const stashHead = node('div', '', 'vw-section-heading'); stashHead.append(node('h3', 'Stashes'), button('Stash changes', () => ask('Stash local changes', [{ key: 'message', label: 'Description', value: 'Wiek workspace stash' }, { key: 'includeUntracked', label: 'Include untracked files', type: 'select', options: [['false', 'Tracked changes only'], ['true', 'Include untracked files']], value: 'false' }], values => gitMutation('stash:push', { message: values.message, includeUntracked: values.includeUntracked === 'true' })))); section.append(stashHead);
     for (const stash of git['stash:list']?.stashes || []) { const row = node('div', '', 'vw-stash-row'); row.append(node('span', `${stash.id} · ${stash.description}`)); for (const operation of ['apply', 'pop', 'drop']) row.append(button(operation, () => confirmAction(`${operation} stash`, `${operation} ${stash.id}? ${operation === 'drop' ? 'This permanently removes that saved stash.' : 'Git will report any conflicts.'}`, () => gitMutation(`stash:${operation}`, { stash: stash.id })), operation === 'drop' ? 'vw-danger' : '')); section.append(row); }
-    const checkpointHead = node('div', '', 'vw-section-heading'); checkpointHead.append(node('h3', 'Named checkpoints'), button('Create checkpoint', () => ask('Create named checkpoint', [{key:'name',label:'Checkpoint name',required:true}, {type:'notice',label:'Saves the real staged index, unstaged files and nonignored untracked files. The index and working files stay in place.'}], values => perform(async () => { const saved = await request('workspace:git:checkpoint:create', {name:values.name}); checkpointNotice = 'Saved checkpoint “' + saved.checkpoint.name + '”.'; await loadGit(); }, true), 'Create checkpoint'))); section.append(checkpointHead);
-    section.append(node('p', 'Restore requires a fresh preview and confirmation. It preserves a safety checkpoint of your current state. Checkpoints apply on their original HEAD commit; ignored files, symlinks and submodules are excluded or refused.', 'vw-hint'));
+    const checkpointHead = node('div', '', 'vw-section-heading'); checkpointHead.append(node('h3', 'Project file backups'), button('Back up project files', () => ask('Create file backup', [{key:'name',label:'Backup name',required:true}, {type:'notice',label:'Saves the real staged index, unstaged files and nonignored untracked files. The index and working files stay in place.'}], values => perform(async () => { const saved = await request('workspace:git:checkpoint:create', {name:values.name}); checkpointNotice = 'Saved file backup “' + saved.checkpoint.name + '”.'; await loadGit(); }, true), 'Back up project files'))); section.append(checkpointHead);
+    section.append(node('p', 'Restoring files requires a fresh preview and confirmation. It preserves a safety checkpoint of your current state. File backups apply on their original HEAD commit; ignored files, symlinks and submodules are excluded or refused.', 'vw-hint'));
     if (checkpointNotice) section.append(node('div', checkpointNotice, 'vw-notice'));
-    for (const saved of git['checkpoint:list']?.checkpoints || []) { const row=node('div','','vw-checkpoint-row'); row.append(node('span',saved.name),node('small',formatDate(saved.createdAt)+' · '+saved.files+' files'),button('Preview restore',()=>perform(async()=>{checkpointPreview=await request('workspace:git:checkpoint:preview',{id:saved.id});}))); section.append(row); }
+    for (const saved of git['checkpoint:list']?.checkpoints || []) { const row=node('div','','vw-checkpoint-row'); row.append(node('span',saved.name),node('small',formatDate(saved.createdAt)+' · '+saved.files+' files'),button('Preview file restore',()=>perform(async()=>{checkpointPreview=await request('workspace:git:checkpoint:preview',{id:saved.id});}))); section.append(row); }
     if (!(git['checkpoint:list']?.checkpoints || []).length) section.append(node('p','No named checkpoints in this repository.','vw-hint'));
     if (checkpointPreview) { const saved=checkpointPreview.checkpoint, panel=node('section','','vw-checkpoint-preview'), head=node('div','','vw-section-heading'); head.append(node('h3','Restore preview · '+saved.name),button('Close preview',()=>{checkpointPreview=null;render();})); panel.append(head,node('p',checkpointPreview.changes.length+' working-file changes; staged index will match this saved checkpoint.','vw-hint'));
       for (const change of checkpointPreview.changes) panel.append(node('code',change.kind+'  '+change.path,'vw-checkpoint-change'));
       panel.append(node('h3','Saved staged changes'),node('pre',checkpointPreview.stagedDiff||'No staged changes.','vw-diff'),node('h3','Saved unstaged and untracked changes'),node('pre',checkpointPreview.worktreeDiff||'No unstaged changes.','vw-diff'));
-      panel.append(button('Restore checkpoint',()=>{
+      panel.append(button('Restore file backup',()=>{
         if(dirty){error='Save or reload your unsaved editor buffer before restoring a checkpoint.';render();return;}
         const selected=checkpointPreview;
-        ask('Restore “'+saved.name+'”', [{type:'notice',label:'This replaces current staged, unstaged and nonignored untracked state with this checkpoint. A named safety checkpoint preserves the current state. Type the checkpoint name to confirm.'},{key:'confirmation',label:'Checkpoint name',required:true}],values=>{
+        ask('Restore “'+saved.name+'”', [{type:'notice',label:'This replaces current staged, unstaged and nonignored untracked state with this file backup. A named safety checkpoint preserves the current state. Type the checkpoint name to confirm.'},{key:'confirmation',label:'Backup name',required:true}],values=>{
           if(values.confirmation!==saved.name){error='The confirmation name does not match.';render();return;}
-          return perform(async()=>{const result=await request('workspace:git:checkpoint:restore',{id:saved.id,expectedState:selected.expectedState,confirm:true});checkpointNotice='Restored “'+saved.name+'”. Safety checkpoint: '+result.backupCheckpoint.name;checkpointPreview=null;file=null;preview=null;dirty=false;changed=false;await Promise.all([loadGit(),loadTree()]);},true);
-        },'Restore checkpoint');
+          return perform(async()=>{const result=await request('workspace:git:checkpoint:restore',{id:saved.id,expectedState:selected.expectedState,confirm:true});checkpointNotice='Restored “'+saved.name+'”. Backup of the previous files: '+result.backupCheckpoint.name;checkpointPreview=null;file=null;preview=null;dirty=false;changed=false;await Promise.all([loadGit(),loadTree()]);},true);
+        },'Restore file backup');
       },'vw-danger')); section.append(panel);
     }
     section.append(node('h3', 'Recent commits'));

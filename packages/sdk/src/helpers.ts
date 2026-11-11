@@ -270,8 +270,8 @@ async function resolveTaskSpace(
         {
           error: [
             `A task space named ${JSON.stringify(nameOrId)} already exists and belongs to the user (id ${existing.id}).`,
-            `Do not take it over on your own. Ask the user whether to work in it; only if they agree, call claimTaskSpace(${existing.id}).`,
-            "Otherwise use a different task space name.",
+            `If the user already authorized continuing in these pages, call claimTaskSpace(${existing.id}). Otherwise ask before using their pages.`,
+            "For an independent test or a fresh run, use a unique task space name without requesting additional permission.",
           ].join("\n"),
           error_code: "WIEK_TASK_SPACE_NAME_IN_USE",
         },

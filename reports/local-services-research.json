@@ -68,5 +68,48 @@
     "Reference runtime behavior is not established",
     "Dynamic calls/imports remain unresolved",
     "Global classification, ancestor inference and automatic title probing are outside the implemented scope"
-  ]
+  ],
+  "titleFollowup": {
+    "clientDate": "2026-11-10",
+    "sourceExcerptSha256": "8f82f9540c580ef6ac494bdd61c6302c554050c6aa0c9938e9abcd7d58b2d419",
+    "restoredParentEvidenceId": "ev_5eb2b6d90d5a8c8ca00ff53739844dd93fd521c9b62523d1f0e1fbe51c94cdae",
+    "traceEvidenceId": "ev_548943d3ed389b4a6e850a83183c66a792d89046700112b85c95966df4365e67",
+    "traceStatus": "found",
+    "traceCoverage": "partial",
+    "seedMatches": 1,
+    "traversedNodes": 1,
+    "traversedRelations": 0,
+    "relevantUnknowns": 1,
+    "unresolvedReason": "dynamic-call",
+    "sourceLines": [
+      127027,
+      127036
+    ],
+    "metadataCandidates": [
+      "application-name",
+      "og:title",
+      "twitter:title",
+      "title"
+    ],
+    "witnessType": "Static shipped-artifact observation; not reference runtime behavior",
+    "implementation": "Independent bounded anonymous HTTP reader, invoked explicitly for a listed process endpoint",
+    "validation": [
+      "tests/local-server-title.test.mjs",
+      "tests/local-server-service.test.mjs",
+      "tests/local-server-panel.test.mjs"
+    ],
+    "differences": [
+      "No automatic network probing during discovery",
+      "No redirects or browser cookies",
+      "Only selected literal loopback HTTP root endpoints",
+      "No persistent title cache"
+    ],
+    "rawTraceSha256": "0110187904e09f6023d5c4431924640ea7f0b54439b626eee28229bb3977e50f",
+    "sourceBytesReverified": true,
+    "traceLimitations": [
+      "Artifact identity is unavailable on the trace observation itself; identity comes from the verified excerpt and retained parent record.",
+      "Selected function only; unresolved dynamic member call remains.",
+      "Static syntax and relationships do not establish runtime reachability."
+    ]
+  }
 }

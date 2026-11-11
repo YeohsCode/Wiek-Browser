@@ -6,8 +6,8 @@
   dist/src/public-api-schema.js                  23.9kb
   dist/src/driver/page-waits.js                  20.6kb
   dist/src/driver/page-keyboard.js               18.5kb
+  dist/src/helpers.js                            18.4kb
   dist/src/driver/pointer.js                     18.3kb
-  dist/src/helpers.js                            18.3kb
   dist/src/clipboard.js                          17.0kb
   dist/src/page-ledger.js                        16.3kb
   dist/src/driver/keyboard.js                    14.9kb
@@ -16,12 +16,12 @@
   dist/src/learning/validate-learning-format.js   8.9kb
   dist/src/help-runtime.js                        8.4kb
   dist/src/driver/downloads.js                    8.2kb
-  dist/src/wiek-errors.js                         6.5kb
+  dist/src/wiek-errors.js                         6.3kb
   dist/src/learning/index.js                      6.2kb
   dist/src/index.js                               6.1kb
   ...and 25 more output files...
 
-⚡ Done in 18ms
+⚡ Done in 15ms
 [wiek-browser] js() received a function and auto-wrapped it (() => document.title).
   js() is a thin wrapper over CDP Runtime.evaluate; it takes a string expression,
   not a Puppeteer/Playwright-style callable. Auto-wrap does NOT capture closure

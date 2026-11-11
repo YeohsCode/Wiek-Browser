@@ -106,4 +106,4 @@ async function restoreLocalStorage(ses,areas,{createContents,signal}={}) {
   for(const area of areas){abort(signal);const holder=createContents(ses),wc=holder.webContents||holder;try{wc.debugger.attach('1.3');await restoreArea(wc,area,{isLocalStorage:true,signal});restored++;}catch(failure){warnings.push('A local storage origin could not be fully restored.');if(failure.storageMayHaveChanged)try{await bounded(ses.clearStorageData({origin:area.origin,storages:['localstorage']}));}catch{warnings.push('Partial local storage cleanup failed for an imported origin.');}abort(signal);}finally{const live=holder.webContents||wc;if(!live.isDestroyed())await closeContents(live);}}
   return {restored,warnings:[...new Set(warnings)]};
 }
-module.exports={captureProfileTabs,captureProfileCookies,restoreArea,restoreLocalStorage,originOf};
+module.exports={captureProfileTabs,captureProfileCookies,restoreArea,restoreLocalStorage,originOf,storageFrame:frame,sameStorageFrame:sameFrame,closeContents};

@@ -1,0 +1,42 @@
+✔ modern stdio discovers without initialization and sends metadata on every request (51.7025ms)
+✔ modern stdio keeps interleaved list/resource streams scoped and invalidates only explicit lists (50.165ms)
+✔ modern stdio ignores unsolicited list changes and unregistered subscription ids (47.912ms)
+✔ modern stdio rejects invalid subscription establishment --before-ack (48.135791ms)
+✔ modern stdio rejects invalid subscription establishment --extra-filter (46.359541ms)
+✔ modern stdio rejects invalid subscription establishment --silent-ack (150.11ms)
+✔ modern stdio enforces acknowledged partial filters and preserves unrelated resource subscription (53.071042ms)
+✔ modern stdio graceful stream close invalidates caches and requires explicit resubscribe (45.764167ms)
+✔ modern stdio sends request cancellation and never replays late results (547.92275ms)
+✔ modern stdio refuses server-initiated requests without exposing roots (49.827709ms)
+✔ modern stdio rejects malformed discovery without legacy fallback (51.180167ms)
+✔ modern stdio rejects a tool-list notification race instead of caching outdated definitions (47.821541ms)
+✖ modern stdio service configuration, prompt reads and notification state stay in scope and out of persistence (52.176542ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 12
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1321.673375
+
+✖ failing tests:
+
+test at tests/mcp-stdio-modern.test.mjs:23:1
+✖ modern stdio service configuration, prompt reads and notification state stay in scope and out of persistence (52.176542ms)
+  Error: ENOENT: no such file or directory, open '/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/wiek-modern-stdio-CFCDnP/mcp/state.json.45e0ef3b-d58f-48a8-8803-cedaaff67434.tmp'
+      at Object.openSync (node:fs:555:18)
+      at Object.writeFileSync (node:fs:2405:35)
+      at publish (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/mcp-service.cjs:173:95)
+      at Object.close (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/mcp-service.cjs:366:105)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async TestHook.run (node:internal/test_runner/test:1113:7)
+      at async Test.runHook (node:internal/test_runner/test:1024:9)
+      at async after (node:internal/test_runner/test:1064:9)
+      at async Test.run (node:internal/test_runner/test:1132:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:788:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/wiek-modern-stdio-CFCDnP/mcp/state.json.45e0ef3b-d58f-48a8-8803-cedaaff67434.tmp'
+  }

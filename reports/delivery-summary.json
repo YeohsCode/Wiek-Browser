@@ -1,18 +1,18 @@
 {
-  "schemaVersion": 4,
-  "clientDate": "2026-11-10",
-  "generatedAt": "2026-11-09T17:03:43.184023+00:00",
+  "schemaVersion": 5,
+  "clientDate": "2026-11-11",
+  "generatedAt": "2026-11-11T01:19:47.022120+00:00",
   "project": "Wiek Browser",
-  "version": "0.23.0",
+  "version": "0.24.0",
   "repository": "https://github.com/YeohsCode/Wiek-Browser",
   "fullParity": false,
   "runtimeIndependent": true,
-  "independenceEvidence": "independence-results.json",
+  "previousCheckpoint": "wiek-v0.23-checkpoint.json",
   "localTests": {
-    "pass": 548,
+    "pass": 608,
     "fail": 0,
     "skip": 0,
-    "log": "v023-source-tests-after-ci.log"
+    "log": "v024-source-tests-final.log"
   },
   "sdkTests": {
     "pass": 532,
@@ -22,115 +22,55 @@
     "namespaceMappedInputs": true,
     "assertionsRemoved": 0,
     "thresholdsChanged": 0,
-    "log": "v023-sdk-tests-final.log"
-  },
-  "frameworkTests": {
-    "pass": 336,
-    "fail": 0,
-    "skip": 0,
-    "log": "v023-framework-all-tests.log"
+    "log": "terminology-sdk-regression.log"
   },
   "packagedHost": {
-    "checks": 197,
+    "checks": 198,
     "passed": true,
-    "version": "0.23.0",
-    "log": "v023-package-workbench.log"
+    "version": "0.24.0",
+    "log": "v024-package-workbench.log"
   },
-  "packagedLocalServicesPanel": {
-    "checks": 11,
+  "packagedPanels": {
+    "pass": 13,
+    "fail": 0,
+    "skip": 0,
+    "log": "v024-package-panels.log"
+  },
+  "browserContinuation": {
+    "checks": 17,
     "passed": true,
-    "log": "v023-package-local-server-panel.log"
+    "actualPackagedCLI": true,
+    "log": "terminology-packaged-recovery.log"
+  },
+  "usabilityAudit": {
+    "report": "usability-audit.md",
+    "glossary": "../docs/terminology.md",
+    "featureDecisions": 23,
+    "installedGuide": "terminology-installed-guide.md",
+    "globalEntrypointsUpdated": true
   },
   "browserSuite": {
-    "comparableToHistoricalRuntime": false,
-    "namespaceMappedInputs": true,
-    "counts": {
-      "total": 69,
-      "selected": 69,
-      "pass": 69,
-      "fail": 0,
-      "skip": 0,
-      "notRun": 0,
-      "assertions": 1248
-    },
-    "hostCleanup": {
-      "status": "stopped",
-      "pid": 72432
-    },
-    "log": "v023-browser-suite-final.log"
-  },
-  "package": {
-    "filesChecked": 199,
-    "sourceMatches": true,
-    "sdkSha256": "6d1ef3537f56eea38ecb72c381b1267d8a489faf5d98c1455eace8ce3c67ef28",
-    "sdkMatchesCompared": true,
-    "signed": false,
-    "notarized": false,
-    "outputDirectory": "dist-validation/mac-arm64/Wiek Browser.app",
-    "runningApplicationOverwritten": false
-  },
-  "frameworkSmoke": {
-    "passed": true,
-    "evidence": "p4-sdk-v2-framework-smoke.json"
+    "status": "passed",
+    "total": 69,
+    "pass": 69,
+    "fail": 0,
+    "skip": 0,
+    "assertions": 1248,
+    "log": "v024-browser-suite.log",
+    "result": "comparison.json"
   },
   "ci": {
-    "currentCheckpointStatus": "success",
-    "failedStandaloneAttempt": 42660992010,
-    "previousCheckpointFailedRun": 42132702954,
-    "run": 42724506570,
-    "sourceCommit": "d6d3be9d6e254b9b2305abae0254039c5ed0fdcc",
-    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/42724506570",
-    "status": "completed",
-    "conclusion": "success",
-    "remoteCounts": {
-      "sdk": 532,
-      "source": 548,
-      "framework": 336,
-      "packagedHost": 197,
-      "packagedPanel": 11,
-      "browser": 69,
-      "browserAssertions": 1248,
-      "trackedFrameworkInputs": 263,
-      "releaseFiles": 199,
-      "immutableSdkInputs": 81
-    },
-    "evidenceOnlyFollowup": true
-  },
-  "remaining": {
-    "otherProviders": "Deferred per priority",
-    "p2": [
-      "DCR and complete step-up",
-      "Modern stdio, prompt notifications and remaining continuations",
-      "Full profile migration and IndexedDB"
-    ],
-    "p3": [
-      "Physical multi-display and permission revocation",
-      "Final-package native capture positive matrix",
-      "Physical sleep/wake and login/logout",
-      "Semantic retrieval and broader local service classification"
-    ],
-    "p4": [
-      "31 online model tasks with dedicated models and accounts",
-      "Signing/notarization and release"
-    ]
+    "status": "pending"
   },
   "paidModelCalls": 0,
-  "realAccountWrites": 0,
-  "history": [
-    "wiek-v0.22-checkpoint.json"
-  ],
-  "retainedFailureEvidence": [
-    "v023-source-tests.log",
-    "v023-browser-failed-wiek-e2e.json",
-    "v023-framework-all-tests-initial.log",
-    "p4-ci-42660992010-status.json"
-  ],
-  "frameworkInputs": {
-    "tracked": 263,
-    "cleanCheckoutVerified": true,
-    "evidence": [
-      "v023-clean-checkout-inputs.log",
-      "v023-clean-checkout-framework.log"
-    ]
+  "externalAccountActions": 0,
+  "signed": false,
+  "notarized": false,
+  "packageIdentity": {
+    "passed": true,
+    "checkedFiles": 204,
+    "immutableInputs": 81,
+    "sdkMatchesCompared": true,
+    "log": "v024-package-identity.log"
   }
 }

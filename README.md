@@ -6,7 +6,7 @@
 
 A local Chromium browser and agent workspace with task spaces, isolated browser profiles, file/Git tools, scheduled automations, and browser automation. Wiek has an independently implemented Electron host and local services, plus its own standalone SDK build and runtime namespace. No separate browser installation or service is required. Third-party license and copyright details are retained in [NOTICE.md](NOTICE.md).
 
-**Current checkpoint: 0.23.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
+**Current checkpoint: 0.24.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
 
 ## Run locally
 
@@ -38,10 +38,11 @@ Use `WIEK_DATA_DIR=/absolute/path` to start an isolated instance. Development da
 - JavaScript browser SDK with snapshots, locators, input, frames, screenshots, upload/download, and CDP.
 - Agent workspace with approvals, attachments, conversation branches, selected native adapters, and model catalogues.
 - Scoped files, Git operations, reviewed remote operations, and file checkpoints with linked-worktree isolation.
-- **Project local services:** refresh listening processes, open a loopback address, review a process stop, and confirm it. Process birth identity, directory, executable and endpoints are rechecked before one termination signal. Discovery does not fetch pages or read process arguments/environment.
-- MCP connections, scoped tools/resources, subscriptions, reviewed OAuth and bounded input continuations.
+- **Project local services:** refresh listening processes, open a loopback address, explicitly read its title, review a process stop, and confirm it. Process birth identity, directory, executable and endpoints are rechecked before one termination signal. Discovery does not fetch pages or read process arguments/environment.
+- MCP connections over legacy/modern stdio and HTTP, scoped tools/resources, subscriptions, inert prompt previews, reviewed OAuth and bounded input continuations.
+- Encrypted profile archives with explicit local/session storage and bounded IndexedDB transfer; older archive formats remain readable.
 - Scheduled automations, opt-in background jobs, execution modes, busy deferral, run memory/results, and crash recovery.
-- Collections, screenshots and annotation, page/application recording, explicit desktop capture, local transcription, and configurable offline translation.
+- Collections, screenshots and annotation, page/application action history, explicit desktop capture, local transcription, and configurable offline translation.
 
 Project local services require the macOS native helper. Only matching project directories are shown; protected processes and unsupported runtimes cannot be stopped. A process that ignores the signal remains reported as running. No force-stop escalation is performed.
 
@@ -93,3 +94,5 @@ Remaining work includes broader profile migration, additional MCP flows, semanti
 ## License
 
 Wiek's original implementation uses the MIT license. Bundled SDK, runtime, decoder and model components retain their own notices and licenses. Runtime data, credentials, dependencies, builds, model weights, reference artifacts and full research records are excluded from Git.
+
+User-facing terms and automation continuation are described in the [terminology guide](docs/terminology.md) and [usability audit](reports/usability-audit.md).

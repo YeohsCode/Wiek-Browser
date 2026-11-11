@@ -72,6 +72,18 @@ jobs:
         env:
           WIEK_TEST_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
         run: node --test tests/local-server-panel.test.mjs > reports/ci-local-server-panel.log 2>&1
+      - name: Packaged migration and MCP panels
+        env:
+          VEK_STORAGE_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
+          WIEK_INDEXEDDB_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
+          WIEK_MCP_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
+        run: node --test --test-concurrency=1 tests/profile-web-storage.test.mjs tests/profile-indexeddb.test.mjs tests/mcp-prompts-panel.test.mjs > reports/ci-migration-mcp-panels.log 2>&1
+      - name: Packaged browser continuation
+        env:
+          WIEK_RECOVERY_CLI: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs
+        run: node --test tests/browser-recovery.test.mjs > reports/ci-browser-continuation.log 2>&1
+      - name: Packaged scheduler runtime
+        run: node tests/scheduler-packaged-runtime.mjs "$PWD/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app" "$PWD/dist/mac-arm64/Wiek Browser.app/Contents/MacOS/Wiek Browser" > reports/ci-scheduler-runtime.log 2>&1
       - name: Shared SDK browser suite on Wiek
         env:
           VEK_DATA_DIR: ${{ github.workspace }}/data/ci-sdk

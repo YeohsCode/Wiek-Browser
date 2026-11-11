@@ -1,0 +1,44 @@
+{"ok":true,"checks":15,"realElectronIPC":true,"realNativeDiscovery":true,"realReviewedProcessStop":true,"realAnonymousTitleRead":true,"modelCalls":0,"accountActions":0}
+✔ actual workspace panel refresh, open dispatch, review, cancel and confirmed stop use a real disposable server (1331.357917ms)
+✔ listener parser handles duplicates, bracketed IPv6 and refuses malformed endpoints (1.631125ms)
+✔ listing is read-only, project-scoped, and exposes only derived loopback URLs (2.191417ms)
+✔ review and explicit confirmation are required; the review is single-use (0.841667ms)
+✔ reviews are bound to project id and canonical root and cannot cross scope (0.211792ms)
+✔ expired and cancelled reviews never send a signal (0.245583ms)
+✔ changed birth identity invalidates a review without stopping a process (0.147625ms)
+✔ changed working directory invalidates a review without stopping a process (0.135666ms)
+✔ changed executable invalidates a review without stopping a process (0.09525ms)
+✔ changed listener set invalidates a review without stopping a process (0.114542ms)
+✔ changed listener removal invalidates a review without stopping a process (0.571208ms)
+✔ the last identity read catches a process replacement after listener discovery (0.136833ms)
+✔ current host, its ancestors and unknown runtimes cannot be stopped (0.128875ms)
+✔ a process ignoring termination stays running; no force stop or group signal is sent (0.145625ms)
+✔ service close invalidates reviews without terminating any server (0.06425ms)
+✔ unavailable ancestor identity disables stopping rather than guessing ownership (0.637292ms)
+✔ native probe uses bounded literal argv and rejects nonmatching process identities (0.254125ms)
+✔ titles require a trusted local action and the exact listed process, fingerprint and URL (0.272041ms)
+✔ a title is discarded when process identity changes during its HTTP read (0.090833ms)
+✔ a title is discarded when listening endpoints changes during its HTTP read (0.081792ms)
+✔ a title is discarded when project membership changes during its HTTP read (0.056041ms)
+✔ title reads are bounded and service close cancels all owned reads without stopping processes (0.332417ms)
+✔ late title completions after service close never produce a successful result (0.099042ms)
+✔ actual temporary TCP servers are discovered by native identity and only the reviewed project process stops (446.051709ms)
+✔ metadata priority, attribute forms, entities and Unicode are preserved as inert bounded text (1.579209ms)
+✔ comments, raw text, hidden templates, foreign titles and body metadata cannot impersonate the head (0.116958ms)
+✔ an actual loopback read sends one anonymous request and does not request embedded assets (9.773083ms)
+✔ redirect responses do not supply a title or cause a follow-up request (3.003167ms)
+✔ JSON responses do not supply a title or cause a follow-up request (0.783ms)
+✔ compressed responses do not supply a title or cause a follow-up request (0.695333ms)
+✔ unknown charset responses do not supply a title or cause a follow-up request (0.81025ms)
+✔ error status responses do not supply a title or cause a follow-up request (0.750333ms)
+✔ response prefix limits terminate a streaming body without waiting for its end (0.68525ms)
+✔ timeouts and cancellation terminate real pending HTTP requests (42.728542ms)
+✔ unsafe URLs and unbounded options are rejected before network access (0.225875ms)
+ℹ tests 35
+ℹ suites 0
+ℹ pass 35
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2065.320917

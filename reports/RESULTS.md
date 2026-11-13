@@ -1,6 +1,16 @@
 # Wiek Browser 验证结果
 
-当前开发检查点为 **0.25.0**，日期为 2026-11-13。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+当前开发检查点为 **0.26.0**，日期为 2026-11-13。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+
+## 0.26 专项验收
+
+- IndexedDB 加密备份保留自增主键的下一值。真实 Chromium 检查覆盖独立主键、内联字段路径、删除记录、清空仓库、最后一个可用键和生成器耗尽。导出探测确认回滚，导入离线完成。旧归档继续可读；带自增键的归档需要 0.26 或更高版本。[设计与边界](../analysis/profile-indexeddb-design.md)
+- 打包宿主 198 项，浏览器同集 69/69、1,248 条断言，204 份发行文件与 81 份原始测试输入的身份检查通过。[宿主](v026-package-workbench.log) · [同集](v026-browser-suite.log) · [应用包核对](v026-package-identity.log)
+- 打包专项 15/15 通过，含 27 项真实 IndexedDB 检查和 37 项应用 IPC 检查。导入后页面在首轮初始化时读到了保留的自增键位置，归档准备过程发出零次网络请求。[专项日志](v026-package-targeted-final.log)
+- P3 打包版后台启动器在隔离环境完成空任务检查，核对审核过的参数及清理结果。桌面原生组件读取到辅助功能、输入监控及屏幕录制权限均已授予。多显示器、撤权、实际系统注册及物理睡眠唤醒仍待验收。[启动器](v026-package-scheduler.log) · [权限状态](v026-package-desktop-permissions.json)
+- 首次并行源码回归 609/610。MCP 表单夹具在界面关闭后立即检查网络请求，当时请求仍在传输。单项复测通过，夹具改为等待本次调用实际完成后再检查请求，保留原有断言和整体期限。[初测](v026-source.log) · [单项复测](v026-mcp-panel-retest.log)
+- 修正后的本机串行全量回归 608/610。两项远程 Git 合成夹具超时，随后独立文件复测 17/17。原始 SDK 532/532，TypeScript 检查通过。全局命令与三处指南链接已更新到 0.26 目录包。[串行全量](v026-source-final.log) · [Git 复测](v026-git-retest.log) · [SDK](v026-sdk.log) · [安装记录](v026-install.json)
+- 源码已推送为 `05dd68c`，远端 CI 已启动。[远端运行](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43354343788)
 
 ## 0.25 专项验收
 
@@ -10,7 +20,7 @@
 
 - 打包版浏览器同集 69/69，共 1,248 条断言，204 个发行文件身份检查通过。全局命令已切换到 0.25 目录包。
 
-- 0.25 实际应用包宿主检查 198 项通过。远端 CI [运行 43336629530](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43336629530) 已进入队列。
+- 0.25 实际应用包宿主检查 198 项通过。远端 CI 对源码提交 `6748d30` 全部通过，含 609 项源码、532 项 SDK、336 项评估框架、69 项浏览器同集和 198 项宿主检查。[远端运行](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43336629530) · [验收状态](p4-ci-43336629530-status.json)
 
 [打包宿主](v025-package-workbench.log) · [打包专项](v025-package-tests.log) · [SDK 回归](v025-sdk-regression.log) · [源码复测](v025-source-final.log) · [源码初测](v025-source-initial.log) · [远程 Git 单项复测](v025-git-retest.log) · [浏览器同集](v025-browser-suite.log) · [应用包核对](v025-package-identity.log) · [安装记录](v025-install.json)
 

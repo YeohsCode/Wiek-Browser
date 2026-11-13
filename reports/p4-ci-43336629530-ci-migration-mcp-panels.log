@@ -1,0 +1,24 @@
+{"ok":true,"checks":14,"actualElectronIPC":true,"realStdioPeer":true,"inertPromptPreview":true,"modelCalls":0,"accountActions":0}
+✔ modern stdio and prompt preview operate through real Electron IPC without executing server text (1119.69875ms)
+✔ portable IndexedDB codec preserves UTF-16, dates, binary, special numbers and inert property names (12.955917ms)
+✔ IndexedDB schema rejects origin widening, auto generators, duplicates and invalid primary keys (3.708333ms)
+✔ v3 encrypted archive carries validated IndexedDB values without plaintext data (965.281375ms)
+✔ IndexedDB capture refuses navigated and partitioned origins before reading any records (1.760833ms)
+{"ok":true,"checks":23,"bootstrapNetworkRequests":0,"sourceProfileUnchanged":true,"realBrowserIndexedDB":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron transfers explicit selected-origin IndexedDB offline, excludes unsupported data and rolls back failures (10459.643042ms)
+✔ web storage capture is opt-in and sends no CDP commands by default (1.304958ms)
+✔ navigated, closed and partitioned tabs retain only their URL with explicit skipped-storage warnings (1.923208ms)
+✔ oversized storage is omitted without corrupting the portable tab inventory (1.573375ms)
+✔ cancelled capture yields no partially assembled archive (0.544625ms)
+{"ok":true,"checks":34,"bootstrapNetworkRequests":0,"realBrowserSessions":true,"sourceProfileUnchanged":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron migrates two tab sessions before site scripts, with no bootstrap network and bounded failure cleanup (8741.94925ms)
+{"ok":true,"checks":37,"actualApplicationIPC":true,"injectedNativeDialogs":true,"realPassphraseModal":true,"bootstrapNetworkRequests":0,"modelCalls":0,"externalAccountActions":0}
+✔ actual application exports and restores through trusted IPC and passphrase UI; cancellations create no profile (9452.875209ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 31165.533125

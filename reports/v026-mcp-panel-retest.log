@@ -1,0 +1,10 @@
+{"ok":true,"checks":13,"actualElectronIPC":true,"realLoopbackHTTP":true,"modelCalls":0,"externalAccountActions":0}
+✔ input review UI runs typed submissions, decline and cancellation through real Electron IPC (522.23825ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 583.579791

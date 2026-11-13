@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 5,
+  "clientDate": "2026-11-13",
+  "generatedAt": "2026-11-13T00:21:35.645016+00:00",
+  "project": "Wiek Browser",
+  "version": "0.25.0",
+  "repository": "https://github.com/YeohsCode/Wiek-Browser",
+  "fullParity": false,
+  "runtimeIndependent": true,
+  "previousCheckpoint": "wiek-v0.24-checkpoint.json",
+  "sdkTests": {
+    "pass": 532,
+    "fail": 0,
+    "skip": 0,
+    "immutableInputs": 81,
+    "namespaceMappedInputs": true,
+    "assertionsRemoved": 0,
+    "thresholdsChanged": 0,
+    "log": "v025-sdk-regression.log"
+  },
+  "packagedTargetedTests": {
+    "pass": 7,
+    "fail": 0,
+    "skip": 0,
+    "log": "v025-package-tests.log"
+  },
+  "browserSuite": {
+    "status": "passed",
+    "total": 69,
+    "pass": 69,
+    "fail": 0,
+    "skip": 0,
+    "assertions": 1248,
+    "log": "v025-browser-suite.log",
+    "result": "comparison.json"
+  },
+  "packageIdentity": {
+    "passed": true,
+    "checkedFiles": 204,
+    "immutableInputs": 81,
+    "sdkMatchesCompared": true,
+    "log": "v025-package-identity.log"
+  },
+  "installedEntrypoints": {
+    "updated": true,
+    "receipt": "v025-install.json"
+  },
+  "localTests": {
+    "pass": 609,
+    "fail": 0,
+    "skip": 0,
+    "log": "v025-source-final.log",
+    "initialLog": "v025-source-initial.log"
+  },
+  "ci": {
+    "status": "completed",
+    "runId": 43336629530,
+    "testedCommit": "6748d3030afdc077e996a8b3a7d78d593b676317",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43336629530",
+    "conclusion": "success",
+    "evidence": "p4-ci-43336629530-status.json"
+  },
+  "paidModelCalls": 0,
+  "externalAccountActions": 0,
+  "signed": false,
+  "notarized": false,
+  "packagedHost": {
+    "pass": true,
+    "checks": 198,
+    "version": "0.25.0",
+    "log": "v025-package-workbench.log"
+  }
+}

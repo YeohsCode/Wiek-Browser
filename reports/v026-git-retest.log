@@ -1,0 +1,25 @@
+✔ configured remote listing and reviewed new-branch push use a real local bare Git remote (352.44575ms)
+✔ one-use review rejects local edits, branch changes, wrong project and destination changes (343.138ms)
+✔ fetch downloads just the selected branch without moving HEAD or changing working bytes (408.633209ms)
+✔ pull applies a true fast-forward, refuses dirty/diverged states and never creates merge commits (759.544417ms)
+✔ normal push rejects rewrites, explicit force-with-lease succeeds, stale remote review never writes (753.869666ms)
+✔ transport/options/multiple push destinations are refused and names remain literal argv (258.406208ms)
+✔ cancel interrupts a real push process, marks remote outcome uncertain and cannot replay (3237.841708ms)
+✔ timeout bounds real child lifetime; service close cancels children and reviewed fetch stays safe (5330.602208ms)
+✔ pending review cancellation is explicit and wrong-project cancellation cannot consume it (242.368833ms)
+✔ GitHub list/detail/diff use fixed repository routes and inert bounded strings via a real synthetic gh process (2230.920292ms)
+✔ PR create is reviewable and draft by default; literal multiline body reaches stdin only after confirmation (2513.035375ms)
+✔ PR comment/state/merge require review and are bound to the exact pull request snapshot (4856.878167ms)
+✔ authentication/protocol failures are explicit; uncertain PR POSTs are never retried (3888.220834ms)
+✔ pure URL validation excludes credentials, remote helpers and unintended hosts (0.191833ms)
+✔ PR branch publication checks, replaced reviews and rejected merge results never report false success (3526.841ms)
+✔ server-side lease rejects a branch changed after the final read, preserving the racing commit (1936.479709ms)
+✔ large PR diffs have an explicit bounded preview instead of a silently shortened full-diff claim (1887.805542ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 32598.5895

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-13T00:19:59.572Z",
-  "version": "0.25.0",
+  "generatedAt": "2026-11-13T02:42:01.060Z",
+  "version": "0.26.0",
   "versionMatches": true,
   "checkedFiles": 204,
   "allMatch": true,
@@ -329,12 +329,12 @@
     },
     {
       "file": "app/profile-indexeddb-data.cjs",
-      "sha256": "f0943050345256bf1eab105d1d243217072a947d13a7a757c0acc1b780d15155",
+      "sha256": "921118d4aec11fd1711050e6937fa3b307a1a2337ec88720bbe5487294c8b238",
       "matches": true
     },
     {
       "file": "app/profile-indexeddb.cjs",
-      "sha256": "8ddfcf7228cdee9058c5f1ab53a267156a9f3094e7428c70a478cdd11ac9dbe3",
+      "sha256": "1e76f357ca4671d0800185d7de41776a73a163dd607c53c9ad90cddcf8f0ebdc",
       "matches": true
     },
     {

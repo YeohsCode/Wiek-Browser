@@ -6,7 +6,7 @@
 
 A local Chromium browser and agent workspace with task spaces, isolated browser profiles, file/Git tools, scheduled automations, and browser automation. Wiek has an independently implemented Electron host and local services, plus its own standalone SDK build and runtime namespace. No separate browser installation or service is required. Third-party license and copyright details are retained in [NOTICE.md](NOTICE.md).
 
-**Current checkpoint: 0.27.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
+**Current checkpoint: 0.28.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
 
 ## Run locally
 
@@ -40,7 +40,7 @@ Use `WIEK_DATA_DIR=/absolute/path` to start an isolated instance. Development da
 - Scoped files, Git operations, reviewed remote operations, and file checkpoints with linked-worktree isolation.
 - **Project local services:** refresh listening processes, open a loopback address, explicitly read its title, review a process stop, and confirm it. Process birth identity, directory, executable and endpoints are rechecked before one termination signal. Discovery does not fetch pages or read process arguments/environment.
 - MCP connections over legacy/modern stdio and HTTP, scoped tools/resources, subscriptions, inert prompt previews, reviewed OAuth and bounded input continuations.
-- Encrypted profile archives can transfer local/session storage and bounded IndexedDB data from selected tabs, including auto-increment keys, shared references, cycles, sparse arrays, and typed-array views. Older archive formats remain readable.
+- Encrypted profile archives can transfer local/session storage and bounded IndexedDB data from selected tabs, including auto-increment keys, shared references, cycles, sparse arrays, typed-array views, and Blob/File attachments. Older archive formats remain readable.
 - Scheduled automations, opt-in background jobs, execution modes, busy deferral, run memory/results, and crash recovery.
 - Collections, screenshots and annotation, page/application action history, explicit desktop capture, local transcription, and configurable offline translation.
 

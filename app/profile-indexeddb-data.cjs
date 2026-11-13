@@ -13,8 +13,10 @@ function portableCodec() {
   const views={Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array,BigInt64Array,BigUint64Array,DataView};
   const isArrayIndex=key=>/^(0|[1-9][0-9]*)$/.test(key)&&Number(key)<2**32-1;
   const dataProperty=(target,key,value)=>Object.defineProperty(target,key,{value,enumerable:true,writable:true,configurable:true});
-  function encode(value) {
-    const seen=new Map();let nodes=0,encodedBytes=0;
+  const validType=type=>typeof type==='string'&&!/[\x00-\x1f\x7f-\uffff]/.test(type)&&type===type.toLowerCase();
+  function stage(value) {
+    const seen=new Map(),attachments=[];
+    let nodes=0,encodedBytes=0,attachmentBytes=0;
     const bounded=value=>{encodedBytes+=value.length;if(encodedBytes>524288)fail();return value;};
     const encodeText=value=>bounded(text(value));
     const properties=(object,keys,walk,depth)=>{
@@ -43,6 +45,20 @@ function portableCodec() {
         return ['set',Array.from(v,value=>walk(value,depth+1))];
       }
       if(v instanceof RegExp)return ['regexp',encodeText(v.source),v.flags];
+      if(v instanceof Blob){
+        if(v.size>384*1024||!validType(v.type))fail();
+        const encodedSize=4*Math.ceil(v.size/3);
+        attachmentBytes+=encodedSize;
+        encodedBytes+=encodedSize;
+        if(encodedBytes>524288)fail();
+        let tag=['blob',encodeText(v.type),''];
+        if(v instanceof File){
+          if(!Number.isSafeInteger(v.lastModified)||!v.name.isWellFormed()||v.webkitRelativePath)fail();
+          tag=['file',tag[1],'',encodeText(v.name),v.lastModified];
+        }
+        attachments.push({blob:v,tag});
+        return tag;
+      }
       if(v instanceof ArrayBuffer){
         if(v.resizable)fail();
         return ['binary','ArrayBuffer',bounded(binary(new Uint8Array(v)))];
@@ -67,7 +83,26 @@ function portableCodec() {
       if(![Object.prototype,null].includes(Object.getPrototypeOf(v)))fail();
       return ['object',properties(v,Reflect.ownKeys(v),walk,depth)];
     };
-    const out=JSON.stringify(walk(value,0));if(out.length>524288)fail();return out;
+    const tree=walk(value,0),encoded=JSON.stringify(tree);
+    const size=encoded.length+attachmentBytes;
+    if(size>524288)fail();
+    return {size,encoded,attachments,tree};
+  }
+  function encode(value) {
+    const staged=stage(value);
+    if(staged.attachments.length)fail();
+    return staged.encoded;
+  }
+  async function materialize(staged,check) {
+    if(!staged.attachments.length)return staged.encoded;
+    for(const {blob,tag} of staged.attachments){
+      check();
+      const bytes=new Uint8Array(await blob.arrayBuffer());
+      check();
+      if(bytes.byteLength!==blob.size)fail();
+      tag[2]=binary(bytes);
+    }
+    return JSON.stringify(staged.tree);
   }
   function decode(source) {
     if(typeof source!=='string'||source.length>524288)fail();let nodes=0,root;try{root=JSON.parse(source);}catch{fail();}
@@ -124,6 +159,15 @@ function portableCodec() {
         if(regexp.source!==source||regexp.flags!==v[2])fail();
         return remember(regexp);
       }
+      if((kind==='blob'&&v.length===3)||(kind==='file'&&v.length===5)){
+        const type=untext(value);
+        if(!validType(type))fail();
+        const bytes=unbinary(v[2]);
+        if(kind==='blob')return remember(new Blob([bytes],{type}));
+        const name=untext(v[3]),lastModified=v[4];
+        if(!name.isWellFormed()||!Number.isSafeInteger(lastModified))fail();
+        return remember(new File([bytes],name,{type,lastModified}));
+      }
       if(kind==='binary'&&v.length===3){
         const buffer=unbinary(v[2]).buffer;
         if(value==='ArrayBuffer')return remember(buffer);
@@ -170,7 +214,7 @@ function portableCodec() {
     for(let i=0;i<value.length;i++)if(!Object.hasOwn(value,i)||!key(value[i],seen,depth+1))return false;
     return true;
   }
-  return {encode,decode,text,untext,key};
+  return {encode,stage,materialize,decode,text,untext,key};
 }
 const codec=portableCodec();
 // Represent exhaustion as null because 2^53 + 1 cannot be expressed as a Number.

@@ -29,12 +29,18 @@ app.whenReady().then(async()=>{
      last.add({},2**53-1);last.clear();
      db.createObjectStore('unused',{autoIncrement:true});
    });
-   await open('Blob unsupported',db=>db.createObjectStore('blobs').add(new Blob(['private blob']),'blob'));
+   await open('Attachments',db=>{
+     const store=db.createObjectStore('rows',{autoIncrement:true});
+     const blob=new Blob([new Uint8Array([0,255,17])],{type:'Image/PNG'});
+     const file=new File([new Uint8Array([9,128,0,10])],'草稿.png',{type:'Image/PNG',lastModified:123456789});
+     store.add({blob,file,alias:new Map([[file,blob]]),empty:new File([],'',{lastModified:0})});
+   });
+   await open('Oversized attachment',db=>db.createObjectStore('blobs').add(new Blob([new Uint8Array(384*1024+1)]),'blob'));
  })()`);
- const tabs=[{name:'Selected',tabs:[{webContents:w}]}],captured=await captureProfileIndexedDB(tabs);eq(captured.counts,{indexedDBOrigins:1,indexedDBDatabases:3,indexedDBSkippedDatabases:1,indexedDBSkippedOrigins:0});eq(captured.warnings.length,1);eq(await w.executeJavaScript('indexedDB.databases().then(v=>v.length)'),4);
+ const tabs=[{name:'Selected',tabs:[{webContents:w}]}],captured=await captureProfileIndexedDB(tabs);eq(captured.counts,{indexedDBOrigins:1,indexedDBDatabases:4,indexedDBSkippedDatabases:1,indexedDBSkippedOrigins:0});eq(captured.warnings.length,1);eq(await w.executeJavaScript('indexedDB.databases().then(v=>v.length)'),5);
  eq((await captureProfileIndexedDB(tabs)).indexedDB,captured.indexedDB);
  const archive=createProfileArchive(),encoded=await archive.encode({profile:{name:'IndexedDB native'},indexedDB:captured.indexedDB},'public indexed native passphrase'),decoded=await archive.decode(encoded,'public indexed native passphrase');eq(decoded.metadata.version,3);
- const before=requests,result=await restoreProfileIndexedDB(destination,decoded.payload.indexedDB,{createContents});eq(result,{restoredOrigins:1,restoredDatabases:3,warnings:[]});eq(requests,before);
+ const before=requests,result=await restoreProfileIndexedDB(destination,decoded.payload.indexedDB,{createContents});eq(result,{restoredOrigins:1,restoredDatabases:4,warnings:[]});eq(requests,before);
  const inspect=make(destination);await restoreArea(inspect,{origin,entries:[]},{isLocalStorage:false});const recaptured=await captureProfileIndexedDB([{name:'Destination',tabs:[{webContents:inspect}]}]);eq(recaptured.indexedDB,captured.indexedDB);eq(requests,before);
  eq(await inspect.executeJavaScript(`new Promise((resolve,reject)=>{const r=indexedDB.open('Portable');r.onsuccess=()=>{const db=r.result,tx=db.transaction('out'),q=tx.objectStore('out').index('byTag').get('alpha');q.onsuccess=()=>{const v=q.result;db.close();resolve({odd:[...Array(v.odd.length)].map((_,i)=>v.odd.charCodeAt(i)),date:v.when.toISOString(),bytes:[...v.bytes]})};q.onerror=()=>reject(q.error)}})`),{odd:[0,0xd800,0x4f60,0x597d],date:'2024-01-01T00:00:00.000Z',bytes:[1,65535]});
  eq(await inspect.executeJavaScript(`new Promise((resolve,reject)=>{const r=indexedDB.open('Portable');r.onsuccess=()=>{const db=r.result,q=db.transaction('inline').objectStore('inline').get('one');q.onsuccess=()=>{const v=q.result;db.close();resolve({map:v.map instanceof Map,set:v.map.get(1) instanceof Set,values:[...v.map.get(1)],regexp:v.regex instanceof RegExp,source:v.regex.source,flags:v.regex.flags})};q.onerror=()=>reject(q.error)}})`),{map:true,set:true,values:[2,3],regexp:true,source:'fixture',flags:'gi'});
@@ -56,6 +62,26 @@ app.whenReady().then(async()=>{
      };
    };
  })`),{native:true,shared:true,ranges:[2,4,1,3],sparse:[4,false,true,false],references:true,bytes:[1,2,3,4,5,6,7,8]});
+ eq(await inspect.executeJavaScript(`new Promise((resolve,reject)=>{
+   const open=indexedDB.open('Attachments');open.onerror=()=>reject(open.error);
+   open.onsuccess=()=>{
+     const db=open.result,get=db.transaction('rows').objectStore('rows').get(1);
+     get.onerror=()=>reject(get.error);
+     get.onsuccess=async()=>{
+       try{
+         const {blob,file,alias,empty}=get.result;
+         db.close();
+         const bytes=async value=>Array.from(new Uint8Array(await value.arrayBuffer()));
+         resolve({
+           blob:[blob instanceof Blob,blob instanceof File,blob.type,await bytes(blob)],
+           file:[file instanceof File,file.name,file.lastModified,file.type,await bytes(file)],
+           empty:[empty instanceof File,empty.name,empty.lastModified,empty.type,empty.size],
+           alias:alias.get(file)===blob
+         });
+       }catch(error){reject(error);}
+     };
+   };
+ })`),{blob:[true,false,'image/png',[0,255,17]],file:[true,'草稿.png',123456789,'image/png',[9,128,0,10]],empty:[true,'',0,'',0],alias:true});
  // A previous archive wrote a standalone typed-array tag without a buffer reference.
  const legacy=structuredClone(captured.indexedDB);
  const portable=legacy.origins[0].databases.find(db=>db.name===Buffer.from('Portable','utf16le').toString('base64'));
@@ -65,7 +91,7 @@ app.whenReady().then(async()=>{
  property[1]=['binary','Uint16Array','AQD//w=='];
  record.value=JSON.stringify(beforeValue);
  const legacyDestination=session.fromPartition('legacy');
- eq(await restoreProfileIndexedDB(legacyDestination,legacy,{createContents}),{restoredOrigins:1,restoredDatabases:3,warnings:[]});
+ eq(await restoreProfileIndexedDB(legacyDestination,legacy,{createContents}),{restoredOrigins:1,restoredDatabases:4,warnings:[]});
  const conflict=await restoreProfileIndexedDB(destination,captured.indexedDB,{createContents});eq(conflict.restoredDatabases,0);eq(conflict.warnings.length,1);eq((await captureProfileIndexedDB([{name:'Still present',tabs:[{webContents:inspect}]}])).indexedDB,captured.indexedDB);
  const nextKeys=rollback=>`new Promise((resolve,reject)=>{
    const open=indexedDB.open('Auto generator');open.onerror=()=>reject(open.error);
@@ -89,9 +115,9 @@ app.whenReady().then(async()=>{
  // Probe the original independently and roll back the fixture's own writes as well.
  eq(await w.executeJavaScript(nextKeys(true)),expected);
  eq((await captureProfileIndexedDB(tabs)).indexedDB,captured.indexedDB);
- const partial=session.fromPartition('partial'),otherOrigin='https://other.fixture.test';let partialCreations=0;const twoOrigins={...captured.indexedDB,origins:[captured.indexedDB.origins[0],{...captured.indexedDB.origins[0],origin:otherOrigin}]};const failed=await restoreProfileIndexedDB(partial,twoOrigins,{createContents:ses=>{const wc=createContents(ses),original=wc.executeJavaScriptInIsolatedWorld.bind(wc);if(++partialCreations===1)wc.executeJavaScriptInIsolatedWorld=async(id,scripts)=>{const result=await original(id,scripts);if(scripts[0].code.includes('"mode":"write"'))throw new Error('Synthetic write failure');return result;};return wc;}});eq(failed.restoredDatabases,3);eq(failed.warnings.length,1);const partialInspect=make(partial);await restoreArea(partialInspect,{origin,entries:[]},{isLocalStorage:false});eq(await partialInspect.executeJavaScript('indexedDB.databases().then(v=>v.length)'),0);await restoreArea(partialInspect,{origin:otherOrigin,entries:[]},{isLocalStorage:false});eq(await partialInspect.executeJavaScript('indexedDB.databases().then(v=>v.length)'),3);
+ const partial=session.fromPartition('partial'),otherOrigin='https://other.fixture.test';let partialCreations=0;const twoOrigins={...captured.indexedDB,origins:[captured.indexedDB.origins[0],{...captured.indexedDB.origins[0],origin:otherOrigin}]};const failed=await restoreProfileIndexedDB(partial,twoOrigins,{createContents:ses=>{const wc=createContents(ses),original=wc.executeJavaScriptInIsolatedWorld.bind(wc);if(++partialCreations===1)wc.executeJavaScriptInIsolatedWorld=async(id,scripts)=>{const result=await original(id,scripts);if(scripts[0].code.includes('"mode":"write"'))throw new Error('Synthetic write failure');return result;};return wc;}});eq(failed.restoredDatabases,4);eq(failed.warnings.length,1);const partialInspect=make(partial);await restoreArea(partialInspect,{origin,entries:[]},{isLocalStorage:false});eq(await partialInspect.executeJavaScript('indexedDB.databases().then(v=>v.length)'),0);await restoreArea(partialInspect,{origin:otherOrigin,entries:[]},{isLocalStorage:false});eq(await partialInspect.executeJavaScript('indexedDB.databases().then(v=>v.length)'),4);
  const cancelled=session.fromPartition('cancelled'),controller=new AbortController();await assert.rejects(restoreProfileIndexedDB(cancelled,captured.indexedDB,{signal:controller.signal,createContents:ses=>{const wc=createContents(ses),original=wc.executeJavaScriptInIsolatedWorld.bind(wc);wc.executeJavaScriptInIsolatedWorld=async(id,scripts)=>{const value=await original(id,scripts);if(scripts[0].code.includes('"mode":"write"'))controller.abort();return value;};return wc;}}),/cancelled/);checks++;const cancelledInspect=make(cancelled);await restoreArea(cancelledInspect,{origin,entries:[]},{isLocalStorage:false});eq(await cancelledInspect.executeJavaScript('indexedDB.databases().then(v=>v.length)'),0);
  const quarantined=session.fromPartition('quarantined');let clearCalls=0,blocked;const originalClear=quarantined.clearStorageData.bind(quarantined);quarantined.clearStorageData=async options=>{clearCalls++;return originalClear(options);};await assert.rejects(restoreProfileIndexedDB(quarantined,captured.indexedDB,{createContents:ses=>{const wc=createContents(ses),original=wc.executeJavaScriptInIsolatedWorld.bind(wc),close=wc.close.bind(wc);blocked={wc,close};wc.executeJavaScriptInIsolatedWorld=async(id,scripts)=>{const result=await original(id,scripts);if(scripts[0].code.includes('"mode":"write"')){wc.close=()=>{throw new Error('Synthetic close failure')};throw new Error('Synthetic restore failure');}return result;};return wc;}}),error=>error.profileImportMustAbort===true);checks++;eq(clearCalls,0);blocked.wc.close=blocked.close;blocked.close({waitForBeforeUnload:false});
- const sourceCount=await w.executeJavaScript('indexedDB.databases().then(v=>v.length)');eq(sourceCount,4);eq(requests,before);
+ const sourceCount=await w.executeJavaScript('indexedDB.databases().then(v=>v.length)');eq(sourceCount,5);eq(requests,before);
  for(const view of views)if(view.webContents&&!view.webContents.isDestroyed())view.webContents.close({waitForBeforeUnload:false});await new Promise(r=>server.close(r));console.log(JSON.stringify({ok:true,checks,bootstrapNetworkRequests:0,sourceProfileUnchanged:true,realBrowserIndexedDB:true,modelCalls:0,externalAccountActions:0}));app.quit();
 }).catch(error=>{console.error(error);app.exit(1)});

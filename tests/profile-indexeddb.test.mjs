@@ -49,6 +49,32 @@ test('portable IndexedDB preserves aliases, cycles, array holes and shared view 
    assert.throws(()=>validateIndexedDb(archive),/Invalid portable/);
  }
 });
+test('IndexedDB attachment codec preserves bytes, metadata and aliases within the size budget',async()=>{
+ const blob=new Blob([new Uint8Array([0,255,7])],{type:'image/png'});
+ const file=new File([new Uint8Array([42])],'草稿.png',{type:'image/png',lastModified:0});
+ const value={blob,file,map:new Map([[file,blob]])};
+ const staged=codec.stage(value);
+ const encoded=await codec.materialize(staged,()=>{});
+ assert.equal(encoded.length,staged.size);
+ const restored=codec.decode(encoded);
+ assert.ok(restored.blob instanceof Blob);
+ assert.ok(restored.file instanceof File);
+ assert.equal(restored.map.get(restored.file),restored.blob);
+ assert.deepEqual([...new Uint8Array(await restored.blob.arrayBuffer())],[0,255,7]);
+ assert.deepEqual([...new Uint8Array(await restored.file.arrayBuffer())],[42]);
+ assert.deepEqual([restored.file.name,restored.file.type,restored.file.lastModified],['草稿.png','image/png',0]);
+ assert.throws(()=>codec.stage(new Blob([new Uint8Array(384*1024+1)])),/Unsupported/);
+ assert.throws(()=>codec.stage(Array.from({length:5},()=>new Blob([new Uint8Array(100*1024)]))),/Unsupported/);
+ await assert.rejects(codec.materialize(codec.stage(blob),()=>{throw new Error('cancelled');}),/cancelled/);
+ for(const tag of [
+   ['blob',codec.text('IMAGE/PNG'),'AA=='],
+   ['blob',codec.text('image/png\n'),'AA=='],
+   ['blob',codec.text('image/png'),'invalid'],
+   ['file','','',codec.text('x'),1.5],
+   ['file','','',codec.text('x'),2**53],
+   ['file','','',codec.text('\ud800'),0]
+ ])assert.throws(()=>codec.decode(JSON.stringify(tag)),/Unsupported/);
+});
 test('IndexedDB schema rejects origin widening, incomplete generators, duplicates and invalid primary keys',()=>{
  assert.deepEqual(validateIndexedDb(input()),input());for(const change of [x=>x.origins[0].origin+='/',x=>x.origins.push(x.origins[0]),x=>x.origins[0].databases.push(x.origins[0].databases[0]),x=>x.origins[0].databases[0].stores[0].autoIncrement=true,x=>x.origins[0].databases[0].stores[0].records[0].key=codec.encode(NaN),x=>x.origins[0].databases[0].stores[0].indexes=[{name:codec.text('idx'),keyPath:null,unique:false,multiEntry:false}]]){const x=input();change(x);assert.throws(()=>validateIndexedDb(x));}
 });

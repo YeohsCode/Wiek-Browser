@@ -24,7 +24,7 @@ async function indexedDbScript(options,makeCodec,nextAfterKey) {
     if(!names.length)return {name:codec.text(name),version:db.version,stores:[]};
     const readonly=db.transaction(names,'readonly');
     const hasGenerators=names.some(name=>readonly.objectStore(name).autoIncrement);
-    return new Promise((resolve,reject)=>{
+    const snapshot=await new Promise((resolve,reject)=>{
       const tx=hasGenerators?db.transaction(names,'readwrite'):readonly;
       transactions.add(tx);
       const stores=[],snapshot={name:codec.text(name),version:db.version,stores};
@@ -46,8 +46,8 @@ async function indexedDbScript(options,makeCodec,nextAfterKey) {
           check();const row=cursor.result;
           if(row){
             if(++records>options.limits.records)throw new Error('IndexedDB record limit');
-            const record={key:codec.encode(row.primaryKey),value:codec.encode(row.value)};
-            bytes+=record.key.length+record.value.length;if(bytes>options.limits.databaseBytes)throw new Error('IndexedDB byte limit');
+            const record={key:codec.encode(row.primaryKey),value:codec.stage(row.value)};
+            bytes+=record.key.length+record.value.size;if(bytes>options.limits.databaseBytes)throw new Error('IndexedDB byte limit');
             store.records.push(record);row.continue();return;
           }
           if(!source.autoIncrement){finishStore();return;}
@@ -65,6 +65,12 @@ async function indexedDbScript(options,makeCodec,nextAfterKey) {
       tx.oncomplete=()=>{transactions.delete(tx);if(hasGenerators)reject(new Error('IndexedDB probe was not rolled back'));else resolve(snapshot);};
       tx.onabort=()=>{transactions.delete(tx);if(rolledBack&&!failure&&!stopped)resolve(snapshot);else reject(failure||new Error('IndexedDB read aborted'));};
     });
+    // Blob data is immutable. Read its bytes after the cursor transaction settles.
+    for(const store of snapshot.stores)for(const record of store.records){
+      check();
+      record.value=await codec.materialize(record.value,check);
+    }
+    return snapshot;
   };
   const operation=async()=>{
     check();const existing=await indexedDB.databases();check();if(existing.length>options.limits.databases)throw new Error('IndexedDB database limit');
@@ -90,9 +96,15 @@ async function indexedDbScript(options,makeCodec,nextAfterKey) {
         }
       });check();
       // Normalize older standalone typed-array values to the shared-buffer representation.
-      const expected={...saved,stores:saved.stores.map(store=>({...store,records:store.records.map(row=>({
-        key:row.key,value:codec.encode(codec.decode(row.value))
-      }))}))};
+      const expected={...saved,stores:[]};
+      for(const store of saved.stores){
+        const records=[];
+        for(const row of store.records){
+          check();
+          records.push({key:row.key,value:await codec.materialize(codec.stage(codec.decode(row.value)),check)});
+        }
+        expected.stores.push({...store,records});
+      }
       if(JSON.stringify(await capture(db,name))!==JSON.stringify(expected))throw new Error('IndexedDB verification failed');
       }finally{db?.close();open.delete(db);}
     }

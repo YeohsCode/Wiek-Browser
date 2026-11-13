@@ -53,10 +53,19 @@
     "initialLog": "v025-source-initial.log"
   },
   "ci": {
-    "status": "pending"
+    "status": "queued",
+    "runId": 43336629530,
+    "testedCommit": "6748d3030afdc077e996a8b3a7d78d593b676317",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43336629530"
   },
   "paidModelCalls": 0,
   "externalAccountActions": 0,
   "signed": false,
-  "notarized": false
+  "notarized": false,
+  "packagedHost": {
+    "pass": true,
+    "checks": 198,
+    "version": "0.25.0",
+    "log": "v025-package-workbench.log"
+  }
 }

@@ -10,7 +10,9 @@
 
 - 打包版浏览器同集 69/69，共 1,248 条断言，204 个发行文件身份检查通过。全局命令已切换到 0.25 目录包。
 
-[打包专项](v025-package-tests.log) · [SDK 回归](v025-sdk-regression.log) · [源码复测](v025-source-final.log) · [源码初测](v025-source-initial.log) · [远程 Git 单项复测](v025-git-retest.log) · [浏览器同集](v025-browser-suite.log) · [应用包核对](v025-package-identity.log) · [安装记录](v025-install.json)
+- 0.25 实际应用包宿主检查 198 项通过。远端 CI [运行 43336629530](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43336629530) 已进入队列。
+
+[打包宿主](v025-package-workbench.log) · [打包专项](v025-package-tests.log) · [SDK 回归](v025-sdk-regression.log) · [源码复测](v025-source-final.log) · [源码初测](v025-source-initial.log) · [远程 Git 单项复测](v025-git-retest.log) · [浏览器同集](v025-browser-suite.log) · [应用包核对](v025-package-identity.log) · [安装记录](v025-install.json)
 
 ## 用户反馈与自动化继续执行
 

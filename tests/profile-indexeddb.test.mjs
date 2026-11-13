@@ -9,8 +9,45 @@ const require=createRequire(import.meta.url),{portableCodec,ENCODING,validateInd
 const input=()=>({encoding:ENCODING,origins:[{origin:'https://fixture.test',databases:[{name:codec.text('fixture'),version:3,stores:[{name:codec.text('rows'),keyPath:null,autoIncrement:false,indexes:[],records:[{key:codec.encode(['one',1]),value:codec.encode({id:'one',value:'private fixture'})}]}]}]}]});
 test('portable IndexedDB codec preserves UTF-16, dates, binary, special numbers and inert property names',()=>{
  const value={odd:'\0\ud800你好',array:[null,undefined,true,NaN,Infinity,-Infinity,-0,42n],date:new Date('2024-01-01'),map:new Map([['one',new Set([2,/你好/gi])],[{id:3},'four']]),binary:new Uint16Array([1,65535]),raw:new Uint8Array([3,4]).buffer};Object.defineProperty(value,'__proto__',{value:{inert:true},enumerable:true});const decoded=codec.decode(codec.encode(value));assert.deepEqual(decoded,value);assert.equal(Object.hasOwn(decoded,'__proto__'),true);assert.equal({}.inert,undefined);
- const alias={};for(const v of [new Blob(['x']),new Set(Array.from({length:4097},(_,i)=>i)),new Uint8Array(384*1024+1),new Uint8Array(8).subarray(1),new DataView(new ArrayBuffer(8),2),{a:alias,b:alias},Array(2)])assert.throws(()=>codec.encode(v),/Unsupported/);const cycle={};cycle.self=cycle;assert.throws(()=>codec.encode(cycle),/Unsupported/);
+ for(const v of [new Blob(['x']),new Set(Array.from({length:4097},(_,i)=>i)),new Uint8Array(384*1024+1),Array(4097),Array.from({length:20},()=>new Uint8Array(50000))])assert.throws(()=>codec.encode(v),/Unsupported/);
  for(const v of ['["binary","Function","AAAA"]','["object",[["YQA=",["null"]],["YQA=",["null"]]]]','["unknown"]','["set",[["number",0],["number","-0"]]]','["map",[[["null"],["null"]],[["null"],["boolean",true]]]]','["regexp","eAA=","gg"]'])assert.throws(()=>codec.decode(v),/Unsupported/);
+});
+test('portable IndexedDB preserves aliases, cycles, array holes and shared view ranges',()=>{
+ const buffer=new Uint8Array([1,2,3,4,5,6,7,8]).buffer;
+ const view=new Uint16Array(buffer,2,2),data=new DataView(buffer,1,3);
+ const value={view,data,buffer,alias:view,list:Array(4)};
+ value.list[2]=undefined;
+ value.list.label=value;
+ value.map=new Map([[value,value.list]]);
+ value.set=new Set([value.map,value]);
+ const decoded=codec.decode(codec.encode(value));
+ assert.deepEqual(decoded,value);
+ assert.equal(decoded.view,decoded.alias);
+ assert.equal(decoded.view.buffer,decoded.data.buffer);
+ assert.equal(decoded.data.buffer,decoded.buffer);
+ assert.equal(decoded.view.byteOffset,2);
+ assert.equal(decoded.data.byteLength,3);
+ assert.equal(0 in decoded.list,false);
+ assert.equal(2 in decoded.list,true);
+ assert.equal(decoded.list.label,decoded);
+ assert.equal(decoded.map.get(decoded),decoded.list);
+ assert.ok(decoded.set.has(decoded.map));
+ assert.deepEqual(codec.decode('["binary","Uint16Array","AQD//w=="]'),new Uint16Array([1,65535]));
+ for(const value of [
+   ['ref',0],['array',[['ref',1]]],['array',[['ref',-1]]],
+   ['view','Uint16Array',1,2,['binary','ArrayBuffer','AAAAAA==']],
+   ['view','Uint16Array',0,1,['binary','ArrayBuffer','AAAAAA==']],
+   ['view','DataView',0,5,['binary','ArrayBuffer','AAAAAA==']],
+   ['view','DataView',0,0,['ref',0]],
+   ['sparse-array',1,[[codec.text('1'),['null']]]],
+   ['sparse-array',1,[[codec.text('length'),['null']]]],
+   ['sparse-array',1,[[codec.text('0'),['null']],[codec.text('0'),['null']]]]
+ ])assert.throws(()=>codec.decode(JSON.stringify(value)),/Unsupported/);
+ for(const value of [['sparse-array',2,[]],['array',[['ref',0]]]]){
+   const archive=input();
+   archive.origins[0].databases[0].stores[0].records[0].key=JSON.stringify(value);
+   assert.throws(()=>validateIndexedDb(archive),/Invalid portable/);
+ }
 });
 test('IndexedDB schema rejects origin widening, incomplete generators, duplicates and invalid primary keys',()=>{
  assert.deepEqual(validateIndexedDb(input()),input());for(const change of [x=>x.origins[0].origin+='/',x=>x.origins.push(x.origins[0]),x=>x.origins[0].databases.push(x.origins[0].databases[0]),x=>x.origins[0].databases[0].stores[0].autoIncrement=true,x=>x.origins[0].databases[0].stores[0].records[0].key=codec.encode(NaN),x=>x.origins[0].databases[0].stores[0].indexes=[{name:codec.text('idx'),keyPath:null,unique:false,multiEntry:false}]]){const x=input();change(x);assert.throws(()=>validateIndexedDb(x));}

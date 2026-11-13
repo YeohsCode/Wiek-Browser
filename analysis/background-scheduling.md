@@ -49,4 +49,4 @@ Main在Agent/workspace/checkpoint收尾后才释放foreground gate；worker接�
 
 这些结果证明有界安装路径和代码身份行为，不证明物理sleep/wake、logout/login、OS撤权或所有第三方CLI安装/认证布局均已验收。系统级场景继续保留为未完成。
 
-最终包可另行执行 `node tests/scheduler-packaged-runtime.mjs /absolute/Resources/app /absolute/MacOS/Wiek\ Browser`：以夹具OS回调创建临时收据，再用包内Electron的Node模式执行精确审核的bootstrap argv。它只运行空资料目录的一次tick，检查实际记录与自有文件清理，不调用真实launchctl。初次工具链检查针对0.23旧包通过，保存为baseline；0.24最终包结果必须另行验证。
+最终包可另行执行 `node tests/scheduler-packaged-runtime.mjs /absolute/Resources/app /absolute/MacOS/Wiek\ Browser`：以夹具OS回调创建临时收据，再用包内Electron的Node模式执行精确审核的bootstrap argv。它只运行空资料目录的一次tick，检查实际记录与自有文件清理，不调用真实launchctl。结果输出到 stdout，可重定向到本次验收日志。此前的检查点记录保留在各自的证据文件中。

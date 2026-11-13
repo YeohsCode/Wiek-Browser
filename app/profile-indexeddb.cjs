@@ -88,7 +88,12 @@ async function indexedDbScript(options,makeCodec,nextAfterKey) {
           for(const index of savedStore.indexes)store.createIndex(codec.untext(index.name),Array.isArray(index.keyPath)?index.keyPath.map(codec.untext):codec.untext(index.keyPath),{unique:index.unique,multiEntry:index.multiEntry});
           for(const row of savedStore.records){const value=codec.decode(row.value);if(keyPath===null)store.add(value,codec.decode(row.key));else store.add(value);}
         }
-      });check();if(JSON.stringify(await capture(db,name))!==JSON.stringify(saved))throw new Error('IndexedDB verification failed');
+      });check();
+      // Normalize older standalone typed-array values to the shared-buffer representation.
+      const expected={...saved,stores:saved.stores.map(store=>({...store,records:store.records.map(row=>({
+        key:row.key,value:codec.encode(codec.decode(row.value))
+      }))}))};
+      if(JSON.stringify(await capture(db,name))!==JSON.stringify(expected))throw new Error('IndexedDB verification failed');
       }finally{db?.close();open.delete(db);}
     }
     return true;

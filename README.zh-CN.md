@@ -6,7 +6,7 @@
 
 本地 Chromium 浏览器与 Agent 工作区，提供自动化标签组、隔离的浏览器用户配置、文件/Git 工具、自动化调度与浏览器控制。Electron 宿主和本地服务采用独立实现，SDK 使用自身构建与 Wiek 运行命名空间，无需安装其他浏览器；第三方许可与署名保留在 [NOTICE.md](NOTICE.md)。
 
-**当前检查点：0.26.0。功能覆盖与验收仍在推进。** 参见[计划](PLAN.md)、[能力矩阵](analysis/implementation-matrix.md)和[验证结果](reports/RESULTS.md)。
+**当前检查点：0.27.0。功能覆盖与验收仍在推进。** 参见[计划](PLAN.md)、[能力矩阵](analysis/implementation-matrix.md)和[验证结果](reports/RESULTS.md)。
 
 ## 本地运行
 
@@ -40,7 +40,7 @@ node cli/wiek-browser.mjs stop
 - 项目文件、Git、审核式远程操作及支持 linked worktree 隔离的项目文件备份。
 - **项目本地服务**：刷新监听进程、打开回环地址、显式读取页面标题、审核并确认停止。停止前复核启动身份、目录、可执行文件和端口；发现过程不请求网页、不读取进程参数或环境。
 - MCP 传统/现代 stdio 与 HTTP 连接、作用域工具/资源、订阅、只读提示预览、审核式 OAuth 与有界输入续传。
-- 加密浏览器数据备份可迁移所选标签页的 local/session storage 和有界 IndexedDB 数据，保留自增主键的下一值。旧版归档仍可读取。
+- 加密浏览器数据备份可迁移所选标签页的 local/session storage 和有界 IndexedDB 数据，保留自增主键的下一值，也支持共享引用、循环引用、稀疏数组和二进制视图。旧版归档仍可读取。
 - 自动化调度、显式后台作业、执行模式、忙碌延期、运行记忆/结果和崩溃恢复。
 - 收藏文件夹、截图标注、网页/指定应用操作记录、显式桌面采集、本地转写与离线翻译。
 

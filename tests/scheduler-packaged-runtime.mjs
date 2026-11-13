@@ -1,7 +1,7 @@
 // Explicit packaged runtime QA. All OS job operations are fixture callbacks.
 // Executes the reviewed bootstrap against an empty, disposable profile only.
 import assert from 'node:assert/strict';
-import {mkdtemp,mkdir,readFile,writeFile,rm,realpath} from 'node:fs/promises';
+import {mkdtemp,mkdir,readFile,rm,realpath} from 'node:fs/promises';
 import {resolve,join,isAbsolute} from 'node:path';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
@@ -25,7 +25,6 @@ try{
   await job.dispatch('scheduler:job:remove',{}, {interactive:true});
   assert.equal(job.snapshot().enabled,false);assert.equal(job.snapshot().installed,false);assert.equal(job.snapshot().configured,false);
   const result={passed:true,version:review.plan.version,nodeVersion:review.plan.nodeVersion,exactReviewedArgvExecuted:true,emptyFixtureTickCompleted:true,attempted:0,jobCleanupConfirmed:true,osJobOperations:'fixture-only',realOSRegistration:false,physicalSleepWakeTested:false,modelCalls:0,accountActions:0};
-  await writeFile(resolve('reports/v024-packaged-scheduler-runtime.json'),JSON.stringify(result,null,2)+'\n');
   console.log(JSON.stringify(result,null,2));
 }finally{
   if(job){try{await job.dispatch('scheduler:job:remove',{}, {interactive:true});}finally{await job.close();}}

@@ -11,14 +11,28 @@ function portableCodec() {
   const text=value=>{if(typeof value!=='string'||value.length>262144)fail();const bytes=new Uint8Array(value.length*2);for(let i=0;i<value.length;i++){const n=value.charCodeAt(i);bytes[2*i]=n&255;bytes[2*i+1]=n>>>8;}return binary(bytes);};
   const untext=value=>{const bytes=unbinary(value);if(bytes.length%2)fail();let out='';for(let i=0;i<bytes.length;i+=2)out+=String.fromCharCode(bytes[i]|bytes[i+1]<<8);return out;};
   const views={Int8Array,Uint8Array,Uint8ClampedArray,Int16Array,Uint16Array,Int32Array,Uint32Array,Float32Array,Float64Array,BigInt64Array,BigUint64Array,DataView};
+  const isArrayIndex=key=>/^(0|[1-9][0-9]*)$/.test(key)&&Number(key)<2**32-1;
+  const dataProperty=(target,key,value)=>Object.defineProperty(target,key,{value,enumerable:true,writable:true,configurable:true});
   function encode(value) {
-    const seen=new Set();let nodes=0;
+    const seen=new Map();let nodes=0,encodedBytes=0;
+    const bounded=value=>{encodedBytes+=value.length;if(encodedBytes>524288)fail();return value;};
+    const encodeText=value=>bounded(text(value));
+    const properties=(object,keys,walk,depth)=>{
+      if(keys.length>4096)fail();
+      return keys.map(key=>{
+        const descriptor=Object.getOwnPropertyDescriptor(object,key);
+        if(typeof key!=='string'||!descriptor.enumerable||!('value'in descriptor))fail();
+        return [encodeText(key),walk(descriptor.value,depth+1)];
+      });
+    };
     const walk=(v,depth)=>{
       if(++nodes>4096||depth>16)fail();
       if(v===null)return ['null'];if(v===undefined)return ['undefined'];if(typeof v==='boolean')return ['boolean',v];
       if(typeof v==='number')return ['number',Number.isNaN(v)?'nan':v===Infinity?'infinity':v===-Infinity?'-infinity':Object.is(v,-0)?'-0':v];
-      if(typeof v==='bigint'){if(v>=10n**1024n||v<=-(10n**1024n))fail();const value=v.toString();if(value.length>1024)fail();return ['bigint',value];}if(typeof v==='string')return ['string',text(v)];
-      if(!v||typeof v!=='object'||seen.has(v))fail();seen.add(v);
+      if(typeof v==='bigint'){if(v>=10n**1024n||v<=-(10n**1024n))fail();const value=v.toString();if(value.length>1024)fail();return ['bigint',value];}if(typeof v==='string')return ['string',encodeText(v)];
+      if(!v||typeof v!=='object')fail();
+      if(seen.has(v))return ['ref',seen.get(v)];
+      seen.set(v,seen.size);
       if(v instanceof Date)return ['date',Number.isNaN(v.getTime())?null:v.getTime()];
       if(v instanceof Map){
         if(v.size>2048)fail();
@@ -28,17 +42,49 @@ function portableCodec() {
         if(v.size>4096)fail();
         return ['set',Array.from(v,value=>walk(value,depth+1))];
       }
-      if(v instanceof RegExp)return ['regexp',text(v.source),v.flags];
-      if(v instanceof ArrayBuffer)return ['binary','ArrayBuffer',binary(new Uint8Array(v))];
-      if(ArrayBuffer.isView(v)){if(v.byteOffset!==0||v.byteLength!==v.buffer.byteLength)fail();const name=Object.keys(views).find(name=>v instanceof views[name]);if(!name)fail();return ['binary',name,binary(new Uint8Array(v.buffer,v.byteOffset,v.byteLength))];}
-      if(Array.isArray(v)){if(v.length>4096)fail();const keys=Reflect.ownKeys(v);if(keys.some(k=>typeof k!=='string'||k!=='length'&&!/^(0|[1-9][0-9]*)$/.test(k))||v.length>4096)fail();return ['array',Array.from({length:v.length},(_,i)=>{const d=Object.getOwnPropertyDescriptor(v,String(i));if(!d||!('value'in d))fail();return walk(d.value,depth+1);})];}
+      if(v instanceof RegExp)return ['regexp',encodeText(v.source),v.flags];
+      if(v instanceof ArrayBuffer){
+        if(v.resizable)fail();
+        return ['binary','ArrayBuffer',bounded(binary(new Uint8Array(v)))];
+      }
+      if(ArrayBuffer.isView(v)){
+        const name=Object.keys(views).find(name=>v instanceof views[name]);
+        if(!name||!(v.buffer instanceof ArrayBuffer))fail();
+        return ['view',name,v.byteOffset,v.byteLength,walk(v.buffer,depth+1)];
+      }
+      if(Array.isArray(v)){
+        if(v.length>4096)fail();
+        const keys=Reflect.ownKeys(v).filter(key=>key!=='length');
+        if(keys.length===v.length&&keys.every(key=>typeof key==='string'&&isArrayIndex(key))){
+          return ['array',keys.map(key=>{
+            const descriptor=Object.getOwnPropertyDescriptor(v,key);
+            if(!descriptor.enumerable||!('value'in descriptor))fail();
+            return walk(descriptor.value,depth+1);
+          })];
+        }
+        return ['sparse-array',v.length,properties(v,keys,walk,depth)];
+      }
       if(![Object.prototype,null].includes(Object.getPrototypeOf(v)))fail();
-      return ['object',Reflect.ownKeys(v).map(key=>{const d=Object.getOwnPropertyDescriptor(v,key);if(typeof key!=='string'||!d.enumerable||!('value'in d))fail();return [text(key),walk(d.value,depth+1)];})];
+      return ['object',properties(v,Reflect.ownKeys(v),walk,depth)];
     };
     const out=JSON.stringify(walk(value,0));if(out.length>524288)fail();return out;
   }
   function decode(source) {
     if(typeof source!=='string'||source.length>524288)fail();let nodes=0,root;try{root=JSON.parse(source);}catch{fail();}
+    // Object slots follow their first appearance. Register containers before reading children.
+    const objects=[];
+    const remember=value=>{objects.push(value);return value;};
+    const readProperties=(target,entries,depth)=>{
+      const keys=new Set();
+      for(const pair of entries){
+        if(!Array.isArray(pair)||pair.length!==2)fail();
+        const key=untext(pair[0]);
+        if(keys.has(key)||Array.isArray(target)&&(key==='length'||isArrayIndex(key)&&Number(key)>=target.length))fail();
+        keys.add(key);
+        dataProperty(target,key,walk(pair[1],depth+1));
+      }
+      return target;
+    };
     const walk=(v,depth)=>{
       if(++nodes>4096||depth>16||!Array.isArray(v)||typeof v[0]!=='string')fail();
       const [kind,value]=v;
@@ -47,9 +93,13 @@ function portableCodec() {
       if(kind==='number'&&v.length===2){if(typeof value==='number'&&Number.isFinite(value))return value;if(value==='nan')return NaN;if(value==='infinity')return Infinity;if(value==='-infinity')return -Infinity;if(value==='-0')return -0;fail();}
       if(kind==='bigint'&&v.length===2&&typeof value==='string'&&value.length<=1024&&/^-?(?:0|[1-9][0-9]*)$/.test(value))return BigInt(value);
       if(kind==='string'&&v.length===2)return untext(value);
-      if(kind==='date'&&v.length===2&&(value===null||typeof value==='number'&&!Number.isNaN(value)&&Math.abs(value)<=8640000000000000))return new Date(value===null?NaN:value);
+      if(kind==='ref'&&v.length===2){
+        if(!Number.isInteger(value)||value<0||value>=objects.length||objects[value]===undefined)fail();
+        return objects[value];
+      }
+      if(kind==='date'&&v.length===2&&(value===null||typeof value==='number'&&!Number.isNaN(value)&&Math.abs(value)<=8640000000000000))return remember(new Date(value===null?NaN:value));
       if(kind==='map'&&v.length===2&&Array.isArray(value)&&value.length<=2048){
-        const map=new Map();
+        const map=remember(new Map());
         for(const pair of value){
           if(!Array.isArray(pair)||pair.length!==2)fail();
           const key=walk(pair[0],depth+1);
@@ -59,7 +109,7 @@ function portableCodec() {
         return map;
       }
       if(kind==='set'&&v.length===2&&Array.isArray(value)&&value.length<=4096){
-        const set=new Set();
+        const set=remember(new Set());
         for(const item of value){
           const decoded=walk(item,depth+1);
           if(set.has(decoded))fail();
@@ -72,16 +122,54 @@ function portableCodec() {
         let regexp;
         try{regexp=new RegExp(source,v[2]);}catch{fail();}
         if(regexp.source!==source||regexp.flags!==v[2])fail();
-        return regexp;
+        return remember(regexp);
       }
-      if(kind==='binary'&&v.length===3){const bytes=unbinary(v[2]),buffer=bytes.buffer;if(value==='ArrayBuffer')return buffer;if(!Object.hasOwn(views,value))fail();try{return new views[value](buffer);}catch{fail();}}
-      if(kind==='array'&&v.length===2&&Array.isArray(value)&&value.length<=4096)return value.map(item=>walk(item,depth+1));
-      if(kind==='object'&&v.length===2&&Array.isArray(value)&&value.length<=4096){const out={},keys=new Set();for(const pair of value){if(!Array.isArray(pair)||pair.length!==2)fail();const key=untext(pair[0]);if(keys.has(key))fail();keys.add(key);Object.defineProperty(out,key,{value:walk(pair[1],depth+1),enumerable:true,writable:true,configurable:true});}return out;}
+      if(kind==='binary'&&v.length===3){
+        const buffer=unbinary(v[2]).buffer;
+        if(value==='ArrayBuffer')return remember(buffer);
+        if(!Object.hasOwn(views,value))fail();
+        try{return remember(new views[value](buffer));}catch{fail();}
+      }
+      if(kind==='view'&&v.length===5&&Object.hasOwn(views,value)){
+        const [,name,offset,length,backing]=v;
+        if(!Number.isSafeInteger(offset)||offset<0||!Number.isSafeInteger(length)||length<0)fail();
+        if(!Array.isArray(backing)||!(backing[0]==='ref'||backing[0]==='binary'&&backing[1]==='ArrayBuffer'))fail();
+        const slot=objects.length;
+        objects.push(undefined);
+        const buffer=walk(backing,depth+1),Type=views[name];
+        if(!(buffer instanceof ArrayBuffer)||offset+length>buffer.byteLength)fail();
+        try{
+          if(Type===DataView)objects[slot]=new DataView(buffer,offset,length);
+          else{
+            if(length%Type.BYTES_PER_ELEMENT)fail();
+            objects[slot]=new Type(buffer,offset,length/Type.BYTES_PER_ELEMENT);
+          }
+        }catch{fail();}
+        return objects[slot];
+      }
+      if(kind==='array'&&v.length===2&&Array.isArray(value)&&value.length<=4096){
+        const array=remember([]);
+        for(const item of value)array.push(walk(item,depth+1));
+        return array;
+      }
+      if(kind==='sparse-array'&&v.length===3&&Number.isInteger(value)&&value>=0&&value<=4096&&Array.isArray(v[2])&&v[2].length<=4096){
+        return readProperties(remember(new Array(value)),v[2],depth);
+      }
+      if(kind==='object'&&v.length===2&&Array.isArray(value)&&value.length<=4096){
+        return readProperties(remember({}),value,depth);
+      }
       fail();
     };
     return walk(root,0);
   }
-  function key(value,seen=new Set()) {if(typeof value==='string'||typeof value==='number'&&!Number.isNaN(value)||value instanceof Date&&Number.isFinite(value.getTime())||value instanceof ArrayBuffer||ArrayBuffer.isView(value))return true;if(!Array.isArray(value)||seen.has(value))return false;seen.add(value);return value.every(item=>key(item,seen));}
+  function key(value,seen=new Set(),depth=0) {
+    if(depth>16)return false;
+    if(typeof value==='string'||typeof value==='number'&&!Number.isNaN(value)||value instanceof Date&&Number.isFinite(value.getTime())||value instanceof ArrayBuffer||ArrayBuffer.isView(value))return true;
+    if(!Array.isArray(value)||seen.has(value))return false;
+    seen.add(value);
+    for(let i=0;i<value.length;i++)if(!Object.hasOwn(value,i)||!key(value[i],seen,depth+1))return false;
+    return true;
+  }
   return {encode,decode,text,untext,key};
 }
 const codec=portableCodec();

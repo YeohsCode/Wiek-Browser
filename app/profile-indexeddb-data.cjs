@@ -85,6 +85,11 @@ function portableCodec() {
   return {encode,decode,text,untext,key};
 }
 const codec=portableCodec();
+// Represent exhaustion as null because 2^53 + 1 cannot be expressed as a Number.
+function generatorAfterKey(current,key) {
+  if(current===null||typeof key!=='number'||key<current)return current;
+  return key>=2**53?null:Math.floor(key)+1;
+}
 function validateIndexedDb(input) {
   const invalid=()=>{throw new Error('Invalid portable IndexedDB archive');};
   const object=(value,fields)=>{if(!value||Array.isArray(value)||typeof value!=='object'||Object.keys(value).some(k=>!fields.includes(k))||fields.some(k=>!Object.hasOwn(value,k)))invalid();};
@@ -97,12 +102,28 @@ function validateIndexedDb(input) {
     return {origin:area.origin,databases:list(area.databases,LIMITS.databases).map(db=>{
       object(db,['name','version','stores']);name(db.name);if(dbs.has(db.name)||!Number.isSafeInteger(db.version)||db.version<1)invalid();dbs.add(db.name);let records=0;const stores=new Set();
       const result={name:db.name,version:db.version,stores:list(db.stores,LIMITS.stores).map(store=>{
-        object(store,['name','keyPath','autoIncrement','indexes','records']);name(store.name);if(stores.has(store.name)||store.autoIncrement!==false)invalid();stores.add(store.name);const indexes=new Set();
-        return {name:store.name,keyPath:path(store.keyPath),autoIncrement:false,indexes:list(store.indexes,LIMITS.indexes).map(index=>{object(index,['name','keyPath','unique','multiEntry']);name(index.name);if(indexes.has(index.name)||typeof index.unique!=='boolean'||typeof index.multiEntry!=='boolean'||index.keyPath===null)invalid();indexes.add(index.name);return {name:index.name,keyPath:path(index.keyPath),unique:index.unique,multiEntry:index.multiEntry};}),records:list(store.records,LIMITS.records).map(record=>{object(record,['key','value']);if(++records>LIMITS.records||!codec.key(codec.decode(record.key)))invalid();codec.decode(record.value);return {key:record.key,value:record.value};})};
+        const fields=['name','keyPath','autoIncrement','indexes','records'];
+        if(store?.autoIncrement===true)fields.push('nextKey');
+        object(store,fields);name(store.name);if(stores.has(store.name)||typeof store.autoIncrement!=='boolean')invalid();stores.add(store.name);const indexes=new Set();
+        const keyPath=path(store.keyPath);
+        let minimum=1;
+        const result={name:store.name,keyPath,autoIncrement:store.autoIncrement,indexes:list(store.indexes,LIMITS.indexes).map(index=>{object(index,['name','keyPath','unique','multiEntry']);name(index.name);if(indexes.has(index.name)||typeof index.unique!=='boolean'||typeof index.multiEntry!=='boolean'||index.keyPath===null)invalid();indexes.add(index.name);return {name:index.name,keyPath:path(index.keyPath),unique:index.unique,multiEntry:index.multiEntry};}),records:list(store.records,LIMITS.records).map(record=>{
+          object(record,['key','value']);
+          const key=codec.decode(record.key);
+          if(++records>LIMITS.records||!codec.key(key))invalid();
+          minimum=generatorAfterKey(minimum,key);
+          codec.decode(record.value);return {key:record.key,value:record.value};
+        })};
+        if(store.autoIncrement){
+          const next=store.nextKey;
+          if(Array.isArray(keyPath)||keyPath===''||(next!==null&&(!Number.isInteger(next)||next<1||next>2**53||minimum===null||next<minimum)))invalid();
+          result.nextKey=next;
+        }
+        return result;
       })};
       const bytes=Buffer.byteLength(JSON.stringify(result));total+=bytes;if(bytes>LIMITS.databaseBytes||total>LIMITS.totalBytes)invalid();return result;
     })};
   })};
   return out;
 }
-module.exports={ENCODING,LIMITS,portableCodec,validateIndexedDb};
+module.exports={ENCODING,LIMITS,portableCodec,validateIndexedDb,generatorAfterKey};

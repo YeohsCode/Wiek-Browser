@@ -12,8 +12,30 @@ test('portable IndexedDB codec preserves UTF-16, dates, binary, special numbers 
  const alias={};for(const v of [new Blob(['x']),new Set(Array.from({length:4097},(_,i)=>i)),new Uint8Array(384*1024+1),new Uint8Array(8).subarray(1),new DataView(new ArrayBuffer(8),2),{a:alias,b:alias},Array(2)])assert.throws(()=>codec.encode(v),/Unsupported/);const cycle={};cycle.self=cycle;assert.throws(()=>codec.encode(cycle),/Unsupported/);
  for(const v of ['["binary","Function","AAAA"]','["object",[["YQA=",["null"]],["YQA=",["null"]]]]','["unknown"]','["set",[["number",0],["number","-0"]]]','["map",[[["null"],["null"]],[["null"],["boolean",true]]]]','["regexp","eAA=","gg"]'])assert.throws(()=>codec.decode(v),/Unsupported/);
 });
-test('IndexedDB schema rejects origin widening, auto generators, duplicates and invalid primary keys',()=>{
+test('IndexedDB schema rejects origin widening, incomplete generators, duplicates and invalid primary keys',()=>{
  assert.deepEqual(validateIndexedDb(input()),input());for(const change of [x=>x.origins[0].origin+='/',x=>x.origins.push(x.origins[0]),x=>x.origins[0].databases.push(x.origins[0].databases[0]),x=>x.origins[0].databases[0].stores[0].autoIncrement=true,x=>x.origins[0].databases[0].stores[0].records[0].key=codec.encode(NaN),x=>x.origins[0].databases[0].stores[0].indexes=[{name:codec.text('idx'),keyPath:null,unique:false,multiEntry:false}]]){const x=input();change(x);assert.throws(()=>validateIndexedDb(x));}
+});
+test('IndexedDB schema validates the archived generator against numeric keys, including exhaustion',()=>{
+ const archive=input(),store=archive.origins[0].databases[0].stores[0];
+ store.autoIncrement=true;
+ store.records[0].key=codec.encode(20.5);
+ for(const next of [21,25,2**53,null]){
+   store.nextKey=next;
+   assert.deepEqual(validateIndexedDb(archive),archive);
+ }
+ for(const next of [undefined,0,20,21.5,2**53+2,'21']){
+   store.nextKey=next;
+   assert.throws(()=>validateIndexedDb(archive),/Invalid portable/);
+ }
+ store.records[0].key=codec.encode(Infinity);
+ store.nextKey=2**53;
+ assert.throws(()=>validateIndexedDb(archive),/Invalid portable/);
+ store.nextKey=null;
+ assert.deepEqual(validateIndexedDb(archive),archive);
+ for(const path of [codec.text(''),[codec.text('id')]]){
+   store.keyPath=path;
+   assert.throws(()=>validateIndexedDb(archive),/Invalid portable/);
+ }
 });
 test('v3 encrypted archive carries validated IndexedDB values without plaintext data',async()=>{
  const a=createProfileArchive(),data={profile:{name:'IndexedDB fixture'},indexedDB:input()},encoded=await a.encode(data,'public indexed fixture passphrase');assert.equal(encoded.includes('private fixture'),false);const decoded=await a.decode(encoded,'public indexed fixture passphrase');assert.equal(decoded.metadata.version,3);assert.deepEqual(decoded.payload.indexedDB,input());

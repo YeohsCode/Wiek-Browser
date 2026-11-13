@@ -1,26 +1,69 @@
 'use strict';
-const {ENCODING,LIMITS,portableCodec,validateIndexedDb}=require('./profile-indexeddb-data.cjs');
+const {ENCODING,LIMITS,portableCodec,validateIndexedDb,generatorAfterKey}=require('./profile-indexeddb-data.cjs');
 const {restoreArea,storageFrame,sameStorageFrame,closeContents,originOf}=require('./profile-web-storage.cjs');
 const cancelled=signal=>{if(signal?.aborted)throw new Error('IndexedDB operation cancelled');};
 // Fixed code, always executed in an isolated world. No archive text is code.
-async function indexedDbScript(options,makeCodec) {
+async function indexedDbScript(options,makeCodec,nextAfterKey) {
   if(location.href!==options.url||location.origin!==options.origin)throw new Error('IndexedDB document changed');
   const codec=makeCodec(),open=new Set(),transactions=new Set();let stopped=false;
   const check=()=>{if(stopped)throw new Error('IndexedDB operation stopped');};
   const database=(name,version,upgrade)=>new Promise((resolve,reject)=>{const r=indexedDB.open(name,version);r.onupgradeneeded=()=>{if(stopped||!upgrade){r.transaction.abort();return;}try{upgrade(r.result,r.transaction);}catch{r.transaction.abort();}};r.onblocked=()=>reject(new Error('IndexedDB is blocked'));r.onerror=()=>reject(new Error('IndexedDB open failed'));r.onsuccess=()=>{const db=r.result;if(stopped){db.close();reject(new Error('IndexedDB operation stopped'));return;}open.add(db);db.onversionchange=()=>db.close();resolve(db);};});
+  function inlineRecord(path,key) {
+    const parts=path.split('.'),record={};
+    let target=record;
+    for(const part of parts.slice(0,-1)){
+      const child={};
+      Object.defineProperty(target,part,{value:child,enumerable:true});
+      target=child;
+    }
+    Object.defineProperty(target,parts.at(-1),{value:key,enumerable:true});
+    return record;
+  }
   const capture=async(db,name)=>{
     const names=Array.from(db.objectStoreNames);if(names.length>options.limits.stores)throw new Error('IndexedDB store limit');
     if(!names.length)return {name:codec.text(name),version:db.version,stores:[]};
+    const readonly=db.transaction(names,'readonly');
+    const hasGenerators=names.some(name=>readonly.objectStore(name).autoIncrement);
     return new Promise((resolve,reject)=>{
-      const tx=db.transaction(names,'readonly');transactions.add(tx);const stores=[];let records=0,bytes=0,failure;
+      const tx=hasGenerators?db.transaction(names,'readwrite'):readonly;
+      transactions.add(tx);
+      const stores=[],snapshot={name:codec.text(name),version:db.version,stores};
+      let records=0,bytes=0,pending=names.length,failure,rolledBack=false;
       const bad=error=>{failure=error;try{tx.abort();}catch{reject(error);}};
-      try {for(const name of names){const source=tx.objectStore(name);if(source.autoIncrement)throw new Error('Auto-increment stores are not portable');
+      const finishStore=()=>{
+        if(--pending===0&&hasGenerators){
+          // Roll back every probe and generator advance before returning the snapshot.
+          tx.abort();
+          rolledBack=true;
+        }
+      };
+      try {for(const name of names){const source=tx.objectStore(name);
         const keyPath=value=>value===null?null:Array.isArray(value)?value.map(codec.text):codec.text(value);
         const indexes=Array.from(source.indexNames).map(name=>{const index=source.index(name);return{name:codec.text(name),keyPath:keyPath(index.keyPath),unique:index.unique,multiEntry:index.multiEntry};});if(indexes.length>options.limits.indexes)throw new Error('IndexedDB index limit');
-        const store={name:codec.text(name),keyPath:keyPath(source.keyPath),autoIncrement:false,indexes,records:[]};stores.push(store);
-        const cursor=source.openCursor();cursor.onsuccess=()=>{try{check();const row=cursor.result;if(!row)return;if(++records>options.limits.records)throw new Error('IndexedDB record limit');const record={key:codec.encode(row.primaryKey),value:codec.encode(row.value)};bytes+=record.key.length+record.value.length;if(bytes>options.limits.databaseBytes)throw new Error('IndexedDB byte limit');store.records.push(record);row.continue();}catch(error){bad(error);}};
+        const store={name:codec.text(name),keyPath:keyPath(source.keyPath),autoIncrement:source.autoIncrement,indexes,records:[]};stores.push(store);
+        const cursor=source.openCursor();
+        cursor.onsuccess=()=>{try{
+          check();const row=cursor.result;
+          if(row){
+            if(++records>options.limits.records)throw new Error('IndexedDB record limit');
+            const record={key:codec.encode(row.primaryKey),value:codec.encode(row.value)};
+            bytes+=record.key.length+record.value.length;if(bytes>options.limits.databaseBytes)throw new Error('IndexedDB byte limit');
+            store.records.push(record);row.continue();return;
+          }
+          if(!source.autoIncrement){finishStore();return;}
+          // An empty value has no index keys except those derived from the generated primary key.
+          const probe=source.add({});
+          probe.onsuccess=()=>{try{check();store.nextKey=probe.result;finishStore();}catch(error){bad(error);}};
+          probe.onerror=event=>{
+            if(probe.error?.name!=='ConstraintError')return;
+            event.preventDefault();
+            event.stopPropagation();
+            try{check();store.nextKey=null;finishStore();}catch(error){bad(error);}
+          };
+        }catch(error){bad(error);}};
       }}catch(error){bad(error);}
-      tx.oncomplete=()=>{transactions.delete(tx);resolve({name:codec.text(name),version:db.version,stores});};tx.onabort=tx.onerror=()=>{transactions.delete(tx);reject(failure||new Error('IndexedDB read aborted'));};
+      tx.oncomplete=()=>{transactions.delete(tx);if(hasGenerators)reject(new Error('IndexedDB probe was not rolled back'));else resolve(snapshot);};
+      tx.onabort=()=>{transactions.delete(tx);if(rolledBack&&!failure&&!stopped)resolve(snapshot);else reject(failure||new Error('IndexedDB read aborted'));};
     });
   };
   const operation=async()=>{
@@ -33,7 +76,15 @@ async function indexedDbScript(options,makeCodec) {
     if(existing.length)throw new Error('Destination IndexedDB is not empty');
     for(const saved of options.databases){check();const name=codec.untext(saved.name);let db;
       try {db=await database(name,saved.version,(created,tx)=>{
-        for(const savedStore of saved.stores){const keyPath=savedStore.keyPath===null?null:Array.isArray(savedStore.keyPath)?savedStore.keyPath.map(codec.untext):codec.untext(savedStore.keyPath),store=created.createObjectStore(codec.untext(savedStore.name),{keyPath,autoIncrement:false});
+        for(const savedStore of saved.stores){const keyPath=savedStore.keyPath===null?null:Array.isArray(savedStore.keyPath)?savedStore.keyPath.map(codec.untext):codec.untext(savedStore.keyPath),store=created.createObjectStore(codec.untext(savedStore.name),{keyPath,autoIncrement:savedStore.autoIncrement});
+          if(savedStore.autoIncrement){
+            const nextKey=savedStore.records.reduce((next,row)=>nextAfterKey(next,codec.decode(row.key)),1);
+            if(savedStore.nextKey!==nextKey){
+              const key=savedStore.nextKey===null?2**53:savedStore.nextKey-1;
+              if(keyPath===null)store.add({},key);else store.add(inlineRecord(keyPath,key));
+              store.delete(key);
+            }
+          }
           for(const index of savedStore.indexes)store.createIndex(codec.untext(index.name),Array.isArray(index.keyPath)?index.keyPath.map(codec.untext):codec.untext(index.keyPath),{unique:index.unique,multiEntry:index.multiEntry});
           for(const row of savedStore.records){const value=codec.decode(row.value);if(keyPath===null)store.add(value,codec.decode(row.key));else store.add(value);}
         }
@@ -45,7 +96,7 @@ async function indexedDbScript(options,makeCodec) {
   let timer;try{return await Promise.race([operation(),new Promise((_,reject)=>{timer=setTimeout(()=>{stopped=true;for(const tx of transactions)try{tx.abort();}catch{}for(const db of open)db.close();reject(new Error('IndexedDB operation timed out'));},options.timeoutMs);})]);}finally{clearTimeout(timer);stopped=true;for(const tx of transactions)try{tx.abort();}catch{}for(const db of open)db.close();}
 }
 async function run(wc,options,{timeoutMs=5000}={}) {
-  let timer;try{return await Promise.race([wc.executeJavaScriptInIsolatedWorld(1004,[{code:'('+indexedDbScript.toString()+')('+JSON.stringify({...options,limits:LIMITS,timeoutMs})+','+portableCodec.toString()+')'}]),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('IndexedDB transport timed out')),timeoutMs+500);})]);}finally{clearTimeout(timer);}
+  let timer;try{return await Promise.race([wc.executeJavaScriptInIsolatedWorld(1004,[{code:'('+indexedDbScript.toString()+')('+JSON.stringify({...options,limits:LIMITS,timeoutMs})+','+portableCodec.toString()+','+generatorAfterKey.toString()+')'}]),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('IndexedDB transport timed out')),timeoutMs+500);})]);}finally{clearTimeout(timer);}
 }
 async function captureProfileIndexedDB(spaces,{signal}={}) {
   const origins=[],seen=new Set(),warnings=[];let databases=0,total=0,skippedDatabases=0,skippedOrigins=0;

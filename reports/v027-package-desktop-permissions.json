@@ -1,0 +1,12 @@
+{
+  "version": "0.27.0",
+  "generatedAt": "2026-11-13T16:08:42.362Z",
+  "packagedNativeHelper": true,
+  "permissions": {
+    "accessibility": true,
+    "screen": true,
+    "inputMonitoring": true
+  },
+  "permissionChanges": 0,
+  "screenCaptureAttempted": false
+}

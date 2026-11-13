@@ -1,6 +1,15 @@
 # Wiek Browser 验证结果
 
-当前开发检查点为 **0.26.0**，日期为 2026-11-13。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+当前开发检查点为 **0.27.0**，日期为 2026-11-14。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+
+## 0.27 专项验收
+
+- IndexedDB 归档恢复共享引用和循环引用、稀疏数组、同一固定缓冲区上的多个二进制视图。真实 Chromium 验证恢复后的对象身份、数组空位、缓冲区和视图范围，并成功恢复含旧版 TypedArray 标签的归档。[设计与边界](../analysis/profile-indexeddb-design.md)
+
+- 打包专项 16/16 通过，其中 29 项真实 IndexedDB 检查、37 项应用 IPC 检查。打包宿主 198 项通过。浏览器同集 69/69、1,248 条断言，204 份发行文件与 81 份原始输入身份检查通过。原始 SDK 532/532，TypeScript 检查通过。[打包专项](v027-package-targeted.log) · [宿主](v027-package-workbench.log) · [同集](v027-browser-suite.log) · [身份核对](v027-package-identity.log) · [SDK](v027-sdk.log)
+- 打包后台启动器的隔离测试通过，验收脚本输出本次结果，避免覆盖以前的报告。桌面权限探测成功，实机录制、多屏和撤权仍待验收。[启动器](v027-package-scheduler.log) · [权限状态](v027-package-desktop-permissions.json)
+- 本机串行源码回归 610/611，Git 专项复测 16/17。两次各有一项不同的合成 PR 夹具超时，两条用例再单独复测均通过，原期限保留。[串行回归](v027-source.log) · [Git 专项](v027-git-retest.log) · [两条用例](v027-git-cases.log)
+- 本机命令及三处指南链接已更新。源码提交 `db9329b` 已推送。[安装记录](v027-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43459604246)
 
 ## 0.26 专项验收
 
@@ -10,7 +19,7 @@
 - P3 打包版后台启动器在隔离环境完成空任务检查，核对审核过的参数及清理结果。桌面原生组件读取到辅助功能、输入监控及屏幕录制权限均已授予。多显示器、撤权、实际系统注册及物理睡眠唤醒仍待验收。[启动器](v026-package-scheduler.log) · [权限状态](v026-package-desktop-permissions.json)
 - 首次并行源码回归 609/610。MCP 表单夹具在界面关闭后立即检查网络请求，当时请求仍在传输。单项复测通过，夹具改为等待本次调用实际完成后再检查请求，保留原有断言和整体期限。[初测](v026-source.log) · [单项复测](v026-mcp-panel-retest.log)
 - 修正后的本机串行全量回归 608/610。两项远程 Git 合成夹具超时，随后独立文件复测 17/17。原始 SDK 532/532，TypeScript 检查通过。全局命令与三处指南链接已更新到 0.26 目录包。[串行全量](v026-source-final.log) · [Git 复测](v026-git-retest.log) · [SDK](v026-sdk.log) · [安装记录](v026-install.json)
-- 源码已推送为 `05dd68c`，远端 CI 已启动。[远端运行](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43354343788)
+- 源码已推送为 `05dd68c`，远端 CI 已通过，完整源码 610/610。[远端运行](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43354343788)
 
 ## 0.25 专项验收
 

@@ -1,0 +1,25 @@
+{"ok":true,"checks":14,"actualElectronIPC":true,"realStdioPeer":true,"inertPromptPreview":true,"modelCalls":0,"accountActions":0}
+✔ modern stdio and prompt preview operate through real Electron IPC without executing server text (971.398291ms)
+✔ portable IndexedDB codec preserves UTF-16, dates, binary, special numbers and inert property names (3.547458ms)
+✔ IndexedDB schema rejects origin widening, incomplete generators, duplicates and invalid primary keys (1.244583ms)
+✔ IndexedDB schema validates the archived generator against numeric keys, including exhaustion (0.825125ms)
+✔ v3 encrypted archive carries validated IndexedDB values without plaintext data (839.472125ms)
+✔ IndexedDB capture refuses navigated and partitioned origins before reading any records (1.183375ms)
+{"ok":true,"checks":27,"bootstrapNetworkRequests":0,"sourceProfileUnchanged":true,"realBrowserIndexedDB":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron transfers explicit selected-origin IndexedDB offline, excludes unsupported data and rolls back failures (5984.422375ms)
+✔ web storage capture is opt-in and sends no CDP commands by default (0.718167ms)
+✔ navigated, closed and partitioned tabs retain only their URL with explicit skipped-storage warnings (1.01ms)
+✔ oversized storage is omitted without corrupting the portable tab inventory (0.824459ms)
+✔ cancelled capture yields no partially assembled archive (0.31225ms)
+{"ok":true,"checks":34,"bootstrapNetworkRequests":0,"realBrowserSessions":true,"sourceProfileUnchanged":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron migrates two tab sessions before site scripts, with no bootstrap network and bounded failure cleanup (4196.028167ms)
+{"ok":true,"checks":37,"actualApplicationIPC":true,"injectedNativeDialogs":true,"realPassphraseModal":true,"bootstrapNetworkRequests":0,"modelCalls":0,"externalAccountActions":0}
+✔ actual application exports and restores through trusted IPC and passphrase UI; cancellations create no profile (6314.480333ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 18519.278208

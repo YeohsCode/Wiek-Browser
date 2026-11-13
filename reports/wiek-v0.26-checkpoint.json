@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 5,
+  "clientDate": "2026-11-13",
+  "generatedAt": "2026-11-13T02:45:59.965Z",
+  "project": "Wiek Browser",
+  "version": "0.26.0",
+  "repository": "https://github.com/YeohsCode/Wiek-Browser",
+  "fullParity": false,
+  "runtimeIndependent": true,
+  "previousCheckpoint": "wiek-v0.25-checkpoint.json",
+  "sdkTests": {
+    "pass": 532,
+    "fail": 0,
+    "skip": 0,
+    "immutableInputs": 81,
+    "namespaceMappedInputs": true,
+    "assertionsRemoved": 0,
+    "thresholdsChanged": 0,
+    "log": "v026-sdk.log"
+  },
+  "packagedTargetedTests": {
+    "pass": 15,
+    "fail": 0,
+    "skip": 0,
+    "realIndexedDBChecks": 27,
+    "applicationIPCChecks": 37,
+    "log": "v026-package-targeted-final.log"
+  },
+  "browserSuite": {
+    "status": "passed",
+    "total": 69,
+    "pass": 69,
+    "fail": 0,
+    "skip": 0,
+    "assertions": 1248,
+    "log": "v026-browser-suite.log",
+    "result": "comparison.json"
+  },
+  "packageIdentity": {
+    "passed": true,
+    "checkedFiles": 204,
+    "immutableInputs": 81,
+    "sdkMatchesCompared": true,
+    "log": "v026-package-identity.log"
+  },
+  "installedEntrypoints": {
+    "updated": true,
+    "verifiedLinks": 4,
+    "receipt": "v026-install.json"
+  },
+  "localTests": {
+    "pass": 608,
+    "fail": 2,
+    "skip": 0,
+    "log": "v026-source-final.log",
+    "initialLog": "v026-source.log",
+    "gitFileRetest": {
+      "pass": 17,
+      "fail": 0,
+      "log": "v026-git-retest.log"
+    }
+  },
+  "ci": {
+    "status": "completed",
+    "runId": 43354343788,
+    "testedCommit": "05dd68c250c2521d3ac7d0376ae6468337213ddd",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43354343788",
+    "conclusion": "success",
+    "evidence": "p4-ci-43354343788-status.json"
+  },
+  "paidModelCalls": 0,
+  "externalAccountActions": 0,
+  "signed": false,
+  "notarized": false,
+  "packagedHost": {
+    "pass": true,
+    "checks": 198,
+    "version": "0.26.0",
+    "log": "v026-package-workbench.log"
+  },
+  "packagedScheduler": {
+    "pass": true,
+    "log": "v026-package-scheduler.log",
+    "realOSRegistration": false
+  },
+  "desktopPermissions": {
+    "evidence": "v026-package-desktop-permissions.json",
+    "nativeCaptureAttempted": false
+  }
+}

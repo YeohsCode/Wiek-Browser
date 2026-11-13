@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "version": "0.27.0",
+  "filesChecked": 200,
+  "textFilesChecked": 188,
+  "scannedDirectories": [
+    "app",
+    "cli",
+    "skills",
+    "packages/sdk/dist",
+    "packages/sdk/skill-body"
+  ],
+  "violations": [],
+  "scope": "All owned runtime, SDK build output, available SDK sources, product Skills and package configuration. Original test inputs and legal notices are outside runtime scope."
+}

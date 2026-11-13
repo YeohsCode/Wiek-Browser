@@ -1,0 +1,38 @@
+✔ configured remote listing and reviewed new-branch push use a real local bare Git remote (475.609041ms)
+✔ one-use review rejects local edits, branch changes, wrong project and destination changes (367.581792ms)
+✔ fetch downloads just the selected branch without moving HEAD or changing working bytes (450.891292ms)
+✔ pull applies a true fast-forward, refuses dirty/diverged states and never creates merge commits (820.214875ms)
+✔ normal push rejects rewrites, explicit force-with-lease succeeds, stale remote review never writes (905.49475ms)
+✔ transport/options/multiple push destinations are refused and names remain literal argv (342.634625ms)
+✔ cancel interrupts a real push process, marks remote outcome uncertain and cannot replay (2266.063792ms)
+✔ timeout bounds real child lifetime; service close cancels children and reviewed fetch stays safe (5425.415041ms)
+✔ pending review cancellation is explicit and wrong-project cancellation cannot consume it (272.916709ms)
+✔ GitHub list/detail/diff use fixed repository routes and inert bounded strings via a real synthetic gh process (2250.056458ms)
+✔ PR create is reviewable and draft by default; literal multiline body reaches stdin only after confirmation (2631.883292ms)
+✖ PR comment/state/merge require review and are bound to the exact pull request snapshot (3896.453ms)
+✔ authentication/protocol failures are explicit; uncertain PR POSTs are never retried (6252.750125ms)
+✔ pure URL validation excludes credentials, remote helpers and unintended hosts (0.2165ms)
+✔ PR branch publication checks, replaced reviews and rejected merge results never report false success (3162.73725ms)
+✔ server-side lease rejects a branch changed after the final read, preserving the racing commit (2078.112958ms)
+✔ large PR diffs have an explicit bounded preview instead of a silently shortened full-diff claim (1912.301833ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 16
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 33588.62875
+
+✖ failing tests:
+
+test at tests/workspace-remote-git.test.mjs:133:1
+✖ PR comment/state/merge require review and are bound to the exact pull request snapshot (3896.453ms)
+  Error: Operation timed out; refresh the remote before retrying a write.
+      at fail (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/workspace-remote-git.cjs:6:72)
+      at ChildProcess.<anonymous> (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/app/workspace-remote-git.cjs:52:35)
+      at ChildProcess.emit (node:events:508:28)
+      at maybeClose (node:internal/child_process:1085:16)
+      at ChildProcess._handle.onexit (node:internal/child_process:304:5) {
+    error_code: 'VEK_REMOTE_TIMEOUT'
+  }

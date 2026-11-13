@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-11T01:14:59.185Z",
-  "version": "0.24.0",
+  "generatedAt": "2026-11-13T00:18:10.831Z",
+  "version": "0.25.0",
   "checked": 384,
   "originalEgoLogoHits": [],
   "skillMappings": [
@@ -10,7 +10,7 @@
       "matches": true
     },
     {
-      "base": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist-validation/v024/mac-arm64/Wiek Browser.app/Contents/Resources/app",
+      "base": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist-validation/v025/mac-arm64/Wiek Browser.app/Contents/Resources/app",
       "skill": "wiek-browser",
       "matches": true
     }

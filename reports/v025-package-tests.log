@@ -1,0 +1,17 @@
+{"ok":true,"checks":22,"realCLI":true,"isolatedData":true,"modelCalls":0,"accountActions":0}
+✔ real CLI distinguishes reopening tabs, continuing scripts, completed tasks and user handoff (4985.360041ms)
+✔ skipping startup tabs preserves browser data for a later normal launch (5410.021125ms)
+✔ portable IndexedDB codec preserves UTF-16, dates, binary, special numbers and inert property names (3.495709ms)
+✔ IndexedDB schema rejects origin widening, auto generators, duplicates and invalid primary keys (0.755583ms)
+✔ v3 encrypted archive carries validated IndexedDB values without plaintext data (421.847292ms)
+✔ IndexedDB capture refuses navigated and partitioned origins before reading any records (0.667291ms)
+{"ok":true,"checks":23,"bootstrapNetworkRequests":0,"sourceProfileUnchanged":true,"realBrowserIndexedDB":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron transfers explicit selected-origin IndexedDB offline, excludes unsupported data and rolls back failures (1276.444625ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 12246.683416

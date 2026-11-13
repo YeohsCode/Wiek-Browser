@@ -11,7 +11,7 @@
 | 文件/Git | 范围内编辑/search/watch、Git、linked worktree checkpoint、审核式远程操作 | 更多仓库布局、真实PR账号路径 |
 | 项目本地服务 | 按需发现、回环地址、显式标题识别、审核停止、微秒启动身份复核 | 全局分类、自动标题缓存、其他平台；参考运行行为未验证 |
 | MCP | 传统/现代stdio与HTTP、作用域工具/资源、订阅、提示列表/预览与变更失效、OAuth/PKCE、身份审核、表单续传 | DCR/step-up、资源/URL续传、sampling/roots |
-| 资料迁移 | 已选来源基础导入、v3加密archive、显式localStorage/sessionStorage、有界IndexedDB | 自增/复杂类型IndexedDB、多来源完整会话、OS绑定密文迁移 |
+| 资料迁移 | 已选来源基础导入、v3加密archive、显式localStorage/sessionStorage、有界IndexedDB（含 Map、Set、RegExp） | 自增键和其余复杂类型IndexedDB、多来源完整会话、OS绑定密文迁移 |
 | 自动化 | 时区/DST、执行模式、后台作业、忙碌延期、记忆/结果、停止判定与恢复 | 物理sleep/login、后台项撤销；本轮8种安装布局与链接身份保护已验收 |
 | 桌面/录制 | 显式采集、被动工具栏、指定应用录制、安全输入边界与孤儿自停 | 最终包正向、实际撤权、多屏、更多应用 |
 | 语音/翻译 | 本地转写、词典/历史；中英/中西四例源码及打包服务 | 不代表一般质量；模型另行安装 |

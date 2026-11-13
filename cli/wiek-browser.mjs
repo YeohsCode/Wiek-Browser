@@ -20,7 +20,7 @@ const defaultData = packaged
 const dataDir = resolve(process.env.VEK_DATA_DIR || defaultData);
 const runtimePath = join(dataDir, 'runtime.json');
 const args = process.argv.slice(2);
-const usage = `Wiek Browser — local browser and agent workspace\n\n  wiek-browser install                Register the command and agent Skills\n  wiek-browser upgrade                Show explicit update instructions\n  wiek-browser start                  Open the browser\n  wiek-browser status                 Show host status\n  wiek-browser translation install --python PATH  Install offline models [--pairs en-zh,zh-en,en-es,es-en]\n  wiek-browser automation memory --stdin  Replace memory for this scheduled run\n  wiek-browser automation result --json JSON  Report notify/silent for this run\n  wiek-browser scheduler tick         Run opted-in due CLI automations once while closed\n  wiek-browser api ACTION --json JSON Call the local workbench API\n  wiek-browser skill                  Print the agent API guide\n  wiek-browser nodejs [-e JavaScript]  Run a script (or read stdin)\n  wiek-browser nodejs --sdk-path PATH  Use an explicit compatible SDK\n  wiek-browser stop [--timeout-ms N]  Wait for this browser to exit (default 30000 ms)\n\nExample:\n  const task = await taskSpace('research');\n  const page = task.page('p1');\n  await page.goto('https://example.com');\n  console.log(await page.snapshot());\n\nWIEK_DATA_DIR selects an independent persistent browser data directory.\n`;
+const usage = `Wiek Browser — local browser and agent workspace\n\n  wiek-browser install                Register the command and agent Skills\n  wiek-browser upgrade                Show explicit update instructions\n  wiek-browser start [--no-restore]   Open the browser, optionally with a blank tab\n  wiek-browser status                 Show host status\n  wiek-browser translation install --python PATH  Install offline models [--pairs en-zh,zh-en,en-es,es-en]\n  wiek-browser automation memory --stdin  Replace memory for this scheduled run\n  wiek-browser automation result --json JSON  Report notify/silent for this run\n  wiek-browser scheduler tick         Run opted-in due CLI automations once while closed\n  wiek-browser api ACTION --json JSON Call the local workbench API\n  wiek-browser skill                  Print the agent API guide\n  wiek-browser nodejs [-e JavaScript]  Run a script (or read stdin)\n  wiek-browser nodejs --sdk-path PATH  Use an explicit compatible SDK\n  wiek-browser stop [--timeout-ms N]  Wait for this browser to exit (default 30000 ms)\n\nExample:\n  const task = await taskSpace('research');\n  const page = task.page('p1');\n  await page.goto('https://example.com');\n  console.log(await page.snapshot());\n\nWIEK_DATA_DIR selects an independent persistent browser data directory.\n`;
 let rpc;
 try {
   if (args.includes('--help') || args[0] === '-h') {
@@ -54,7 +54,10 @@ try {
     await waitForHostExit(host.pid, {timeoutMs});
     process.stdout.write('Wiek Browser stopped.\n');
   } else if (args[0] === 'start') {
-    rpc = await connect(true);
+    if (args.length > 2 || (args.length === 2 && args[1] !== '--no-restore')) {
+      throw new Error('Usage: wiek-browser start [--no-restore]');
+    }
+    rpc = await connect(true, args.slice(1));
     process.stdout.write('Wiek Browser is running.\n');
   } else if (args[0] === 'api' && args[1] === 'help') {
     process.stdout.write(await readFile(join(root,'skills/wiek-browser/API.md'),'utf8'));
@@ -81,7 +84,7 @@ try {
     if (!existsSync(sdkPath)) throw new Error('SDK build missing. Run npm run build:sdk first.');
     const sdk = await import(pathToFileURL(sdkPath).href);
     try {
-      process.exitCode = await sdk.runMain({ argv: [], stdinText: source });
+      process.exitCode = await sdk.runMain({ argv: [], stdinText: source, reportControlErrors: true });
     } finally {
       await sdk.disposeWiekSdk?.();
     }
@@ -117,7 +120,7 @@ async function readStdin() {
   return text;
 }
 
-async function connect(autoStart) {
+async function connect(autoStart, launchArgs = []) {
   try { return await connectExisting(); } catch (error) {
     if (error.error_code === 'WIEK_HOST_UNRESPONSIVE') throw error;
     if (autoStart && process.env.VEK_BROWSER_AUTOSTART==='0') throw new Error('Browser auto-start is disabled in this automation worker');
@@ -130,7 +133,7 @@ async function connect(autoStart) {
     : require('electron'));
   const env = { ...process.env, VEK_DATA_DIR: dataDir };
   delete env.ELECTRON_RUN_AS_NODE;
-  const child = spawn(electron, [root], {
+  const child = spawn(electron, [root, ...launchArgs], {
     detached: true, env, stdio: ['ignore', log.fd, log.fd],
   });
   let spawnError;

@@ -6,7 +6,7 @@
 
 A local Chromium browser and agent workspace with task spaces, isolated browser profiles, file/Git tools, scheduled automations, and browser automation. Wiek has an independently implemented Electron host and local services, plus its own standalone SDK build and runtime namespace. No separate browser installation or service is required. Third-party license and copyright details are retained in [NOTICE.md](NOTICE.md).
 
-**Current checkpoint: 0.24.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
+**Current checkpoint: 0.25.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
 
 ## Run locally
 
@@ -58,6 +58,8 @@ JS
 ```
 
 While the browser stays running, reuse the task ID and page label for the same task. Use unique names and isolated data directories for independent tests. After a browser restart, identify the reopened tabs again. See the [terminology guide](docs/terminology.md), [usability audit](reports/usability-audit.md), and [project tools API](skills/wiek-browser/API.md).
+
+Use `wiek-browser start --no-restore` to start with a blank tab. Saved tabs remain available on the next normal launch, and browser profile data stays available.
 
 ## Optional local models
 

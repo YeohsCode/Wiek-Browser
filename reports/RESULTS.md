@@ -1,6 +1,16 @@
 # Wiek Browser 验证结果
 
-当前开发检查点为 **0.24.0**，日期为 2026-11-11。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+当前开发检查点为 **0.25.0**，日期为 2026-11-13。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+
+## 0.25 专项验收
+
+- 实际目录包的恢复与 IndexedDB 专项 7/7 通过，覆盖控制权错误被捕获后的退出码与日志、跳过重开时的旧数据保留、正常启动恢复，以及 Map、Set、RegExp 的加密归档往返。
+- 原始 SDK 回归 532/532 通过，81 份固定输入保持字节身份。TypeScript 检查通过。
+- 第一次完整源码回归为 608/609。远程 Git 合成夹具的认证错误断言遇到子进程超时，串行单项复测通过，完整串行复测通过 609/609。
+
+- 打包版浏览器同集 69/69，共 1,248 条断言，204 个发行文件身份检查通过。全局命令已切换到 0.25 目录包。
+
+[打包专项](v025-package-tests.log) · [SDK 回归](v025-sdk-regression.log) · [源码复测](v025-source-final.log) · [源码初测](v025-source-initial.log) · [远程 Git 单项复测](v025-git-retest.log) · [浏览器同集](v025-browser-suite.log) · [应用包核对](v025-package-identity.log) · [安装记录](v025-install.json)
 
 ## 用户反馈与自动化继续执行
 
@@ -8,7 +18,7 @@
 
 指南删除一目标一组和普通错误后一律重复询问的限制。重启后按当前标签页重新建立页面句柄，独立测试使用唯一名称与隔离目录，已有授权可继续目标页面。实际包恢复测试与全局命令指南均已核对。错误码与控制权判断兼容既有调用。
 
-## 当前实际结果
+## 0.24 检查点结果
 
 | 检查 | 结果 | 证据 |
 |---|---|---|
@@ -23,11 +33,11 @@
 | 实际包图标与独立运行扫描 | 通过 | [图标](terminology-brand-package.log)、[扫描](terminology-independent-package.log) |
 | 69项浏览器同集 | 69/69，1,248断言，零失败/跳过，独立宿主退出 | [运行日志](v024-browser-suite.log)、[结果](comparison.md) |
 | 实际包源码与原始输入身份 | 204份发行文件一致，81份原始输入不变，包中SDK与同集执行字节一致 | [身份](v024-package-identity.log) |
-| 当前提交远端CI | 全部通过，源码提交 `646421e` | [完整CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/42938519050)、[验收状态](p4-ci-42938519050-status.json) |
+| 0.24 远端CI | 全部通过，源码提交 `646421e` | [完整CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/42938519050)、[验收状态](p4-ci-42938519050-status.json) |
 
 远端验收包括532项SDK、608项源码、336项框架、198项打包宿主、17项打包恢复检查、69项浏览器/1,248条断言和204份发行文件身份。面板、迁移、后台启动器、固定输入与图标检查同样通过。原始CI日志保留为 `p4-ci-42938519050-ci-*.log`。本次归档提交仅更新文档和证据，运行代码对应上述CI提交。
 
-## 当前功能专项
+## 0.24 功能专项
 
 0.24还包含项目本地服务显式标题读取、现代stdio和提示模板预览、有限类型IndexedDB加密备份、后台任务安装路径与代码身份检查。分别见[本地服务](../analysis/local-services-design.md)、[MCP](../analysis/mcp-stdio-prompts-design.md)、[浏览器数据备份](../analysis/profile-indexeddb-design.md)和[后台任务](../analysis/background-scheduling.md)。
 

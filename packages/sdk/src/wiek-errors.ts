@@ -233,7 +233,7 @@ export function buildWiekError(
     // catches it even when the agent's own try/catch later swallows the thrown Error.
     // The op-less owned message is the one the agent should see, regardless of which
     // operation surfaced it.
-    markHardStop(message);
+    markHardStop(message, code);
   }
   const error: Error & { error_code?: string } = new Error(
     op ? `${op}: ${message}` : message,

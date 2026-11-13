@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 5,
+  "clientDate": "2026-11-11",
+  "generatedAt": "2026-11-11T01:33:09.251044+00:00",
+  "project": "Wiek Browser",
+  "version": "0.24.0",
+  "repository": "https://github.com/YeohsCode/Wiek-Browser",
+  "fullParity": false,
+  "runtimeIndependent": true,
+  "previousCheckpoint": "wiek-v0.23-checkpoint.json",
+  "localTests": {
+    "pass": 608,
+    "fail": 0,
+    "skip": 0,
+    "log": "v024-source-tests-final.log"
+  },
+  "sdkTests": {
+    "pass": 532,
+    "fail": 0,
+    "skip": 0,
+    "immutableInputs": 81,
+    "namespaceMappedInputs": true,
+    "assertionsRemoved": 0,
+    "thresholdsChanged": 0,
+    "log": "terminology-sdk-regression.log"
+  },
+  "packagedHost": {
+    "checks": 198,
+    "passed": true,
+    "version": "0.24.0",
+    "log": "v024-package-workbench.log"
+  },
+  "packagedPanels": {
+    "pass": 13,
+    "fail": 0,
+    "skip": 0,
+    "log": "v024-package-panels.log"
+  },
+  "browserContinuation": {
+    "checks": 17,
+    "passed": true,
+    "actualPackagedCLI": true,
+    "log": "terminology-packaged-recovery.log"
+  },
+  "usabilityAudit": {
+    "report": "usability-audit.md",
+    "glossary": "../docs/terminology.md",
+    "featureDecisions": 23,
+    "installedGuide": "terminology-installed-guide.md",
+    "globalEntrypointsUpdated": true
+  },
+  "browserSuite": {
+    "status": "passed",
+    "total": 69,
+    "pass": 69,
+    "fail": 0,
+    "skip": 0,
+    "assertions": 1248,
+    "log": "v024-browser-suite.log",
+    "result": "comparison.json"
+  },
+  "ci": {
+    "status": "completed",
+    "conclusion": "success",
+    "runId": 42938519050,
+    "testedCommit": "646421ea710bf65ff8e7a2ea546c44d6dc49f3cd",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/42938519050",
+    "evidence": "p4-ci-42938519050-status.json"
+  },
+  "paidModelCalls": 0,
+  "externalAccountActions": 0,
+  "signed": false,
+  "notarized": false,
+  "packageIdentity": {
+    "passed": true,
+    "checkedFiles": 204,
+    "immutableInputs": 81,
+    "sdkMatchesCompared": true,
+    "log": "v024-package-identity.log"
+  },
+  "frameworkTests": {
+    "pass": 336,
+    "fail": 0,
+    "log": "p4-ci-42938519050-ci-benchmark-adapter.log"
+  }
+}

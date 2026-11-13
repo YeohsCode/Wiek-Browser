@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {execFile} from 'node:child_process';
 import {promisify} from 'node:util';
-import {mkdtemp, rm} from 'node:fs/promises';
+import {mkdtemp, readFile, rm, writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {createServer} from 'node:http';
@@ -67,12 +67,122 @@ test('real CLI distinguishes reopening tabs, continuing scripts, completed tasks
     const paused = await command('nodejs', '-e', `const task=await taskSpace(${created.id});await task.tabs();`).then(() => null, error => error);
     check(paused?.code, 1);
     assert.match(paused.stderr, /Control of this task space is with the user/); checks++;
+    const caught = await command('nodejs', '-e', `
+      console.log('diagnostic before handoff error');
+      try {
+        const task = await taskSpace(${created.id});
+        await task.tabs();
+      } catch (error) {
+        console.log('caught', error.error_code);
+      }
+    `).then(() => null, error => error);
+    check(caught?.code, 1);
+    check(caught.stdout.trim().split('\n'), [
+      'diagnostic before handoff error',
+      'caught WIEK_TASK_SPACE_USER_IN_CONTROL',
+    ]);
+    const diagnostics = caught.stderr.trim().split('\n');
+    check(diagnostics.length, 1);
+    assert.match(diagnostics[0], /^\[wiek-browser:error\] /); checks++;
+    check(JSON.parse(diagnostics[0].slice('[wiek-browser:error] '.length)).code,
+      'WIEK_TASK_SPACE_USER_IN_CONTROL');
     const resumed = await script(`const task=await takeOverTaskSpace(${created.id});console.log(JSON.stringify({recoveryFixture:true,url:(await task.tabs())[0].url}));`);
     check(resumed.url, url);
     console.log(JSON.stringify({ok:true,checks,realCLI:true,isolatedData:true,modelCalls:0,accountActions:0}));
   } finally {
     if (running) await command('stop');
     await new Promise(resolve => web.close(resolve));
+    await rm(directory, {recursive: true, force: true});
+  }
+});
+
+test('skipping startup tabs preserves browser data for a later normal launch', {
+  skip: process.platform !== 'darwin', timeout: 90000,
+}, async () => {
+  const directory = await mkdtemp(join(tmpdir(), 'wiek-skip-tabs-'));
+  const stateFile = join(directory, 'browser.json');
+  const env = {...process.env, WIEK_DATA_DIR: directory, VEK_DATA_DIR: directory,
+    WIEK_BROWSER_STATE_DIR: join(directory, 'sdk-state'), WIEK_NO_RESTORE: '0'};
+  let requests = 0;
+  const server = createServer((request, response) => {
+    requests++;
+    response.end('<title>Saved tab</title>');
+  });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  const origin = `http://127.0.0.1:${server.address().port}`;
+  const original = {
+    nextSpace: 8,
+    selected: 7,
+    profiles: [{id: 'saved', name: 'Saved profile', isDefault: true}],
+    spaces: [{id: 7, name: 'Previous session', profileId: 'saved', ownership: 'agent',
+      tabs: [{url: origin + '/', title: 'Saved tab', active: true}]}],
+    bookmarks: [{profileId: 'saved', title: 'Bookmark', url: origin + '/bookmark'}],
+    history: [{profileId: 'saved', url: origin + '/history'}],
+    homePins: {saved: [{id: 'saved-pin', title: 'Home', url: origin + '/home'}]},
+    sitePermissions: [{profileId: 'saved', origin, requestingOrigin: origin,
+      permission: 'notifications', decision: 'block'}],
+    downloads: [{id: 'saved-download', profileId: 'saved', state: 'completed', url: origin + '/download'}],
+    closedSpaces: [{id: 'closed', name: 'Previously closed', profileId: 'saved', tabs: []}],
+  };
+  const command = (args, overrides = {}) => execute(process.execPath, [cli, ...args], {
+    env: {...env, ...overrides}, timeout: 30000, maxBuffer: 1024 * 1024,
+  });
+  let running = false;
+  try {
+    await writeFile(stateFile, JSON.stringify(original), {mode: 0o600});
+    // Exercise the public flag and the existing environment option on successive launches.
+    for (const [args, overrides] of [
+      [['start', '--no-restore'], {}],
+      [['start'], {WIEK_NO_RESTORE: '1'}],
+    ]) {
+      await command(args, overrides); running = true;
+      const result = await command(['nodejs', '-e', 'console.log(JSON.stringify(await listTaskSpaces()))']);
+      const groups = JSON.parse(result.stdout.trim());
+      assert.equal(groups.length, 1);
+      assert.equal(groups[0].profileId, 'saved');
+      assert.ok(groups[0].id > 7);
+      assert.equal(requests, 0);
+      await command(['stop']); running = false;
+      const saved = JSON.parse(await readFile(stateFile, 'utf8'));
+      for (const key of ['selected', 'profiles', 'spaces', 'bookmarks', 'history', 'homePins', 'sitePermissions', 'closedSpaces']) {
+        assert.deepEqual(saved[key], original[key], key);
+      }
+      assert.equal(saved.downloads[0].id, 'saved-download');
+      assert.ok(saved.nextSpace > groups[0].id);
+    }
+    await command(['start', '--no-restore']); running = true;
+    const reusedName = await command(['nodejs', '-e', `await taskSpace('Previous session')`])
+      .then(() => null, error => error);
+    assert.equal(reusedName?.code, 1);
+    assert.match(reusedName.stderr, /name in use/i);
+    const created = await command(['nodejs', '-e', `
+      const task = await taskSpace('New session');
+      await task.page('p1').goto(${JSON.stringify(origin + '/new')});
+      console.log(task.spaceId);
+    `]);
+    const newGroupId = Number(created.stdout.trim());
+    assert.ok(newGroupId > 7);
+    await command(['stop']); running = false;
+    const saved = JSON.parse(await readFile(stateFile, 'utf8'));
+    assert.deepEqual(saved.spaces[0], original.spaces[0]);
+    assert.equal(saved.spaces.length, 2);
+    assert.equal(saved.spaces[1].id, newGroupId);
+    assert.equal(saved.spaces[1].tabs[0].url, origin + '/new');
+
+    requests = 0;
+    await command(['start']); running = true;
+    const restored = await command(['nodejs', '-e', `
+      const task = await taskSpace(7);
+      const [tab] = await task.tabs();
+      const page = await task.adopt(tab.page);
+      await page.waitForFunction(() => document.title === 'Saved tab');
+      console.log(await page.url());
+    `]);
+    assert.equal(restored.stdout.trim(), origin + '/');
+    assert.ok(requests > 0);
+  } finally {
+    if (running) await command(['stop']);
+    await new Promise(resolve => server.close(resolve));
     await rm(directory, {recursive: true, force: true});
   }
 });

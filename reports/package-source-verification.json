@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-11-11T01:21:59.169Z",
-  "version": "0.24.0",
+  "generatedAt": "2026-11-13T00:19:59.572Z",
+  "version": "0.25.0",
   "versionMatches": true,
   "checkedFiles": 204,
   "allMatch": true,
-  "sdkSha256": "1c4e8428e8c66b612f59d333f99fbdd2cd45dbf617d85e681ea3387c68d695ff",
+  "sdkSha256": "4ddcbf8ad4bc660ad00a90964fe6e5058e6e1ca69b2fb4bf1fac3de415af9d0f",
   "sdkMatchesCompared": true,
   "files": [
     {
@@ -229,7 +229,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "e8cb01a78f3ab8848710abaaf4c20be9f747bb38e6969008a373337643d15d8f",
+      "sha256": "b884d241fa0e58303b74ffb23e1cde72007bc3908325d39e1b47c3fea799be4d",
       "matches": true
     },
     {
@@ -329,7 +329,7 @@
     },
     {
       "file": "app/profile-indexeddb-data.cjs",
-      "sha256": "dadfbd6949fdb3f1eddfe6c5e717580578a1e3303156310e5cd96542f192c649",
+      "sha256": "f0943050345256bf1eab105d1d243217072a947d13a7a757c0acc1b780d15155",
       "matches": true
     },
     {
@@ -529,7 +529,7 @@
     },
     {
       "file": "cli/wiek-browser.mjs",
-      "sha256": "87e69290c96fff68e2690fe8701edda06d18dc8450e3733762c4ba08dc9a6241",
+      "sha256": "dfc1d8fec71ef17c6ae7c6230a6c09331d0966e2854b16e67f8744c5832174f5",
       "matches": true
     },
     {
@@ -664,12 +664,12 @@
     },
     {
       "file": "packages/sdk/dist/out/index.js",
-      "sha256": "1c4e8428e8c66b612f59d333f99fbdd2cd45dbf617d85e681ea3387c68d695ff",
+      "sha256": "4ddcbf8ad4bc660ad00a90964fe6e5058e6e1ca69b2fb4bf1fac3de415af9d0f",
       "matches": true
     },
     {
       "file": "packages/sdk/dist/out/wiek-browser/SKILL.md",
-      "sha256": "8155b338159030d655a200aa2a0a33d315c4502119cfbc9f881992597cb94eb7",
+      "sha256": "fef43e585d3ae1f6f8cae420526017bc8ccc45c7cba1d1781e193fa021705e93",
       "matches": true
     },
     {
@@ -824,7 +824,7 @@
     },
     {
       "file": "packages/sdk/dist/src/output-sink.js",
-      "sha256": "57f51990a689d7fc1e22f4f1c8bf74d05f6a2ed8b6a0cbcbfda65ea2ed52bf8d",
+      "sha256": "e7dceb01eaa114e6463731ee5abd7570d3348e40b85755e5a2b4344c9cd68a58",
       "matches": true
     },
     {
@@ -869,7 +869,7 @@
     },
     {
       "file": "packages/sdk/dist/src/run.js",
-      "sha256": "68018c63c23ecfaf4881a333354ff00572e8c3ceee8f7fb17260548dab9b796b",
+      "sha256": "7c8a9c83d9c163736d40678ba7ff6ee3e2c8b2c2fe9fa90dcee9abbfe784a975",
       "matches": true
     },
     {
@@ -894,12 +894,12 @@
     },
     {
       "file": "packages/sdk/dist/src/wiek-errors.js",
-      "sha256": "d2b964635522df33585bb6cf4a508c10b199a239f351a4bcaba9f14756df215e",
+      "sha256": "82e5456680306948b6834f3c643da2850e9867f9fb9517f36174f3e3a655836d",
       "matches": true
     },
     {
       "file": "packages/sdk/skill-body/SKILL.md",
-      "sha256": "fc91db8f2f8c69a1b72d2e16025abe81511fe8ed7bb2cdab81a42ced900a0ed0",
+      "sha256": "885ccbe7b7f5652e0ed5646bcebf86a8b38fffd7e2317a1ee6e03c73f6083a47",
       "matches": true
     },
     {

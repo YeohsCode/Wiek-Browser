@@ -68,7 +68,19 @@ function vaultFor(profileId) {
   return vaults.get(profileId);
 }
 let store = { nextSpace: 1, selected: null, profiles: [{ id: 'Default', name: 'Personal', isDefault: true }], spaces: [], bookmarks: [], history: [] };
-if (process.env.VEK_NO_RESTORE !== '1' && !process.argv.includes('--no-restore')) { try { store = { ...store, ...JSON.parse(fs.readFileSync(path.join(DATA, 'browser.json'), 'utf8')) }; } catch (failure) { if(failure.code!=='ENOENT')throw new Error('Browser state could not be restored; existing data was preserved'); } }
+const reopenTabs = process.env.VEK_NO_RESTORE !== '1' && !process.argv.includes('--no-restore');
+try {
+  store = { ...store, ...JSON.parse(fs.readFileSync(path.join(DATA, 'browser.json'), 'utf8')) };
+} catch (failure) {
+  if (failure.code !== 'ENOENT') throw new Error('Browser state could not be restored; existing data was preserved');
+}
+const unopenedSpaces = reopenTabs ? [] : store.spaces;
+const previouslySelected = reopenTabs ? null : store.selected;
+if (!reopenTabs) {
+  store.spaces = [];
+  store.selected = null;
+}
+let blankStartupGroup;
 store.permissions ||= {}; store.extensionPaths ||= {}; store.closedSpaces ||= []; store.homePins ||= {};
 const tabs = new Map(), connections = new Set(), attachedSessions = new Map(), downloads = (store.downloads || []).map(d => ({...d, paused:false, canResume:false, state: d.state === 'progressing' ? 'interrupted' : d.state }));
 const initializedProfiles = new Set();
@@ -90,7 +102,34 @@ function persist() {
   saving = setTimeout(writeBrowserStore, 120);
 }
 function writePrivateFile(target,contents){const temporary=path.join(path.dirname(target),`.vek-${crypto.randomUUID()}.tmp`);let fd;try{fd=fs.openSync(temporary,'wx',0o600);fs.writeFileSync(fd,contents);fs.fsyncSync(fd);fs.closeSync(fd);fd=undefined;fs.renameSync(temporary,target);}finally{if(fd!==undefined)fs.closeSync(fd);try{fs.unlinkSync(temporary);}catch{}}}
-function writeBrowserStore(){if(!browserStoreReady)return;const data={...store,downloads:downloads.map(({item,...d})=>d),spaces:store.spaces.map(s=>({...s,tabs:s.tabs.map(id=>tabs.get(id)).filter(Boolean).map(t=>{const destroyed=t.view.webContents.isDestroyed();return {url:t.restoreUrl||(destroyed?t.url:t.view.webContents.getURL()||t.url),title:destroyed?'':t.view.webContents.getTitle(),active:s.activeTab===t.id};})}))};writePrivateFile(path.join(DATA,'browser.json'),JSON.stringify(data,null,2));}
+function writeBrowserStore() {
+  if (!browserStoreReady) return;
+  const openSpaces = store.spaces.map(space => ({
+    ...space,
+    tabs: space.tabs.map(id => tabs.get(id)).filter(Boolean).map(tab => {
+      const contents = tab.view.webContents;
+      const alive = !contents.isDestroyed();
+      return {
+        url: tab.restoreUrl || (alive && contents.getURL()) || tab.url,
+        title: alive ? contents.getTitle() : '',
+        active: space.activeTab === tab.id,
+      };
+    }),
+  }));
+  // Skip writing the automatically generated empty group when it is still unused.
+  const spaces = [...unopenedSpaces, ...openSpaces.filter(space => (
+    space.id !== blankStartupGroup || space.name !== 'Personal' ||
+    space.pinned || space.ownership !== 'user' ||
+    space.tabs.length !== 1 || space.tabs[0].url !== 'about:blank'
+  ))];
+  const data = {
+    ...store,
+    selected: previouslySelected ?? store.selected,
+    downloads: downloads.map(({item, ...download}) => download),
+    spaces,
+  };
+  writePrivateFile(path.join(DATA, 'browser.json'), JSON.stringify(data, null, 2));
+}
 function profile(id) { return store.profiles.find(p => p.id === id) || store.profiles[0]; }
 function getSpace(id) {
   if (id === undefined || id === null) throw error('Task space not selected', 'WIEK_TASK_SPACE_NOT_SELECTED');
@@ -167,7 +206,7 @@ function makeTab(space, url = 'about:blank', { activate = true, reveal = false, 
   wc.on('did-navigate-in-page', () => { publish(); persist(); });
   wc.on('dom-ready', () => {if(!t.restoringStorage){loadFavicons(t);sendPageConfig(t);}});
   wc.on('page-favicon-updated', (_, urls) => {if(!t.restoringStorage)loadFavicons(t, urls);});
-  wc.on('did-navigate', (_, url) => { if(t.restoringStorage)return;if(t.restoreUrl)wc.navigationHistory.clear();delete t.restoreUrl;t.url = url; t.favicon = null; layout(); store.history.push({ url, profileId:space.profileId, spaceId:space.id, title: wc.getTitle(), at: new Date().toISOString() }); store.history = store.history.slice(-20000); publish(); persist(); });
+  wc.on('did-navigate', (_, url) => { if(t.restoringStorage)return;if(t.restoreUrl)wc.navigationHistory.clear();delete t.restoreUrl;t.url = url; t.favicon = null; layout(); if (url !== 'about:blank') { store.history.push({ url, profileId:space.profileId, spaceId:space.id, title: wc.getTitle(), at: new Date().toISOString() }); store.history = store.history.slice(-20000); } publish(); persist(); });
   wc.on('before-input-event', (_, input) => {
     if (input.type === 'keyDown' && space.ownership === 'agent' && Date.now() > (t.agentInputUntil || 0)) { space.ownership = 'agentDelegatedToUser'; space.controlReason = 'manual_takeover'; publish(); persist(); }
   });
@@ -228,7 +267,7 @@ function normalizeURL(input) {
 }
 async function createSpace(name, profileId = 'Default', ownership = 'agent') {
   if (!store.profiles.some(p => p.id === profileId)) throw error('Profile not found', 'WIEK_PROFILE_NOT_FOUND');
-  if (ownership === 'agent' && store.spaces.some(s => s.name === name)) throw error(`Task space name in use: ${name}`, 'WIEK_TASK_SPACE_NAME_IN_USE');
+  if (ownership === 'agent' && [...store.spaces, ...unopenedSpaces].some(s => s.name === name)) throw error(`Task space name in use: ${name}`, 'WIEK_TASK_SPACE_NAME_IN_USE');
   const s = { id: store.nextSpace++, name, profileId, ownership, createdBy: ownership === 'agent' ? 'agent' : 'user', tabs: [], activeTab: null, taskState: '' };
   store.spaces.push(s);
   await createTab(s, 'about:blank', { reveal: ownership === 'user' });
@@ -789,7 +828,11 @@ app.whenReady().then(async () => {
     if (!s.tabs.length) await createTab(s, 'about:blank', { activate: false });
     s.activeTab ||= s.tabs[0];
   }
-  if (!store.spaces.length) await createSpace('Personal', 'Default', 'user');
+  if (!store.spaces.length) {
+    const defaultProfile = store.profiles.find(item => item.isDefault) || store.profiles[0];
+    const blank = await createSpace('Personal', defaultProfile.id, 'user');
+    if (!reopenTabs && unopenedSpaces.length) blankStartupGroup = blank.id;
+  }
   store.selected = store.spaces.some(s => s.id === store.selected) ? store.selected : store.spaces[0].id;
   browserStoreReady=true;persist();layout(); publish(); await startRPC();desktopService.activate();await desktopMonitorService.activate();
 }).catch(err => { console.error(err); foregroundLease?.release();app.exit(1); });

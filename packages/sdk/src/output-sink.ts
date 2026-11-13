@@ -23,6 +23,7 @@ export type RoundConsole = Pick<Console, "log" | "info" | "warn" | "error">;
 
 let buffer: string[] = [];
 let hardStopMessage: string | null = null;
+let controlError: { code: string; message: string } | undefined;
 let flushed = false;
 let lifecycleHooked = false;
 
@@ -52,10 +53,9 @@ export function createRoundConsole(
  * — the same error re-reported on each loop iteration — are ignored so the agent sees
  * the guidance exactly once.
  */
-export function markHardStop(message: string): void {
-  if (hardStopMessage === null) {
-    hardStopMessage = message;
-  }
+export function markHardStop(message: string, code?: string): void {
+  hardStopMessage ??= message;
+  if (code) controlError ??= { code, message };
 }
 
 /**
@@ -67,10 +67,20 @@ export function markHardStop(message: string): void {
  * so we stay silent and only drop the buffer. Non-hard-stop output is flushed either way,
  * so an ordinary failure still shows what the script logged before it threw.
  */
-export function flushSink(stream: WritableLike, thrown: boolean): void {
+export function flushSink(
+  stream: WritableLike,
+  thrown: boolean,
+  diagnostics?: WritableLike,
+): string | undefined {
   if (flushed) return;
   flushed = true;
   const pageNotices = consumeUnhandledPageNotices();
+  if (controlError && diagnostics) {
+    for (const chunk of buffer) stream.write(chunk);
+    diagnostics.write(`[wiek-browser:error] ${JSON.stringify(controlError)}\n`);
+    buffer = [];
+    return controlError.code;
+  }
   if (hardStopMessage !== null) {
     // Drop every buffered line — business logs, success rows, and the repeated error
     // echoes — so the owned guidance is all that remains.
@@ -94,6 +104,7 @@ export function flushSink(stream: WritableLike, thrown: boolean): void {
 export function resetSink(): void {
   buffer = [];
   hardStopMessage = null;
+  controlError = undefined;
   flushed = false;
   resetPageNotices();
 }

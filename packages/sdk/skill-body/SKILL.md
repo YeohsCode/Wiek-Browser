@@ -495,6 +495,12 @@ browser semantics.
 
 ## User control and completion
 
+When `wiek-browser nodejs` encounters a control error, it exits with status 1
+even if the script catches the error. Script logs remain on stdout. On stderr,
+the line starting with `[wiek-browser:error] ` contains JSON with `code` and
+`message`. Use the exit status when deciding whether the invocation succeeded.
+
+
 Stop when the user takes control or the space is inactive or unassigned. Do not
 retry or route around the stop. Permission prompts, device choosers, and
 other browser-owned prompts require the user to handle them.

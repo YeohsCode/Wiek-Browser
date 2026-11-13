@@ -8,6 +8,7 @@ import { parse } from "acorn";
 import { formatCliLogValue } from "./format.js";
 import * as helpers from "./helpers.js";
 import { addPageContextHint } from "./page-context-guard.js";
+import { wiekErrorCode } from "./wiek-errors.js";
 import {
   bufferOutput,
   createRoundConsole,
@@ -32,6 +33,7 @@ export type RunMainOptions = {
   stderr?: WritableLike;
   stdin?: ReadableLike;
   stdinText?: string;
+  reportControlErrors?: boolean;
 };
 
 export const HELP = `wiek-browser
@@ -81,11 +83,10 @@ export async function runMain(options: RunMainOptions = {}) {
     return 2;
   }
 
-  await execute(code, stdout);
-  return 0;
+  return execute(code, stdout, options.reportControlErrors ? stderr : undefined);
 }
 
-async function execute(code: string, stdout: WritableLike) {
+async function execute(code: string, stdout: WritableLike, diagnostics?: WritableLike) {
   resetSink();
   const context = await executionContext();
   // Helpers remain globally visible for loaded agent modules, but console is a
@@ -106,12 +107,11 @@ async function execute(code: string, stdout: WritableLike) {
   try {
     await fn(...values);
   } catch (error) {
-    // The thrown Error surfaces the hard-stop message on its own, so flush as a thrown
-    // completion (drop the buffer, stay silent) and let it propagate.
-    flushSink(stdout, true);
+    const controlCode = flushSink(stdout, true, diagnostics);
+    if (controlCode && wiekErrorCode(error) === controlCode) return 1;
     throw addPageContextHint(error);
   }
-  flushSink(stdout, false);
+  return flushSink(stdout, false, diagnostics) ? 1 : 0;
 }
 
 function userScriptSyntaxError(code: string, original: unknown): SyntaxError {

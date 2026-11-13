@@ -6,7 +6,7 @@
 
 本地 Chromium 浏览器与 Agent 工作区，提供自动化标签组、隔离的浏览器用户配置、文件/Git 工具、自动化调度与浏览器控制。Electron 宿主和本地服务采用独立实现，SDK 使用自身构建与 Wiek 运行命名空间，无需安装其他浏览器；第三方许可与署名保留在 [NOTICE.md](NOTICE.md)。
 
-**当前检查点：0.24.0。功能覆盖与验收仍在推进。** 参见[计划](PLAN.md)、[能力矩阵](analysis/implementation-matrix.md)和[验证结果](reports/RESULTS.md)。
+**当前检查点：0.25.0。功能覆盖与验收仍在推进。** 参见[计划](PLAN.md)、[能力矩阵](analysis/implementation-matrix.md)和[验证结果](reports/RESULTS.md)。
 
 ## 本地运行
 
@@ -58,6 +58,8 @@ JS
 ```
 
 同一任务在浏览器持续运行时复用任务 ID 与页面标识。独立测试可使用不同任务名和隔离数据目录。重启后重新识别标签页。术语与具体操作见[术语表](docs/terminology.md)及[易用性审计](reports/usability-audit.md)。本地工作区接口参见 [API 指南](skills/wiek-browser/API.md)。
+
+启动时只打开一个空白标签页可用 `wiek-browser start --no-restore`。下次正常启动仍可重开之前保存的标签页，浏览器资料继续可用。
 
 ## 可选本地模型
 

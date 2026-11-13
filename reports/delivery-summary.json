@@ -1,41 +1,37 @@
 {
   "schemaVersion": 5,
   "clientDate": "2026-11-14",
-  "generatedAt": "2026-11-13T16:09:09.968Z",
+  "generatedAt": "2026-11-13T16:22:50.314Z",
   "project": "Wiek Browser",
-  "version": "0.27.0",
+  "version": "0.28.0",
   "repository": "https://github.com/YeohsCode/Wiek-Browser",
   "fullParity": false,
   "runtimeIndependent": true,
-  "previousCheckpoint": "wiek-v0.26-checkpoint.json",
+  "previousCheckpoint": "wiek-v0.27-checkpoint.json",
   "packagedTargetedTests": {
-    "pass": 16,
+    "pass": 17,
     "fail": 0,
     "skip": 0,
-    "realIndexedDBChecks": 29,
+    "realIndexedDBChecks": 30,
     "applicationIPCChecks": 37,
-    "log": "v027-package-targeted.log"
+    "log": "v028-package-targeted.log"
   },
   "packagedHost": {
     "pass": true,
     "checks": 198,
-    "version": "0.27.0",
-    "log": "v027-package-workbench.log"
+    "version": "0.28.0",
+    "log": "v028-package-workbench.log"
   },
   "packagedScheduler": {
     "pass": true,
-    "log": "v027-package-scheduler.log",
+    "log": "v028-package-scheduler.log",
     "realOSRegistration": false
   },
-  "desktopPermissions": {
-    "evidence": "v027-package-desktop-permissions.json",
-    "nativeCaptureAttempted": false
-  },
   "ci": {
-    "status": "queued",
-    "runId": 43459604246,
-    "testedCommit": "db9329bbda56dc24b2a49dd9d71b130e4c8ace36",
-    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43459604246"
+    "status": "in_progress",
+    "runId": 43461504488,
+    "testedCommit": "7ccf0598f66034c47a995d9824bd4161196f0f78",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43461504488"
   },
   "paidModelCalls": 0,
   "externalAccountActions": 0,
@@ -49,7 +45,7 @@
     "namespaceMappedInputs": true,
     "assertionsRemoved": 0,
     "thresholdsChanged": 0,
-    "log": "v027-sdk.log"
+    "log": "v028-sdk.log"
   },
   "browserSuite": {
     "status": "passed",
@@ -58,7 +54,7 @@
     "fail": 0,
     "skip": 0,
     "assertions": 1248,
-    "log": "v027-browser-suite.log",
+    "log": "v028-browser-suite.log",
     "result": "comparison.json"
   },
   "packageIdentity": {
@@ -66,27 +62,22 @@
     "checkedFiles": 204,
     "immutableInputs": 81,
     "sdkMatchesCompared": true,
-    "log": "v027-package-identity.log"
+    "log": "v028-package-identity.log"
   },
   "installedEntrypoints": {
     "updated": true,
     "verifiedLinks": 4,
-    "receipt": "v027-install.json"
+    "receipt": "v028-install.json"
   },
   "localTests": {
-    "pass": 610,
+    "pass": 611,
     "fail": 1,
     "skip": 0,
-    "log": "v027-source.log",
-    "gitFileRetest": {
-      "pass": 16,
-      "fail": 1,
-      "log": "v027-git-retest.log"
-    },
+    "log": "v028-source.log",
     "gitCaseRetest": {
-      "pass": 2,
+      "pass": 1,
       "fail": 0,
-      "log": "v027-git-cases.log"
+      "log": "v028-git-case.log"
     }
   }
 }

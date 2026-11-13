@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 5,
+  "clientDate": "2026-11-14",
+  "generatedAt": "2026-11-13T16:09:09.968Z",
+  "project": "Wiek Browser",
+  "version": "0.27.0",
+  "repository": "https://github.com/YeohsCode/Wiek-Browser",
+  "fullParity": false,
+  "runtimeIndependent": true,
+  "previousCheckpoint": "wiek-v0.26-checkpoint.json",
+  "packagedTargetedTests": {
+    "pass": 16,
+    "fail": 0,
+    "skip": 0,
+    "realIndexedDBChecks": 29,
+    "applicationIPCChecks": 37,
+    "log": "v027-package-targeted.log"
+  },
+  "packagedHost": {
+    "pass": true,
+    "checks": 198,
+    "version": "0.27.0",
+    "log": "v027-package-workbench.log"
+  },
+  "packagedScheduler": {
+    "pass": true,
+    "log": "v027-package-scheduler.log",
+    "realOSRegistration": false
+  },
+  "desktopPermissions": {
+    "evidence": "v027-package-desktop-permissions.json",
+    "nativeCaptureAttempted": false
+  },
+  "ci": {
+    "status": "completed",
+    "runId": 43459604246,
+    "testedCommit": "db9329bbda56dc24b2a49dd9d71b130e4c8ace36",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43459604246",
+    "conclusion": "cancelled",
+    "evidence": "p4-ci-43459604246-status.json"
+  },
+  "paidModelCalls": 0,
+  "externalAccountActions": 0,
+  "signed": false,
+  "notarized": false,
+  "sdkTests": {
+    "pass": 532,
+    "fail": 0,
+    "skip": 0,
+    "immutableInputs": 81,
+    "namespaceMappedInputs": true,
+    "assertionsRemoved": 0,
+    "thresholdsChanged": 0,
+    "log": "v027-sdk.log"
+  },
+  "browserSuite": {
+    "status": "passed",
+    "total": 69,
+    "pass": 69,
+    "fail": 0,
+    "skip": 0,
+    "assertions": 1248,
+    "log": "v027-browser-suite.log",
+    "result": "comparison.json"
+  },
+  "packageIdentity": {
+    "passed": true,
+    "checkedFiles": 204,
+    "immutableInputs": 81,
+    "sdkMatchesCompared": true,
+    "log": "v027-package-identity.log"
+  },
+  "installedEntrypoints": {
+    "updated": true,
+    "verifiedLinks": 4,
+    "receipt": "v027-install.json"
+  },
+  "localTests": {
+    "pass": 610,
+    "fail": 1,
+    "skip": 0,
+    "log": "v027-source.log",
+    "gitFileRetest": {
+      "pass": 16,
+      "fail": 1,
+      "log": "v027-git-retest.log"
+    },
+    "gitCaseRetest": {
+      "pass": 2,
+      "fail": 0,
+      "log": "v027-git-cases.log"
+    }
+  }
+}

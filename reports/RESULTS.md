@@ -1,6 +1,14 @@
 # Wiek Browser 验证结果
 
-当前开发检查点为 **0.27.0**，日期为 2026-11-14。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+当前开发检查点为 **0.28.0**，日期为 2026-11-14。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+
+## 0.28 专项验收
+
+- IndexedDB 加密归档恢复 Blob/File 的二进制字节、媒体类型、文件名、修改时间、空文件和记录内共享引用。超限附件所在数据库仍会整体跳过。真实 Chromium 覆盖自增仓库、旧归档、恢复失败清理及零次归档准备网络请求。[设计与边界](../analysis/profile-indexeddb-design.md)
+
+- 打包专项 17/17，其中真实 IndexedDB 30 项，应用 IPC 37 项。打包宿主 198 项、浏览器同集 69/69（1,248 条断言）、SDK 532/532 和 TypeScript 检查通过。204 份发行文件及 81 份原始 SDK 测试输入通过身份核对。[专项](v028-package-targeted.log) · [宿主](v028-package-workbench.log) · [同集](v028-browser-suite.log) · [SDK](v028-sdk.log) · [身份核对](v028-package-identity.log)
+- 本机串行源码回归 611/612。一项合成 PR 夹具超时，按原期限单独复测通过。[全量](v028-source.log) · [复测](v028-git-case.log)
+- 本机命令和三处指南链接已更新。源码提交 `7ccf059` 已推送，远端 CI 已启动。[安装记录](v028-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43461504488)
 
 ## 0.27 专项验收
 
@@ -9,7 +17,7 @@
 - 打包专项 16/16 通过，其中 29 项真实 IndexedDB 检查、37 项应用 IPC 检查。打包宿主 198 项通过。浏览器同集 69/69、1,248 条断言，204 份发行文件与 81 份原始输入身份检查通过。原始 SDK 532/532，TypeScript 检查通过。[打包专项](v027-package-targeted.log) · [宿主](v027-package-workbench.log) · [同集](v027-browser-suite.log) · [身份核对](v027-package-identity.log) · [SDK](v027-sdk.log)
 - 打包后台启动器的隔离测试通过，验收脚本输出本次结果，避免覆盖以前的报告。桌面权限探测成功，实机录制、多屏和撤权仍待验收。[启动器](v027-package-scheduler.log) · [权限状态](v027-package-desktop-permissions.json)
 - 本机串行源码回归 610/611，Git 专项复测 16/17。两次各有一项不同的合成 PR 夹具超时，两条用例再单独复测均通过，原期限保留。[串行回归](v027-source.log) · [Git 专项](v027-git-retest.log) · [两条用例](v027-git-cases.log)
-- 本机命令及三处指南链接已更新。源码提交 `db9329b` 已推送。[安装记录](v027-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43459604246)
+- 本机命令及三处指南链接已更新。源码提交 `db9329b` 已推送。其排队中的远端运行在 0.28 推送后取消。[安装记录](v027-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43459604246)
 
 ## 0.26 专项验收
 

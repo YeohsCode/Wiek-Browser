@@ -2299,6 +2299,9 @@
     "Appearance & shortcuts": "外观与快捷键",
     "Search bookmarks": "搜索书签",
     "No matching bookmarks.": "没有匹配的书签。",
+    "Full requested address": "请求的完整网址",
+    "Address contains an internationalized domain": "网址包含国际化域名",
+    "Retry after finishing on the website": "在网站完成后重试",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

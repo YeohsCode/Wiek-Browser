@@ -72,6 +72,17 @@ function prepareInput(result,{allowUrl=false}={}) {
   });
   return { forms, ...(Object.hasOwn(result, 'requestState') ? { requestState: result.requestState } : {}) };
 }
+function prepareLegacyUrls(entries) {
+  if (!Array.isArray(entries) || !entries.length || entries.length > 8) throw fail('Invalid MCP URL authorization requests');
+  const seen = new Set();
+  return entries.map(entry => {
+    if (!allowed(entry, ['mode', 'message', 'url', 'elicitationId', '_meta']) ||
+        entry.mode !== 'url' || !safeKey(entry.elicitationId) || seen.has(entry.elicitationId)) throw fail('Invalid MCP URL authorization request');
+    seen.add(entry.elicitationId);
+    const { elicitationId, ...params } = entry;
+    return prepareInput({resultType:'input_required',inputRequests:{[elicitationId]:{method:'elicitation/create',params}}},{allowUrl:true}).forms[0];
+  });
+}
 function validateResponses(forms, responses) {
   if (!object(responses) || Buffer.byteLength(JSON.stringify(responses)) > 131072 || Object.keys(responses).length !== forms.length || Object.keys(responses).some(id => !forms.some(f => f.id === id))) throw fail('Supply one response for every requested input');
   return Object.fromEntries(forms.map(form => {
@@ -83,4 +94,4 @@ function validateResponses(forms, responses) {
     return [form.id, { action: 'accept', content: JSON.parse(JSON.stringify(content)) }];
   }));
 }
-module.exports = { prepareInput, validateResponses, validateSchema, choices };
+module.exports = { prepareInput, prepareLegacyUrls, validateResponses, validateSchema, choices };

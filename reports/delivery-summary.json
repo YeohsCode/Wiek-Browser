@@ -103,7 +103,18 @@
     "ci": {
       "runId": 43581417475,
       "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43581417475",
-      "status": "in_progress"
+      "status": "passed",
+      "sourceTests": 625,
+      "browserTests": 69,
+      "browserAssertions": 1248,
+      "packageFiles": 208,
+      "originalInputs": 81
+    },
+    "latestLocalSource": {
+      "total": 626,
+      "passed": 624,
+      "failed": 2,
+      "isolatedRetryPassed": 2
     }
   }
 }

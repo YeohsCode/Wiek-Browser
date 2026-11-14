@@ -1,7 +1,7 @@
 'use strict';
 // Explicit OAuth authorization-code/PKCE for HTTP MCP. No tool request replay,
-// browser cookies, ambient credentials, dynamic registration or client secrets.
-const { normalizeIdentity, resolveClientIdentity } = require('./mcp-client-identity.cjs');
+// browser cookies, ambient credentials or client secrets.
+const { normalizeIdentity, resolveClientIdentity, registerPublicClient } = require('./mcp-client-identity.cjs');
 const fs = require('node:fs');
 const path = require('node:path');
 const http = require('node:http');
@@ -15,7 +15,7 @@ const loopback = url => ['127.0.0.1', '[::1]', 'localhost'].includes(url.hostnam
 function text(value, label, max = 4096) { if (typeof value !== 'string' || !value || !value.isWellFormed() || /[\x00-\x1f\x7f]/.test(value) || Buffer.byteLength(value) > max) throw fail(`Invalid OAuth ${label}`); return value; }
 function url(value, config, label = 'URL') { let result; try { result = new URL(text(value, label, 16384)); } catch { throw fail(`Invalid OAuth ${label}`); } if (result.username || result.password || result.hash || result.protocol !== 'https:' && !(config.allowInsecureHttp === true && new URL(config.url).protocol==='http:' && loopback(new URL(config.url)) && loopback(result) && result.protocol === 'http:')) throw fail('OAuth requires HTTPS; insecure HTTP is limited to explicitly allowed loopback fixtures'); return result; }
 function scopes(values) { if (!Array.isArray(values) || values.length > 32 || values.some(value => typeof value !== 'string' || !/^[\x21\x23-\x5b\x5d-\x7e]{1,128}$/.test(value))) throw fail('Invalid OAuth scopes'); return [...new Set(values)]; }
-function normalizeOAuth(value) { if (value === undefined || value === null) return null; if (!value || Array.isArray(value) || typeof value !== 'object' || Object.keys(value).some(key => !['clientId', 'scopes','redirectPort','registration','issuer'].includes(key))) throw fail('OAuth accepts a public client ID, registration, expected issuer, scopes and redirect port only'); if(value.redirectPort!==undefined&&(!Number.isInteger(value.redirectPort)||value.redirectPort!==0&&(value.redirectPort<1024||value.redirectPort>65535)))throw fail('OAuth redirect port must be zero or between 1024 and 65535'); return { ...normalizeIdentity(value),redirectPort:value.redirectPort??0,clientId: text(value.clientId, 'public client ID', 2048), ...(value.scopes === undefined ? {} : { scopes: scopes(value.scopes) }) }; }
+function normalizeOAuth(value) { if (value === undefined || value === null) return null; if (!value || Array.isArray(value) || typeof value !== 'object' || Object.keys(value).some(key => !['clientId', 'scopes','redirectPort','registration','issuer'].includes(key))) throw fail('OAuth accepts a public client ID, registration, expected issuer, scopes and redirect port only'); if(value.redirectPort!==undefined&&(!Number.isInteger(value.redirectPort)||value.redirectPort!==0&&(value.redirectPort<1024||value.redirectPort>65535)))throw fail('OAuth redirect port must be zero or between 1024 and 65535'); return { ...normalizeIdentity(value),redirectPort:value.redirectPort??0,...(value.registration==='dynamic'?{}:{clientId: text(value.clientId, 'public client ID', 2048)}), ...(value.scopes === undefined ? {} : { scopes: scopes(value.scopes) }) }; }
 function challenge(header) {
   if (header === undefined) return {}; text(header, 'challenge', 16384);
   const start = /(?:^|,)\s*Bearer(?:\s+|$)/i.exec(header); if (!start) return {};
@@ -27,13 +27,13 @@ function challenge(header) {
   }
   return out;
 }
-async function fetchBounded(endpoint, { method = 'GET', body, signal, headers = {}, timeoutMs = 10000, json = true, maxBytes = 256 * 1024, acceptJsonSuffix = false } = {}) {
+async function fetchBounded(endpoint, { method = 'GET', body, signal, headers = {}, timeoutMs = 10000, json = true, maxBytes = 256 * 1024, acceptJsonSuffix = false, contentType = 'application/x-www-form-urlencoded' } = {}) {
   const controller = new AbortController(), abort = () => controller.abort(); signal?.addEventListener('abort', abort, { once: true }); if (signal?.aborted) abort();
   const timer = setTimeout(abort, timeoutMs);
   try {
     return await new Promise((resolve, reject) => {
       const transport = endpoint.protocol === 'https:' ? https : http;
-      const request = transport.request(endpoint, { method, signal: controller.signal, agent: false, headers: { Accept: 'application/json', ...headers, ...(body === undefined ? {} : { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(body) }) } }, async response => {
+      const request = transport.request(endpoint, { method, signal: controller.signal, agent: false, headers: { Accept: 'application/json', ...headers, ...(body === undefined ? {} : { 'Content-Type': contentType, 'Content-Length': Buffer.byteLength(body) }) } }, async response => {
         if (!json || response.statusCode < 200 || response.statusCode >= 300) { response.destroy(); resolve({ status: response.statusCode, headers: response.headers }); return; }
         try {
           const mediaType=(response.headers['content-type']||'').split(';')[0].trim().toLowerCase();if (mediaType !== 'application/json' && !(acceptJsonSuffix && /^application\/[a-z0-9!#$&^_.+-]+\+json$/.test(mediaType))) throw fail('OAuth metadata/token response must be JSON');
@@ -65,8 +65,13 @@ async function discover(config, signal) {
   if (metadata.token_endpoint_auth_methods_supported && (!Array.isArray(metadata.token_endpoint_auth_methods_supported) || !metadata.token_endpoint_auth_methods_supported.includes('none'))) throw fail('This client supports public clients with token endpoint authentication none only');
   const authorization = url(metadata.authorization_endpoint, config, 'authorization endpoint'), token = url(metadata.token_endpoint, config, 'token endpoint');
   for (const key of ['client_id','redirect_uri','response_type','state','scope','resource','code_challenge','code_challenge_method']) if (authorization.searchParams.has(key)) throw fail('Authorization endpoint contains reserved query parameters');
+  let registrationEndpoint;
+  if (config.oauth.registration === 'dynamic' && metadata.registration_endpoint) {
+    const candidate = url(metadata.registration_endpoint, config, 'registration endpoint');
+    if (candidate.origin === issuer.origin) registrationEndpoint = candidate.href;
+  }
   const selectedScopes = config.oauth.scopes === undefined ? (auth.scope === undefined ? scopes(resource.scopes_supported || []) : scopes(auth.scope.split(' ').filter(Boolean))) : scopes(config.oauth.scopes);
-  return { issuer: metadata.issuer, resource: canonical(endpoint.href), authorizationEndpoint: authorization.href, tokenEndpoint: token.href, requireIssuer:metadata.authorization_response_iss_parameter_supported===true, ...(metadata.client_id_metadata_document_supported===true?{clientIdMetadataDocumentSupported:true}:{}), scopes: selectedScopes };
+  return { ...(registrationEndpoint ? { registrationEndpoint } : {}), issuer: metadata.issuer, resource: canonical(endpoint.href), authorizationEndpoint: authorization.href, tokenEndpoint: token.href, requireIssuer:metadata.authorization_response_iss_parameter_supported===true, ...(metadata.client_id_metadata_document_supported===true?{clientIdMetadataDocumentSupported:true}:{}), scopes: selectedScopes };
 }
 function binding(config, scope) { return sha(JSON.stringify([config.id, config.url, normalizeOAuth(config.oauth), scope.projectId, scope.threadId || ''])); }
 function keyFor(config, scope) { return sha(JSON.stringify([config.id, scope.projectId, scope.threadId || ''])); }
@@ -130,11 +135,13 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
       flow.meta = await discover(config, flow.controller.signal);
       if (upgrade) flow.meta.scopes = upgrade.scopes;
       const previous=credentials.find(row=>row.key===keyFor(config,scope)&&row.fingerprint===binding(config,scope));
-      if((upgrade||config.oauth.registration!=='metadata')&&previous){
-        let identity;try{identity=JSON.parse(decrypt(Buffer.from(previous.sealed,'base64')));if(identity.binding!==binding(config,scope)||identity.resource!==canonical(config.url)||typeof identity.issuer!=='string')throw Error();}catch{throw fail('Encrypted OAuth client identity cannot be verified; sign in again');}
+      let identity;
+      if((upgrade||config.oauth.registration!=='metadata')&&previous){try{identity=JSON.parse(decrypt(Buffer.from(previous.sealed,'base64')));if(identity.binding!==binding(config,scope)||identity.resource!==canonical(config.url)||typeof identity.issuer!=='string')throw Error();}catch{throw fail('Encrypted OAuth client identity cannot be verified; sign in again');}
         if(identity.issuer!==flow.meta.issuer)throw fail('Pre-registered client belongs to a different authorization server; configure the expected issuer before authorizing again');
       }
-      flow.clientIdentity=await resolveClientIdentity(config,flow.meta,flow.controller.signal,fetchBounded); if (flow.controller.signal.aborted || closed) throw fail('OAuth sign-in cancelled');
+      flow.clientIdentity=await resolveClientIdentity(config,flow.meta,flow.controller.signal,fetchBounded);
+      flow.clientId = config.oauth.registration==='dynamic' ? identity?.clientId : config.oauth.clientId;
+      if(config.oauth.registration==='dynamic' && flow.clientId) flow.clientIdentity.clientId = flow.clientId; if (flow.controller.signal.aborted || closed) throw fail('OAuth sign-in cancelled');
       flow.verifier = randomBytes(32).toString('base64url'); flow.state = randomBytes(32).toString('base64url'); const callbackPath = '/oauth/callback';
       flow.server = http.createServer(async (req, res) => {
         const reply = (status, body) => { res.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer', 'Content-Security-Policy': "default-src 'none'; frame-ancestors 'none'" }); res.end(body); };
@@ -149,11 +156,11 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
         const code = callback.searchParams.get('code'); if (!code || code.length > 4096 || /[\x00-\x1f\x7f]/.test(code)) return reply(400, 'Invalid authorization code');
         flow.status = 'exchanging'; publish();
         try {
-          const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: flow.redirectUri, client_id: config.oauth.clientId, code_verifier: flow.verifier, resource: flow.meta.resource }).toString();
+          const body = new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: flow.redirectUri, client_id: flow.clientId, code_verifier: flow.verifier, resource: flow.meta.resource }).toString();
           const token = await fetchBounded(url(flow.meta.tokenEndpoint, config), { method: 'POST', body, signal: flow.controller.signal });
           if (token.status !== 200) throw fail(`OAuth token exchange failed (HTTP ${token.status}); no automatic retry`);
           if (flow.controller.signal.aborted || closed || flow.fingerprint !== binding(config, scope)) throw fail('OAuth configuration changed or sign-in cancelled');
-          const granted = tokenData(token.data, null, flow.meta);
+          const granted = tokenData(token.data, null, {...flow.meta, clientId:flow.clientId});
           if (upgrade && !upgrade.scopes.every(value => granted.scopes.includes(value))) throw fail('OAuth server did not grant the reviewed scopes');
           save(config, scope, granted);
           if (upgrade && scopeChallenges.get(key) === upgrade) scopeChallenges.delete(key);
@@ -164,17 +171,37 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
       await new Promise((resolve, reject) => { flow.server.once('error', reject); flow.server.listen(config.oauth.redirectPort||0, '127.0.0.1', resolve); });
       if (flow.controller.signal.aborted || closed) throw fail('OAuth sign-in cancelled');
       flow.redirectUri = `http://127.0.0.1:${flow.server.address().port}${callbackPath}`;flow.clientIdentity.redirectUri=flow.redirectUri;
-      const authorization = new URL(flow.meta.authorizationEndpoint); for (const [key, value] of Object.entries({ response_type: 'code', client_id: config.oauth.clientId, redirect_uri: flow.redirectUri, state: flow.state, code_challenge: createHash('sha256').update(flow.verifier).digest('base64url'), code_challenge_method: 'S256', resource: flow.meta.resource, ...(flow.meta.scopes.length ? { scope: flow.meta.scopes.join(' ') } : {}) })) authorization.searchParams.set(key, value);
-      flow.authorizationUrl = authorization.href; flow.status = 'prepared'; publish(); return publicFlow(flow);
+      flow.status = 'prepared'; publish(); return publicFlow(flow);
     } catch (error) { if (!['cancelled','expired'].includes(flow.status)) finish(flow, 'failed', error.error_code ? error.message : 'OAuth discovery failed'); throw error.error_code ? error : fail('OAuth discovery failed'); }
   }
   function flowFor(id, config, scope) { const flow = flows.get(id); if (!flow || flow.integrationId !== config.id || flow.fingerprint !== binding(config, scope)) throw fail('OAuth flow is outside this configuration/scope'); return flow; }
-  async function open(id, config, scope) { ensure(); const flow = flowFor(id, config, scope); if (flow.status !== 'prepared') throw fail('OAuth flow is not ready to open'); if (typeof openExternal !== 'function') throw fail('External browser sign-in is unavailable'); flow.status = 'authorizing'; publish(); try { await openExternal(flow.authorizationUrl); } catch { finish(flow, 'failed', 'Could not open the authorization page'); throw fail('Could not open the authorization page'); } return publicFlow(flow); }
+  async function open(id, config, scope) {
+    ensure();
+    const flow = flowFor(id, config, scope);
+    if (flow.status !== 'prepared') throw fail('OAuth flow is not ready to open');
+    if (typeof openExternal !== 'function') throw fail('External browser sign-in is unavailable');
+    flow.status = 'authorizing'; publish();
+    try {
+      if (!flow.clientId && config.oauth.registration === 'dynamic') {
+        flow.clientId = await registerPublicClient(flow.clientIdentity, flow.controller.signal, fetchBounded);
+        if (flow.controller.signal.aborted || closed) throw fail('OAuth sign-in cancelled');
+        flow.clientIdentity.clientId = flow.clientId;
+      }
+      const authorization = new URL(flow.meta.authorizationEndpoint);
+      const parameters = { response_type:'code', client_id:flow.clientId, redirect_uri:flow.redirectUri, state:flow.state, code_challenge:createHash('sha256').update(flow.verifier).digest('base64url'), code_challenge_method:'S256', resource:flow.meta.resource, ...(flow.meta.scopes.length ? {scope:flow.meta.scopes.join(' ')} : {}) };
+      for (const [name,value] of Object.entries(parameters)) authorization.searchParams.set(name,value);
+      await openExternal(authorization.href);
+    } catch (failure) {
+      if (!['cancelled','expired'].includes(flow.status)) finish(flow,'failed',failure.error_code ? failure.message : 'Could not open the authorization page');
+      throw failure.error_code ? failure : fail('Could not open the authorization page');
+    }
+    return publicFlow(flow);
+  }
   function cancel(id, config, scope) { const flow = flowFor(id, config, scope); if (['discovering','prepared','authorizing','exchanging'].includes(flow.status)) finish(flow, 'cancelled'); return publicFlow(flow); }
   function forget(config, scope) { for(const row of credentials)if(row.integrationId===config.id&&(!scope||row.key===keyFor(config,scope)))scopeChallenges.delete(row.key);for (const flow of flows.values()) if (flow.integrationId === config.id && (!scope || JSON.stringify(flow.scope) === JSON.stringify(scope)) && ['discovering','prepared','authorizing','exchanging'].includes(flow.status)) finish(flow, 'cancelled'); for (const active of refreshing.values()) if (active.integrationId === config.id && (!scope || active.key === keyFor(config, scope))) active.controller.abort(); persist(credentials.filter(row => row.integrationId !== config.id || scope && row.key !== keyFor(config, scope))); publish(); }
   async function authorization(config, scope, signal) {
     ensure();if([...flows.values()].some(flow=>flow.integrationId===config.id&&JSON.stringify(flow.scope)===JSON.stringify(scope)&&['discovering','prepared','authorizing','exchanging'].includes(flow.status)))throw fail('OAuth sign-in is in progress; finish or cancel it before connecting','VEK_MCP_OAUTH_REQUIRED');  const key = keyFor(config, scope), row = credentials.find(item => item.key === key && item.fingerprint === binding(config, scope)); if (!row) throw fail('OAuth sign-in is required; prepare authorization explicitly', 'VEK_MCP_OAUTH_REQUIRED');
-    let data; try { data = JSON.parse(decrypt(Buffer.from(row.sealed, 'base64')));if(data.binding!==binding(config,scope)||data.resource!==canonical(config.url)||data.expiresAt!==null&&(!Number.isFinite(data.expiresAt)||data.expiresAt<=0))throw fail('OAuth credential binding mismatch'); tokenData({ token_type: 'Bearer', access_token: data.accessToken, ...(data.refreshToken ? { refresh_token: data.refreshToken } : {}) }, data, data); } catch { throw fail('Encrypted OAuth credential cannot be opened; sign in again'); }
+    let data; try { data = JSON.parse(decrypt(Buffer.from(row.sealed, 'base64')));if(data.binding!==binding(config,scope)||data.resource!==canonical(config.url)||config.oauth.registration==='dynamic'&&(typeof data.clientId!=='string'||!/^[!-~]{1,2048}$/.test(data.clientId))||data.expiresAt!==null&&(!Number.isFinite(data.expiresAt)||data.expiresAt<=0))throw fail('OAuth credential binding mismatch'); tokenData({ token_type: 'Bearer', access_token: data.accessToken, ...(data.refreshToken ? { refresh_token: data.refreshToken } : {}) }, data, data); } catch { throw fail('Encrypted OAuth credential cannot be opened; sign in again'); }
     if (data.expiresAt === null || data.expiresAt > Date.now() + 30000) { onSecret(data.accessToken); return `Bearer ${data.accessToken}`; }
     if (!data.refreshToken) throw fail('OAuth token expired; sign in again', 'VEK_MCP_OAUTH_REQUIRED');
     if (refreshing.has(key)) return refreshing.get(key).promise;
@@ -182,7 +209,7 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
     const operation = { key, integrationId: config.id, controller }; refreshing.set(key, operation);
     operation.promise = (async () => {
       try {
-        const body = new URLSearchParams({ grant_type: 'refresh_token', refresh_token: data.refreshToken, client_id: config.oauth.clientId, resource: data.resource }).toString(); const response = await fetchBounded(url(data.tokenEndpoint, config), { method: 'POST', body, signal: controller.signal });
+        const body = new URLSearchParams({ grant_type: 'refresh_token', refresh_token: data.refreshToken, client_id: data.clientId || config.oauth.clientId, resource: data.resource }).toString(); const response = await fetchBounded(url(data.tokenEndpoint, config), { method: 'POST', body, signal: controller.signal });
         if (response.status !== 200 || controller.signal.aborted || closed || !credentials.includes(row)) throw fail('OAuth refresh failed');
         const next = tokenData(response.data, data, data); if (response.data.refresh_token === undefined||response.data.refresh_token===data.refreshToken) throw fail('OAuth public-client refresh token rotation is required'); save(config, scope, next); return `Bearer ${next.accessToken}`;
       } catch { if (credentials.includes(row)) { persist(credentials.filter(item => item !== row)); publish(); } throw fail('OAuth refresh failed; sign in again. Refresh was not replayed.', 'VEK_MCP_OAUTH_REQUIRED'); }

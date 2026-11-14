@@ -1634,7 +1634,7 @@
     "Scheduler tick needs a data directory and timeout from 25 to 3600000 ms": "调度器勾选需要数据目录和超时从 25到 360000 ms",
     "Scope": "范围",
     "Scope: {0}. Each thread gets a separate server process. Use credential references; their values are never entered in this form.": "范围：{0}。每个对话使用独立的服务器进程。请填写凭据引用，将凭据值留在环境变量中。",
-    "Scope: {0}. Each thread has an isolated connection. The selected protocol controls session or per-request behavior. Referenced environment variables contain complete header values (for example Bearer …). OAuth uses a pre-registered public client or your hosted HTTPS Client ID Metadata Document, S256 PKCE and secure OS storage. Metadata mode requires a fixed port and the exact http://127.0.0.1:PORT/oauth/callback in that document. Save first, then use Client metadata to host for a JSON template. Wiek does not publish it. Automatic ports are available only for pre-registered native clients. Authorization headers and OAuth cannot be combined. Saving a new endpoint/client/scope clears existing sign-in.": "范围：{0}。每个对话使用独立连接。所选协议决定使用会话或逐个请求。引用的环境变量应包含完整的请求头值，例如 Bearer …。OAuth 使用预先注册的公共客户端，或你托管的 HTTPS 客户端 ID 元数据文档，并使用 S256 PKCE 和系统安全存储。元数据模式需要固定端口，文档中必须包含准确的 http://127.0.0.1:PORT/oauth/callback。保存后可在“待托管的客户端元数据”查看 JSON 模板并自行发布。只有预先注册的原生客户端可使用自动端口。Authorization 请求头与 OAuth 只能选择其中一项。更改端点、客户端或范围会清除现有登录。",
+    "Scope: {0}. Each thread has an isolated connection. The selected protocol controls session or per-request behavior. Referenced environment variables contain complete header values (for example Bearer …). OAuth uses a pre-registered public client or your hosted HTTPS Client ID Metadata Document, S256 PKCE and secure OS storage. Metadata mode requires a fixed port and the exact http://127.0.0.1:PORT/oauth/callback in that document. Save first, then use Client metadata to host for a JSON template. Wiek does not publish it. Automatic ports are available only for pre-registered native clients. Dynamic registration requires an expected issuer and a fixed port. Leave the client ID empty. Authorization headers and OAuth cannot be combined. Saving a new endpoint/client/scope clears existing sign-in.": "范围：{0}。每个对话使用独立连接。所选协议决定使用会话或逐个请求。引用的环境变量应包含完整的请求头值，例如 Bearer …。OAuth 使用预先注册的公共客户端，或你托管的 HTTPS 客户端 ID 元数据文档，并使用 S256 PKCE 和系统安全存储。元数据模式需要固定端口，文档中必须包含准确的 http://127.0.0.1:PORT/oauth/callback。保存后可在“待托管的客户端元数据”查看 JSON 模板并自行发布。只有预先注册的原生客户端可使用自动端口。Authorization 请求头与 OAuth 只能选择其中一项。更改端点、客户端或范围会清除现有登录。动态注册需要指定授权服务器和固定的回调端口，此时请将客户端 ID 留空。",
     "Scoped project no longer exists": "范围化项目不复存在",
     "Screen Recording permission is not granted.": "屏幕录制权限不被授予。",
     "Screen Recording permission is not granted. Open macOS settings to enable capture.": "不允许屏幕记录。 打开 macOS 设置以启用捕获。",
@@ -2276,6 +2276,15 @@
     "Additional permissions requested: {0}": "服务请求增加权限：{0}",
     "Review additional permissions": "审核新增权限",
     "No additional OAuth permissions are pending": "没有待审核的 OAuth 新增权限",
+    "Register a public client with the issuer": "向授权服务器注册公开客户端",
+    "Assigned after approval": "批准后分配",
+    "Registration endpoint": "注册端点",
+    "Register and open sign-in": "注册并打开登录页面",
+    "Dynamic registration requires an expected issuer and no configured client ID": "动态注册需要指定授权服务器，并将客户端 ID 留空",
+    "Dynamic registration requires a fixed loopback port between 1024 and 65535": "动态注册需要指定 1024 至 65535 之间的固定回调端口",
+    "The expected issuer does not advertise a same-origin registration endpoint": "指定的授权服务器未提供同源注册端点",
+    "Dynamic client registration failed": "动态客户端注册失败",
+    "Dynamic registration returned incompatible public client metadata": "动态注册返回了不兼容的公开客户端信息",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

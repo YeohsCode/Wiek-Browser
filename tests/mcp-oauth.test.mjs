@@ -13,6 +13,7 @@ const pause = ms => new Promise(r => setTimeout(r, ms));
 async function fixture(t, settings = {}) {
  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'vek-oauth-'));
  const cleanups=[],calls = [], codes = new Map(), tokens = [], key = randomBytes(32); let opened, base, issued = 0;
+ const expectedClient = settings.registration ? 'registered-fixture-client' : 'public-client';
  const server = http.createServer(async (req, res) => {
   let body = ''; for await (const chunk of req) body += chunk;
   const parsed = new URL(req.url, base), form = new URLSearchParams(req.headers['content-type']==='application/json'?'':body); calls.push({ method: req.method, path: parsed.pathname, body: Object.fromEntries(form), authorization: req.headers.authorization });
@@ -28,14 +29,22 @@ async function fixture(t, settings = {}) {
   if (parsed.pathname.includes('/.well-known/oauth-authorization-server') || parsed.pathname.includes('/.well-known/openid-configuration') || parsed.pathname.endsWith('/.well-known/openid-configuration')) {
    if (settings.oidcAppendOnly && parsed.pathname !== '/tenant/.well-known/openid-configuration') return json({}, 404);
    if (settings.oidcOnly && parsed.pathname.includes('oauth-authorization-server')) return json({}, 404);
-   return json({ issuer: settings.wrongIssuer ? base + '/wrong' : base + (settings.tenant || ''), authorization_endpoint: base + '/authorize', token_endpoint: base + '/token', response_types_supported: ['code'], ...(settings.noPkce ? {} : { code_challenge_methods_supported: ['S256'] }), token_endpoint_auth_methods_supported: ['none'] });
+   return json({ issuer: settings.wrongIssuer ? base + '/wrong' : base + (settings.tenant || ''), authorization_endpoint: base + '/authorize', token_endpoint: base + '/token', response_types_supported: ['code'], ...(settings.noPkce ? {} : { code_challenge_methods_supported: ['S256'] }), token_endpoint_auth_methods_supported: ['none'], ...(settings.registration?{registration_endpoint:settings.registrationUrl || base+'/register'}:{}) });
+  }
+  if (parsed.pathname === '/register' && settings.registration) {
+   assert.equal(req.method, 'POST'); assert.equal(req.headers['content-type'], 'application/json'); assert.equal(req.headers.authorization, undefined);
+   const metadata = JSON.parse(body);
+   assert.deepEqual(metadata.grant_types, ['authorization_code','refresh_token']);
+   assert.equal(metadata.token_endpoint_auth_method, 'none');
+   assert.match(metadata.redirect_uris[0], /^http:\/\/127\.0\.0\.1:\d+\/oauth\/callback$/);
+   return json({...metadata, client_id: expectedClient, ...(settings.registrationSecret?{client_secret:'fixture-secret'}:{})},201);
   }
   if (parsed.pathname === '/authorize') {
-   const params = parsed.searchParams; assert.equal(params.get('resource'), base + '/mcp'); assert.equal(params.get('code_challenge_method'), 'S256'); assert.equal(params.get('client_id'), 'public-client');
+   const params = parsed.searchParams; assert.equal(params.get('resource'), base + '/mcp'); assert.equal(params.get('code_challenge_method'), 'S256'); assert.equal(params.get('client_id'), expectedClient);
    const code = randomUUID(); codes.set(code, Object.fromEntries(params)); const redirect = new URL(params.get('redirect_uri')); redirect.searchParams.set('state', params.get('state')); redirect.searchParams.set('code', code); redirect.searchParams.set('iss', base + (settings.tenant || '')); res.writeHead(302, { location: redirect.href }); res.end(); return;
   }
   if (parsed.pathname === '/token') {
-   assert.equal(form.get('resource'), base + '/mcp'); assert.equal(form.get('client_id'), 'public-client'); assert.equal(req.headers.authorization, undefined);
+   assert.equal(form.get('resource'), base + '/mcp'); assert.equal(form.get('client_id'), expectedClient); assert.equal(req.headers.authorization, undefined);
    if(settings.slowToken)await pause(settings.slowToken);
    if (settings.tokenFailure) return json({}, 503);
    let requestedScope;
@@ -206,4 +215,43 @@ test('HTTP insufficient_scope opens a scoped, reviewed OAuth upgrade and does no
  assert.deepEqual(h.service.snapshot().oauth.credentials[0].scopes, ['notes:read', 'notes:write']);
  delete h.settings.stepUpChallenge;
  assert.equal((await h.callTool()).status, 'completed');
+});
+
+
+test('dynamic registration is reviewed and the issued public client is rebound to this issuer and scope', async t => {
+ const h = await fixture(t, { registration:true });
+ const reservation = http.createServer();
+ await new Promise(resolve => reservation.listen(0,'127.0.0.1',resolve));
+ const port = reservation.address().port;
+ await new Promise(resolve => reservation.close(resolve));
+ h.config.oauth = { registration:'dynamic', issuer:h.base, redirectPort:port };
+ const prepared = await h.prepare();
+ assert.equal(prepared.clientIdentity.endpoint,h.base+'/register');
+ assert.equal(prepared.clientIdentity.clientId,undefined);
+ assert.equal(h.calls.filter(call=>call.path==='/register').length,0);
+ h.manager.cancel(prepared.id,h.config,scope);
+ const flow = await h.authorize();
+ assert.equal(flow.status,'prepared');
+ assert.equal(new URL(h.opened()).searchParams.get('client_id'),'registered-fixture-client');
+ assert.equal(h.calls.filter(call=>call.path==='/register').length,1);
+ await h.authorize();
+ assert.equal(h.calls.filter(call=>call.path==='/register').length,1);
+ await assert.rejects(h.manager.authorization(h.config,{...scope,threadId:'other'}),/required/);
+});
+
+test('dynamic registration rejects another origin or a registration requiring a client secret', async t => {
+ const h = await fixture(t, { registration:true, registrationUrl:'http://127.0.0.1:1/register' });
+ const reservation = http.createServer();
+ await new Promise(resolve => reservation.listen(0,'127.0.0.1',resolve));
+ const port = reservation.address().port;
+ await new Promise(resolve => reservation.close(resolve));
+ h.config.oauth = { registration:'dynamic', issuer:h.base, redirectPort:port };
+ await assert.rejects(h.prepare(),/same-origin/);
+ assert.equal(h.opened(),undefined);
+ h.settings.registrationUrl = undefined;
+ h.settings.registrationSecret = true;
+ const prepared = await h.prepare();
+ await assert.rejects(h.manager.open(prepared.id,h.config,scope),/incompatible public/);
+ assert.equal(h.opened(),undefined);
+ assert.deepEqual(h.manager.snapshot().credentials,[]);
 });

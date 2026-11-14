@@ -7,6 +7,8 @@
 - MCP 2025-11-25 支持审核会话式 HTTP 和 stdio 工具请求。实际回环 HTTP 测试覆盖直接请求和需授权后重试的回复。stdio 测试覆盖明确拒绝。
 - macOS 可对当前资料中主动保存的文本运行本机语义搜索。使用系统句向量，每份文档检查标题和最多 64 句，按相关度排序。本机测试使用中文与英文改述查询，验证资料隔离和删除时取消。模型可用性取决于系统和查询语言。[Apple Natural Language](https://developer.apple.com/documentation/naturallanguage/nlembedding/sentenceembedding(for:))
 
+- 本地源码 632/632，当前应用包专项 22/22。本地同集曾与源码测试重叠，结果为 40/69。串行复跑为 68/69，页面执行超时恢复用例按原时限单独复测通过 24 条断言。远端源码通过 631 项、跳过 1 项，原始浏览器同集 69/69 和 1,248 条断言通过，209 份发行文件与 81 份原始输入核对通过。[远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43612042448)
+
 ## 0.30 界面语言
 
 - 设置新增跟随系统、简体中文和 English，即时切换并保留选择。打包版验收覆盖主窗口、独立标签组窗口、菜单、重启恢复和输入法组词中的刷新。用户输入与用户命名保持原样。[语言验收](v030-interface-language.log)

@@ -116,5 +116,33 @@
       "failed": 2,
       "isolatedRetryPassed": 2
     }
+  },
+  "urlReviewAndSemanticSearch": {
+    "testedCommit": "787c44b32980574057a6aec4ee559114fd1f8b18",
+    "sourceLocal": {
+      "pass": 632,
+      "fail": 0
+    },
+    "packagedTargetedLocal": 22,
+    "browserLocalSerial": {
+      "pass": 68,
+      "fail": 1,
+      "individualRetryAssertions": 24
+    },
+    "browserLocalOverlap": {
+      "pass": 40,
+      "fail": 29
+    },
+    "ci": {
+      "status": "passed",
+      "runId": 43612042448,
+      "sourcePassed": 631,
+      "sourceSkipped": 1,
+      "browserPassed": 69,
+      "browserAssertions": 1248,
+      "packageFiles": 209,
+      "originalInputs": 81,
+      "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43612042448"
+    }
   }
 }

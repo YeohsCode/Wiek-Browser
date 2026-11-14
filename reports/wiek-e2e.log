@@ -26,11 +26,11 @@
   dist/src/index.js                               6.1kb
   ...and 25 more output files...
 
-⚡ Done in 20ms
+⚡ Done in 19ms
 == E2E (real browser helpers) ==
-fixture: http://127.0.0.1:54045
-task: wiek-lite real browser e2e 1794586747457-ae2b069a0a1ef
-cli: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist-validation/v028/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs
+fixture: http://127.0.0.1:53224
+task: wiek-lite real browser e2e 1794627201081-1fdf8fa9917088
+cli: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist-validation/v029/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs
 sdk: /Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/data/sdk-regression/workspace/packages/sdk/dist/out/index.js
 -- environment initialization
 {"ok":true,"assertions":24}
@@ -489,19 +489,19 @@ Click a mouse target.
 click(target, options?) → Promise<void>
 Unknown helper: missingHelperForE2E
 {"ok":true,"assertions":67}
--- helper surface passed (170ms, 67 assertions)
+-- helper surface passed (166ms, 67 assertions)
 -- task spaces and control
 {"ok":true,"assertions":58}
 -- task spaces and control passed (1.1s, 58 assertions)
 -- TaskSpace profile selection
 {"ok":true,"assertions":19}
--- TaskSpace profile selection passed (367ms, 19 assertions)
+-- TaskSpace profile selection passed (356ms, 19 assertions)
 -- v2 cross-space routing
 {"ok":true,"assertions":4}
--- v2 cross-space routing passed (634ms, 4 assertions)
+-- v2 cross-space routing passed (622ms, 4 assertions)
 -- navigation helpers
 {"ok":true,"assertions":33}
--- navigation helpers passed (3.1s, 33 assertions)
+-- navigation helpers passed (3.2s, 33 assertions)
 -- observation helpers
 {"observationStep":"dynamic DOM"}
 {"observationStep":"iframe"}
@@ -521,12 +521,12 @@ Unknown helper: missingHelperForE2E
 {"pointerStep":"rapid clicks"}
 {"pointerStep":"checkbox"}
 {"ok":true,"assertions":45}
--- pointer and scroll helpers passed (8.8s, 45 assertions)
+-- pointer and scroll helpers passed (8.9s, 45 assertions)
 -- keyboard and file helpers
 {"keyboardStep":"contentEditable"}
 {"keyboardStep":"rapid backspace"}
 {"ok":true,"assertions":22}
--- keyboard and file helpers passed (1.8s, 22 assertions)
+-- keyboard and file helpers passed (1.9s, 22 assertions)
 -- keyboard regression
 {"ok":true,"assertions":14}
 -- keyboard regression passed (1.1s, 14 assertions)
@@ -553,7 +553,7 @@ Focus an input, optionally clear it, type text, and fire input/change events.
 fillInput(selector, text, options?) → Promise<void>
 Unknown helper: missingHelperForE2E
 {"ok":true,"assertions":42}
--- wait, fetch, cdp, js, help passed (2.8s, 42 assertions)
+-- wait, fetch, cdp, js, help passed (2.7s, 42 assertions)
 -- runtime regression
 [wiek-browser] js() received a function and auto-wrapped it (function () {\n      return typeof outer;\n    }).
   js() is a thin wrapper over CDP Runtime.evaluate; it takes a string expression,
@@ -568,36 +568,36 @@ Unknown helper: missingHelperForE2E
 -- target-scoped event isolation passed (3.6s, 4 assertions)
 -- page labels: create
 {"ok":true,"assertions":13}
--- page labels: create passed (774ms, 13 assertions)
+-- page labels: create passed (745ms, 13 assertions)
 -- page labels: restore and reuse
 {"ok":true,"assertions":14}
--- page labels: restore and reuse passed (495ms, 14 assertions)
+-- page labels: restore and reuse passed (500ms, 14 assertions)
 -- page labels: close and do not reuse
 {"ok":true,"assertions":10}
--- page labels: close and do not reuse passed (643ms, 10 assertions)
+-- page labels: close and do not reuse passed (640ms, 10 assertions)
 -- page labels: persist before hard stop
--- page labels: persist before hard stop passed (342ms, expected termination)
+-- page labels: persist before hard stop passed (332ms, expected termination)
 -- page labels: restore after hard stop
 {"ok":true,"assertions":3}
--- page labels: restore after hard stop passed (336ms, 3 assertions)
+-- page labels: restore after hard stop passed (322ms, 3 assertions)
 -- page inventory and budget
 {"ok":true,"assertions":9}
--- page inventory and budget passed (892ms, 9 assertions)
+-- page inventory and budget passed (899ms, 9 assertions)
 -- page adoption and release
 {"ok":true,"assertions":19}
--- page adoption and release passed (593ms, 19 assertions)
+-- page adoption and release passed (580ms, 19 assertions)
 -- page basic operations
 {"ok":true,"assertions":53}
 -- page basic operations passed (1.9s, 53 assertions)
 -- page complex evaluate
 {"ok":true,"assertions":23}
--- page complex evaluate passed (649ms, 23 assertions)
+-- page complex evaluate passed (648ms, 23 assertions)
 -- page fetch
 {"ok":true,"assertions":25}
--- page fetch passed (713ms, 25 assertions)
+-- page fetch passed (694ms, 25 assertions)
 -- page actions and popup adoption
 {"ok":true,"assertions":57}
--- page actions and popup adoption passed (4.6s, 57 assertions)
+-- page actions and popup adoption passed (4.5s, 57 assertions)
 -- Page click hit target
 {"ok":true,"assertions":17}
 -- Page click hit target passed (3.6s, 17 assertions)
@@ -612,64 +612,64 @@ Unknown helper: missingHelperForE2E
 -- Page JavaScript dialog handling passed (1.1s, 34 assertions)
 -- Page media playback
 {"ok":true,"assertions":17}
--- Page media playback passed (6.6s, 17 assertions)
+-- Page media playback passed (4.8s, 17 assertions)
 -- Page scrolled screenshot
 {"screenshotBytes":{"default":34666,"raw":34666},"screenshotSamples":{"default":{"colorful":25,"sampled":25,"width":1150,"height":786},"raw":{"colorful":25,"sampled":25,"width":1150,"height":786}}}
 {"ok":true,"assertions":13}
--- Page scrolled screenshot passed (476ms, 13 assertions)
+-- Page scrolled screenshot passed (494ms, 13 assertions)
 -- Page snapshot locator quality
 {"ok":true,"assertions":4}
--- Page snapshot locator quality passed (404ms, 4 assertions)
+-- Page snapshot locator quality passed (400ms, 4 assertions)
 -- Page snapshot iframe viewport
 { frame: 'Same-origin iframe', verifiedAction: 'snapshot ref' }
 { frame: 'Cross-origin OOPIF', verifiedAction: 'snapshot ref' }
 {"ok":true,"assertions":13}
--- Page snapshot iframe viewport passed (5.5s, 13 assertions)
+-- Page snapshot iframe viewport passed (929ms, 13 assertions)
 -- Page snapshot subtree
 {"ok":true,"assertions":46}
--- Page snapshot subtree passed (1.6s, 46 assertions)
+-- Page snapshot subtree passed (2.1s, 46 assertions)
 -- Page ref identity across partial snapshots
 {"ok":true,"assertions":14}
--- Page ref identity across partial snapshots passed (1.6s, 14 assertions)
+-- Page ref identity across partial snapshots passed (2.4s, 14 assertions)
 -- Page refs across rounds: prepare
 {"ok":true,"assertions":5}
--- Page refs across rounds: prepare passed (406ms, 5 assertions)
+-- Page refs across rounds: prepare passed (411ms, 5 assertions)
 -- Page refs across rounds: resume
 {"ok":true,"assertions":12}
--- Page refs across rounds: resume passed (5.2s, 12 assertions)
+-- Page refs across rounds: resume passed (5.3s, 12 assertions)
 -- Page refs in dialog workflows
 {"ok":true,"assertions":10}
--- Page refs in dialog workflows passed (857ms, 10 assertions)
+-- Page refs in dialog workflows passed (877ms, 10 assertions)
 -- Page refs after failed actions: prepare
 {"ok":true,"assertions":8}
--- Page refs after failed actions: prepare passed (827ms, 8 assertions)
+-- Page refs after failed actions: prepare passed (821ms, 8 assertions)
 -- Page refs after failed actions: resume
 {"ok":true,"assertions":3}
--- Page refs after failed actions: resume passed (321ms, 3 assertions)
+-- Page refs after failed actions: resume passed (319ms, 3 assertions)
 -- Page refs after upload: prepare
 {"ok":true,"assertions":2}
--- Page refs after upload: prepare passed (512ms, 2 assertions)
+-- Page refs after upload: prepare passed (501ms, 2 assertions)
 -- Page refs after upload: resume
 {"ok":true,"assertions":3}
--- Page refs after upload: resume passed (304ms, 3 assertions)
+-- Page refs after upload: resume passed (309ms, 3 assertions)
 -- Page snapshot lazy iframe
 {"ok":true,"assertions":14}
--- Page snapshot lazy iframe passed (417ms, 14 assertions)
+-- Page snapshot lazy iframe passed (414ms, 14 assertions)
 -- Page snapshot sibling iframes
 {"ok":true,"assertions":14}
--- Page snapshot sibling iframes passed (589ms, 14 assertions)
+-- Page snapshot sibling iframes passed (583ms, 14 assertions)
 -- Page snapshot nested iframes
 {"ok":true,"assertions":18}
--- Page snapshot nested iframes passed (551ms, 18 assertions)
+-- Page snapshot nested iframes passed (577ms, 18 assertions)
 -- Page snapshot replaced iframe
 {"ok":true,"assertions":11}
--- Page snapshot replaced iframe passed (538ms, 11 assertions)
+-- Page snapshot replaced iframe passed (524ms, 11 assertions)
 -- Page open Shadow DOM locators
 {"ok":true,"assertions":4}
--- Page open Shadow DOM locators passed (863ms, 4 assertions)
+-- Page open Shadow DOM locators passed (886ms, 4 assertions)
 -- Page text locators
 {"ok":true,"assertions":6}
--- Page text locators passed (994ms, 6 assertions)
+-- Page text locators passed (1.0s, 6 assertions)
 -- Page Playwright selector compatibility
 {"ok":true,"assertions":16}
 -- Page Playwright selector compatibility passed (3.1s, 16 assertions)
@@ -678,142 +678,142 @@ Unknown helper: missingHelperForE2E
 -- Page popup waiter and URL diagnostic passed (1.4s, 11 assertions)
 -- Page download lifecycle
 {"ok":true,"assertions":8}
--- Page download lifecycle passed (735ms, 8 assertions)
+-- Page download lifecycle passed (729ms, 8 assertions)
 -- Concurrent TaskSpace downloads
 {"ok":true,"assertions":13}
 -- Concurrent TaskSpace downloads passed (2.2s, 13 assertions)
 -- Page Chromium PDF viewer download
 {"ok":true,"assertions":13}
--- Page Chromium PDF viewer download passed (1.1s, 13 assertions)
+-- Page Chromium PDF viewer download passed (1.2s, 13 assertions)
 -- Page download across rounds: prepare
 {"ok":true,"assertions":1}
--- Page download across rounds: prepare passed (735ms, 1 assertions)
+-- Page download across rounds: prepare passed (722ms, 1 assertions)
 -- Page download across rounds: resume
 {"ok":true,"assertions":4}
--- Page download across rounds: resume passed (217ms, 4 assertions)
+-- Page download across rounds: resume passed (214ms, 4 assertions)
 -- Page OOPIF actions
 {"ok":true,"assertions":15}
 -- Page OOPIF actions passed (2.3s, 15 assertions)
 -- Page OOPIF restore and close
 {"ok":true,"assertions":7}
--- Page OOPIF restore and close passed (238ms, 7 assertions)
+-- Page OOPIF restore and close passed (236ms, 7 assertions)
 -- Page load states
 {"ok":true,"assertions":50}
 -- Page load states passed (11.9s, 50 assertions)
 -- Page dedicated Worker startup
 {"ok":true,"assertions":1}
--- Page dedicated Worker startup passed (374ms, 1 assertions)
+-- Page dedicated Worker startup passed (362ms, 1 assertions)
 -- Page API alignment
 {"ok":true,"assertions":40}
--- Page API alignment passed (5.7s, 40 assertions)
+-- Page API alignment passed (5.6s, 40 assertions)
 -- Page actionability
 {"ok":true,"assertions":46}
--- Page actionability passed (6.3s, 46 assertions)
+-- Page actionability passed (6.4s, 46 assertions)
 -- Page evaluate timeout recovery
 {"ok":true,"assertions":24}
 -- Page evaluate timeout recovery passed (48.5s, 24 assertions)
 -- Page delayed popup: schedule
 {"ok":true,"assertions":1}
--- Page delayed popup: schedule passed (709ms, 1 assertions)
+-- Page delayed popup: schedule passed (714ms, 1 assertions)
 -- Page delayed popup: resume
 {"ok":true,"assertions":3}
 -- Page delayed popup: resume passed (1.1s, 3 assertions)
 -- v1 and v2 action parity
 {"ok":true,"assertions":13}
--- v1 and v2 action parity passed (978ms, 13 assertions)
+-- v1 and v2 action parity passed (984ms, 13 assertions)
 -- portable keyboard workflow
 {"ok":true,"assertions":4}
--- portable keyboard workflow passed (940ms, 4 assertions)
+-- portable keyboard workflow passed (947ms, 4 assertions)
 -- Page keyboard interface
 {"ok":true,"assertions":38}
 -- Page keyboard interface passed (2.5s, 38 assertions)
 -- pure CDP workflow
 {"ok":true,"assertions":9}
--- pure CDP workflow passed (522ms, 9 assertions)
+-- pure CDP workflow passed (508ms, 9 assertions)
 -- snapshot workflow
 {"ok":true,"assertions":7}
 -- snapshot workflow passed (1.2s, 7 assertions)
 -- visual workflow
 {"ok":true,"assertions":5}
--- visual workflow passed (474ms, 5 assertions)
+-- visual workflow passed (469ms, 5 assertions)
 
 == E2E Summary ==
   Passed:   69/69  (100%)
-  Total time: 174.0s
+  Total time: 169.0s
   Assertions: 1248
 
   Cases:
     environment initialization                     2.8s    24 assertions  PASS
-    helper surface                                170ms    67 assertions  PASS
+    helper surface                                166ms    67 assertions  PASS
     task spaces and control                        1.1s    58 assertions  PASS
-    TaskSpace profile selection                   367ms    19 assertions  PASS
-    v2 cross-space routing                        634ms    4 assertions  PASS
-    navigation helpers                             3.1s    33 assertions  PASS
+    TaskSpace profile selection                   356ms    19 assertions  PASS
+    v2 cross-space routing                        622ms    4 assertions  PASS
+    navigation helpers                             3.2s    33 assertions  PASS
     observation helpers                            1.9s    51 assertions  PASS
-    pointer and scroll helpers                     8.8s    45 assertions  PASS
-    keyboard and file helpers                      1.8s    22 assertions  PASS
+    pointer and scroll helpers                     8.9s    45 assertions  PASS
+    keyboard and file helpers                      1.9s    22 assertions  PASS
     keyboard regression                            1.1s    14 assertions  PASS
-    wait, fetch, cdp, js, help                     2.8s    42 assertions  PASS
+    wait, fetch, cdp, js, help                     2.7s    42 assertions  PASS
     runtime regression                             3.6s    20 assertions  PASS
     target-scoped event isolation                  3.6s    4 assertions  PASS
-    page labels: create                           774ms    13 assertions  PASS
-    page labels: restore and reuse                495ms    14 assertions  PASS
-    page labels: close and do not reuse           643ms    10 assertions  PASS
-    page labels: persist before hard stop         342ms    1 assertions  PASS
-    page labels: restore after hard stop          336ms    3 assertions  PASS
-    page inventory and budget                     892ms    9 assertions  PASS
-    page adoption and release                     593ms    19 assertions  PASS
+    page labels: create                           745ms    13 assertions  PASS
+    page labels: restore and reuse                500ms    14 assertions  PASS
+    page labels: close and do not reuse           640ms    10 assertions  PASS
+    page labels: persist before hard stop         332ms    1 assertions  PASS
+    page labels: restore after hard stop          322ms    3 assertions  PASS
+    page inventory and budget                     899ms    9 assertions  PASS
+    page adoption and release                     580ms    19 assertions  PASS
     page basic operations                          1.9s    53 assertions  PASS
-    page complex evaluate                         649ms    23 assertions  PASS
-    page fetch                                    713ms    25 assertions  PASS
-    page actions and popup adoption                4.6s    57 assertions  PASS
+    page complex evaluate                         648ms    23 assertions  PASS
+    page fetch                                    694ms    25 assertions  PASS
+    page actions and popup adoption                4.5s    57 assertions  PASS
     Page click hit target                          3.6s    17 assertions  PASS
     Page action motion tolerance                   1.2s    6 assertions  PASS
     Page drag and canvas drawing                   1.0s    15 assertions  PASS
     Page JavaScript dialog handling                1.1s    34 assertions  PASS
-    Page media playback                            6.6s    17 assertions  PASS
-    Page scrolled screenshot                      476ms    13 assertions  PASS
-    Page snapshot locator quality                 404ms    4 assertions  PASS
-    Page snapshot iframe viewport                  5.5s    13 assertions  PASS
-    Page snapshot subtree                          1.6s    46 assertions  PASS
-    Page ref identity across partial snapshots     1.6s    14 assertions  PASS
-    Page refs across rounds: prepare              406ms    5 assertions  PASS
-    Page refs across rounds: resume                5.2s    12 assertions  PASS
-    Page refs in dialog workflows                 857ms    10 assertions  PASS
-    Page refs after failed actions: prepare       827ms    8 assertions  PASS
-    Page refs after failed actions: resume        321ms    3 assertions  PASS
-    Page refs after upload: prepare               512ms    2 assertions  PASS
-    Page refs after upload: resume                304ms    3 assertions  PASS
-    Page snapshot lazy iframe                     417ms    14 assertions  PASS
-    Page snapshot sibling iframes                 589ms    14 assertions  PASS
-    Page snapshot nested iframes                  551ms    18 assertions  PASS
-    Page snapshot replaced iframe                 538ms    11 assertions  PASS
-    Page open Shadow DOM locators                 863ms    4 assertions  PASS
-    Page text locators                            994ms    6 assertions  PASS
+    Page media playback                            4.8s    17 assertions  PASS
+    Page scrolled screenshot                      494ms    13 assertions  PASS
+    Page snapshot locator quality                 400ms    4 assertions  PASS
+    Page snapshot iframe viewport                 929ms    13 assertions  PASS
+    Page snapshot subtree                          2.1s    46 assertions  PASS
+    Page ref identity across partial snapshots     2.4s    14 assertions  PASS
+    Page refs across rounds: prepare              411ms    5 assertions  PASS
+    Page refs across rounds: resume                5.3s    12 assertions  PASS
+    Page refs in dialog workflows                 877ms    10 assertions  PASS
+    Page refs after failed actions: prepare       821ms    8 assertions  PASS
+    Page refs after failed actions: resume        319ms    3 assertions  PASS
+    Page refs after upload: prepare               501ms    2 assertions  PASS
+    Page refs after upload: resume                309ms    3 assertions  PASS
+    Page snapshot lazy iframe                     414ms    14 assertions  PASS
+    Page snapshot sibling iframes                 583ms    14 assertions  PASS
+    Page snapshot nested iframes                  577ms    18 assertions  PASS
+    Page snapshot replaced iframe                 524ms    11 assertions  PASS
+    Page open Shadow DOM locators                 886ms    4 assertions  PASS
+    Page text locators                             1.0s    6 assertions  PASS
     Page Playwright selector compatibility         3.1s    16 assertions  PASS
     Page popup waiter and URL diagnostic           1.4s    11 assertions  PASS
-    Page download lifecycle                       735ms    8 assertions  PASS
+    Page download lifecycle                       729ms    8 assertions  PASS
     Concurrent TaskSpace downloads                 2.2s    13 assertions  PASS
-    Page Chromium PDF viewer download              1.1s    13 assertions  PASS
-    Page download across rounds: prepare          735ms    1 assertions  PASS
-    Page download across rounds: resume           217ms    4 assertions  PASS
+    Page Chromium PDF viewer download              1.2s    13 assertions  PASS
+    Page download across rounds: prepare          722ms    1 assertions  PASS
+    Page download across rounds: resume           214ms    4 assertions  PASS
     Page OOPIF actions                             2.3s    15 assertions  PASS
-    Page OOPIF restore and close                  238ms    7 assertions  PASS
+    Page OOPIF restore and close                  236ms    7 assertions  PASS
     Page load states                              11.9s    50 assertions  PASS
-    Page dedicated Worker startup                 374ms    1 assertions  PASS
-    Page API alignment                             5.7s    40 assertions  PASS
-    Page actionability                             6.3s    46 assertions  PASS
+    Page dedicated Worker startup                 362ms    1 assertions  PASS
+    Page API alignment                             5.6s    40 assertions  PASS
+    Page actionability                             6.4s    46 assertions  PASS
     Page evaluate timeout recovery                48.5s    24 assertions  PASS
-    Page delayed popup: schedule                  709ms    1 assertions  PASS
+    Page delayed popup: schedule                  714ms    1 assertions  PASS
     Page delayed popup: resume                     1.1s    3 assertions  PASS
-    v1 and v2 action parity                       978ms    13 assertions  PASS
-    portable keyboard workflow                    940ms    4 assertions  PASS
+    v1 and v2 action parity                       984ms    13 assertions  PASS
+    portable keyboard workflow                    947ms    4 assertions  PASS
     Page keyboard interface                        2.5s    38 assertions  PASS
-    pure CDP workflow                             522ms    9 assertions  PASS
+    pure CDP workflow                             508ms    9 assertions  PASS
     snapshot workflow                              1.2s    7 assertions  PASS
-    visual workflow                               474ms    5 assertions  PASS
+    visual workflow                               469ms    5 assertions  PASS
 
 -- cleanup
 {"cleanup":{"done":true}}
 {"ok":true,"assertions":0}
--- cleanup passed (111ms, 0 assertions)
+-- cleanup passed (108ms, 0 assertions)

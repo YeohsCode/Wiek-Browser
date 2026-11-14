@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 5,
+  "clientDate": "2026-11-14",
+  "generatedAt": "2026-11-13T16:22:50.314Z",
+  "project": "Wiek Browser",
+  "version": "0.28.0",
+  "repository": "https://github.com/YeohsCode/Wiek-Browser",
+  "fullParity": false,
+  "runtimeIndependent": true,
+  "previousCheckpoint": "wiek-v0.27-checkpoint.json",
+  "packagedTargetedTests": {
+    "pass": 17,
+    "fail": 0,
+    "skip": 0,
+    "realIndexedDBChecks": 30,
+    "applicationIPCChecks": 37,
+    "log": "v028-package-targeted.log"
+  },
+  "packagedHost": {
+    "pass": true,
+    "checks": 198,
+    "version": "0.28.0",
+    "log": "v028-package-workbench.log"
+  },
+  "packagedScheduler": {
+    "pass": true,
+    "log": "v028-package-scheduler.log",
+    "realOSRegistration": false
+  },
+  "ci": {
+    "status": "completed",
+    "runId": 43461504488,
+    "testedCommit": "7ccf0598f66034c47a995d9824bd4161196f0f78",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43461504488",
+    "conclusion": "success",
+    "evidence": "p4-ci-43461504488-status.json"
+  },
+  "paidModelCalls": 0,
+  "externalAccountActions": 0,
+  "signed": false,
+  "notarized": false,
+  "sdkTests": {
+    "pass": 532,
+    "fail": 0,
+    "skip": 0,
+    "immutableInputs": 81,
+    "namespaceMappedInputs": true,
+    "assertionsRemoved": 0,
+    "thresholdsChanged": 0,
+    "log": "v028-sdk.log"
+  },
+  "browserSuite": {
+    "status": "passed",
+    "total": 69,
+    "pass": 69,
+    "fail": 0,
+    "skip": 0,
+    "assertions": 1248,
+    "log": "v028-browser-suite.log",
+    "result": "comparison.json"
+  },
+  "packageIdentity": {
+    "passed": true,
+    "checkedFiles": 204,
+    "immutableInputs": 81,
+    "sdkMatchesCompared": true,
+    "log": "v028-package-identity.log"
+  },
+  "installedEntrypoints": {
+    "updated": true,
+    "verifiedLinks": 4,
+    "receipt": "v028-install.json"
+  },
+  "localTests": {
+    "pass": 611,
+    "fail": 1,
+    "skip": 0,
+    "log": "v028-source.log",
+    "gitCaseRetest": {
+      "pass": 1,
+      "fail": 0,
+      "log": "v028-git-case.log"
+    }
+  }
+}

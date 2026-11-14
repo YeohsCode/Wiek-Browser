@@ -1,0 +1,27 @@
+{"ok":true,"checks":14,"actualElectronIPC":true,"realStdioPeer":true,"inertPromptPreview":true,"modelCalls":0,"accountActions":0}
+✔ modern stdio and prompt preview operate through real Electron IPC without executing server text (1071.113916ms)
+✔ portable IndexedDB codec preserves UTF-16, dates, binary, special numbers and inert property names (19.234167ms)
+✔ portable IndexedDB preserves aliases, cycles, array holes and shared view ranges (7.405542ms)
+✔ IndexedDB attachment codec preserves bytes, metadata and aliases within the size budget (1.519625ms)
+✔ IndexedDB schema rejects origin widening, incomplete generators, duplicates and invalid primary keys (0.915334ms)
+✔ IndexedDB schema validates the archived generator against numeric keys, including exhaustion (0.846875ms)
+✔ v3 encrypted archive carries validated IndexedDB values without plaintext data (785.305125ms)
+✔ IndexedDB capture refuses navigated and partitioned origins before reading any records (0.870958ms)
+{"ok":true,"checks":30,"bootstrapNetworkRequests":0,"sourceProfileUnchanged":true,"realBrowserIndexedDB":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron transfers explicit selected-origin IndexedDB offline, excludes unsupported data and rolls back failures (6396.193ms)
+✔ web storage capture is opt-in and sends no CDP commands by default (0.724416ms)
+✔ navigated, closed and partitioned tabs retain only their URL with explicit skipped-storage warnings (1.034791ms)
+✔ oversized storage is omitted without corrupting the portable tab inventory (0.791083ms)
+✔ cancelled capture yields no partially assembled archive (0.321875ms)
+{"ok":true,"checks":34,"bootstrapNetworkRequests":0,"realBrowserSessions":true,"sourceProfileUnchanged":true,"modelCalls":0,"externalAccountActions":0}
+✔ actual Electron migrates two tab sessions before site scripts, with no bootstrap network and bounded failure cleanup (7241.339583ms)
+{"ok":true,"checks":37,"actualApplicationIPC":true,"injectedNativeDialogs":true,"realPassphraseModal":true,"bootstrapNetworkRequests":0,"modelCalls":0,"externalAccountActions":0}
+✔ actual application exports and restores through trusted IPC and passphrase UI; cancellations create no profile (6283.591583ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 22060.219833

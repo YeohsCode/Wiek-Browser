@@ -1,0 +1,155 @@
+Collecting uv==0.11.19
+  Downloading uv-0.11.19-py3-none-macosx_11_0_arm64.whl.metadata (11 kB)
+Downloading uv-0.11.19-py3-none-macosx_11_0_arm64.whl (21.8 MB)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 21.8/21.8 MB 73.5 MB/s  0:00:00
+Installing collected packages: uv
+Successfully installed uv-0.11.19
+
+[notice] A new release of pip is available: 26.2.2 -> 26.3
+[notice] To update, run: /Users/runner/work/Wiek-Browser/Wiek-Browser/data/benchmark-bootstrap/bin/python3.15 -m pip install --upgrade pip
+Downloading cpython-3.13.13-macos-aarch64-none (download) (23.9MiB)
+ Downloaded cpython-3.13.13-macos-aarch64-none (download)
+Using CPython 3.13.13
+Creating virtual environment at: benchmark/framework/.venv
+Downloading uvloop (1.3MiB)
+Downloading pygments (1.2MiB)
+Downloading openai-codex-cli-bin (111.1MiB)
+Downloading ruff (10.1MiB)
+Downloading pydantic-core (1.8MiB)
+Downloading pillow (4.5MiB)
+ Downloaded pydantic-core
+ Downloaded ruff
+ Downloaded uvloop
+ Downloaded pillow
+ Downloaded openai-codex-cli-bin
+ Downloaded pygments
+Prepared 38 packages in 2.73s
+Installed 38 packages in 81ms
+ + annotated-doc==0.0.4
+ + annotated-types==0.7.0
+ + anyio==4.13.0
+ + certifi==2026.5.20
+ + charset-normalizer==3.4.7
+ + click==8.1.8
+ + fastapi==0.136.1
+ + h11==0.16.0
+ + httptools==0.7.1
+ + idna==3.13
+ + iniconfig==2.3.0
+ + jinja2==3.1.6
+ + loguru==0.7.3
+ + markupsafe==3.0.3
+ + openai-codex==0.144.4
+ + openai-codex-cli-bin==0.144.4
+ + packaging==26.2
+ + pillow==12.2.0
+ + pluggy==1.6.0
+ + pydantic==2.12.5
+ + pydantic-core==2.41.5
+ + pygments==2.20.0
+ + pytest==9.1.0
+ + python-dotenv==1.2.2
+ + pyyaml==6.0.3
+ + regex==2026.5.9
+ + requests==2.34.2
+ + ruff==0.15.21
+ + starlette==1.0.0
+ + tiktoken==0.13.0
+ + tqdm==4.67.3
+ + typing-extensions==4.15.0
+ + typing-inspection==0.4.2
+ + urllib3==2.7.0
+ + uvicorn==0.46.0
+ + uvloop==0.22.1
+ + watchfiles==1.1.1
+ + websockets==16.0
+........................................................................ [ 21%]
+........................................................................ [ 42%]
+........................................................................ [ 64%]
+........................................................................ [ 85%]
+................................................                         [100%]
+336 passed in 9.20s
+{
+  "onlineBenchmark": false,
+  "modelCalls": 0,
+  "accountActions": 0,
+  "sdkSha256": "4ddcbf8ad4bc660ad00a90964fe6e5058e6e1ca69b2fb4bf1fac3de415af9d0f",
+  "adapter": {
+    "repositoryOwned": true,
+    "datasetSha256": "e1495bef65b83c7bcb4cf3bf7a6e515239c6763c620efe1d31749ad6d54f6200",
+    "files": {
+      "wiek_bench/browser_tools/wiek_browser.py": "01ac84613117518e4f3d9066bff0928dda5fd0ec333d738010c350e288809207",
+      "wiek_bench/browser_tools/canonical_v2.py": "ba4c2d326f53d0bf6e129bf6533f0877d2b8104e3a1fb0f1fd563e4d7bb7b172",
+      "wiek_bench/browser_tools/_canonical_control.mjs": "f2230adfd231c226ead5625eddbe50ee6b01e3c70158311a46d52965a24f65e1",
+      "data/real_world_bench.json": "e1495bef65b83c7bcb4cf3bf7a6e515239c6763c620efe1d31749ad6d54f6200"
+    },
+    "modelCalls": 0,
+    "accountActions": 0
+  },
+  "fixtureSha256": "caf1c8d3a411fa2d75faaa7578aae60c2fa7308193f50d39e57946cc3bd0532e",
+  "runs": [
+    {
+      "browser": "wiek",
+      "passed": true,
+      "cliSha256": "dfc1d8fec71ef17c6ae7c6230a6c09331d0966e2854b16e67f8744c5832174f5",
+      "checks": [
+        {
+          "probe": "canonical-sdk-v2",
+          "zeroMutation": true,
+          "pairedSkill": true
+        },
+        {
+          "strictHook": true,
+          "screenshotHook": true,
+          "pngSha256": "6b852c147e1826546eeeb62c6bd230d7c35f6d5e790d071bd57d1eeeb769ac65",
+          "pngBytes": 12481,
+          "ax": true,
+          "viewportRestored": true,
+          "receipt": {
+            "canonicalMarker": "716a819e719b4ac19f0da5976278c019",
+            "spaceId": 2,
+            "targetId": "48E1CD06DE770074AC0B26AC2680CECA",
+            "viewport": {
+              "width": 1280,
+              "height": 800,
+              "deviceScaleFactor": 1,
+              "mobile": false
+            },
+            "axError": null,
+            "sha256": "6b852c147e1826546eeeb62c6bd230d7c35f6d5e790d071bd57d1eeeb769ac65"
+          }
+        },
+        {
+          "closed": {
+            "wiekBenchClose": [
+              {
+                "candidate": "framework-smoke-0d3c02e6c91b40448a47fe2f6975dfb1",
+                "ok": true,
+                "receipt": {
+                  "spaceId": 2,
+                  "closedSpace": true,
+                  "keptManagedLabels": [],
+                  "closedManagedLabels": [
+                    "p1"
+                  ],
+                  "preservedUnmanagedCount": 0
+                }
+              }
+            ],
+            "canonicalMarker": "e4a8e2af4b1144079b30dfd542f3fda7"
+          },
+          "missingCleanupIdempotent": true
+        }
+      ],
+      "hostVersion": {
+        "currentVersion": "0.28.0",
+        "updateAvailable": false
+      },
+      "finalCleanup": {
+        "ok": true,
+        "error": null
+      }
+    }
+  ],
+  "passed": true
+}

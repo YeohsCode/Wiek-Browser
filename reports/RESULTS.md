@@ -1,6 +1,16 @@
 # Wiek Browser 验证结果
 
-当前开发检查点为 **0.28.0**，日期为 2026-11-14。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+当前开发检查点为 **0.29.0**，日期为 2026-11-14。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+
+## 0.29 专项验收
+
+- MCP 现代 HTTP 与 stdio 支持交互式资源读取和提示预览续传。实际 Electron 面板验证 URL 打开和继续提交为两个动作，打开操作由测试回调记录。续传保留原请求参数与服务端状态。普通读取继续保留直达预览。[实现范围](../analysis/mcp-input-continuations.md)
+
+- MCP 专项 143/143，打包 MCP 22/22，打包宿主 198 项、浏览器同集 69/69（1,248 条断言）、SDK 532/532。204 份发行文件及 81 份原始输入身份一致。[MCP](v029-mcp-focused.log) · [打包 MCP](v029-package-mcp.log) · [宿主](v029-package-workbench.log) · [同集](v029-browser-suite.log) · [SDK](v029-sdk.log)
+- P3 打包桌面面板 2/2 及后台启动器隔离验收通过。桌面面板使用合成捕获，实机录屏、撤权、多屏和系统后台注册待验收。[桌面](v029-package-desktop.log) · [启动器](v029-package-scheduler.log)
+- P4 的 31 项线上任务顺序校验通过。本地评估框架首次 335/336，系统 PATH 上的 CLI 安装缺少原生组件；仅在测试进程内切换到本机已有的可用 CLI 后，336/336 通过。线上模型评估仍需测试环境配置。[首次](v029-framework.log) · [复测](v029-framework-retest.log) · [任务身份](p4-benchmark-readiness.json)
+- 本机串行源码回归 614/616。两项合成 Git/PR 用例分别收到不确定结果和超时，原期限单独复测 2/2。[全量](v029-source.log) · [复测](v029-git-cases.log)
+- 本机命令与三处指南链接已更新，源码提交 `d0b34dc` 已推送。[安装记录](v029-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43552273366)
 
 ## 0.28 专项验收
 
@@ -8,7 +18,7 @@
 
 - 打包专项 17/17，其中真实 IndexedDB 30 项，应用 IPC 37 项。打包宿主 198 项、浏览器同集 69/69（1,248 条断言）、SDK 532/532 和 TypeScript 检查通过。204 份发行文件及 81 份原始 SDK 测试输入通过身份核对。[专项](v028-package-targeted.log) · [宿主](v028-package-workbench.log) · [同集](v028-browser-suite.log) · [SDK](v028-sdk.log) · [身份核对](v028-package-identity.log)
 - 本机串行源码回归 611/612。一项合成 PR 夹具超时，按原期限单独复测通过。[全量](v028-source.log) · [复测](v028-git-case.log)
-- 本机命令和三处指南链接已更新。源码提交 `7ccf059` 已推送，远端 CI 已启动。[安装记录](v028-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43461504488)
+- 本机命令和三处指南链接已更新。源码提交 `7ccf059` 已推送，远端 CI 全部通过，源码 612/612。[安装记录](v028-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43461504488)
 
 ## 0.27 专项验收
 

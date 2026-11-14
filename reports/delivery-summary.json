@@ -1,42 +1,73 @@
 {
   "schemaVersion": 5,
   "clientDate": "2026-11-14",
-  "generatedAt": "2026-11-13T16:22:50.314Z",
+  "generatedAt": "2026-11-14T03:35:29.699Z",
   "project": "Wiek Browser",
-  "version": "0.28.0",
+  "version": "0.29.0",
   "repository": "https://github.com/YeohsCode/Wiek-Browser",
   "fullParity": false,
   "runtimeIndependent": true,
-  "previousCheckpoint": "wiek-v0.27-checkpoint.json",
+  "previousCheckpoint": "wiek-v0.28-checkpoint.json",
   "packagedTargetedTests": {
-    "pass": 17,
+    "pass": 22,
     "fail": 0,
     "skip": 0,
-    "realIndexedDBChecks": 30,
-    "applicationIPCChecks": 37,
-    "log": "v028-package-targeted.log"
+    "log": "v029-package-mcp.log"
   },
   "packagedHost": {
     "pass": true,
     "checks": 198,
-    "version": "0.28.0",
-    "log": "v028-package-workbench.log"
+    "version": "0.29.0",
+    "log": "v029-package-workbench.log"
   },
   "packagedScheduler": {
     "pass": true,
-    "log": "v028-package-scheduler.log",
+    "log": "v029-package-scheduler.log",
     "realOSRegistration": false
   },
   "ci": {
     "status": "in_progress",
-    "runId": 43461504488,
-    "testedCommit": "7ccf0598f66034c47a995d9824bd4161196f0f78",
-    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43461504488"
+    "runId": 43552273366,
+    "testedCommit": "d0b34dc2cc48832b64f9316aec74825f1c46702e",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43552273366"
   },
   "paidModelCalls": 0,
   "externalAccountActions": 0,
   "signed": false,
   "notarized": false,
+  "installedEntrypoints": {
+    "updated": true,
+    "verifiedLinks": 4,
+    "receipt": "v029-install.json"
+  },
+  "localTests": {
+    "pass": 614,
+    "fail": 2,
+    "skip": 0,
+    "log": "v029-source.log",
+    "gitCasesRetest": {
+      "pass": 2,
+      "fail": 0,
+      "log": "v029-git-cases.log"
+    }
+  },
+  "packagedDesktop": {
+    "pass": 2,
+    "fail": 0,
+    "actualOsCapture": false,
+    "log": "v029-package-desktop.log"
+  },
+  "frameworkTests": {
+    "pass": 336,
+    "fail": 0,
+    "log": "v029-framework-retest.log",
+    "initialLog": "v029-framework.log"
+  },
+  "mcpTests": {
+    "pass": 143,
+    "fail": 0,
+    "log": "v029-mcp-focused.log"
+  },
   "sdkTests": {
     "pass": 532,
     "fail": 0,
@@ -45,7 +76,7 @@
     "namespaceMappedInputs": true,
     "assertionsRemoved": 0,
     "thresholdsChanged": 0,
-    "log": "v028-sdk.log"
+    "log": "v029-sdk.log"
   },
   "browserSuite": {
     "status": "passed",
@@ -54,7 +85,7 @@
     "fail": 0,
     "skip": 0,
     "assertions": 1248,
-    "log": "v028-browser-suite.log",
+    "log": "v029-browser-suite.log",
     "result": "comparison.json"
   },
   "packageIdentity": {
@@ -62,22 +93,6 @@
     "checkedFiles": 204,
     "immutableInputs": 81,
     "sdkMatchesCompared": true,
-    "log": "v028-package-identity.log"
-  },
-  "installedEntrypoints": {
-    "updated": true,
-    "verifiedLinks": 4,
-    "receipt": "v028-install.json"
-  },
-  "localTests": {
-    "pass": 611,
-    "fail": 1,
-    "skip": 0,
-    "log": "v028-source.log",
-    "gitCaseRetest": {
-      "pass": 1,
-      "fail": 0,
-      "log": "v028-git-case.log"
-    }
+    "log": "v029-package-identity.log"
   }
 }

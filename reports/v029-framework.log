@@ -1,0 +1,85 @@
+........................................................................ [ 21%]
+.........................F.............................................. [ 42%]
+........................................................................ [ 64%]
+........................................................................ [ 85%]
+................................................                         [100%]
+=================================== FAILURES ===================================
+________________ test_codex_prompt_contains_only_managed_skill _________________
+
+tmp_path = PosixPath('/private/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/pytest-of-andrewyeoh/pytest-76/test_codex_prompt_contains_onl0')
+
+    def test_codex_prompt_contains_only_managed_skill(tmp_path: Path) -> None:
+        codex_bin = resolve_codex_runtime(None).executable
+        home = tmp_path / ".codex"
+        home.mkdir()
+        source_config = Path(__file__).parents[1] / "agent-home" / ".codex" / "config.toml"
+        shutil.copy2(source_config, home / "config.toml")
+        skill = _write_skill(tmp_path / "source-skills", "only-skill")
+        prepare_codex_home(home, skill)
+        workdir = home / "workspace"
+        (workdir / CODEX_PROJECT_MARKER).write_text("managed root\n", encoding="utf-8")
+
+>       verify_codex_context_isolation(
+            codex_bin=codex_bin,
+            codex_home=home,
+            workdir=workdir,
+            real_home=str(Path.home()),
+            expected_skill_name="only-skill",
+        )
+
+benchmark/framework/tests/test_codex_provider.py:185:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+codex_bin = '/opt/homebrew/lib/node_modules/@openai/codex/bin/codex.js'
+codex_home = PosixPath('/private/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/pytest-of-andrewyeoh/pytest-76/test_codex_prompt_contains_onl0/.codex')
+workdir = PosixPath('/private/var/folders/hz/py68r_5s1r508zdc_qdbsvp80000gn/T/pytest-of-andrewyeoh/pytest-76/test_codex_prompt_contains_onl0/.codex/workspace')
+real_home = '/Users/andrewyeoh', expected_skill_name = 'only-skill'
+
+    def verify_codex_context_isolation(
+        *,
+        codex_bin: str,
+        codex_home: str | Path,
+        workdir: str | Path,
+        real_home: str,
+        expected_skill_name: str,
+    ) -> None:
+        """Fail before a measured run if Codex's model-visible prompt is contaminated."""
+        home = Path(codex_home).resolve()
+        isolated_home = home / "isolated-home"
+        command = [codex_bin, "-C", str(Path(workdir).resolve())]
+        for override in build_codex_config_overrides(real_home):
+            command.extend(["--config", override])
+        command.extend(["debug", "prompt-input", "context isolation probe"])
+        completed = subprocess.run(
+            command,
+            cwd=workdir,
+            env={
+                **dict(os.environ),
+                "CODEX_HOME": str(home),
+                "HOME": str(isolated_home),
+            },
+            capture_output=True,
+            text=True,
+            timeout=30,
+            check=False,
+        )
+        if completed.returncode != 0:
+            detail = completed.stderr.strip() or completed.stdout.strip()
+>           raise RuntimeError(f"Codex context probe failed: {detail}")
+E           RuntimeError: Codex context probe failed: file:///opt/homebrew/lib/node_modules/@openai/codex/bin/codex.js:105
+E             throw new Error(
+E                   ^
+E
+E           Error: Missing optional dependency @openai/codex-darwin-arm64. Reinstall Codex: npm install -g @openai/codex@latest
+E               at findCodexExecutable (file:///opt/homebrew/lib/node_modules/@openai/codex/bin/codex.js:105:9)
+E               at file:///opt/homebrew/lib/node_modules/@openai/codex/bin/codex.js:110:20
+E               at ModuleJob.run (node:internal/modules/esm/module_job:413:25)
+E               at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:654:26)
+E               at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
+E
+E           Node.js v25.2.1
+
+benchmark/framework/wiek_bench/providers/codex_sdk.py:205: RuntimeError
+=========================== short test summary info ============================
+FAILED benchmark/framework/tests/test_codex_provider.py::test_codex_prompt_contains_only_managed_skill
+1 failed, 335 passed in 3.91s

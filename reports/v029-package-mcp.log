@@ -1,0 +1,33 @@
+{"ok":true,"checks":19,"actualElectronIPC":true,"realLoopbackHTTP":true,"modelCalls":0,"externalAccountActions":0}
+✔ input review UI runs typed submissions, decline and cancellation through real Electron IPC (550.013667ms)
+✔ form schema validates typed primitive/enum/array values, required fields and closed properties (1.674417ms)
+✔ form validation rejects unsupported schemas, unsafe keys, invalid defaults and malformed input results (0.197833ms)
+✔ string formats and Unicode length constraints are checked without navigation or network (1.053083ms)
+✔ modern tool review waits for explicit submission, echoes exact opaque state, new ID, unchanged arguments and per-call capabilities (24.707708ms)
+✔ scope and stale-review validation happen before any continuation is sent, validation failure leaves review available (16.000834ms)
+✔ decline/dismiss responses are explicit wire actions, empty state remains exact and previous state never leaks to next round (19.090916ms)
+✔ state-only response requires explicit review and does not trigger automatic busy polling (13.187125ms)
+✔ cancellation while awaiting input clears review and prevents any late submission/replay (8.40025ms)
+✔ task deadline expires input review without replay (185.233833ms)
+✔ disconnect cancels awaiting reviews immediately and reconnect cannot revive them (17.069ms)
+✔ round limit ends repeated prompts; malformed and unsupported forms never replay automatically (58.186834ms)
+✔ unsupported sampling fails without a model or continuation request (8.650583ms)
+✔ uncertain continuation POST is never retried, input and server state are not saved in error history (15.042166ms)
+✔ concurrent thread tasks have isolated review state, responses and requestState (18.141ms)
+✔ closing and restarting service discards reviews and session-only results without reviving requests (23.112625ms)
+✔ cancelling an in-flight continuation aborts the POST and does not send legacy cancellation or replay (19.770875ms)
+✔ modern resource reads continue the same URI only after reviewed form and URL inputs (16.055542ms)
+✔ modern interactive prompt preview uses the same continuation without changing prompt arguments (13.963084ms)
+✔ URL input accepts only explicitly enabled credential-free HTTPS addresses (0.288292ms)
+{"ok":true,"checks":14,"actualElectronIPC":true,"realLoopbackSSE":true,"modelCalls":0,"externalAccountActions":0}
+✔ modern resource and list watches operate through real Electron IPC with visible stream loss and explicit retry (388.84575ms)
+{"ok":true,"checks":14,"actualElectronIPC":true,"realStdioPeer":true,"inertPromptPreview":true,"modelCalls":0,"accountActions":0}
+✔ modern stdio and prompt preview operate through real Electron IPC without executing server text (332.968208ms)
+ℹ tests 22
+ℹ suites 0
+ℹ pass 22
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1987.119375

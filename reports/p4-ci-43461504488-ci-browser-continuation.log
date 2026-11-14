@@ -1,0 +1,11 @@
+{"ok":true,"checks":22,"realCLI":true,"isolatedData":true,"modelCalls":0,"accountActions":0}
+✔ real CLI distinguishes reopening tabs, continuing scripts, completed tasks and user handoff (6352.645042ms)
+✔ skipping startup tabs preserves browser data for a later normal launch (8403.884ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 14849.497584

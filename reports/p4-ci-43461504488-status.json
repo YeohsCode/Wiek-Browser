@@ -1,0 +1,202 @@
+{
+  "id": 43461504488,
+  "status": "completed",
+  "conclusion": "success",
+  "head_sha": "7ccf0598f66034c47a995d9824bd4161196f0f78",
+  "html_url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43461504488",
+  "created_at": "2026-11-13T16:19:06Z",
+  "updated_at": "2026-11-13T16:29:08Z",
+  "jobs": [
+    {
+      "name": "macos-arm64",
+      "status": "completed",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-11-13T16:19:14Z",
+          "completed_at": "2026-11-13T16:19:17Z"
+        },
+        {
+          "name": "Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-11-13T16:19:17Z",
+          "completed_at": "2026-11-13T16:19:21Z"
+        },
+        {
+          "name": "Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-11-13T16:19:21Z",
+          "completed_at": "2026-11-13T16:19:23Z"
+        },
+        {
+          "name": "Install locked dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-11-13T16:19:23Z",
+          "completed_at": "2026-11-13T16:19:30Z"
+        },
+        {
+          "name": "Configure and record deterministic desktop size",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-11-13T16:19:30Z",
+          "completed_at": "2026-11-13T16:19:40Z"
+        },
+        {
+          "name": "Verify tracked evaluation inputs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-11-13T16:19:40Z",
+          "completed_at": "2026-11-13T16:19:41Z"
+        },
+        {
+          "name": "SDK tests and build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-11-13T16:19:41Z",
+          "completed_at": "2026-11-13T16:20:12Z"
+        },
+        {
+          "name": "Build owned native helpers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-11-13T16:20:12Z",
+          "completed_at": "2026-11-13T16:20:31Z"
+        },
+        {
+          "name": "Repository-owned V2 evaluation framework",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-11-13T16:20:31Z",
+          "completed_at": "2026-11-13T16:21:13Z"
+        },
+        {
+          "name": "Local services and actual Electron fixture panels",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-11-13T16:21:13Z",
+          "completed_at": "2026-11-13T16:24:35Z"
+        },
+        {
+          "name": "Restore pinned optional speech model",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-11-13T16:24:35Z",
+          "completed_at": "2026-11-13T16:24:38Z"
+        },
+        {
+          "name": "Build unsigned macOS application",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-11-13T16:24:38Z",
+          "completed_at": "2026-11-13T16:24:42Z"
+        },
+        {
+          "name": "Packaged host integration",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-11-13T16:24:42Z",
+          "completed_at": "2026-11-13T16:25:10Z"
+        },
+        {
+          "name": "Packaged native local services panel",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-11-13T16:25:10Z",
+          "completed_at": "2026-11-13T16:25:13Z"
+        },
+        {
+          "name": "Packaged migration and MCP panels",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-11-13T16:25:13Z",
+          "completed_at": "2026-11-13T16:25:35Z"
+        },
+        {
+          "name": "Packaged browser continuation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-11-13T16:25:35Z",
+          "completed_at": "2026-11-13T16:25:50Z"
+        },
+        {
+          "name": "Packaged scheduler runtime",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-11-13T16:25:50Z",
+          "completed_at": "2026-11-13T16:25:51Z"
+        },
+        {
+          "name": "Shared SDK browser suite on Wiek",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-11-13T16:25:51Z",
+          "completed_at": "2026-11-13T16:28:57Z"
+        },
+        {
+          "name": "Verify package and pinned upstream inputs",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-11-13T16:28:57Z",
+          "completed_at": "2026-11-13T16:28:59Z"
+        },
+        {
+          "name": "Upload validation evidence",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-11-13T16:28:59Z",
+          "completed_at": "2026-11-13T16:29:00Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 39,
+          "started_at": "2026-11-13T16:29:00Z",
+          "completed_at": "2026-11-13T16:29:02Z"
+        },
+        {
+          "name": "Post Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 40,
+          "started_at": "2026-11-13T16:29:02Z",
+          "completed_at": "2026-11-13T16:29:03Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 41,
+          "started_at": "2026-11-13T16:29:03Z",
+          "completed_at": "2026-11-13T16:29:06Z"
+        }
+      ]
+    }
+  ]
+}

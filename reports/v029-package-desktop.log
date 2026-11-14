@@ -1,0 +1,12 @@
+{"ok":true,"checks":17,"realElectronIPC":true,"fixtureCaptureOnly":true,"actualOSCapture":false,"modelCalls":0}
+✔ actual Electron desktop controls require opt-in and app scope, show native action preview, stop and recover deletion (348.703458ms)
+{"ok":true,"checks":20,"realElectronIPC":true,"fixtureCaptureOnly":true,"actualOSCapture":false,"modelCalls":0}
+✔ actual Electron desktop panel previews before copy/save and transfers PNG to the real Library editor (314.481916ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 780.777917

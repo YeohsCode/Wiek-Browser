@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-11-13T16:22:02.070Z",
-  "version": "0.28.0",
+  "generatedAt": "2026-11-14T03:36:09.411Z",
+  "version": "0.29.0",
   "versionMatches": true,
   "checkedFiles": 204,
   "allMatch": true,
@@ -229,7 +229,7 @@
     },
     {
       "file": "app/main.cjs",
-      "sha256": "b884d241fa0e58303b74ffb23e1cde72007bc3908325d39e1b47c3fea799be4d",
+      "sha256": "8929674c43d198abb390601715535396afb9f6e68b24f73e14123ae51f913421",
       "matches": true
     },
     {
@@ -239,12 +239,12 @@
     },
     {
       "file": "app/mcp-http-client.cjs",
-      "sha256": "7e092d7186cdde6f76ac56a290e46d21aab29df185a036c6c47380e661061ffe",
+      "sha256": "9a567636594e2c2b80aef888b5142f9daf6f420231ef4ee69198856197025b82",
       "matches": true
     },
     {
       "file": "app/mcp-input.cjs",
-      "sha256": "5365df91d148f6c94405cda9a2109485649947e8bcdc6c3c0886f62f3beba4e0",
+      "sha256": "a886449b81670567942bace2a004393154c397b458401ac5c1420be27cab1911",
       "matches": true
     },
     {
@@ -259,27 +259,27 @@
     },
     {
       "file": "app/mcp-panel.js",
-      "sha256": "7826c80aade45cff619db7dfbe16c57e67d3dbd23c371cf64bf46cbe4bca2aaf",
+      "sha256": "6e58cee8f4daa5feb81ee09796d7b80b482da7b0e81f6ad58c3ede36940ba6a6",
       "matches": true
     },
     {
       "file": "app/mcp-prompts.cjs",
-      "sha256": "dc617b8ac3982e2c4e9e52c08db44f1b1965f7952c19419279e90cf97c58e35e",
+      "sha256": "af3752e52594550cca9404614d39d56a430d7510ce0cc84c2cd0520148435350",
       "matches": true
     },
     {
       "file": "app/mcp-resources.cjs",
-      "sha256": "1f4d0bb85bac16b3abf84015086f6e524e1373bdf645139fa065777adef3f634",
+      "sha256": "f3698e1c3b259ed279a846c3a7b07700998d79a44e0e26fb21ba5effcf068320",
       "matches": true
     },
     {
       "file": "app/mcp-service.cjs",
-      "sha256": "b630ee8df4fe356f6346c53901aa315d67027823019a67c3820346105d0b526b",
+      "sha256": "2db8c0e50bce9c52d216503f5238fc267b6b497f50390faaccd0ae49f6b3c26f",
       "matches": true
     },
     {
       "file": "app/mcp-stdio-modern.cjs",
-      "sha256": "c423ad1c4e10faa43cb248235172e6d062a2699a035fcf721ea1dd6de77a0048",
+      "sha256": "6c6ed9238b4315e65e4cae122efd16ad59f71fd02cd7ac6c374f92ed31626513",
       "matches": true
     },
     {

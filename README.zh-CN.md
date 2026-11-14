@@ -6,7 +6,9 @@
 
 本地 Chromium 浏览器与 Agent 工作区，提供自动化标签组、隔离的浏览器用户配置、文件/Git 工具、自动化调度与浏览器控制。Electron 宿主和本地服务采用独立实现，SDK 使用自身构建与 Wiek 运行命名空间，无需安装其他浏览器；第三方许可与署名保留在 [NOTICE.md](NOTICE.md)。
 
-**当前检查点：0.29.0。功能覆盖与验收仍在推进。** 参见[计划](PLAN.md)、[能力矩阵](analysis/implementation-matrix.md)和[验证结果](reports/RESULTS.md)。
+**当前检查点：0.30.0。功能覆盖与验收仍在推进。** 参见[计划](PLAN.md)、[能力矩阵](analysis/implementation-matrix.md)和[验证结果](reports/RESULTS.md)。
+
+在 **设置 → 界面语言** 中可以选择跟随系统、简体中文或 English。设置即时生效，并在下次启动时保留。
 
 ## 本地运行
 

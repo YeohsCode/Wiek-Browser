@@ -7,9 +7,11 @@ contextBridge.executeInMainWorld({ func: () => { window.prompt = function prompt
 
 // Optional, explicitly enabled local recording and selection controls. The page
 // receives no IPC function, token, filesystem API, or means to enable recording.
+let selectionLabels = {};
 let recording = false, selectionOptions = {enabled:false}, toolbar, selectedText = '', selectionTimer, scrollTimer;
 ipcRenderer.on('vek:page-config', (_event, config) => {
   recording = config.recording === true;
+  selectionLabels = config.selectionLabels || {};
   if(config.selectionToolbar)selectionOptions=config.selectionToolbar;
   if(!selectionOptions.enabled)toolbar?.remove();
 });
@@ -43,7 +45,7 @@ function displaySelection() {
   toolbar=document.createElement('div');toolbar.id='__vek-selection-tools';
   Object.assign(toolbar.style,{position:'fixed',left:`${Math.max(8,Math.min(rect.left,innerWidth-250))}px`,top:`${Math.max(8,Math.min(rect.bottom+8,innerHeight-55))}px`,zIndex:'2147483647'});
   const shadow=toolbar.attachShadow({mode:'closed'}),box=document.createElement('div');box.style.cssText='display:flex;gap:4px;padding:5px;background:#25314c;color:white;border:1px solid #657296;border-radius:9px;box-shadow:0 3px 15px #0004;font:12px system-ui;';
-  for(const [action,label] of [['copy','Copy'],['save','Save selection'],['ask','Ask Agent'],['translate','Translate']])if(selectionOptions[action]){const button=document.createElement('button');button.textContent=label;button.style.cssText='font:inherit;border:0;background:transparent;color:white;cursor:pointer;padding:7px;border-radius:5px;';button.onmousedown=event=>event.preventDefault();button.onclick=event=>{if(!event.isTrusted)return;ipcRenderer.send('vek:selection-action',{action,text:selectedText});toolbar.remove();};box.append(button);}
+  for(const [action,label] of [['copy','Copy'],['save','Save selection'],['ask','Ask Agent'],['translate','Translate']])if(selectionOptions[action]){const button=document.createElement('button');button.textContent=selectionLabels[action]||label;button.style.cssText='font:inherit;border:0;background:transparent;color:white;cursor:pointer;padding:7px;border-radius:5px;';button.onmousedown=event=>event.preventDefault();button.onclick=event=>{if(!event.isTrusted)return;ipcRenderer.send('vek:selection-action',{action,text:selectedText});toolbar.remove();};box.append(button);}
   shadow.append(box);document.documentElement.append(toolbar);
 }
 document.addEventListener('selectionchange',()=>{clearTimeout(selectionTimer);selectionTimer=setTimeout(displaySelection,180);});

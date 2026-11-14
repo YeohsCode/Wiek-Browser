@@ -7,7 +7,7 @@ const clone = value => JSON.parse(JSON.stringify(value));
 const ACTIONS = [
   ['newTab', 'New tab', 'CommandOrControl+T'], ['closeTab', 'Close tab', 'CommandOrControl+W'], ['openLocation', 'Open location', 'CommandOrControl+L'], ['reload', 'Reload page', 'CommandOrControl+R'], ['find', 'Find in page', 'CommandOrControl+F'], ['back', 'Back', 'CommandOrControl+['], ['forward', 'Forward', 'CommandOrControl+]'], ['zoomIn', 'Zoom in', 'CommandOrControl+Plus'], ['zoomOut', 'Zoom out', 'CommandOrControl+-'], ['zoomReset', 'Actual size', 'CommandOrControl+0'], ['voiceInput', 'Voice input', ''], ['screenshot', 'Capture screenshot', ''], ['clip', 'Save selected text', ''], ['chat', 'Open agent chat', ''], ['switchSpace', 'Switch tab group', ''], ['spaceManager', 'Manage tab groups', ''],
 ].map(([id, label, defaultAccelerator]) => ({ id, label, defaultAccelerator }));
-function defaults() { return { version: 1, theme: 'system', tabLayout: 'horizontal', backgroundMode: false, onDeviceModels: true, selectionToolbar: { enabled: false, copy: true, ask: true, save: true, translate: false }, memory: { browserActivity: false, localFiles: false }, instructions: '', shortcuts: Object.fromEntries(ACTIONS.map(a => [a.id, a.defaultAccelerator])) }; }
+function defaults() { return { version: 1, theme: 'system', interfaceLanguage: 'system', tabLayout: 'horizontal', backgroundMode: false, onDeviceModels: true, selectionToolbar: { enabled: false, copy: true, ask: true, save: true, translate: false }, memory: { browserActivity: false, localFiles: false }, instructions: '', shortcuts: Object.fromEntries(ACTIONS.map(a => [a.id, a.defaultAccelerator])) }; }
 const aliases = { cmd: 'Command', command: 'Command', ctrl: 'Control', control: 'Control', alt: 'Alt', option: 'Alt', opt: 'Alt', shift: 'Shift', cmdorctrl: 'CommandOrControl', commandorcontrol: 'CommandOrControl', super: 'Super', win: 'Super', windows: 'Super' };
 const specialKeys = { space: 'Space', tab: 'Tab', esc: 'Escape', escape: 'Escape', enter: 'Enter', return: 'Enter', backspace: 'Backspace', delete: 'Delete', del: 'Delete', insert: 'Insert', ins: 'Insert', home: 'Home', end: 'End', pageup: 'PageUp', pagedown: 'PageDown', up: 'Up', arrowup: 'Up', down: 'Down', arrowdown: 'Down', left: 'Left', arrowleft: 'Left', right: 'Right', arrowright: 'Right', plus: 'Plus', minus: '-' };
 const modifierOrder = ['CommandOrControl', 'Command', 'Control', 'Alt', 'Shift', 'Super'];
@@ -44,9 +44,13 @@ function createPreferencesService({ dataDir, onChange = () => {}, platform = pro
   const reserved = (platform === 'darwin' ? [['Command+Q', 'Quit application'], ['Command+H', 'Hide application'], ['Command+M', 'Minimize window'], ['Command+Tab', 'Switch applications'], ['Command+Space', 'System search'], ['Command+Control+Q', 'Lock screen']] : [['Alt+F4', 'Close window'], ['Alt+Tab', 'Switch applications'], ['Control+Alt+Delete', 'System security'], ['Super+L', 'Lock screen']]).concat(reservedShortcuts.map(item => [item.accelerator, item.label || 'Reserved by application'])).map(([accelerator, label]) => ({ accelerator: normalizeAccelerator(accelerator, platform), label }));
   function validatePatch(patch, current = state) {
     if (!patch || typeof patch !== 'object' || Array.isArray(patch)) throw fail('Preferences patch must be an object');
-    if (Object.keys(patch).some(key => !['theme', 'tabLayout', 'backgroundMode', 'onDeviceModels', 'selectionToolbar', 'memory', 'instructions'].includes(key))) throw fail('Unknown preferences field');
+    if (Object.keys(patch).some(key => !['theme', 'interfaceLanguage', 'tabLayout', 'backgroundMode', 'onDeviceModels', 'selectionToolbar', 'memory', 'instructions'].includes(key))) throw fail('Unknown preferences field');
     const next = clone(current);
     if (patch.theme !== undefined) { if (!['light', 'dark', 'system'].includes(patch.theme)) throw fail('Unknown theme'); next.theme = patch.theme; }
+    if (patch.interfaceLanguage !== undefined) {
+      if (!['system', 'en', 'zh-CN'].includes(patch.interfaceLanguage)) throw fail('Unknown interface language');
+      next.interfaceLanguage = patch.interfaceLanguage;
+    }
     if (patch.tabLayout !== undefined) { if (!['horizontal', 'vertical'].includes(patch.tabLayout)) throw fail('Unknown tab layout'); next.tabLayout = patch.tabLayout; }
     for (const key of ['backgroundMode', 'onDeviceModels']) if (patch[key] !== undefined) { if (typeof patch[key] !== 'boolean') throw fail(`${key} must be boolean`); next[key] = patch[key]; }
     for (const key of ['selectionToolbar', 'memory']) if (patch[key] !== undefined) {

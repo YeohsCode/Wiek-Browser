@@ -1,4 +1,6 @@
 'use strict';
+const { resolveLocale, translate: translateUi } = require('./locales/i18n.js');
+const tr = (message, ...values) => translateUi(interfaceLocale(), message, ...values);
 const {normalizeEnvironment,packagedDataDirectory}=require('./brand.cjs');normalizeEnvironment();
 const { app, BrowserWindow, WebContentsView, ipcMain, session, dialog, shell, Menu, safeStorage, nativeTheme, nativeImage, Tray, clipboard, globalShortcut, systemPreferences, powerMonitor, screen } = require('electron');
 const { WebSocketServer } = require('ws');
@@ -92,7 +94,7 @@ const sitePermissions=createSitePermissions({initial:store.sitePermissions||[],l
   const tab=[...tabs.values()].find(t=>t.view.webContents===contents);
   if(!tab)return 'block-once';
   const owner=spaceWindows.get(tab.spaceId)?.window||window;
-  const result=await dialog.showMessageBox(owner,{signal,type:'question',title:'Website permission',message:`${requestingOrigin} requests ${permissions.map(p=>p.label).join(', ')}`,detail:origin===requestingOrigin?'This decision applies to this browser profile.':`Embedded in ${origin}. This decision applies only within this top-level website and profile.`,buttons:['Block once','Always block','Allow once','Always allow'],defaultId:0,cancelId:0});
+  const result=await dialog.showMessageBox(owner,{signal,type:'question',title:tr("Website permission"),message:tr("{0} requests {1}", (requestingOrigin), (permissions.map(p=>tr(p.label)).join(', '))),detail:origin===requestingOrigin?tr("This decision applies to this browser profile."):tr("Embedded in {0}. This decision applies only within this top-level website and profile.", (origin)),buttons:[tr('Block once'),tr('Always block'),tr('Allow once'),tr('Always allow')],defaultId:0,cancelId:0});
   return ['block-once','block','allow-once','allow'][result.response]||'block-once';
 }});
 store.sitePermissions=sitePermissions.snapshot().rules;delete store.permissions;
@@ -146,10 +148,13 @@ function controlled(id) {
 function descriptor(s) { return { id: s.id, taskId: s.name, name: s.name, detached:spaceWindows.has(s.id), pinned:Boolean(s.pinned), ownership: s.ownership, createdBy: s.createdBy, profileId: s.profileId, profileName: profile(s.profileId).name, recentTabTitles: s.tabs.map(id => tabs.get(id)?.view.webContents.getTitle() || '').slice(-5) }; }
 function chromeBounds() { return preferencesService?.snapshot().tabLayout === 'vertical' ? {x:410,y:64} : {x:230,y:116}; }
 function tabDescriptor(t, index = 0) { return { targetId: t.id, ...(t.openerId ? { openerId: t.openerId } : {}), ...(t.favicon ? { favicon: t.favicon } : {}), title: t.view.webContents.getTitle() || '', url: t.restoreUrl || t.view.webContents.getURL() || t.url, active: getSpace(t.spaceId).activeTab === t.id, index }; }
+function interfaceLocale() {
+  return resolveLocale(preferencesService?.snapshot().interfaceLanguage, app.getPreferredSystemLanguages()[0] || app.getLocale());
+}
 function uiState(selectedSpaceId = store.selected) {
   const s = store.spaces.find(s => s.id === selectedSpaceId);
   const active = s && tabs.get(s.activeTab);
-  return { translation:translationService?.snapshot(),desktopMonitor:desktopMonitorService?.snapshot(),schedulerJob:schedulerJobService?.snapshot(),agents: agentService?.snapshot(), desktop:desktopService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
+  return { interfaceLocale:interfaceLocale(), translation:translationService?.snapshot(),desktopMonitor:desktopMonitorService?.snapshot(),schedulerJob:schedulerJobService?.snapshot(),agents: agentService?.snapshot(), desktop:desktopService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
 }
 function publish() { if (window && !window.isDestroyed()) window.webContents.send('vek:state', uiState());for(const [id,record]of spaceWindows)if(!record.window.isDestroyed())record.window.webContents.send('vek:state',uiState(id)); }
 let panelOpen = false;
@@ -299,7 +304,7 @@ function attachSpaceWindow(id) {
 }
 async function openSpaceWindow(space) {
   if(spaceWindows.has(space.id)){spaceWindows.get(space.id).window.show();spaceWindows.get(space.id).window.focus();return;}
-  const secondary=new BrowserWindow({icon:path.join(__dirname,'assets/wiek.png'),width:1100,height:800,minWidth:600,minHeight:400,title:`${space.name} — Wiek Browser`,backgroundColor:'#f6f7fb',webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,sandbox:true,nodeIntegration:false}});
+  const secondary=new BrowserWindow({icon:path.join(__dirname,'assets/wiek.png'),width:1100,height:800,minWidth:600,minHeight:400,title:tr("{0} — Wiek Browser", (space.name)),backgroundColor:'#f6f7fb',webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,sandbox:true,nodeIntegration:false}});
   spaceWindows.set(space.id,{window:secondary});
   for(const id of space.tabs){const t=tabs.get(id);if(t){window.contentView.removeChildView(t.view);secondary.contentView.addChildView(t.view);}}
   secondary.on('resize',layout);secondary.on('close',event=>{if(!closing){event.preventDefault();attachSpaceWindow(space.id);}});
@@ -454,21 +459,21 @@ function showPageContextMenu(tab,params) {
   const guarded=fn=>()=>{if(!wc.isDestroyed())Promise.resolve().then(fn).catch(error=>owner.webContents.send('vek:error',error.message));};
   const selection=String(params.selectionText||'').trim().slice(0,50000),link=String(params.linkURL||'').slice(0,16384);
   if(link){
-    if(/^https?:\/\//i.test(link))items.push({label:'Open link in new tab',click:guarded(()=>createTab(space,link,{activate:false}))},{label:'Open link in new Space',click:guarded(async()=>{const created=await createSpace('New Space',space.profileId,'user');await tabs.get(created.activeTab).view.webContents.loadURL(link);})},{label:'Save link as…',click:guarded(()=>wc.downloadURL(link))});
-    items.push({label:'Copy link address',click:()=>clipboard.writeText(link)},{type:'separator'});
+    if(/^https?:\/\//i.test(link))items.push({label:tr("Open link in new tab"),click:guarded(()=>createTab(space,link,{activate:false}))},{label:tr("Open link in new Space"),click:guarded(async()=>{const created=await createSpace('New Space',space.profileId,'user');await tabs.get(created.activeTab).view.webContents.loadURL(link);})},{label:tr("Save link as…"),click:guarded(()=>wc.downloadURL(link))});
+    items.push({label:tr("Copy link address"),click:()=>clipboard.writeText(link)},{type:'separator'});
   }
   if(params.mediaType==='image'){
-    items.push({label:'Copy image',click:guarded(()=>wc.copyImageAt(params.x,params.y))});
-    if(/^(https?:|data:image\/|blob:)/i.test(params.srcURL||''))items.push({label:'Save image as…',click:guarded(()=>wc.downloadURL(params.srcURL))});
+    items.push({label:tr("Copy image"),click:guarded(()=>wc.copyImageAt(params.x,params.y))});
+    if(/^(https?:|data:image\/|blob:)/i.test(params.srcURL||''))items.push({label:tr("Save image as…"),click:guarded(()=>wc.downloadURL(params.srcURL))});
     items.push({type:'separator'});
   }
   if(params.isEditable){
     for(const suggestion of (params.dictionarySuggestions||[]).slice(0,6))items.push({label:suggestion,click:guarded(()=>wc.replaceMisspelling(suggestion))});
-    if(params.misspelledWord)items.push({label:'Add to spelling dictionary',click:guarded(()=>wc.session.addWordToSpellCheckerDictionary(params.misspelledWord))},{type:'separator'});
-    items.push({role:'undo'},{role:'redo'},{type:'separator'},{role:'cut',enabled:params.editFlags.canCut},{role:'copy',enabled:params.editFlags.canCopy},{role:'paste',enabled:params.editFlags.canPaste},{role:'selectAll'},{type:'separator'});
-  }else if(selection)items.push({role:'copy'},{type:'separator'});
-  if(selection)items.push({label:'Save selected text',click:guarded(()=>saveSelection(selection,tab))},{label:'Ask Agent about selection',click:()=>{openPanel('agents');window.webContents.send('vek:draft',selection);}},{label:'Search web for selection',click:guarded(()=>createTab(space,`https://www.google.com/search?q=${encodeURIComponent(selection.slice(0,500))}`,{reveal:true}))},{type:'separator'});
-  items.push({label:'Back',enabled:wc.navigationHistory.canGoBack(),click:guarded(()=>wc.navigationHistory.goBack())},{label:'Forward',enabled:wc.navigationHistory.canGoForward(),click:guarded(()=>wc.navigationHistory.goForward())},{label:'Reload',click:guarded(()=>wc.reload())},{type:'separator'},{label:'Inspect element',click:guarded(()=>wc.inspectElement(params.x,params.y))});
+    if(params.misspelledWord)items.push({label:tr("Add to spelling dictionary"),click:guarded(()=>wc.session.addWordToSpellCheckerDictionary(params.misspelledWord))},{type:'separator'});
+    items.push({role: 'undo', label: tr('Undo')},{role: 'redo', label: tr('Redo')},{type:'separator'},{role: 'cut', label: tr('Cut'),enabled:params.editFlags.canCut},{role: 'copy', label: tr('Copy'),enabled:params.editFlags.canCopy},{role: 'paste', label: tr('Paste'),enabled:params.editFlags.canPaste},{role: 'selectAll', label: tr('Select All')},{type:'separator'});
+  }else if(selection)items.push({role: 'copy', label: tr('Copy')},{type:'separator'});
+  if(selection)items.push({label:tr("Save selected text"),click:guarded(()=>saveSelection(selection,tab))},{label:tr("Ask Agent about selection"),click:()=>{openPanel('agents');window.webContents.send('vek:draft',selection);}},{label:tr("Search web for selection"),click:guarded(()=>createTab(space,`https://www.google.com/search?q=${encodeURIComponent(selection.slice(0,500))}`,{reveal:true}))},{type:'separator'});
+  items.push({label:tr("Back"),enabled:wc.navigationHistory.canGoBack(),click:guarded(()=>wc.navigationHistory.goBack())},{label:tr("Forward"),enabled:wc.navigationHistory.canGoForward(),click:guarded(()=>wc.navigationHistory.goForward())},{label:tr("Reload"),click:guarded(()=>wc.reload())},{type:'separator'},{label:tr("Inspect element"),click:guarded(()=>wc.inspectElement(params.x,params.y))});
   Menu.buildFromTemplate(items).popup({window:owner});
 }
 function focusedChrome() { const t=visibleTab();return t&&spaceWindows.get(t.spaceId)?.window||window; }
@@ -479,22 +484,22 @@ function zoomPage(delta) { const t = visibleTab(); if (t) { userControl(getSpace
 function browserMenu() {
   const shortcuts=preferencesService?.snapshot().shortcuts || {};
   const shortcut=(action,fallback)=>Object.hasOwn(shortcuts,action)?shortcuts[action]||undefined:fallback;
-  return [{ label: 'Wiek Browser', submenu: [{ role: 'about' }, { type: 'separator' }, { role: 'quit' }] },
-    { label: 'File', submenu: [
-      { label: 'New Tab', accelerator: shortcut('newTab','CmdOrCtrl+T'), click: () => menuAction('tab:new') },
-      { label: 'Close Tab', accelerator: shortcut('closeTab','CmdOrCtrl+W'), click: () => { const t = visibleTab(); if (t) menuAction('tab:close', t.id); else window.close(); } },
-      { type: 'separator' }, { label: 'Open Location…', accelerator: shortcut('openLocation','CmdOrCtrl+L'), click: focusAddress },
-      { label: 'Print…', accelerator: 'CmdOrCtrl+P', click: () => { const t = visibleTab(); if (t) { userControl(getSpace(t.spaceId)); t.view.webContents.print({ silent: false, printBackground: true }); } } }
+  return [{ label: 'Wiek Browser', submenu: [{ role: 'about', label: tr('About Wiek Browser') }, { type: 'separator' }, { role: 'quit', label: tr('Quit Wiek Browser') }] },
+    { label: tr("File"), submenu: [
+      { label: tr("New Tab"), accelerator: shortcut('newTab','CmdOrCtrl+T'), click: () => menuAction('tab:new') },
+      { label: tr("Close Tab"), accelerator: shortcut('closeTab','CmdOrCtrl+W'), click: () => { const t = visibleTab(); if (t) menuAction('tab:close', t.id); else window.close(); } },
+      { type: 'separator' }, { label: tr("Open Location…"), accelerator: shortcut('openLocation','CmdOrCtrl+L'), click: focusAddress },
+      { label: tr("Print…"), accelerator: 'CmdOrCtrl+P', click: () => { const t = visibleTab(); if (t) { userControl(getSpace(t.spaceId)); t.view.webContents.print({ silent: false, printBackground: true }); } } }
     ] },
-    { label: 'Edit', submenu: [{ role: 'undo' }, { role: 'redo' }, { type: 'separator' }, { role: 'cut' }, { role: 'copy' }, { role: 'paste' }, { role: 'selectAll' }, { type: 'separator' }, { label: 'Find in Page…', accelerator: shortcut('find','CmdOrCtrl+F'), click: showFind }, { label: 'Find Next', accelerator: 'CmdOrCtrl+G', click: () => focusedChrome().webContents.send('vek:find-next', true) }, { label: 'Find Previous', accelerator: 'CmdOrCtrl+Shift+G', click: () => focusedChrome().webContents.send('vek:find-next', false) }] },
-    { label: 'View', submenu: [{ label: 'Reload Page', accelerator: shortcut('reload','CmdOrCtrl+R'), click: () => menuAction('reload') }, { type: 'separator' }, { label: 'Zoom In', accelerator: shortcut('zoomIn','CmdOrCtrl+Plus'), click: () => zoomPage(0.5) }, { label: 'Zoom Out', accelerator: shortcut('zoomOut','CmdOrCtrl+-'), click: () => zoomPage(-0.5) }, { label: 'Actual Size', accelerator: shortcut('zoomReset','CmdOrCtrl+0'), click: () => zoomPage(null) }, { type: 'separator' }, { role: 'togglefullscreen' }, { label: 'Developer Tools', accelerator: 'Alt+CmdOrCtrl+I', click: () => uiAction('devtools') }] },
-    { label: 'History', submenu: [{ label: 'Back', accelerator: shortcut('back','CmdOrCtrl+['), click: () => menuAction('back') }, { label: 'Forward', accelerator: shortcut('forward','CmdOrCtrl+]'), click: () => menuAction('forward') }] },
-    { label:'Tools', submenu: [
-      ...[['voiceInput','Voice input','voice'],['screenshot','Capture screenshot','library'],['chat','Agent chat','agents'],['spaceManager','Manage tab groups','spaces']].map(([action,label,name])=>({label,accelerator:shortcut(action),click:()=>openPanel(name,action==='screenshot'?'capture':undefined)})),
-      {label:'Save selected text',accelerator:shortcut('clip'),click:()=>void saveSelection().catch(e=>window.webContents.send('vek:error',e.message))},
-      {label:'Next tab group',accelerator:shortcut('switchSpace'),click:()=>{const index=store.spaces.findIndex(s=>s.id===store.selected);const next=store.spaces[(index+1)%store.spaces.length];if(next)void uiAction('space:select',next.id);}},
+    { label: tr("Edit"), submenu: [{ role: 'undo', label: tr('Undo') }, { role: 'redo', label: tr('Redo') }, { type: 'separator' }, { role: 'cut', label: tr('Cut') }, { role: 'copy', label: tr('Copy') }, { role: 'paste', label: tr('Paste') }, { role: 'selectAll', label: tr('Select All') }, { type: 'separator' }, { label: tr("Find in Page…"), accelerator: shortcut('find','CmdOrCtrl+F'), click: showFind }, { label: tr("Find Next"), accelerator: 'CmdOrCtrl+G', click: () => focusedChrome().webContents.send('vek:find-next', true) }, { label: tr("Find Previous"), accelerator: 'CmdOrCtrl+Shift+G', click: () => focusedChrome().webContents.send('vek:find-next', false) }] },
+    { label: tr("View"), submenu: [{ label: tr("Reload Page"), accelerator: shortcut('reload','CmdOrCtrl+R'), click: () => menuAction('reload') }, { type: 'separator' }, { label: tr("Zoom In"), accelerator: shortcut('zoomIn','CmdOrCtrl+Plus'), click: () => zoomPage(0.5) }, { label: tr("Zoom Out"), accelerator: shortcut('zoomOut','CmdOrCtrl+-'), click: () => zoomPage(-0.5) }, { label: tr("Actual Size"), accelerator: shortcut('zoomReset','CmdOrCtrl+0'), click: () => zoomPage(null) }, { type: 'separator' }, { role: 'togglefullscreen', label: tr('Toggle Full Screen') }, { label: tr("Developer Tools"), accelerator: 'Alt+CmdOrCtrl+I', click: () => uiAction('devtools') }] },
+    { label: tr("History"), submenu: [{ label: tr("Back"), accelerator: shortcut('back','CmdOrCtrl+['), click: () => menuAction('back') }, { label: tr("Forward"), accelerator: shortcut('forward','CmdOrCtrl+]'), click: () => menuAction('forward') }] },
+    { label:tr("Tools"), submenu: [
+      ...[['voiceInput','Voice input','voice'],['screenshot','Capture screenshot','library'],['chat','Agent chat','agents'],['spaceManager','Manage tab groups','spaces']].map(([action,label,name])=>({label:tr(label),accelerator:shortcut(action),click:()=>openPanel(name,action==='screenshot'?'capture':undefined)})),
+      {label:tr("Save selected text"),accelerator:shortcut('clip'),click:()=>void saveSelection().catch(e=>window.webContents.send('vek:error',e.message))},
+      {label:tr("Next tab group"),accelerator:shortcut('switchSpace'),click:()=>{const index=store.spaces.findIndex(s=>s.id===store.selected);const next=store.spaces[(index+1)%store.spaces.length];if(next)void uiAction('space:select',next.id);}},
     ]},
-    { role: 'windowMenu' }];
+    { role: 'windowMenu', label: tr('Window') }];
 }
 function openPanel(name,intent) { if(name==='library'&&intent==='capture')pendingCaptureTarget=visibleTab()?.id;window.show();window.focus();panelOpen=true;layout();window.webContents.send('vek:open-panel',{name,intent}); }
 async function saveSelection(text,tab=visibleTab()) {
@@ -506,8 +511,14 @@ async function saveSelection(text,tab=visibleTab()) {
 }
 function configureTray(enabled) {
   if (!enabled) {tray?.destroy();tray=null;return;}
-  if (tray) return;
-  const icon=nativeImage.createFromPath(path.join(__dirname,'assets/wiek-trayTemplate.png'));icon.setTemplateImage(true);tray=new Tray(icon);tray.setToolTip('Wiek Browser');tray.setContextMenu(Menu.buildFromTemplate([{label:'Show Wiek Browser',click:()=>{window.show();window.focus();}},{label:'Agents & automations',click:()=>openPanel('agents')},{type:'separator'},{label:'Quit Wiek Browser',click:()=>app.quit()}]));tray.on('click',()=>{window.show();window.focus();});
+  if (!tray) {
+    const icon = nativeImage.createFromPath(path.join(__dirname, 'assets/wiek-trayTemplate.png'));
+    icon.setTemplateImage(true);
+    tray = new Tray(icon);
+    tray.setToolTip('Wiek Browser');
+    tray.on('click', () => { window.show(); window.focus(); });
+  }
+  tray.setContextMenu(Menu.buildFromTemplate([{label:tr("Show Wiek Browser"),click:()=>{window.show();window.focus();}},{label:tr("Agents & automations"),click:()=>openPanel('agents')},{type:'separator'},{label:tr("Quit Wiek Browser"),click:()=>app.quit()} ]));
 }
 function applyPreferences() {
   if(!preferencesService)return;const settings=preferencesService.snapshot();nativeTheme.themeSource=settings.theme;
@@ -516,7 +527,7 @@ function applyPreferences() {
 function sendPageConfig(t) {
   if(t.view.webContents.isDestroyed())return;
   const state=recorderService?.snapshot(),active=state?.sessions.find(s=>s.id===state.activeSessionId);
-  t.view.webContents.send('vek:page-config',{selectionToolbar:preferencesService?.snapshot().selectionToolbar,recording:Boolean(state?.recording&&active?.targetId===t.id)});
+  t.view.webContents.send('vek:page-config',{selectionToolbar:preferencesService?.snapshot().selectionToolbar,selectionLabels:{copy:tr('Copy'),save:tr('Save selected text'),ask:tr('Ask Agent'),translate:tr('Translate')},recording:Boolean(state?.recording&&active?.targetId===t.id)});
 }
 async function captureTabImage(t) {
   // A hidden WebContentsView may have no current Viz surface after a resize.
@@ -563,11 +574,11 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       if(wc.isDestroyed()||wc.getURL()!==before||page.url!==before||!tabs.has(tab.id)||selected.activeTab!==tab.id)throw new Error('Page changed during memory capture');
       return memoryService.indexPage(profileId,{...page,spaceId:selected.id});
     }
-    if(action==='memory:choose-files'){const project=agentService.snapshot().projects.find(p=>p.id===value?.projectId);if(!project)throw new Error('Choose a project');if(!preferencesService.snapshot().memory.localFiles)throw new Error('Enable Project file context first');const pick=await dialog.showOpenDialog(window,{defaultPath:project.path,properties:['openFile','multiSelections'],filters:[{name:'Text files',extensions:['txt','md','csv','json','js','ts','py','rs','go','html','css','yaml','toml','sql','log']}]});if(pick.canceled)return memoryService.snapshot(profileId);return memoryService.dispatch('memory:index:files',{profileId,projectId:project.id,paths:pick.filePaths});}
+    if(action==='memory:choose-files'){const project=agentService.snapshot().projects.find(p=>p.id===value?.projectId);if(!project)throw new Error('Choose a project');if(!preferencesService.snapshot().memory.localFiles)throw new Error('Enable Project file context first');const pick=await dialog.showOpenDialog(window,{defaultPath:project.path,properties:['openFile','multiSelections'],filters:[{name:tr('Text files'),extensions:['txt','md','csv','json','js','ts','py','rs','go','html','css','yaml','toml','sql','log']}]});if(pick.canceled)return memoryService.snapshot(profileId);return memoryService.dispatch('memory:index:files',{profileId,projectId:project.id,paths:pick.filePaths});}
     return memoryService.dispatch(action,{...value,profileId});
   }
   if(action.startsWith('library:'))return libraryService.dispatch(action,value);
-  if(action==='recorder:file:export') {const result=await recorderService.dispatch('recorder:export',value);const pick=await dialog.showSaveDialog(window,{defaultPath:result.exportData.filename,filters:[{name:'Action recording',extensions:['json']}]});if(!pick.canceled&&pick.filePath)writePrivateFile(pick.filePath,result.exportData.content);return recorderService.snapshot();}
+  if(action==='recorder:file:export') {const result=await recorderService.dispatch('recorder:export',value);const pick=await dialog.showSaveDialog(window,{defaultPath:result.exportData.filename,filters:[{name:tr('Action recording'),extensions:['json']}]});if(!pick.canceled&&pick.filePath)writePrivateFile(pick.filePath,result.exportData.content);return recorderService.snapshot();}
   if(action.startsWith('recorder:'))return recorderService.dispatch(action,value);
   if (action === 'voice:recording') {
     if (value?.active && value?.mute) for (const t of tabs.values()) { if (!voiceMutedTabs.has(t.id)) voiceMutedTabs.set(t.id,t.view.webContents.isAudioMuted());t.view.webContents.setAudioMuted(true); }
@@ -588,7 +599,7 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
     if (action === 'catalog:select') {const thread=agentService.snapshot().threads.find(t=>t.id===value?.threadId&&(!value.projectId||t.projectId===value.projectId));if(!thread)throw new Error('Conversation not found in this project');value={...value,projectId:thread.projectId};}
     return catalogService.dispatch(action, value);
   }
-  if(action==='agents:files:attach'){const pick=await dialog.showOpenDialog(window,{title:'Attach files to this conversation',properties:['openFile','multiSelections']});if(pick.filePaths.length)await agentService.dispatch('agents:attachments:add',{id:value?.id,paths:pick.filePaths});return agentService.snapshot();}
+  if(action==='agents:files:attach'){const pick=await dialog.showOpenDialog(window,{title:tr("Attach files to this conversation"),properties:['openFile','multiSelections']});if(pick.filePaths.length)await agentService.dispatch('agents:attachments:add',{id:value?.id,paths:pick.filePaths});return agentService.snapshot();}
   if(action==='agents:files:open'){const result=await agentService.dispatch('agents:attachments:read',value);if(result.attachmentData?.storedPath)shell.showItemInFolder(result.attachmentData.storedPath);return agentService.snapshot();}
   if (action === 'agents:file:export') {
     const result = await agentService.dispatch('agents:export', value || {});
@@ -599,17 +610,17 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
     return uiState();
   }
   if (action === 'agents:file:import') {
-    const pick = await dialog.showOpenDialog(window, { properties: ['openFile'], filters: [{ name: 'Wiek agent archive', extensions: ['json'] }] });
+    const pick = await dialog.showOpenDialog(window, { properties: ['openFile'], filters: [{ name: tr('Wiek agent archive'), extensions: ['json'] }] });
     if (pick.filePaths[0]) { if (fs.statSync(pick.filePaths[0]).size > 32 * 1024 * 1024) throw new Error('Agent archive exceeds 32 MiB'); await agentService.dispatch('agents:import', { data: JSON.parse(fs.readFileSync(pick.filePaths[0], 'utf8')) }); }
     return uiState();
   }
   if (action === 'agents:file:codex:preview') {
-    const pick = await dialog.showOpenDialog(window, {title:'Select a Codex rollout JSONL file',properties:['openFile'],filters:[{name:'Codex rollout',extensions:['jsonl']}]});
+    const pick = await dialog.showOpenDialog(window, {title:tr("Select a Codex rollout JSONL file"),properties:['openFile'],filters:[{name:tr('Codex rollout'),extensions:['jsonl']}]});
     if(!pick.canceled && pick.filePaths[0])return agentService.dispatch('agents:codex:preview',{path:pick.filePaths[0]});
     return agentService.snapshot();
   }
   if (action === 'agents:file:claude:preview') {
-    const pick = await dialog.showOpenDialog(window, { title: 'Select a Claude conversation JSONL file', properties: ['openFile'], filters: [{ name: 'Claude conversation', extensions: ['jsonl'] }] });
+    const pick = await dialog.showOpenDialog(window, { title: tr("Select a Claude conversation JSONL file"), properties: ['openFile'], filters: [{ name: tr('Claude conversation'), extensions: ['jsonl'] }] });
     if (!pick.canceled && pick.filePaths[0]) return agentService.dispatch('agents:claude:preview', { path: pick.filePaths[0] });
     return agentService.snapshot();
   }
@@ -651,8 +662,8 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
     case 'profile:default': for (const p of store.profiles) p.isDefault = p.id === value; break;
     case 'data:clear': if (s) await sessionFor(s.profileId).clearStorageData(); break;
     case 'profile:file:export': if(!s)break;return profileArchiveOperation(async()=>{
-      const pick=await dialog.showSaveDialog(window,{defaultPath:`${profile(s.profileId).name}.wiek-profile.json`,filters:[{name:'Encrypted Wiek profile',extensions:['json']}]});if(pick.canceled||!pick.filePath)return;
-      const passphrase=await requestSecret('Protect this exported profile with a passphrase',true);if(passphrase===null)return;
+      const pick=await dialog.showSaveDialog(window,{defaultPath:`${profile(s.profileId).name}.wiek-profile.json`,filters:[{name:tr('Encrypted Wiek profile'),extensions:['json']}]});if(pick.canceled||!pick.filePath)return;
+      const passphrase=await requestSecret(tr("Protect this exported profile with a passphrase"),true);if(passphrase===null)return;
       const selectedTabs=store.spaces.filter(space=>space.profileId===s.profileId).map(space=>({...space,tabs:space.tabs.map(id=>tabs.get(id)).filter(Boolean).map(t=>({id:t.id,url:t.url,webContents:t.view.webContents}))}));
       const captured=await captureProfileTabs(selectedTabs,{includeWebStorage:value?.includeWebStorage===true}),spaces=captured.spaces;
       const indexed=value?.includeIndexedDB===true?await captureProfileIndexedDB(selectedTabs):{counts:{},warnings:[]};
@@ -660,14 +671,14 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       const passwords=value?.includePasswords?vaultFor(s.profileId).list().map(row=>({origin:row.origin,...vaultFor(s.profileId).forOrigin(row.id,row.origin)})):[];
       const payload={profile:{name:profile(s.profileId).name,id:s.profileId},spaces,...(captured.webStorage?{webStorage:captured.webStorage}:{}),...(indexed.indexedDB?{indexedDB:indexed.indexedDB}:{}),bookmarks:store.bookmarks.filter(row=>belongsToProfile(row,s.profileId)&&/^https?:/i.test(row.url)).map(row=>({url:row.url,title:row.title||row.url,...(row.folder?{folder:row.folder}:{})})),history:store.history.filter(row=>(row.profileId===s.profileId||!row.profileId&&s.profileId==='Default')&&/^https?:/i.test(row.url)).map(row=>({url:row.url,title:row.title||row.url,at:row.at})),cookies,passwords,extensionsMetadata:(store.extensionPaths[s.profileId]||[]).map(row=>({id:row.id,name:row.name||'Extension',version:row.version||'0',enabled:row.enabled!==false}))};
       const encoded=await createProfileArchive().encode(payload,passphrase);writePrivateFile(pick.filePath,encoded);
-      profileArchiveResult={message:'Encrypted profile exported.',counts:{spaces:spaces.length,cookies:cookies.length,passwords:passwords.length,...captured.counts,...indexed.counts},warnings:[...captured.warnings,...indexed.warnings,...(cookieCapture.skipped?[`${cookieCapture.skipped} partitioned cookies were omitted; they are not converted to unpartitioned cookies.`]:[]),'Storage covers only current unpartitioned top-level HTTP(S) origins in open tabs. IndexedDB requires explicit keys and portable values; auto-increment stores, Blob/File/CryptoKey, sliced binary views, shared/cyclic references and unsupported values are omitted. Iframe/previous-origin storage, service workers, permissions and extension binaries are not included.']};
+      profileArchiveResult={message:"Encrypted profile exported.",counts:{spaces:spaces.length,cookies:cookies.length,passwords:passwords.length,...captured.counts,...indexed.counts},warnings:[...captured.warnings,...indexed.warnings,...(cookieCapture.skipped?[`${cookieCapture.skipped} partitioned cookies were omitted; they are not converted to unpartitioned cookies.`]:[]),'Storage covers only current unpartitioned top-level HTTP(S) origins in open tabs. IndexedDB requires explicit keys and portable values; auto-increment stores, Blob/File/CryptoKey, sliced binary views, shared/cyclic references and unsupported values are omitted. Iframe/previous-origin storage, service workers, permissions and extension binaries are not included.']};
     });
     case 'profile:file:import': return profileArchiveOperation(async()=>{
-      const pick=await dialog.showOpenDialog(window,{properties:['openFile'],filters:[{name:'Encrypted Wiek profile',extensions:['json']}]});if(!pick.filePaths[0])return;if(fs.statSync(pick.filePaths[0]).size>32*1024*1024)throw new Error('Profile archive exceeds 32 MiB');
-      const passphrase=await requestSecret('Unlock the selected Wiek profile archive');if(passphrase===null)return;
+      const pick=await dialog.showOpenDialog(window,{properties:['openFile'],filters:[{name:tr('Encrypted Wiek profile'),extensions:['json']}]});if(!pick.filePaths[0])return;if(fs.statSync(pick.filePaths[0]).size>32*1024*1024)throw new Error('Profile archive exceeds 32 MiB');
+      const passphrase=await requestSecret(tr("Unlock the selected Wiek profile archive"));if(passphrase===null)return;
       const {payload}=await createProfileArchive().decode(fs.readFileSync(pick.filePaths[0]),passphrase);
       const sessionCount=payload.spaces.reduce((n,space)=>n+space.tabs.filter(tab=>tab.sessionStorage).length,0),localAreas=payload.webStorage?.localStorage||[];
-      const answer=await dialog.showMessageBox(window,{type:'question',title:'Import browser profile',message:`Create a profile “${payload.profile.name}” with ${payload.cookies.length} cookies, ${payload.passwords.length} saved logins and ${payload.spaces.length} tab groups?`,detail:`${localAreas.length} local storage origins and ${sessionCount} tab sessions are in this archive. ${payload.indexedDB?.origins.reduce((n,a)=>n+a.databases.length,0)||0} IndexedDB databases are also included. `+(value?.restoreTabs===false?'Tabs stay closed; tab session storage will be skipped.':'Restored HTTP(S) tabs will open after storage restoration. Current-origin tab sessions are restored separately.')+' Existing profiles remain available. Extension metadata does not install extensions.',buttons:['Cancel','Restore'],defaultId:0,cancelId:0});if(answer.response!==1)return;
+      const answer=await dialog.showMessageBox(window,{type:'question',title:tr("Import browser profile"),message:tr("Create a profile “{0}” with {1} cookies, {2} saved logins and {3} tab groups?", (payload.profile.name), (payload.cookies.length), (payload.passwords.length), (payload.spaces.length)),detail:tr('{0} local storage origins and {1} tab sessions are in this archive. {2} IndexedDB databases are also included. ', localAreas.length, sessionCount, payload.indexedDB?.origins.reduce((n,a)=>n+a.databases.length,0)||0)+(value?.restoreTabs===false?tr('Tabs stay closed; tab session storage will be skipped.'):tr('Restored HTTP(S) tabs will open after storage restoration. Current-origin tab sessions are restored separately.'))+tr(' Existing profiles remain available. Extension metadata does not install extensions.'),buttons:[tr('Cancel'),tr('Restore')],defaultId:0,cancelId:0});if(answer.response!==1)return;
       const created={id:`profile-${crypto.randomUUID()}`,name:`${payload.profile.name} (imported)`,isDefault:false};store.profiles.push(created);const ses=sessionFor(created.id),warnings=[],counts={cookies:0,passwords:0,spaces:0,bookmarks:0,history:0,localStorageOrigins:0,sessionStorageTabs:0,indexedDBOrigins:0,indexedDBDatabases:0};
       const localResult=await restoreLocalStorage(ses,localAreas,{createContents:ses=>new WebContentsView({webPreferences:{session:ses,sandbox:true,contextIsolation:true,nodeIntegration:false}})});counts.localStorageOrigins=localResult.restored;warnings.push(...localResult.warnings);
       if(payload.indexedDB){try{const indexed=await restoreProfileIndexedDB(ses,payload.indexedDB,{createContents:ses=>new WebContentsView({webPreferences:{session:ses,sandbox:true,contextIsolation:true,nodeIntegration:false}})});counts.indexedDBOrigins=indexed.restoredOrigins;counts.indexedDBDatabases=indexed.restoredDatabases;warnings.push(...indexed.warnings);}catch(failure){store.profiles=store.profiles.filter(p=>p.id!==created.id);throw failure;}}
@@ -679,18 +690,18 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       else if(sessionCount)warnings.push(`${sessionCount} tab session storage areas were skipped because restored tabs were left closed.`);
       if(!store.spaces.some(space=>space.profileId===created.id)){await createSpace(created.name,created.id,'user');counts.spaces++;}
       if(payload.extensionsMetadata.length)warnings.push(`${payload.extensionsMetadata.length} extension references were recorded; load their unpacked folders separately.`);
-      created.importedExtensions=payload.extensionsMetadata;profileArchiveResult={message:'Profile restored into a new profile.',counts,warnings:[...new Set(warnings)]};openPanel('settings');
+      created.importedExtensions=payload.extensionsMetadata;profileArchiveResult={message:"Profile restored into a new profile.",counts,warnings:[...new Set(warnings)]};openPanel('settings');
     });
     case 'permissions:snapshot': return sitePermissions.snapshot(s?.profileId);
     case 'permissions:set': if(!s)throw new Error('Select a browser profile');sitePermissions.set({...value,profileId:s.profileId});break;
     case 'permissions:remove': if(s)sitePermissions.reset(s.profileId,typeof value==='string'?value:value.origin);break;
     case 'profile:import': if (s) {
-      const pick = await dialog.showOpenDialog(window, { title: 'Select a Chromium profile folder (e.g. Default or Profile 1)', properties: ['openDirectory'] });
+      const pick = await dialog.showOpenDialog(window, { title: tr("Select a Chromium profile folder (e.g. Default or Profile 1)"), properties: ['openDirectory'] });
       if (!pick.filePaths[0]) break;
       const source = await inspectProfile(pick.filePaths[0]);
       const options = { bookmarks: value?.bookmarks !== false, history: value?.history !== false, cookies: value?.cookies === true, passwords: value?.passwords === true };
       if (options.cookies || options.passwords) {
-        const answer = await dialog.showMessageBox(window, { type: 'question', title: 'Import protected browser data', message: 'Import selected login data into this Wiek profile?', detail: `Source: ${source.path}\nCookies and saved passwords will be decrypted using the selected browser’s macOS Safe Storage key. macOS may request Keychain access. Passwords are encrypted again in Wiek’s local vault. Unsupported records will be reported.`, buttons: ['Cancel', 'Import'], defaultId: 0, cancelId: 0 });
+        const answer = await dialog.showMessageBox(window, { type: 'question', title: tr("Import protected browser data"), message: tr("Import selected login data into this Wiek profile?"), detail: tr("Source: {0}\nCookies and saved passwords will be decrypted using the selected browser’s macOS Safe Storage key. macOS may request Keychain access. Passwords are encrypted again in Wiek’s local vault. Unsupported records will be reported.", (source.path)), buttons: ['Cancel', 'Import'], defaultId: 0, cancelId: 0 });
         if (answer.response !== 1) break;
       }
       const services = { chrome: 'Chrome Safe Storage', chromium: 'Chromium Safe Storage', edge: 'Microsoft Edge Safe Storage', brave: 'Brave Safe Storage' };
@@ -717,7 +728,7 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       if (!filled) throw new Error('No password field found on the active page');
       panelOpen = false;
     } break;
-    case 'cookies:import': if (s) { const pick = await dialog.showOpenDialog(window, { properties: ['openFile'], filters: [{ name: 'Cookie JSON', extensions: ['json'] }] }); if (pick.filePaths[0]) { const cookies = JSON.parse(fs.readFileSync(pick.filePaths[0], 'utf8')); if (!Array.isArray(cookies)) throw new Error('Expected an array of cookies'); for (const cookie of cookies) { const protocol = cookie.secure ? 'https' : 'http'; const payload = { ...cookie, url: cookie.url || `${protocol}://${cookie.domain.replace(/^\./, '')}${cookie.path || '/'}` }; delete payload.hostOnly; delete payload.session; delete payload.storeId; await sessionFor(s.profileId).cookies.set(payload); } } } break;
+    case 'cookies:import': if (s) { const pick = await dialog.showOpenDialog(window, { properties: ['openFile'], filters: [{ name: tr('Cookie JSON'), extensions: ['json'] }] }); if (pick.filePaths[0]) { const cookies = JSON.parse(fs.readFileSync(pick.filePaths[0], 'utf8')); if (!Array.isArray(cookies)) throw new Error('Expected an array of cookies'); for (const cookie of cookies) { const protocol = cookie.secure ? 'https' : 'http'; const payload = { ...cookie, url: cookie.url || `${protocol}://${cookie.domain.replace(/^\./, '')}${cookie.path || '/'}` }; delete payload.hostOnly; delete payload.session; delete payload.storeId; await sessionFor(s.profileId).cookies.set(payload); } } } break;
     case 'extensions:load': if (s) { const pick = await dialog.showOpenDialog(window, { properties: ['openDirectory'] }); if (pick.filePaths[0]) { const ext = await sessionFor(s.profileId).extensions.loadExtension(pick.filePaths[0]); store.extensionPaths[s.profileId] ||= []; if (!store.extensionPaths[s.profileId].some(e => e.id === ext.id)) store.extensionPaths[s.profileId].push({ id: ext.id, path: pick.filePaths[0], name: ext.name, version: ext.version, enabled: true }); } } break;
     case 'extensions:toggle': if (s) { const ext = store.extensionPaths[s.profileId]?.find(e => e.id === value); if (!ext) throw new Error('Extension not found'); if (ext.enabled !== false) { sessionFor(s.profileId).extensions.removeExtension(ext.id); ext.enabled = false; } else { const loaded = await sessionFor(s.profileId).extensions.loadExtension(ext.path); ext.id = loaded.id; ext.enabled = true; ext.error = undefined; } } break;
     case 'extensions:remove': if (s) { sessionFor(s.profileId).extensions.removeExtension(value); store.extensionPaths[s.profileId] = (store.extensionPaths[s.profileId] || []).filter(e => e.id !== value); } break;
@@ -777,10 +788,10 @@ app.whenReady().then(async () => {
   voiceService = createVoiceService({ dataDir: DATA, defaultConfig: fs.existsSync(whisperCommand) && fs.existsSync(whisperModel) ? { command:whisperCommand, args:['-m',whisperModel,'-f','{audio}','-l','{language}','-nt','-np','-ng'], output:'stdout' } : null });
   const translationPython=path.join(DATA,'translation-runtime/bin/python');
   translationService=createTranslationService({dataDir:DATA,onChange:publish,defaultConfig:fs.existsSync(translationPython)?{command:translationPython,args:[path.join(__dirname,'argos-translate.py')],source:'en',target:'zh'}:null});
-  libraryService=createLibraryService({dataDir:DATA,onChange:publish,capture:async()=>{const t=pendingCaptureTarget?tabs.get(pendingCaptureTarget):visibleTab();pendingCaptureTarget=undefined;if(!t)throw new Error('Open a page to capture');const image=await captureTabImage(t);return {pngBase64:image.toPNG().toString('base64'),url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()};},activePage:async()=>{const t=visibleTab();if(!t)throw new Error('Open a page to save');return {url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()};},exportImage:async({pngBase64,suggestedName})=>{const pick=await dialog.showSaveDialog(window,{defaultPath:suggestedName,filters:[{name:'PNG image',extensions:['png']}]});if(pick.canceled||!pick.filePath)return {saved:false};fs.writeFileSync(pick.filePath,Buffer.from(pngBase64,'base64'),{mode:0o600});return {saved:true,path:pick.filePath};},openUrl:async url=>{const s=getSpace(store.selected);userControl(s);await createTab(s,url,{reveal:true});return {opened:true};}});
+  libraryService=createLibraryService({dataDir:DATA,onChange:publish,capture:async()=>{const t=pendingCaptureTarget?tabs.get(pendingCaptureTarget):visibleTab();pendingCaptureTarget=undefined;if(!t)throw new Error('Open a page to capture');const image=await captureTabImage(t);return {pngBase64:image.toPNG().toString('base64'),url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()};},activePage:async()=>{const t=visibleTab();if(!t)throw new Error('Open a page to save');return {url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()};},exportImage:async({pngBase64,suggestedName})=>{const pick=await dialog.showSaveDialog(window,{defaultPath:suggestedName,filters:[{name:tr('PNG image'),extensions:['png']}]});if(pick.canceled||!pick.filePath)return {saved:false};fs.writeFileSync(pick.filePath,Buffer.from(pngBase64,'base64'),{mode:0o600});return {saved:true,path:pick.filePath};},openUrl:async url=>{const s=getSpace(store.selected);userControl(s);await createTab(s,url,{reveal:true});return {opened:true};}});
   const nativeDesktop=createNativeDesktop({dataDir:DATA,screenPermission:()=>process.platform==='darwin'?systemPreferences.getMediaAccessStatus('screen'):'unknown'});
   desktopService=createDesktopService({dataDir:DATA,registry:globalShortcut,capture:nativeDesktop.screenshot,selection:nativeDesktop.selection,permissions:()=>({screen:process.platform==='darwin'?systemPreferences.getMediaAccessStatus('screen'):'unsupported',accessibility:process.platform==='darwin'?(systemPreferences.isTrustedAccessibilityClient(false)?'granted':'not-granted'):'unsupported'}),checkChord:key=>{const p=preferencesService.snapshot(),physical=physicalChord(key,process.platform),conflict=[...p.reservedShortcuts,...Object.entries(p.shortcuts).filter(([,value])=>value).map(([action,accelerator])=>({accelerator,label:p.actions.find(a=>a.id===action)?.label||action}))].find(row=>physicalChord(row.accelerator,process.platform)===physical);return conflict?{valid:false,error:'Shortcut conflicts with '+conflict.label}:{valid:true};},onOpen:action=>openPanel(action==='chat'?'agents':action==='voice'?'voice':'desktop'),onChange:publish,copyText:text=>clipboard.writeText(text),saveText:payload=>libraryService.dispatch('library:items:create',{kind:'text',...payload})});
-  selectionToolbar=createSelectionToolbar({BrowserWindow,screen,ipcMain,consume:id=>desktopMonitorService.consume(id),dismiss:id=>desktopMonitorService.dismiss(id),copy:text=>clipboard.writeText(text),ask:text=>{openPanel('agents');window.webContents.send('vek:draft',text);},translate:async text=>{openPanel('translation');window.webContents.send('vek:translation',text);},onError:message=>window?.webContents.send('vek:error',message)});
+  selectionToolbar=createSelectionToolbar({BrowserWindow,screen,ipcMain,locale:interfaceLocale,consume:id=>desktopMonitorService.consume(id),dismiss:id=>desktopMonitorService.dismiss(id),copy:text=>clipboard.writeText(text),ask:text=>{openPanel('agents');window.webContents.send('vek:draft',text);},translate:async text=>{openPanel('translation');window.webContents.send('vek:translation',text);},onError:message=>window?.webContents.send('vek:error',message)});
   desktopMonitorService=createDesktopMonitorService({dataDir:DATA,native:createDesktopMonitorNative({dataDir:DATA,screenPermission:()=>process.platform==='darwin'?systemPreferences.getMediaAccessStatus('screen'):'unsupported'}),onChange:publish,onSelection:value=>void selectionToolbar.show(value).catch(error=>console.error('Selection toolbar:',error.message))});
   for(const event of ['suspend','resume','lock-screen','unlock-screen','user-did-resign-active','user-did-become-active'])powerMonitor.on(event,()=>{const mapped={'user-did-resign-active':'session-resigned','user-did-become-active':'session-active'}[event]||event;selectionToolbar.hide();void agentService.lifecycle(mapped).catch(error=>console.error('Scheduler lifecycle:',error.message));});
   recorderService=createActionRecorder({dataDir:DATA,onChange:()=>{for(const t of tabs.values())sendPageConfig(t);publish();},activePage:()=>{const t=visibleTab();return t?{targetId:t.id,url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()}:null;},capture:async({targetId})=>{const t=tabs.get(targetId);if(!t||t.view.webContents.isDestroyed())throw new Error('Recorded page was closed');return {pngBase64:(await captureTabImage(t)).toPNG().toString('base64')};}});

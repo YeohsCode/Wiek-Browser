@@ -1,5 +1,7 @@
 'use strict';
+
 (() => {
+  const tr = (message, ...values) => globalThis.WiekI18n?.t(message, ...values) ?? message.replace(/\{(\d+)\}/g, (match, index) => index < values.length ? String(values[index]) : match);
   let root, invoke, appState, mode, catalog, voice, error = '', detail = null, busy = false, recording = null, transcript = '';
   let projectId = '', threadId = '';
   const node = (tag, text, cls) => { const n = document.createElement(tag); if (text) n.textContent = text; if (cls) n.className = cls; return n; };
@@ -9,64 +11,65 @@
   function selector(label, values, selected, changed) { const wrap = node('label', label), select = node('select'); for (const [id, name] of values) { const option = node('option', name); option.value = id; select.append(option); } select.value = selected; select.onchange = () => execute(() => changed(select.value)); wrap.append(select); return wrap; }
   function card(title, description) { const c = node('section', '', 'card'); c.append(node('h3', title), node('p', description)); root.append(c); return c; }
   function render() {
+    if (globalThis.WiekI18n?.deferWhileComposing(root, render)) return;
     if (!root || !root.isConnected) return;
     root.replaceChildren();
-    if (error) root.append(node('p', error, 'tools-error'));
+    if (error) root.append(node('p', (globalThis.WiekI18n?.error(error) ?? (error)), 'tools-error'));
     if (mode === 'catalog') renderCatalog(); else renderVoice();
   }
   function renderCatalog() {
     const projects = appState.agents?.projects || [], threads = appState.agents?.threads || [];
-    const controls = card('Skills, commands & agents', 'Discover local instruction files. Read a file before selecting it for a conversation; selected files are included in the next provider turn. Disable affects Wiek’s catalog only.');
-    controls.append(selector('Project', [['','User catalog'], ...projects.map(p => [p.id,p.name])], projectId, async id => { projectId = id; detail = null; await refresh(); }));
-    controls.append(selector('Conversation', [['','Choose a conversation'], ...threads.filter(t => !projectId || t.projectId === projectId).map(t => [t.id,t.title])], threadId, async id => { threadId = id; const thread = threads.find(t => t.id === id); if (thread) projectId = thread.projectId; await refresh(); }));
-    controls.append(button('Refresh', refresh));
-    if (!catalog) { controls.append(node('p', 'Loading catalog…')); return; }
-    const list = card(`${catalog.entries.length} entries`, 'Project entries and user entries are listed with their source. No plugin installation or global configuration changes are performed.');
+    const controls = card(tr("Skills, commands & agents"), tr("Discover local instruction files. Read a file before selecting it for a conversation; selected files are included in the next provider turn. Disable affects Wiek’s catalog only."));
+    controls.append(selector(tr("Project"), [['',tr('User catalog')], ...projects.map(p => [p.id,p.name])], projectId, async id => { projectId = id; detail = null; await refresh(); }));
+    controls.append(selector(tr("Conversation"), [['',tr('Choose a conversation')], ...threads.filter(t => !projectId || t.projectId === projectId).map(t => [t.id,t.title])], threadId, async id => { threadId = id; const thread = threads.find(t => t.id === id); if (thread) projectId = thread.projectId; await refresh(); }));
+    controls.append(button(tr("Refresh"), refresh));
+    if (!catalog) { controls.append(node('p', tr("Loading catalog…"))); return; }
+    const list = card(tr("{0} entries", (catalog.entries.length)), tr("Project entries and user entries are listed with their source. No plugin installation or global configuration changes are performed."));
     for (const entry of catalog.entries) {
       const row = node('div', '', 'row'), main = node('div', '', 'row-main'); main.append(node('strong', entry.name), node('p', `${entry.kind} · ${entry.scope} · ${entry.description}`, 'row-sub')); row.append(main);
-      row.append(button('Read', async () => { detail = await invoke('catalog:read', { id: entry.id }); }));
-      row.append(button(entry.disabled ? 'Enable' : 'Disable', async () => { catalog = await invoke('catalog:toggle', { id: entry.id, projectId: projectId || undefined }); }));
+      row.append(button(tr("Read"), async () => { detail = await invoke('catalog:read', { id: entry.id }); }));
+      row.append(button(entry.disabled ? tr("Enable") : tr("Disable"), async () => { catalog = await invoke('catalog:toggle', { id: entry.id, projectId: projectId || undefined }); }));
       const selected = catalog.selections[threadId] || [];
-      if (threadId && !entry.disabled) row.append(button(selected.includes(entry.id) ? 'Remove from conversation' : 'Use in conversation', async () => { const ids = selected.includes(entry.id) ? selected.filter(id => id !== entry.id) : [...selected, entry.id]; catalog = await invoke('catalog:select', { threadId, ids, projectId }); }));
+      if (threadId && !entry.disabled) row.append(button(selected.includes(entry.id) ? tr("Remove from conversation") : tr("Use in conversation"), async () => { const ids = selected.includes(entry.id) ? selected.filter(id => id !== entry.id) : [...selected, entry.id]; catalog = await invoke('catalog:select', { threadId, ids, projectId }); }));
       list.append(row);
     }
     if (detail) { const preview = card(detail.name, detail.path); const pre = node('pre', detail.content, 'tools-source'); preview.append(pre); }
   }
   function renderVoice() {
-    const intro = card('Local voice transcription', 'Record a message or choose an audio file. Transcription runs locally using a configured executable; the resulting text can be added to a conversation draft. It is never sent automatically.');
-    if (!voice) { intro.append(node('p', 'Loading voice settings…')); return; }
+    const intro = card(tr("Local voice transcription"), tr("Record a message or choose an audio file. Transcription runs locally using a configured executable; the resulting text can be added to a conversation draft. It is never sent automatically."));
+    if (!voice) { intro.append(node('p', tr("Loading voice settings…"))); return; }
     const bundled=voice.config?.command?.endsWith('/app/bin/whisper-cli');
-    intro.append(node('p', voice.configured ? bundled?'Whisper · multilingual · runs on this device':`Local provider: ${voice.config.command.split(/[\\/]/).pop()}` : 'No local transcription provider is configured.'));
-    const upload = document.createElement('input'); upload.type = 'file'; upload.accept = '.wav,.mp3,.ogg,.webm,.m4a'; upload.setAttribute('aria-label','Audio file'); upload.disabled = busy;
-    upload.onchange = () => { const file = upload.files[0]; if (!file) return; execute(async () => { const mime = file.type || ({wav:'audio/wav',mp3:'audio/mpeg',ogg:'audio/ogg',webm:'audio/webm',m4a:'audio/mp4'})[file.name.split('.').pop()]; if (file.size > voice.maxAudioBytes) throw new Error('Audio exceeds the 20 MiB limit'); await transcribe(new Uint8Array(await file.arrayBuffer()), mime); }); };
+    intro.append(node('p', voice.configured ? bundled?tr("Whisper · multilingual · runs on this device"):tr("Local provider: {0}", (voice.config.command.split(/[\\/]/).pop())) : tr("No local transcription provider is configured.")));
+    const upload = document.createElement('input'); upload.type = 'file'; upload.accept = '.wav,.mp3,.ogg,.webm,.m4a'; upload.setAttribute('aria-label',tr("Audio file")); upload.disabled = busy;
+    upload.onchange = () => { const file = upload.files[0]; if (!file) return; execute(async () => { const mime = file.type || ({wav:'audio/wav',mp3:'audio/mpeg',ogg:'audio/ogg',webm:'audio/webm',m4a:'audio/mp4'})[file.name.split('.').pop()]; if (file.size > voice.maxAudioBytes) throw new Error(tr("Audio exceeds the 20 MiB limit")); await transcribe(new Uint8Array(await file.arrayBuffer()), mime); }); };
     intro.append(upload);
-    intro.append(button(recording ? 'Stop recording & transcribe' : 'Record microphone', async () => { if (recording) { await stopRecording(); return; } await startRecording(); }));
-    if (busy) { const stop = button('Stop transcription', async () => { await invoke('voice:stop'); }); stop.disabled=false; intro.append(stop); }
-    if (recording) intro.append(node('p', 'Recording on this device… stop within 2 minutes.'));
-    if (transcript) { const c = card('Transcript', 'Review this text before sending.'); const text = node('textarea'); text.value = transcript; text.rows = 6; text.setAttribute('aria-label','Voice transcript'); text.oninput = () => transcript = text.value; c.append(text); c.append(button('Add to selected conversation draft', () => { if (!window.WiekAgentPanel.appendDraft(transcript)) throw new Error('Open a conversation in Agents first, then return here.'); window.dispatchEvent(new CustomEvent('vek:show-panel', { detail: 'agents' })); })); }
-    const settings = card('Transcription provider', 'Arguments run without a shell. Use {audio} for the temporary recording path; file-output tools can use {output}. Whisper example: ["-m","/path/ggml-tiny.bin","-f","{audio}","-l","auto","-nt","-np"].');
-    const form = node('form'), command = node('input'), args = node('textarea'); command.placeholder = '/absolute/path/to/transcriber'; command.value = voice.config?.command || ''; command.setAttribute('aria-label','Transcriber executable'); args.rows = 4; args.value = JSON.stringify(voice.config?.args || []); args.setAttribute('aria-label','Transcriber arguments JSON');
-    const output = document.createElement('select'); for (const [id, name] of [['stdout','Text on standard output'],['file','Text at {output} path']]) { const option = node('option',name); option.value=id; output.append(option); } output.value = voice.config?.output || 'stdout';
-    const save = node('button','Save provider'); save.disabled = busy; form.append(command,args,output,save); form.onsubmit = e => { e.preventDefault(); const values = {command:command.value,args:args.value,output:output.value};execute(async () => voice = await invoke('voice:configure',{...values,args:JSON.parse(values.args)})); }; settings.append(form);
-    const advanced=node('details'),summary=node('summary','Advanced: choose another transcription provider');advanced.append(summary,...settings.childNodes);settings.replaceChildren(advanced);
-    const prefs=voice.settings || {}, options=card('Voice preferences', 'Transcripts stay on this device for the selected retention period. Audio is kept only when enabled. Dictionary replacements match literal phrases.');
-    const prefForm=node('form'), language=node('input'); language.value=prefs.language || 'auto'; language.setAttribute('aria-label','Speech language');
-    const retention=node('input');retention.type='number';retention.min='0';retention.max='365';retention.value=prefs.historyRetentionDays ?? 7;retention.setAttribute('aria-label','Transcript retention days');
-    prefForm.append(node('label','Language code (auto, en, zh…)'),language,node('label','Transcript retention days (0 disables history)'),retention);
-    const checks={};for (const [key,label] of [['keepAudio','Keep audio for download'],['sounds','Play start/stop sounds'],['muteOtherAudio','Mute browser pages while recording']]) {const wrap=node('label',label),check=document.createElement('input');check.type='checkbox';check.checked=Boolean(prefs[key]);checks[key]=check;wrap.prepend(check);prefForm.append(wrap);}
-    const dictionary=node('textarea');dictionary.rows=5;dictionary.value=JSON.stringify(prefs.dictionary || [],null,2);dictionary.setAttribute('aria-label','Voice dictionary JSON');prefForm.append(node('label','Dictionary: [{"from":"phrase","to":"replacement"}]'),dictionary,node('button','Save voice preferences'));
+    intro.append(button(recording ? tr("Stop recording & transcribe") : tr("Record microphone"), async () => { if (recording) { await stopRecording(); return; } await startRecording(); }));
+    if (busy) { const stop = button(tr("Stop transcription"), async () => { await invoke('voice:stop'); }); stop.disabled=false; intro.append(stop); }
+    if (recording) intro.append(node('p', tr("Recording on this device… stop within 2 minutes.")));
+    if (transcript) { const c = card(tr("Transcript"), tr("Review this text before sending.")); const text = node('textarea'); text.value = transcript; text.rows = 6; text.setAttribute('aria-label',tr("Voice transcript")); text.oninput = () => transcript = text.value; c.append(text); c.append(button(tr("Add to selected conversation draft"), () => { if (!window.WiekAgentPanel.appendDraft(transcript)) throw new Error(tr("Open a conversation in Agents first, then return here.")); window.dispatchEvent(new CustomEvent('vek:show-panel', { detail: 'agents' })); })); }
+    const settings = card(tr("Transcription provider"), tr("Arguments run without a shell. Use {audio} for the temporary recording path; file-output tools can use {output}. Whisper example: [\"-m\",\"/path/ggml-tiny.bin\",\"-f\",\"{audio}\",\"-l\",\"auto\",\"-nt\",\"-np\"]."));
+    const form = node('form'), command = node('input'), args = node('textarea'); command.placeholder = '/absolute/path/to/transcriber'; command.value = voice.config?.command || ''; command.setAttribute('aria-label',tr("Transcriber executable")); args.rows = 4; args.value = JSON.stringify(voice.config?.args || []); args.setAttribute('aria-label',tr("Transcriber arguments JSON"));
+    const output = document.createElement('select'); for (const [id, name] of [['stdout',tr("Text on standard output")],['file',tr("Text at {output} path")]]) { const option = node('option',name); option.value=id; output.append(option); } output.value = voice.config?.output || 'stdout';
+    const save = node('button',tr("Save provider")); save.disabled = busy; form.append(command,args,output,save); form.onsubmit = e => { e.preventDefault(); const values = {command:command.value,args:args.value,output:output.value};execute(async () => voice = await invoke('voice:configure',{...values,args:JSON.parse(values.args)})); }; settings.append(form);
+    const advanced=node('details'),summary=node('summary',tr("Advanced: choose another transcription provider"));advanced.append(summary,...settings.childNodes);settings.replaceChildren(advanced);
+    const prefs=voice.settings || {}, options=card(tr("Voice preferences"), tr("Transcripts stay on this device for the selected retention period. Audio is kept only when enabled. Dictionary replacements match literal phrases."));
+    const prefForm=node('form'), language=node('input'); language.value=prefs.language || 'auto'; language.setAttribute('aria-label',tr("Speech language"));
+    const retention=node('input');retention.type='number';retention.min='0';retention.max='365';retention.value=prefs.historyRetentionDays ?? 7;retention.setAttribute('aria-label',tr("Transcript retention days"));
+    prefForm.append(node('label',tr("Language code (auto, en, zh…)")),language,node('label',tr("Transcript retention days (0 disables history)")),retention);
+    const checks={};for (const [key,label] of [['keepAudio',tr("Keep audio for download")],['sounds',tr("Play start/stop sounds")],['muteOtherAudio',tr("Mute browser pages while recording")]]) {const wrap=node('label',label),check=document.createElement('input');check.type='checkbox';check.checked=Boolean(prefs[key]);checks[key]=check;wrap.prepend(check);prefForm.append(wrap);}
+    const dictionary=node('textarea');dictionary.rows=5;dictionary.value=JSON.stringify(prefs.dictionary || [],null,2);dictionary.setAttribute('aria-label',tr("Voice dictionary JSON"));prefForm.append(node('label',tr("Dictionary: [{\"from\":\"phrase\",\"to\":\"replacement\"}]")),dictionary,node('button',tr("Save voice preferences")));
     prefForm.onsubmit=e=>{e.preventDefault();execute(async()=>{const values={language:language.value,historyRetentionDays:Number(retention.value),dictionary:JSON.parse(dictionary.value),...Object.fromEntries(Object.entries(checks).map(([key,input])=>[key,input.checked]))};voice=await invoke('voice:settings:update',values);});}; options.append(prefForm);
-    const history=card('Transcript history','Deleted items can be restored until their retention period expires.');
-    for(const entry of voice.history || []) { const row=node('div','','voice-history-item');row.append(node('strong',new Date(entry.createdAt).toLocaleString()),node('p',entry.text));
-      row.append(button(entry.trashed?'Restore':'Delete',async()=>voice=await invoke(entry.trashed?'voice:history:restore':'voice:history:delete',{id:entry.id})));
-      if(!entry.trashed)row.append(button('Use transcript',async()=>transcript=entry.text));
-      if(entry.hasAudio&&!entry.trashed)row.append(button('Save audio…',async()=>{await invoke('voice:history:save-audio',{id:entry.id});}));history.append(row);
+    const history=card(tr("Transcript history"),tr("Deleted items can be restored until their retention period expires."));
+    for(const entry of voice.history || []) { const row=node('div','','voice-history-item');row.append(node('strong',new Date(entry.createdAt).toLocaleString(globalThis.WiekI18n?.locale())),node('p',entry.text));
+      row.append(button(entry.trashed?tr("Restore"):tr("Delete"),async()=>voice=await invoke(entry.trashed?'voice:history:restore':'voice:history:delete',{id:entry.id})));
+      if(!entry.trashed)row.append(button(tr("Use transcript"),async()=>transcript=entry.text));
+      if(entry.hasAudio&&!entry.trashed)row.append(button(tr("Save audio…"),async()=>{await invoke('voice:history:save-audio',{id:entry.id});}));history.append(row);
     }
   }
   async function transcribe(audio, mime) { const result = await invoke('voice:transcribe', { audio, mime: mime?.split(';')[0] }); transcript = result.text; voice=await invoke('voice:snapshot'); }
   function cue(context,frequency) { if(!voice.settings?.sounds)return;const oscillator=context.createOscillator(),gain=context.createGain();gain.gain.value=0.04;oscillator.frequency.value=frequency;oscillator.connect(gain);gain.connect(context.destination);oscillator.start();oscillator.stop(context.currentTime+0.1); }
   async function startRecording() {
-    if (!voice.configured) throw new Error('Configure a local transcription provider first');
+    if (!voice.configured) throw new Error(tr("Configure a local transcription provider first"));
     const stream = await navigator.mediaDevices.getUserMedia({audio:true});
     // PCM WAV keeps recorded audio compatible with local whisper-cli.
     const context = new AudioContext({sampleRate:16000}), source = context.createMediaStreamSource(stream), processor = context.createScriptProcessor(4096,1,1), mute = context.createGain(); mute.gain.value = 0;

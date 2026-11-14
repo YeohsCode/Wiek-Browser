@@ -6,7 +6,9 @@
 
 A local Chromium browser and agent workspace with task spaces, isolated browser profiles, file/Git tools, scheduled automations, and browser automation. Wiek has an independently implemented Electron host and local services, plus its own standalone SDK build and runtime namespace. No separate browser installation or service is required. Third-party license and copyright details are retained in [NOTICE.md](NOTICE.md).
 
-**Current checkpoint: 0.29.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
+**Current checkpoint: 0.30.0.** Functional coverage and acceptance are still in progress. See the [plan](PLAN.md), [capability matrix](analysis/implementation-matrix.md), and [validation results](reports/RESULTS.md).
+
+Choose **Settings → Interface language** to follow the system or switch between Simplified Chinese and English. Changes apply immediately and persist across restarts.
 
 ## Run locally
 

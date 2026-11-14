@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
-const { createMemoryService } = createRequire(import.meta.url)('../app/memory-service.cjs');
+const root = process.env.WIEK_MEMORY_APP_ROOT || fileURLToPath(new URL('..', import.meta.url));
+const { createMemoryService } = createRequire(import.meta.url)(path.join(root,'app/memory-service.cjs'));
 async function harness(t, enabled = true, semanticOptions = {}) {
  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'vek-memory-')), project = path.join(dir, 'project'); await fs.mkdir(project);
  let policy = { browserActivity: enabled, localFiles: enabled };
@@ -95,7 +97,7 @@ test('semantic mode receives only scoped saved text and drops results after dele
 });
 
 test('native on-device search ranks Chinese and English paraphrases without matching exact terms', {
- skip:process.platform!=='darwin' || !await fs.access(new URL('../app/bin/wiek-saved-text-search',import.meta.url)).then(()=>true,()=>false)
+ skip:process.platform!=='darwin' || !await fs.access(path.join(root,'app/bin/wiek-saved-text-search')).then(()=>true,()=>false)
 }, async t => {
  const h = await harness(t,true,{onDeviceEnabled:()=>true});
  h.page('Workers can get legal advice about their job agreements.', {title:'Labor law',url:'https://fixture.test/labor'});

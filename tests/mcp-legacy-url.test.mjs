@@ -3,8 +3,10 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { createMcpService } from '../app/mcp-service.cjs';
+import { join, resolve } from 'node:path';
+import { createRequire } from 'node:module';
+const root = process.env.VEK_MCP_APP_ROOT || resolve(import.meta.dirname, '..');
+const { createMcpService } = createRequire(import.meta.url)(join(root, 'app/mcp-service.cjs'));
 
 for (const mode of ['server', 'retry']) {
   test(`session HTTP URL elicitation via ${mode} requires scoped desktop review`, async t => {

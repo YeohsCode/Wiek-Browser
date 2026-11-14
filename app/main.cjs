@@ -11,7 +11,7 @@ const crypto = require('node:crypto');
 const { snapshotPage } = require('./snapshot.cjs');
 const { createAgentService } = require('./agent-service.cjs');
 const { sendOrdered } = require('./cdp-transport.cjs');
-const { inspectProfile, readProfile, createCredentialVault } = require('./profile-import.cjs');
+const { readSelectedProfiles, createCredentialVault } = require('./profile-import.cjs');
 const { createWorkspaceService } = require('./workspace-service.cjs');
 const { createMcpService, createBrowserGateway } = require('./mcp-service.cjs');
 const { createCatalogService } = require('./catalog-service.cjs');
@@ -753,25 +753,37 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
     case 'permissions:set': if(!s)throw new Error('Select a browser profile');sitePermissions.set({...value,profileId:s.profileId});break;
     case 'permissions:remove': if(s)sitePermissions.reset(s.profileId,typeof value==='string'?value:value.origin);break;
     case 'profile:import': if (s) {
-      const pick = await dialog.showOpenDialog(window, { title: tr("Select a Chromium profile folder (e.g. Default or Profile 1)"), properties: ['openDirectory'] });
+      const pick = await dialog.showOpenDialog(window, { title: tr("Select Chromium profile folders (e.g. Default or Profile 1)"), properties: ['openDirectory','multiSelections'] });
       if (!pick.filePaths[0]) break;
-      const source = await inspectProfile(pick.filePaths[0]);
+      if (pick.filePaths.length > 12) throw new Error("Select up to 12 Chromium profile folders");
       const options = { bookmarks: value?.bookmarks !== false, history: value?.history !== false, cookies: value?.cookies === true, passwords: value?.passwords === true };
       if (options.cookies || options.passwords) {
-        const answer = await dialog.showMessageBox(window, { type: 'question', title: tr("Import protected browser data"), message: tr("Import selected login data into this Wiek profile?"), detail: tr("Source: {0}\nCookies and saved passwords will be decrypted using the selected browser’s macOS Safe Storage key. macOS may request Keychain access. Passwords are encrypted again in Wiek’s local vault. Unsupported records will be reported.", (source.path)), buttons: ['Cancel', 'Import'], defaultId: 0, cancelId: 0 });
+        const answer = await dialog.showMessageBox(window, { type: 'question', title: tr("Import protected browser data"), message: tr("Import selected login data into this Wiek profile?"), detail: tr("Source: {0}\nCookies and saved passwords will be decrypted using the selected browser’s macOS Safe Storage key. macOS may request Keychain access. Passwords are encrypted again in Wiek’s local vault. Unsupported records will be reported.", (pick.filePaths.join("\n"))), buttons: [tr('Cancel'), tr('Import')], defaultId: 0, cancelId: 0 });
         if (answer.response !== 1) break;
       }
       const services = { chrome: 'Chrome Safe Storage', chromium: 'Chromium Safe Storage', edge: 'Microsoft Edge Safe Storage', brave: 'Brave Safe Storage' };
       const serviceName = services[value?.sourceBrowser || 'chrome'];
       if (!serviceName) throw new Error('Unknown source browser');
-      const imported = await readProfile({ directory: source.path, ...options, getPassword: async () => {
+      const imported = await readSelectedProfiles({ directories: pick.filePaths, ...options, getPassword: async () => {
         if (process.platform !== 'darwin') throw new Error('Encrypted migration is supported on macOS');
         try { const result = await execFileAsync('/usr/bin/security', ['find-generic-password', '-s', serviceName, '-w'], { timeout: 60000, maxBuffer: 4096 }); return result.stdout.replace(/\r?\n$/, ''); }
         catch { throw new Error('Source browser key access was denied or unavailable'); }
       } });
       const counts = { bookmarks: 0, history: 0, cookies: 0, passwords: 0 };
-      for (const item of imported.bookmarks) if (!store.bookmarks.some(b => belongsToProfile(b,s.profileId)&&b.url === item.url)) { store.bookmarks.push({...item,profileId:s.profileId}); counts.bookmarks++; }
-      for (const item of imported.history) if (!store.history.some(h => belongsToProfile(h,s.profileId)&&h.url === item.url && h.at === item.at)) { store.history.push({...item,profileId:s.profileId}); counts.history++; }
+      const bookmarkUrls = new Set(store.bookmarks.filter(item => belongsToProfile(item, s.profileId)).map(item => item.url));
+      for (const item of imported.bookmarks) {
+        if (bookmarkUrls.has(item.url)) continue;
+        bookmarkUrls.add(item.url);
+        store.bookmarks.push({...item, profileId:s.profileId}); counts.bookmarks++;
+      }
+      const historyKey = item => JSON.stringify([item.url, item.at]);
+      const knownHistory = new Set(store.history.filter(item => belongsToProfile(item, s.profileId)).map(historyKey));
+      for (const item of imported.history) {
+        const key = historyKey(item);
+        if (knownHistory.has(key)) continue;
+        knownHistory.add(key);
+        store.history.push({...item, profileId:s.profileId}); counts.history++;
+      }
       store.history.sort((a, b) => Date.parse(a.at) - Date.parse(b.at)); store.history = store.history.slice(-20000);
       for (const cookie of imported.cookies) try { await sessionFor(s.profileId).cookies.set(cookie); counts.cookies++; } catch { const warning = imported.warnings.find(w => w.category === 'cookies' && w.reason === 'Cookie rejected by Chromium'); if (warning) warning.count++; else imported.warnings.push({ category: 'cookies', reason: 'Cookie rejected by Chromium', count: 1 }); }
       if (imported.passwords.length) try { counts.passwords = vaultFor(s.profileId).import(imported.passwords); } catch { imported.warnings.push({ category: 'passwords', reason: 'System encryption unavailable; passwords were not saved', count: imported.passwords.length }); }

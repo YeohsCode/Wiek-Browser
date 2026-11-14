@@ -108,6 +108,33 @@ async function readProfile({ directory, bookmarks = true, history = true, cookie
   for (const category of ['bookmarks', 'history', 'cookies', 'passwords']) output.counts[category] = output[category].length;
   return output;
 }
+async function readSelectedProfiles({ directories, ...options }) {
+  if (!Array.isArray(directories) || directories.length < 1 || directories.length > 12) throw new Error('Select up to 12 Chromium profile folders');
+  const roots = new Set();
+  const result = { bookmarks: [], history: [], cookies: [], passwords: [], warnings: [], sources: 0 };
+  const categories = ['bookmarks', 'history', 'cookies', 'passwords'];
+  let sourceKey;
+  for (const directory of directories) {
+    let root;
+    try {
+      root = sourceDirectory(directory);
+      if (roots.has(root)) continue;
+      roots.add(root);
+      const profile = await readProfile({ ...options, directory: root, getPassword: () => sourceKey ??= Promise.resolve().then(() => options.getPassword?.()) });
+      result.sources++;
+      for (const category of categories) {
+        const room = MAX_ROWS - result[category].length;
+        result[category].push(...profile[category].slice(0, room));
+        if (profile[category].length > room) result.warnings.push({ category, count: profile[category].length - room, reason: 'Combined import limit reached' });
+      }
+      result.warnings.push(...profile.warnings);
+    } catch (error) {
+      if (directories.length === 1) throw error;
+      result.warnings.push({ category: 'profiles', count: 1, reason: 'Selected profile could not be read' });
+    }
+  }
+  return result;
+}
 function createCredentialVault({ dataDir, encrypt, decrypt }) {
   const file = path.join(dataDir, 'credentials.json');
   let entries = [];
@@ -132,4 +159,4 @@ function createCredentialVault({ dataDir, encrypt, decrypt }) {
     forOrigin(id, origin) { const entry = entries.find(e => e.id === id && e.origin === origin); if (!entry) throw new Error('Saved login does not match the active page origin'); return { username: entry.username, password: decrypt(Buffer.from(entry.sealed, 'base64')) }; },
   };
 }
-module.exports = { inspectProfile, readProfile, decryptMac, bookmarksFromJSON, createCredentialVault };
+module.exports = { inspectProfile, readProfile, readSelectedProfiles, decryptMac, bookmarksFromJSON, createCredentialVault };

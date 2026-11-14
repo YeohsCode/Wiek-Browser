@@ -6,7 +6,7 @@ import os from 'node:os';
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-const { inspectProfile, readProfile, decryptMac, createCredentialVault } = createRequire(import.meta.url)('../app/profile-import.cjs');
+const { inspectProfile, readProfile, readSelectedProfiles, decryptMac, createCredentialVault } = createRequire(import.meta.url)('../app/profile-import.cjs');
 const { DatabaseSync } = createRequire(import.meta.url)('node:sqlite');
 const password = 'temporary fixture key';
 function encrypted(value, domain) {
@@ -67,4 +67,26 @@ test('vault stores only sealed secrets, deduplicates, requires exact origin, sur
   vault.remove(vault.list()[0].id); assert.equal(vault.list().length, 0);
   const broken = createCredentialVault({ dataDir: root, encrypt: () => { throw new Error('Keychain unavailable'); }, decrypt });
   assert.throws(() => broken.import([{ origin: 'https://fixture.test', password: 'x' }]), /Keychain/); assert.equal(broken.list().length, 0);
+});
+
+
+test('multi-profile import reads each selected canonical folder once and reports unreadable selections', async t => {
+  const first = await fixture(t), second = await fixture(t);
+  await fs.writeFile(path.join(second, 'Bookmarks'), JSON.stringify({
+    roots: { bookmark_bar: { name: 'Second', children: [{ type: 'url', name: 'Second', url: 'https://second.test/' }] } }
+  }));
+  const alias = path.join(second, 'first-alias');
+  await fs.symlink(first, alias);
+  const firstBytes = await fs.readFile(path.join(first, 'Bookmarks'));
+  const result = await readSelectedProfiles({
+    directories: [first, path.join(second, 'missing'), alias, second],
+    getPassword: () => { throw new Error('Unprotected categories must not access the source key'); }
+  });
+  assert.equal(result.sources, 2);
+  assert.deepEqual(result.bookmarks.map(row => row.url), ['https://fixture.test/path', 'https://second.test/']);
+  assert.equal(result.history.length, 2);
+  assert.deepEqual(result.warnings, [{ category: 'profiles', count: 1, reason: 'Selected profile could not be read' }]);
+  assert.deepEqual(await fs.readFile(path.join(first, 'Bookmarks')), firstBytes);
+  await assert.rejects(readSelectedProfiles({ directories: [path.join(first, 'missing')] }), /ENOENT/);
+  await assert.rejects(readSelectedProfiles({ directories: Array(13).fill(first) }), /up to 12/);
 });

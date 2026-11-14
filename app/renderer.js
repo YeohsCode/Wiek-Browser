@@ -150,14 +150,14 @@ function settingsPanel(p) {
   const profiles = card(tr("Browser profiles"), tr("Each profile keeps its own cookies, sessions, cache, and local storage. Tab groups using the same profile share login state."));
   for (const profile of state.profiles) { const row = text('div', '', 'row'); row.append(text('div', profile.name, 'row-main')); if (profile.isDefault) row.append(text('span', tr("DEFAULT"), 'badge')); else { const button = text('button', tr("Make default")); button.onclick = () => act('profile:default', profile.id); row.append(button); } profiles.append(row); }
   const add = text('button', tr("＋ Add profile"), 'subtle-button'); add.onclick = async () => { const name = await askText(tr("Browser profile name")); if (name) act('profile:create', name); }; profiles.append(add);
-  const data = card(tr("Sessions and browsing data"), tr("Current profile: {0}. Import a selected Chromium profile folder. Source files stay read-only; unsupported encrypted records and partitioned cookies are reported.", (activeSpace()?.profileName || tr('Personal'))));
+  const data = card(tr("Sessions and browsing data"), tr("Current profile: {0}. Import selected profile folders from the same Chromium-based browser. Source files stay read-only; unsupported encrypted records and partitioned cookies are reported.", (activeSpace()?.profileName || tr('Personal'))));
   const migration = text('div', '', 'settings-actions');
   const source = document.createElement('select'); source.setAttribute('aria-label', tr("Source browser"));
   for (const [value, label] of [['chrome',tr("Google Chrome")],['chromium',tr("Chromium")],['edge',tr("Microsoft Edge")],['brave',tr("Brave")]]) { const option = text('option', label); option.value = value; source.append(option); }
   migration.append(source);
   const choices = {};
   for (const category of ['bookmarks','history','cookies','passwords']) { const label = text('label', tr(category)); const check = document.createElement('input'); check.type = 'checkbox'; check.checked = ['bookmarks','history'].includes(category); choices[category] = check; label.prepend(check); migration.append(label); }
-  const migrate = text('button', tr("Choose source profile…")); migrate.onclick = () => act('profile:import', { sourceBrowser: source.value, ...Object.fromEntries(Object.entries(choices).map(([key, input]) => [key, input.checked])) }); migration.append(migrate); data.append(migration);
+  const migrate = text('button', tr("Choose source profiles…")); migrate.onclick = () => act('profile:import', { sourceBrowser: source.value, ...Object.fromEntries(Object.entries(choices).map(([key, input]) => [key, input.checked])) }); migration.append(migrate); data.append(migration);
   if (state.importResult) { const result = text('div', '', 'import-result'); result.append(text('p', tr("Imported: {0}.", (Object.entries(state.importResult.counts).map(([key, count]) => `${count} ${tr(key)}`).join(', '))))); for (const warning of state.importResult.warnings) result.append(text('p', tr("{0}: {1} skipped — {2}", tr(warning.category), warning.count, tr(warning.reason)))); data.append(result); }
   const actions = text('div', '', 'settings-actions');
   const imp = text('button', tr("Import cookie JSON")); imp.onclick = () => act('cookies:import');

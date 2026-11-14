@@ -334,7 +334,7 @@
     "Choose one application, then explicitly start. Wiek records click, scroll and navigation-key geometry with screenshots of that application’s window and target outlines. Visible private content may appear in screenshots. Printable keys and protected controls are omitted. Switching applications pauses collection; restart never resumes recording. Screen Recording, Accessibility and Input Monitoring permissions are required.": "选择一个应用并手动开始。Wiek 记录点击、滚动和导航键操作的位置，并保存该应用窗口的截图和操作目标轮廓。截图可能包含窗口中可见的私人内容。普通字符键和受保护的控件会跳过。切换应用时暂停，重启后需要重新开始。需要开启屏幕录制、辅助功能和输入监控权限。",
     "Choose one to ten absolute attachment file paths": "选择一个至十个绝对附件文件路径",
     "Choose region or window…": "选择区域或窗口...",
-    "Choose source profile…": "选择源文件配置...",
+    "Choose source profiles…": "选择来源资料…",
     "Choose text, page, url, or image": "选择文本、页面、 url 或图像",
     "Choose the language used in Wiek Browser.": "选择 Wiek Browser 的显示语言。",
     "Choose the quick actions offered when you select text on a page.": "当您选择页面上的文本时, 选择所提供的快速动作。",
@@ -510,7 +510,7 @@
     "Cron timeZone must be a valid IANA timezone": "Cron TimeZone必须是一个有效的 IANA 时区",
     "Cron timezone (IANA)": "Cron 时区( IANA)",
     "Crop": "裁剪",
-    "Current profile: {0}. Import a selected Chromium profile folder. Source files stay read-only; unsupported encrypted records and partitioned cookies are reported.": "当前简介 : {0}。导入选定的 Chromium 配置文件夹。源文件只保留读数;不支持的加密记录和分区的 cookie 被报告。",
+    "Current profile: {0}. Import selected profile folders from the same Chromium-based browser. Source files stay read-only; unsupported encrypted records and partitioned cookies are reported.": "当前浏览器资料：{0}。可从同一种 Chromium 浏览器中选择多个资料文件夹。应用以只读方式访问来源文件，并报告跳过的加密记录和分区 Cookie。",
     "Cut": "剪切",
     "DEFAULT": "国防",
     "Daily project check": "每日项目检查",
@@ -1660,7 +1660,7 @@
     "Select All": "全选",
     "Select HTTP transport to configure an endpoint": "选择要配置终点的 HTTP 传输",
     "Select Spaces to close": "选择要关闭的空格",
-    "Select a Chromium profile folder (e.g. Default or Profile 1)": "选择 Chromium 描述文件文件夹(如默认或配置文件 1)",
+    "Select Chromium profile folders (e.g. Default or Profile 1)": "选择 Chromium 浏览器资料文件夹，例如 Default 或 Profile 1",
     "Select a Claude conversation JSONL file": "选择 Claude 对话 JSONL文件",
     "Select a Codex rollout JSONL file": "选择一个代码推出 JSONL文件",
     "Select a browser profile": "选择浏览器配置文件",
@@ -2285,6 +2285,10 @@
     "The expected issuer does not advertise a same-origin registration endpoint": "指定的授权服务器未提供同源注册端点",
     "Dynamic client registration failed": "动态客户端注册失败",
     "Dynamic registration returned incompatible public client metadata": "动态注册返回了不兼容的公开客户端信息",
+    "profiles": "浏览器资料",
+    "Select up to 12 Chromium profile folders": "最多选择 12 个 Chromium 浏览器资料文件夹",
+    "Combined import limit reached": "已达到本次导入的总量上限",
+    "Selected profile could not be read": "无法读取所选浏览器资料",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

@@ -1,5 +1,35 @@
 'use strict';
 const { contextBridge, ipcRenderer } = require('electron');
+// The main process supplies at most one archive session for this exact
+// top-level document. It runs in the preload before website scripts.
+if (process.isMainFrame && process.argv.includes('--wiek-import-session') && /^https?:/.test(location.href)) {
+  const entries = ipcRenderer.sendSync('wiek:restore-tab-session', location.href);
+  if (entries) {
+    const decode = value => {
+      const bytes = atob(value);
+      let result = '';
+      for (let i = 0; i < bytes.length; i += 2) result += String.fromCharCode(bytes.charCodeAt(i) | (bytes.charCodeAt(i + 1) << 8));
+      return result;
+    };
+    let restored = false;
+    try {
+      const storage = window.sessionStorage;
+      if (storage.length === 0) {
+        try {
+          for (const [key, value] of entries) storage.setItem(decode(key), decode(value));
+          restored = true;
+        } catch {
+          storage.clear();
+        }
+      }
+    } catch {
+      // Storage can be unavailable for a document with a sandboxed origin.
+    } finally {
+      ipcRenderer.sendSync('wiek:restore-tab-session-result', location.href, restored);
+    }
+  }
+}
+
 // Electron has no Chromium prompt handler. This narrow bridge blocks only page
 // JavaScript until the user or agent resolves the authored dialog.
 contextBridge.exposeInMainWorld('__vekPrompt', (message = '', defaultValue = '') => ipcRenderer.sendSync('vek:page-prompt', String(message), String(defaultValue)));

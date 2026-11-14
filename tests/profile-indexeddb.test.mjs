@@ -100,8 +100,8 @@ test('IndexedDB schema validates the archived generator against numeric keys, in
    assert.throws(()=>validateIndexedDb(archive),/Invalid portable/);
  }
 });
-test('v3 encrypted archive carries validated IndexedDB values without plaintext data',async()=>{
- const a=createProfileArchive(),data={profile:{name:'IndexedDB fixture'},indexedDB:input()},encoded=await a.encode(data,'public indexed fixture passphrase');assert.equal(encoded.includes('private fixture'),false);const decoded=await a.decode(encoded,'public indexed fixture passphrase');assert.equal(decoded.metadata.version,3);assert.deepEqual(decoded.payload.indexedDB,input());
+test('encrypted archive carries validated IndexedDB values without plaintext data',async()=>{
+ const a=createProfileArchive(),data={profile:{name:'IndexedDB fixture'},indexedDB:input()},encoded=await a.encode(data,'public indexed fixture passphrase');assert.equal(encoded.includes('private fixture'),false);const decoded=await a.decode(encoded,'public indexed fixture passphrase');assert.equal(decoded.metadata.version,4);assert.deepEqual(decoded.payload.indexedDB,input());
 });
 test('IndexedDB capture refuses navigated and partitioned origins before reading any records',async()=>{
  for(const partitioned of [false,true]){let reads=0;const frameOrigin=partitioned?'https://old.fixture.test':'https://new.fixture.test',wc={getURL:()=> 'https://old.fixture.test/current',executeJavaScriptInIsolatedWorld:()=>{reads++;throw new Error('must not read');},debugger:{sendCommand:async method=>method==='Page.getFrameTree'?{frameTree:{frame:{id:'f',loaderId:'l',url:frameOrigin+'/current',securityOrigin:frameOrigin}}}:{storageKey:frameOrigin+'/'+(partitioned?'^0partition':'')}}};const result=await captureProfileIndexedDB([{tabs:[{webContents:wc}]}]);assert.equal(reads,0);assert.deepEqual(result.indexedDB.origins,[]);assert.equal(result.counts.indexedDBSkippedOrigins,1);assert.equal(result.warnings.length,1);}

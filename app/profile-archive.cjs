@@ -4,10 +4,11 @@ const { randomBytes, scrypt, createCipheriv, createDecipheriv } = require('node:
 const { promisify } = require('node:util');
 const { TextDecoder } = require('node:util');
 const derive = promisify(scrypt);
+const { MAX_NAVIGATION_ENTRIES } = require('./profile-navigation.cjs');
 const { validateIndexedDb } = require('./profile-indexeddb-data.cjs');
 const { ENCODING, LIMITS: STORAGE_LIMITS, validateArea } = require('./profile-storage-data.cjs');
 // The on-disk identifier is retained so existing encrypted archives still decode.
-const FORMAT = 'vek-browser-profile', MIME_TYPE = 'application/vnd.vek.profile+json', VERSION = 3;
+const FORMAT = 'vek-browser-profile', MIME_TYPE = 'application/vnd.vek.profile+json', VERSION = 4;
 const KDF = 'scrypt-131072-8-1', CIPHER = 'aes-256-gcm';
 const DEFAULT_MAX_BYTES = 32 * 1024 * 1024;
 const SCRYPT = Object.freeze({ N: 131072, r: 8, p: 1, maxmem: 256 * 1024 * 1024 });
@@ -75,7 +76,28 @@ function normalizePayload(input, maxBytes, version = VERSION) {
     object(space, ['name','pinned','activeTabIndex','tabs'], 'space', ['name','tabs']);
     const tabs = array(space.tabs, 'tabs', 1024); totalTabs += tabs.length;
     if (totalTabs > TAB_LIMIT) throw error('Archive has too many tabs', 'VEK_PROFILE_ARCHIVE_LIMIT');
-    const normalized = { name: string(space.name, 'space name', 1024, false), tabs: tabs.map(tab => { object(tab, ['url','title',...(version>=2?['sessionStorage']:[])], 'tab', ['url']); const result = { url: url(tab.url, 'tab', true) }; optionalText(result,tab,'title'); if(Object.hasOwn(tab,'sessionStorage')) { result.sessionStorage=validateArea(tab.sessionStorage,storageBudget);if(result.url==='about:blank'||new URL(result.url).origin!==result.sessionStorage.origin)throw error('Session storage origin must match its tab'); }return result; }) };
+    const normalized = {
+      name: string(space.name, 'space name', 1024, false),
+      tabs: tabs.map(tab => {
+        object(tab, ['url', 'title', ...(version >= 2 ? ['sessionStorage'] : []), ...(version >= 4 ? ['navigation'] : [])], 'tab', ['url']);
+        const result = { url: url(tab.url, 'tab', true) };
+        optionalText(result, tab, 'title');
+        if (Object.hasOwn(tab, 'sessionStorage')) {
+          result.sessionStorage = validateArea(tab.sessionStorage, storageBudget);
+          if (result.url === 'about:blank' || new URL(result.url).origin !== result.sessionStorage.origin) throw error('Session storage origin must match its tab');
+        }
+        if (Object.hasOwn(tab, 'navigation')) {
+          const saved = object(tab.navigation, ['index', 'entries'], 'tab navigation', ['index', 'entries']);
+          const entries = array(saved.entries, 'tab navigation entries', MAX_NAVIGATION_ENTRIES).map(entry => {
+            object(entry, ['url', 'title'], 'navigation entry', ['url', 'title']);
+            return { url: url(entry.url, 'navigation entry', true), title: string(entry.title, 'navigation title', 4096) };
+          });
+          if (entries.length < 2 || !Number.isInteger(saved.index) || entries[saved.index]?.url !== result.url) throw error('Navigation history must contain the active tab URL at its saved index');
+          result.navigation = { index: saved.index, entries };
+        }
+        return result;
+      })
+    };
     if (Object.hasOwn(space,'pinned')) normalized.pinned = bool(space.pinned,'space pinned');
     if (Object.hasOwn(space,'activeTabIndex')) { if (!Number.isInteger(space.activeTabIndex) || space.activeTabIndex < 0 || space.activeTabIndex >= tabs.length) throw error('Invalid active tab index'); normalized.activeTabIndex = space.activeTabIndex; }
     return normalized;
@@ -158,7 +180,7 @@ function createProfileArchive({maxBytes=DEFAULT_MAX_BYTES}={}) {
       envelope=plainClone(envelope,maxBytes);
       object(envelope,[...headerFields,'tag','data'],'archive envelope',[...headerFields,'tag','data']);
       if(envelope.format!==FORMAT||envelope.mimeType!==MIME_TYPE)throw error('Unrecognized Wiek profile archive format or MIME type');
-      if(![1,2,VERSION].includes(envelope.version))throw error('Unsupported Wiek profile archive version','VEK_PROFILE_ARCHIVE_VERSION');
+      if(![1,2,3,VERSION].includes(envelope.version))throw error('Unsupported Wiek profile archive version','VEK_PROFILE_ARCHIVE_VERSION');
       if(envelope.kdf!==KDF||envelope.cipher!==CIPHER)throw error('Unsupported archive encryption parameters');
       date(envelope.createdAt,'archive creation date');if(envelope.expiresAt!==null)date(envelope.expiresAt,'archive expiry');
       const salt=base64(envelope.salt,'salt',16,16),iv=base64(envelope.iv,'IV',12,12),tag=base64(envelope.tag,'tag',16,16),data=base64(envelope.data,'ciphertext',null,maxBytes);

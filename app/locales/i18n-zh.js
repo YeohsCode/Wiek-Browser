@@ -660,7 +660,7 @@
     "Export action history (JSON)": "导出动作历史( JSON)",
     "Export canceled.": "已取消导出。",
     "Export encrypted profile…": "导出加密配置文件...",
-    "Export tabs, bookmarks, history and cookies from this browser profile. Saved logins, web storage and IndexedDB are optional. Web storage covers current top-level origins in open tabs, with separate tab sessions; it can contain login tokens. Archives require a passphrase and restore into a new profile. IndexedDB supports explicit-key databases with portable values; unsupported databases are reported. Iframe storage, permissions and extension binaries are excluded.": "导出当前用户配置的标签页、书签、历史记录和 Cookie。也可选择已保存的登录信息、网页存储和 IndexedDB。网页存储仅包含已打开标签页的顶层来源，各标签页的会话单独保存，其中可能包含登录令牌。请使用口令保护备份，导入时会创建新的用户配置。应用会提示跳过的 IndexedDB 数据库。备份范围包括当前支持的存储数据，iframe 存储、网站权限和扩展程序文件需另行处理。",
+    "Export tabs with their back and forward history, bookmarks, browsing history and cookies. Saved logins, web storage and IndexedDB are optional. Tab session storage can contain login tokens. The archive requires a passphrase and restores into a new browser profile.": "导出标签页及其前进和后退记录、书签、浏览历史和 Cookie。也可选择导出已保存的登录信息、网页存储和 IndexedDB。标签页会话存储可能包含登录令牌。备份需要口令，导入会创建新的浏览器资料。",
     "Export without files": "没有文件导出",
     "Extension not found": "找不到扩展名",
     "External browser sign-in is unavailable": "外部浏览器无法登录",
@@ -2272,6 +2272,7 @@
     "changed — read again": "内容已更新，请重新读取",
     "no unread update": "无未读更新",
     "no scopes returned": "未返回授权范围",
+    "Web storage covers current unpartitioned top-level HTTP(S) origins in open tabs. IndexedDB includes supported values, attachments and auto-increment stores. Unsupported values such as CryptoKey are skipped. The archive also excludes iframe storage, service workers, site permissions and extension binaries.": "网页存储覆盖已打开标签页当前未分区的顶层 HTTP(S) 网站。IndexedDB 支持常见数据、附件和自增主键仓库。备份会跳过 CryptoKey 等不支持的数据类型，也不包含 iframe 存储、Service Worker、网站权限和扩展程序文件。",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

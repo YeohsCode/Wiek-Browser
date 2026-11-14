@@ -42,7 +42,7 @@ Use `WIEK_DATA_DIR=/absolute/path` to start an isolated instance. Development da
 - Scoped files, Git operations, reviewed remote operations, and file checkpoints with linked-worktree isolation.
 - **Project local services:** refresh listening processes, open a loopback address, explicitly read its title, review a process stop, and confirm it. Process birth identity, directory, executable and endpoints are rechecked before one termination signal. Discovery does not fetch pages or read process arguments/environment.
 - MCP connections over legacy/modern stdio and HTTP, scoped tools/resources, subscriptions, inert prompt previews, reviewed OAuth and bounded input continuations.
-- Encrypted profile archives can transfer local/session storage and bounded IndexedDB data from selected tabs, including auto-increment keys, shared references, cycles, sparse arrays, typed-array views, and Blob/File attachments. Older archive formats remain readable.
+- Encrypted profile archives preserve up to 64 back/forward entries per tab and can transfer local/session storage and bounded IndexedDB data from selected tabs, including auto-increment keys, shared references, cycles, sparse arrays, typed-array views, and Blob/File attachments. Older archive formats remain readable.
 - Scheduled automations, opt-in background jobs, execution modes, busy deferral, run memory/results, and crash recovery.
 - Collections, screenshots and annotation, page/application action history, explicit desktop capture, local transcription, and configurable offline translation.
 

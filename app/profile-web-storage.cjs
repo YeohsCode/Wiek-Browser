@@ -1,4 +1,5 @@
 'use strict';
+const { captureNavigation } = require('./profile-navigation.cjs');
 const {ENCODING,LIMITS,exactOrigin,validateArea}=require('./profile-storage-data.cjs');
 const blank=url=>url==='about:blank';
 function originOf(url) {try{const u=new URL(url);return ['http:','https:'].includes(u.protocol)&&!u.username&&!u.password?u.origin:null;}catch{return null}}
@@ -31,7 +32,7 @@ async function captureProfileTabs(spaces,{includeWebStorage=false,signal}={}) {
   const admit=area=>{const next={bytes:budget.bytes};validateArea(area,next);budget.bytes=next.bytes;return area;};
   for(const space of spaces){abort(signal);const rows=[];let activeTabIndex;
     for(const tab of space.tabs){abort(signal);const wc=tab.webContents;let row;
-      try {const url=wc.getURL()||tab.url;if(!blank(url)&&!originOf(url)){skippedTabs++;continue;}row={url,title:wc.getTitle()};}catch{skippedTabs++;continue;}
+      try {const url=wc.getURL()||tab.url;if(!blank(url)&&!originOf(url)){skippedTabs++;continue;}row={url,title:wc.getTitle()};const navigation=captureNavigation(wc,url);if(navigation)row.navigation=navigation;}catch{skippedTabs++;continue;}
       if(tab.id===space.activeTab)activeTabIndex=rows.length;rows.push(row);
       if(!includeWebStorage||blank(row.url))continue;
       try {

@@ -34,6 +34,7 @@ const { createDesktopService } = require('./desktop-service.cjs');
 const { createNativeDesktop } = require('./desktop-native.cjs');
 const { physicalChord } = require('./preferences-service.cjs');
 const { captureProfileTabs, captureProfileCookies, restoreArea, restoreLocalStorage } = require('./profile-web-storage.cjs');
+const archiveTabSessions = new Map();
 const {captureProfileIndexedDB,restoreProfileIndexedDB}=require('./profile-indexeddb.cjs');
 const { createSitePermissions } = require('./site-permissions.cjs');
 const { createTurnCheckpoints } = require('./turn-checkpoints.cjs');
@@ -192,8 +193,8 @@ function sessionFor(profileId) {
   }
   return ses;
 }
-function makeTab(space, url = 'about:blank', { activate = true, reveal = false, nativeOptions, openerId, deferNavigation = false } = {}) {
-  const view = new WebContentsView({ ...(nativeOptions?.webContents ? { webContents: nativeOptions.webContents } : {}), webPreferences: { ...nativeOptions?.webPreferences, session: sessionFor(space.profileId), preload: path.join(__dirname, 'page-preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true, backgroundThrottling: false, safeDialogs: false } });
+function makeTab(space, url = 'about:blank', { activate = true, reveal = false, nativeOptions, openerId, deferNavigation = false, restoreSessionInPreload = false } = {}) {
+  const view = new WebContentsView({ ...(nativeOptions?.webContents ? { webContents: nativeOptions.webContents } : {}), webPreferences: { ...nativeOptions?.webPreferences, session: sessionFor(space.profileId), preload: path.join(__dirname, 'page-preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true, backgroundThrottling: false, safeDialogs: false, ...(restoreSessionInPreload ? { additionalArguments: ['--wiek-import-session'] } : {}) } });
   const t = { id: '', spaceId: space.id, view, url, ...(deferNavigation?{restoreUrl:normalizeURL(url)}:{}), openerId, rootSession: null, childSessions: new Set(), favicon: null };
   const secondary = spaceWindows.get(space.id)?.window;
   const owner = secondary || window;
@@ -221,7 +222,7 @@ function makeTab(space, url = 'about:blank', { activate = true, reveal = false, 
   wc.on('did-navigate-in-page', () => { publish(); persist(); });
   wc.on('dom-ready', () => {if(!t.restoringStorage){loadFavicons(t);sendPageConfig(t);}});
   wc.on('page-favicon-updated', (_, urls) => {if(!t.restoringStorage)loadFavicons(t, urls);});
-  wc.on('did-navigate', (_, url) => { if(t.restoringStorage)return;if(t.restoreUrl)wc.navigationHistory.clear();delete t.restoreUrl;t.url = url; t.favicon = null; layout(); if (url !== 'about:blank') { store.history.push({ url, profileId:space.profileId, spaceId:space.id, title: wc.getTitle(), at: new Date().toISOString() }); store.history = store.history.slice(-20000); } publish(); persist(); });
+  wc.on('did-navigate', (_, url) => { if(t.restoringStorage)return;if(t.restoreUrl&&!t.restoringNavigation)wc.navigationHistory.clear();delete t.restoreUrl;t.url = url; t.favicon = null; layout(); if (url !== 'about:blank') { store.history.push({ url, profileId:space.profileId, spaceId:space.id, title: wc.getTitle(), at: new Date().toISOString() }); store.history = store.history.slice(-20000); } publish(); persist(); });
   wc.on('before-input-event', (_, input) => {
     if (input.type === 'keyDown' && space.ownership === 'agent' && Date.now() > (t.agentInputUntil || 0)) { space.ownership = 'agentDelegatedToUser'; space.controlReason = 'manual_takeover'; publish(); persist(); }
   });
@@ -681,7 +682,7 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       const passwords=value?.includePasswords?vaultFor(s.profileId).list().map(row=>({origin:row.origin,...vaultFor(s.profileId).forOrigin(row.id,row.origin)})):[];
       const payload={profile:{name:profile(s.profileId).name,id:s.profileId},spaces,...(captured.webStorage?{webStorage:captured.webStorage}:{}),...(indexed.indexedDB?{indexedDB:indexed.indexedDB}:{}),bookmarks:store.bookmarks.filter(row=>belongsToProfile(row,s.profileId)&&/^https?:/i.test(row.url)).map(row=>({url:row.url,title:row.title||row.url,...(row.folder?{folder:row.folder}:{})})),history:store.history.filter(row=>(row.profileId===s.profileId||!row.profileId&&s.profileId==='Default')&&/^https?:/i.test(row.url)).map(row=>({url:row.url,title:row.title||row.url,at:row.at})),cookies,passwords,extensionsMetadata:(store.extensionPaths[s.profileId]||[]).map(row=>({id:row.id,name:row.name||'Extension',version:row.version||'0',enabled:row.enabled!==false}))};
       const encoded=await createProfileArchive().encode(payload,passphrase);writePrivateFile(pick.filePath,encoded);
-      profileArchiveResult={message:"Encrypted profile exported.",counts:{spaces:spaces.length,cookies:cookies.length,passwords:passwords.length,...captured.counts,...indexed.counts},warnings:[...captured.warnings,...indexed.warnings,...(cookieCapture.skipped?[`${cookieCapture.skipped} partitioned cookies were omitted; they are not converted to unpartitioned cookies.`]:[]),'Storage covers only current unpartitioned top-level HTTP(S) origins in open tabs. IndexedDB requires explicit keys and portable values; auto-increment stores, Blob/File/CryptoKey, sliced binary views, shared/cyclic references and unsupported values are omitted. Iframe/previous-origin storage, service workers, permissions and extension binaries are not included.']};
+      profileArchiveResult={message:"Encrypted profile exported.",counts:{spaces:spaces.length,cookies:cookies.length,passwords:passwords.length,...captured.counts,...indexed.counts},warnings:[...captured.warnings,...indexed.warnings,...(cookieCapture.skipped?[`${cookieCapture.skipped} partitioned cookies were omitted; they are not converted to unpartitioned cookies.`]:[]),'Web storage covers current unpartitioned top-level HTTP(S) origins in open tabs. IndexedDB includes supported values, attachments and auto-increment stores. Unsupported values such as CryptoKey are skipped. The archive also excludes iframe storage, service workers, site permissions and extension binaries.']};
     });
     case 'profile:file:import': return profileArchiveOperation(async()=>{
       const pick=await dialog.showOpenDialog(window,{properties:['openFile'],filters:[{name:tr('Encrypted Wiek profile'),extensions:['json']}]});if(!pick.filePaths[0])return;if(fs.statSync(pick.filePaths[0]).size>32*1024*1024)throw new Error('Profile archive exceeds 32 MiB');
@@ -696,8 +697,54 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       if(payload.passwords.length)try{counts.passwords=vaultFor(created.id).import(payload.passwords);}catch{warnings.push('System encryption was unavailable; saved logins were not imported.');}
       for(const row of payload.bookmarks)if(!store.bookmarks.some(b=>belongsToProfile(b,created.id)&&b.url===row.url)){store.bookmarks.push({...row,profileId:created.id});counts.bookmarks++;}
       for(const row of payload.history){store.history.push({...row,profileId:created.id});counts.history++;}store.history.sort((a,b)=>Date.parse(a.at)-Date.parse(b.at));store.history=store.history.slice(-20000);
-      if(value?.restoreTabs!==false)for(const saved of payload.spaces){const space=await createSpace(saved.name,created.id,'user');space.pinned=saved.pinned;const blank=space.tabs[0];for(const tab of saved.tabs){let restored=await createTab(space,tab.url,{activate:false,deferNavigation:true});if(tab.sessionStorage){restored.restoringStorage=true;try{await restoreArea(restored.view.webContents,tab.sessionStorage,{isLocalStorage:false});counts.sessionStorageTabs++;}catch{warnings.push('A tab session could not be restored; that tab was opened without its session storage.');restored=await createTab(space,tab.url,{activate:false,deferNavigation:true});}finally{restored.restoringStorage=false;}}restored.view.webContents.loadURL(tab.url).catch(()=>{});}if(saved.tabs.length){closeTab(tabs.get(blank));space.activeTab=space.tabs[saved.activeTabIndex||0];}counts.spaces++;}
+      const pendingSessions = [];
+      if(value?.restoreTabs!==false)for(const saved of payload.spaces){
+        const space=await createSpace(saved.name,created.id,'user');
+        space.pinned=saved.pinned;
+        const blank=space.tabs[0];
+        for(const tab of saved.tabs){
+          const makeRestoredTab=()=>createTab(space,tab.url,{activate:false,deferNavigation:true,restoreSessionInPreload:Boolean(tab.navigation && tab.sessionStorage)});
+          let restored=await makeRestoredTab();
+          if (tab.navigation) {
+            const contents = restored.view.webContents;
+            restored.restoringNavigation = true;
+            if (tab.sessionStorage) {
+              pendingSessions.push(new Promise(resolve => {
+                const id = contents.id;
+                const finish = success => {
+                  clearTimeout(timer);
+                  contents.removeListener('destroyed', onDestroyed);
+                  archiveTabSessions.delete(id);
+                  if (success) counts.sessionStorageTabs++;
+                  else warnings.push('A tab session could not be restored; that tab was opened without its session storage.');
+                  resolve();
+                };
+                const onDestroyed = () => finish(false);
+                const timer = setTimeout(onDestroyed, 5000);
+                contents.once('destroyed', onDestroyed);
+                archiveTabSessions.set(id, { url: tab.url, area: tab.sessionStorage, delivered: false, finish });
+              }));
+            }
+            void contents.navigationHistory.restore(tab.navigation).catch(failure => {
+              if (contents.isDestroyed() || contents.getURL() || failure.code === 'ERR_ABORTED') return;
+              restored.restoringNavigation = false;
+              return contents.loadURL(tab.url).catch(() => {});
+            }).finally(() => { restored.restoringNavigation = false; });
+          } else {
+            if (tab.sessionStorage) {
+              restored.restoringStorage = true;
+              try { await restoreArea(restored.view.webContents, tab.sessionStorage, { isLocalStorage: false }); counts.sessionStorageTabs++; }
+              catch { warnings.push('A tab session could not be restored; that tab was opened without its session storage.'); restored = await makeRestoredTab(); }
+              finally { restored.restoringStorage = false; }
+            }
+            void restored.view.webContents.loadURL(tab.url).catch(() => {});
+          }
+        }
+        if(saved.tabs.length){closeTab(tabs.get(blank));space.activeTab=space.tabs[saved.activeTabIndex||0];}
+        counts.spaces++;
+      }
       else if(sessionCount)warnings.push(`${sessionCount} tab session storage areas were skipped because restored tabs were left closed.`);
+      await Promise.all(pendingSessions);
       if(!store.spaces.some(space=>space.profileId===created.id)){await createSpace(created.name,created.id,'user');counts.spaces++;}
       if(payload.extensionsMetadata.length)warnings.push(`${payload.extensionsMetadata.length} extension references were recorded; load their unpacked folders separately.`);
       created.importedExtensions=payload.extensionsMetadata;profileArchiveResult={message:"Profile restored into a new profile.",counts,warnings:[...new Set(warnings)]};openPanel('settings');
@@ -836,6 +883,22 @@ app.whenReady().then(async () => {
     else if(data.action==='ask'){openPanel('agents');window.webContents.send('vek:draft',data.text);}
     else if(data.action==='translate'){openPanel('translation');window.webContents.send('vek:translation',data.text);}
     else void saveSelection(data.text,t).catch(error=>window.webContents.send('vek:error',error.message));
+  });
+  ipcMain.on('wiek:restore-tab-session', (event, documentUrl) => {
+    const saved = archiveTabSessions.get(event.sender.id);
+    const frame = event.senderFrame;
+    if (!saved || saved.delivered || !frame || frame.parent !== null || frame.url !== saved.url || documentUrl !== saved.url) {
+      event.returnValue = null;
+      return;
+    }
+    saved.delivered = true;
+    event.returnValue = saved.area.entries;
+  });
+  ipcMain.on('wiek:restore-tab-session-result', (event, documentUrl, result) => {
+    const saved = archiveTabSessions.get(event.sender.id);
+    const frame = event.senderFrame;
+    if (saved?.delivered && frame && frame.parent === null && frame.url === saved.url && documentUrl === saved.url) saved.finish(result === true);
+    event.returnValue = null;
   });
   ipcMain.handle('vek:state', event => { if (event.sender === window.webContents)return uiState();const secondary=[...spaceWindows].find(([,record])=>record.window.webContents===event.sender);if(!secondary)throw new Error('Invalid sender');return uiState(secondary[0]); });
   ipcMain.handle('vek:action', (event, action, value) => { if(event.sender===window.webContents)return uiAction(action,value,undefined,true);const secondary=[...spaceWindows].find(([,record])=>record.window.webContents===event.sender);if(!secondary||!['navigate','back','forward','reload','tab:new','tab:select','tab:close','bookmark:add','space:control','space:attach-window','find','find:close'].includes(action))throw new Error('Invalid sender or detached-window action');return uiAction(action,value,secondary[0]); });

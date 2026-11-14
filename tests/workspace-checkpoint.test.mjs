@@ -33,3 +33,30 @@ test('late filesystem collision rolls back real file replacements and preserves 
 test('preview authorization is bound to the selected checkpoint and unsafe restore symlinks are refused',async t=>{const f=await fixture(t),first=await f.action('create',{name:'First'});await fs.writeFile(path.join(f.root,'tracked.txt'),'second content');const second=await f.action('create',{name:'Second'}),preview=await f.action('preview',{id:first.checkpoint.id}),index=await f.read('.git/index');await assert.rejects(f.action('restore',{id:second.checkpoint.id,expectedState:preview.expectedState,confirm:true}),/Preview this checkpoint/);await fs.unlink(path.join(f.root,'tracked.txt'));const outside=await fs.mkdtemp(path.join(os.tmpdir(),'vek-restore-outside-'));t.after(()=>fs.rm(outside,{recursive:true,force:true}));await fs.writeFile(path.join(outside,'safe'),'outside bytes');await fs.symlink(path.join(outside,'safe'),path.join(f.root,'tracked.txt'));await assert.rejects(f.action('restore',{id:first.checkpoint.id,expectedState:preview.expectedState,confirm:true}),/symlink/);assert.equal(await fs.readFile(path.join(outside,'safe'),'utf8'),'outside bytes');assert.deepEqual(await f.read('.git/index'),index);});
 
 test('a new Git lock acquired after index replacement is never removed by checkpoint cleanup',async t=>{const f=await fixture(t),saved=await f.action('create',{name:'Original'});await fs.writeFile(path.join(f.root,'tracked.txt'),'later');await f.service.close();const {writeFileSync}=await import('node:fs');const next=workspace.createWorkspaceService({projects:()=>[{id:'p',path:f.root}],onChange:snapshot=>{if(snapshot.lastEvent?.type==='checkpoint-restored')writeFileSync(path.join(f.root,'.git/index.lock'),'new owner',{flag:'wx'});}});t.after(()=>next.close());const action=(op,p={})=>next.dispatch('workspace:git:checkpoint:'+op,{projectId:'p',...p});const preview=await action('preview',{id:saved.checkpoint.id});await action('restore',{id:saved.checkpoint.id,expectedState:preview.expectedState,confirm:true});assert.equal((await f.read('.git/index.lock')).toString(),'new owner');assert.equal((await f.read('tracked.txt')).toString(),'HEAD\n');});
+
+test('checkpoint size limits leave files, references and index unchanged and release the lock', async t => {
+  const f = await fixture(t);
+  const index = await f.read('.git/index');
+  const head = await f.git('rev-parse', 'HEAD');
+  const large = path.join(f.root, 'large.bin');
+  await fs.writeFile(large, Buffer.alloc(2 * 1024 * 1024 + 1, 29));
+  await assert.rejects(f.action('create', { name: 'Oversized file' }), /2 MiB workspace limit/);
+  assert.equal((await fs.stat(large)).size, 2 * 1024 * 1024 + 1);
+  await fs.unlink(large);
+
+  const generated = path.join(f.root, 'generated');
+  await fs.mkdir(generated);
+  for (let offset = 0; offset < 2001; offset += 50) {
+    await Promise.all(Array.from({ length: Math.min(50, 2001 - offset) },
+      (_, index) => fs.writeFile(path.join(generated, String(offset + index)), 'fixture')));
+  }
+  await assert.rejects(f.action('create', { name: 'Too many files' }), /at most 2000/);
+  assert.equal((await fs.readdir(generated)).length, 2001);
+  assert.equal(await f.git('rev-parse', 'HEAD'), head);
+  assert.deepEqual(await f.read('.git/index'), index);
+  assert.deepEqual((await f.action('list')).checkpoints, []);
+  await assert.rejects(f.read('.git/index.lock'), { code: 'ENOENT' });
+
+  await fs.rm(generated, { recursive: true });
+  assert.ok((await f.action('create', { name: 'Retry' })).checkpoint.id);
+});

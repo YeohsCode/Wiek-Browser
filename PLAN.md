@@ -110,7 +110,7 @@
 
 | 阶段 | 已实现范围 | 剩余工作 |
 |---|---|---|
-| P0：文件与 turn 一致性 | turn 前后快照、实际 diff、显式恢复、保护快照、linked worktree 隔离 | 更广目录布局及超限场景持续验收 |
+| P0：文件与 turn 一致性 | turn 前后快照、实际 diff、显式恢复、保护快照、linked worktree 隔离 | 新增单文件 2 MiB 与 2,000 文件上限的回退验收，覆盖工作树、索引、快照和锁。更多目录布局与总大小边界待验收 |
 | P1：provider 与会话 | 已接入的原生协议、目录、可见历史导入、分支/审批/中断与退出等待 | 按既有优先级暂缓其他 provider；源会话完整迁移、后台任务和 gateway 注入继续保留 |
 | P2：MCP | 传统/现代stdio与HTTP、作用域、工具/资源、显式订阅、提示列表/预览和变更失效、预注册OAuth/PKCE、身份审核、工具、资源和提示的表单及 URL 续传 | 托管客户端身份、DCR/完整 step-up、旧版 URL 流程、sampling/roots |
 | P2：资料迁移 | 选择来源的基础 Chromium 导入；v3加密归档、显式顶层localStorage/当前页sessionStorage、有界IndexedDB（含 Map、Set、RegExp、自增键、共享与循环引用、稀疏数组、固定缓冲区视图和 Blob/File） | 多来源完整迁移、CryptoKey 等其余 IndexedDB 类型、完整会话及 OS 绑定密文兼容 |

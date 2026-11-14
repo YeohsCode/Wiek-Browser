@@ -1,6 +1,7 @@
 'use strict';
 const tr = (message, ...values) => globalThis.WiekI18n?.t(message, ...values) ?? message.replace(/\{(\d+)\}/g, (match, index) => index < values.length ? String(values[index]) : match);
 let state, currentPanel = null, addressEditing = false, settingsSection = 'data';
+let bookmarkQuery = '';
 const $ = id => document.getElementById(id);
 const text = (tag, content, cls) => { const e = document.createElement(tag); e.textContent = content; if (cls) e.className = cls; return e; };
 async function act(name, value) { try { if(['navigate','space:select','tab:new','tab:select','tab:close'].includes(name))window.WiekToolsPanel.dispose();const next = await window.vek.action(name, value); if (next?.spaces && next?.tabs) render(next); return next; } catch (e) { toast(e.message); } }
@@ -120,13 +121,35 @@ function renderPanel() {
     return;
   }
   if (currentPanel === 'settings') p.dataset.settingsLocale = state.interfaceLocale;
+  const bookmarkFocused = p.contains(document.activeElement) && document.activeElement.id === 'bookmark-search';
+  const bookmarkSelection = bookmarkFocused ? [document.activeElement.selectionStart, document.activeElement.selectionEnd] : null;
   p.replaceChildren();
   const labels = { bookmarks: ['Bookmarks', 'A place for the pages you want to keep.'], history: ['History', 'Your recent browsing, stored on this device.'], downloads: ['Downloads', 'Files from your browsing sessions.'], settings: ['Settings', 'Profiles, browser data, and local preferences.'] };
   const heading = text('div', '', 'panel-heading'), left = text('div', ''); left.append(text('h1', tr(labels[currentPanel][0])), text('p', tr(labels[currentPanel][1]))); heading.append(left);
   const close = text('button', tr("Back to browser"), 'subtle-button'); close.onclick = () => { currentPanel = null; p.hidden = true; $('empty').hidden = false; act('panel', false); }; heading.append(close); p.append(heading);
   if (currentPanel === 'settings') return settingsPanel(p);
-  const list = state[currentPanel]; const card = text('div', '', 'card');
-  if (!list.length) card.append(text('div', tr("No {0} yet.", tr(currentPanel)), 'empty-list'));
+  let list = state[currentPanel];
+  let bookmarkSearch;
+  if (currentPanel === 'bookmarks' && list.length) {
+    const fold = value => value.normalize('NFKC').toLocaleLowerCase(state.interfaceLocale);
+    const filter = query => list.filter(item => fold(item.title || '').includes(query) || fold(item.url || '').includes(query));
+    bookmarkSearch = text('input', '', 'bookmark-search');
+    bookmarkSearch.id = 'bookmark-search';
+    bookmarkSearch.type = 'text';
+    bookmarkSearch.inputMode = 'search';
+    bookmarkSearch.setAttribute('role', 'searchbox');
+    bookmarkSearch.value = bookmarkQuery;
+    bookmarkSearch.placeholder = tr('Search bookmarks');
+    bookmarkSearch.setAttribute('aria-label', tr('Search bookmarks'));
+    bookmarkSearch.oninput = () => {
+      bookmarkQuery = bookmarkSearch.value;
+      renderPanel();
+    };
+    p.append(bookmarkSearch);
+    list = filter(fold(bookmarkQuery.trim()));
+  }
+  const card = text('div', '', 'card');
+  if (!list.length) card.append(text('div', bookmarkSearch && bookmarkQuery.trim() ? tr('No matching bookmarks.') : tr("No {0} yet.", tr(currentPanel)), 'empty-list'));
   for (const item of list) {
     const row = text('div', '', 'row'), main = text('div', '', 'row-main');
     row.append(text('div', currentPanel === 'downloads' ? '↓' : currentPanel === 'bookmarks' ? '☆' : '◷', 'row-icon'));
@@ -139,6 +162,10 @@ function renderPanel() {
     card.append(row);
   }
   p.append(card);
+  if (bookmarkSelection && bookmarkSearch) {
+    bookmarkSearch.focus({ preventScroll: true });
+    bookmarkSearch.setSelectionRange(...bookmarkSelection);
+  }
   if (currentPanel === 'history' && list.length) { const clear = text('button', tr("Clear history"), 'subtle-button'); clear.onclick = () => act('history:clear'); p.append(clear); }
 }
 function settingsPanel(p) {

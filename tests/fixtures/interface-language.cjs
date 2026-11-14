@@ -2,6 +2,7 @@
 const { app, BrowserWindow, Menu } = require('electron');
 const assert = require('node:assert/strict');
 const { join } = require('node:path');
+const { createServer } = require('node:http');
 const phase = process.argv.at(-1);
 const root = process.env.WIEK_LANGUAGE_APP_ROOT;
 
@@ -77,6 +78,30 @@ async function verify(window) {
       return retained;
     })()`);
     assert.equal(composition, true);
+    await js('document.querySelector("[data-panel=settings]").click()');
+    await wait('!!document.querySelector("#interface-language")');
+    const site = createServer((_request, response) => {
+      response.setHeader('Content-Type', 'text/html; charset=utf-8');
+      response.end('<title>中文书签测试</title>');
+    });
+    await new Promise(resolve => site.listen(0, '127.0.0.1', resolve));
+    try {
+      const url = JSON.stringify(`http://127.0.0.1:${site.address().port}/`);
+      await js(`window.vek.action("navigate", ${url})`);
+      await wait('window.vek.state().then(s => s.tabs.find(t => t.active)?.title === "中文书签测试")');
+      await js('window.vek.action("bookmark:add")');
+      await js('document.querySelector("[data-panel=bookmarks]").click()');
+      await wait('!!document.querySelector("#bookmark-search")');
+      assert.equal(await js('document.querySelector("#bookmark-search").placeholder'), '搜索书签');
+      const search = value => js(`(() => { const input = document.querySelector("#bookmark-search"); input.value = ${JSON.stringify(value)}; input.focus(); input.dispatchEvent(new Event("input")); })()`);
+      await search('书签测试');
+      await wait('document.querySelector("#panel-content .row-title")?.textContent === "中文书签测试"');
+      await search('没有结果');
+      await wait('document.querySelector("#panel-content .empty-list")?.textContent === "没有匹配的书签。"');
+    } finally {
+      site.closeAllConnections();
+      await new Promise(resolve => site.close(resolve));
+    }
     await js('document.querySelector("[data-panel=settings]").click()');
     await wait('!!document.querySelector("#interface-language")');
     await choose('en');

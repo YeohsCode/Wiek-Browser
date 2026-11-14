@@ -2297,6 +2297,8 @@
     "Settings sections": "设置分区",
     "Profiles and data": "资料与数据",
     "Appearance & shortcuts": "外观与快捷键",
+    "Search bookmarks": "搜索书签",
+    "No matching bookmarks.": "没有匹配的书签。",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

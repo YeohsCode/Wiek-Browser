@@ -5,11 +5,11 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 const { createMemoryService } = createRequire(import.meta.url)('../app/memory-service.cjs');
-async function harness(t, enabled = true) {
+async function harness(t, enabled = true, semanticOptions = {}) {
  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'vek-memory-')), project = path.join(dir, 'project'); await fs.mkdir(project);
  let policy = { browserActivity: enabled, localFiles: enabled };
  const canonicalProject = await fs.realpath(project);
- const options = { dataDir: dir, policy: () => policy, projects: () => [{ id: 'p', path: canonicalProject }] };
+ const options = { dataDir: dir, policy: () => policy, ...semanticOptions, projects: () => [{ id: 'p', path: canonicalProject }] };
  const service = createMemoryService(options); t.after(async () => { service.close(); await fs.rm(dir, { recursive: true, force: true }); });
  return { dir, project, service, options, policy: next => { policy = { ...policy, ...next }; service.syncPolicy(); }, dispatch: (action, payload = {}) => service.dispatch('memory:' + action, { profileId: 'one', ...payload }), page: (text, extra = {}) => service.indexPage('one', { url: 'https://fixture.test/page?token=not-retained#fragment', title: 'Page title', text, spaceId: 1, ...extra }) };
 }
@@ -75,4 +75,41 @@ test('private state validates hashes, rejects symlinks, and excludes a second ow
  const h = await harness(t); h.page('retained'); assert.throws(() => createMemoryService(h.options), /already open/); h.service.close();
  const filename = path.join(h.dir, 'memory/state.json'), saved = JSON.parse(await fs.readFile(filename, 'utf8')); saved.documents[0].text = 'tampered'; await fs.writeFile(filename, JSON.stringify(saved)); assert.throws(() => createMemoryService(h.options), /hash/);
  await fs.rm(filename); await fs.symlink(path.join(h.dir, 'target.json'), filename); await fs.writeFile(path.join(h.dir, 'target.json'), '{}'); assert.throws(() => createMemoryService(h.options), /state file/);
+});
+
+test('semantic mode receives only scoped saved text and drops results after deletion', async t => {
+ let release, captured;
+ const h = await harness(t, true, {onDeviceEnabled:()=>true, rank:(query, documents, signal)=>{
+   captured = {query, documents, signal};
+   return new Promise(resolve=>{release=resolve;});
+ }});
+ h.page('Workers get legal advice about job agreements.', {title:'Labor law'});
+ h.service.indexPage('two', {url:'https://other.test/',title:'Foreign',text:'Foreign private text',spaceId:2});
+ const pending = h.dispatch('search', {mode:'semantic',query:'employment contracts',spaceId:1});
+ assert.deepEqual(captured.documents,[{title:'Labor law',text:'Workers get legal advice about job agreements.'}]);
+ await h.dispatch('clear');
+ assert.equal(captured.signal.aborted,true);
+ release([{index:0,offset:0,score:0.8}]);
+ await assert.rejects(pending,/changed/);
+ assert.equal((await h.dispatch('search',{mode:'semantic',query:'employment contracts'})).total,0);
+});
+
+test('native on-device search ranks Chinese and English paraphrases without matching exact terms', {
+ skip:process.platform!=='darwin' || !await fs.access(new URL('../app/bin/wiek-saved-text-search',import.meta.url)).then(()=>true,()=>false)
+}, async t => {
+ const h = await harness(t,true,{onDeviceEnabled:()=>true});
+ h.page('Workers can get legal advice about their job agreements.', {title:'Labor law',url:'https://fixture.test/labor'});
+ h.page('申请旅行证件可以前往出入境服务大厅。', {title:'领事服务',url:'https://fixture.test/visa'});
+ const cases = [['questions about employment contracts','Labor law'],['如何办理护照','领事服务']];
+ for (const [query, expected] of cases) {
+   assert.equal((await h.dispatch('search',{query})).total,0);
+   try {
+     assert.equal((await h.dispatch('search',{query,mode:'semantic'})).results[0]?.title,expected);
+   } catch (error) {
+     if (error.message !== 'No on-device model is available for this query language') throw error;
+     t.diagnostic('The host does not provide the sentence model for '+query);
+     t.skip('Host sentence model unavailable');
+     return;
+   }
+ }
 });

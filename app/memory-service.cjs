@@ -1,10 +1,10 @@
 'use strict';
-// An explicit local search corpus. No directory crawling, background page
-// capture, embeddings, remote service, or automatic agent context injection.
+// An explicit local search corpus with optional on-device semantic ranking.
 const fs = require('node:fs');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
 const { randomUUID, createHash } = require('node:crypto');
+const { execFile } = require('node:child_process');
 const { TextDecoder } = require('node:util');
 const MAX_TEXT = 256 * 1024, MAX_TOTAL = 16 * 1024 * 1024, MAX_DOCUMENTS = 512;
 const fail = (message, code = 'VEK_MEMORY_INVALID') => Object.assign(new Error(message), { error_code: code });
@@ -36,10 +36,25 @@ async function projectFile(root, value) {
   }
   throw fail('Choose a regular file inside the selected project without symlinks');
 }
-function createMemoryService({ dataDir, policy = () => ({}), projects = () => [], onChange = () => {} } = {}) {
+const semanticHelper = path.join(__dirname, 'bin', 'wiek-saved-text-search');
+function rankOnDevice(query, documents, signal) {
+  return new Promise((resolve, reject) => {
+    const child = execFile(semanticHelper, [], {
+      timeout: 15000, maxBuffer: 1024 * 1024, signal, env: {},
+    }, (error, stdout) => {
+      if (error?.code === 3) return reject(fail('No on-device model is available for this query language'));
+      if (error) return reject(fail('On-device search did not complete'));
+      try { resolve(JSON.parse(stdout)); }
+      catch { reject(fail('Invalid on-device search result')); }
+    });
+    child.stdin.on('error', () => {});
+    child.stdin.end(JSON.stringify({query,documents}));
+  });
+}
+function createMemoryService({ dataDir, policy = () => ({}), projects = () => [], onChange = () => {}, onDeviceEnabled = () => false, rank = process.platform === 'darwin' && fs.existsSync(semanticHelper) ? rankOnDevice : null } = {}) {
   const directory = path.join(path.resolve(dataDir), 'memory'), file = path.join(directory, 'state.json');
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 }); if (fs.lstatSync(directory).isSymbolicLink()) throw fail('Memory directory must not be a symlink'); fs.chmodSync(directory, 0o700);
-  let rows = [], closed = false, epoch = 0, lastPolicy = '', active = new Map();
+  let rows = [], closed = false, epoch = 0, revision = 0, lastPolicy = '', active = new Map(), searches = new Map();
   if (fs.existsSync(file)) { const stat = fs.lstatSync(file); if (!stat.isFile() || stat.isSymbolicLink() || stat.size > MAX_TOTAL * 3) throw fail('Invalid memory state file'); const saved = JSON.parse(fs.readFileSync(file, 'utf8')); if (saved.version !== 1 || !Array.isArray(saved.documents) || saved.documents.length > MAX_DOCUMENTS) throw fail('Unsupported memory state'); rows = saved.documents.map(record); if (new Set(rows.map(row => row.id)).size !== rows.length) throw fail('Duplicate memory IDs'); }
   if(rows.reduce((total,row)=>total+Buffer.byteLength(row.text),0)>MAX_TOTAL)throw fail('Memory corpus limit reached');
   const lockFile=path.join(directory,'host.lock'),lockToken=randomUUID();
@@ -49,6 +64,8 @@ function createMemoryService({ dataDir, policy = () => ({}), projects = () => []
   function settings() { const value = policy(); return { page: value.browserActivity === true, file: value.localFiles === true }; }
   function ensureOpen() { if (closed) throw fail('Memory service is closed'); }
   function persist(next) {
+    revision++;
+    for (const search of searches.values()) search.abort();
     if (next.length > MAX_DOCUMENTS || next.reduce((total, row) => total + Buffer.byteLength(row.text), 0) > MAX_TOTAL) throw fail('Memory corpus limit reached', 'VEK_MEMORY_LIMIT');
     const serialized=JSON.stringify({version:1,documents:next});if(Buffer.byteLength(serialized)>MAX_TOTAL*3)throw fail('Encoded memory corpus limit reached','VEK_MEMORY_LIMIT');
     const temporary = `${file}.${randomUUID()}.tmp`; let fd;
@@ -56,9 +73,9 @@ function createMemoryService({ dataDir, policy = () => ({}), projects = () => []
     finally { if (fd !== undefined) fs.closeSync(fd); try { fs.unlinkSync(temporary); } catch {} }
     try { onChange(); } catch {}
   }
-  function syncPolicy() { ensureOpen(); const enabled = settings(), key = JSON.stringify(enabled); if (key !== lastPolicy) { epoch++; const next = rows.filter(row => enabled[row.kind]); if (next.length !== rows.length) persist(next); lastPolicy = key; } }
+  function syncPolicy() { ensureOpen(); const enabled = settings(), key = JSON.stringify(enabled); if (key !== lastPolicy) { epoch++; for (const search of searches.values()) search.abort(); const next = rows.filter(row => enabled[row.kind]); if (next.length !== rows.length) persist(next); lastPolicy = key; } }
   function metadata(row) { const { text, ...out } = row; return { ...out, bytes: Buffer.byteLength(text) }; }
-  function snapshot(profileId) { scope(profileId); const enabled = settings(), documents = rows.filter(row => row.profileId === profileId && enabled[row.kind]); return { profileId, documents: documents.map(metadata).sort((a,b) => b.indexedAt.localeCompare(a.indexedAt)), busy: active.has(profileId), enabled, limits: { documentBytes: MAX_TEXT, totalBytes: MAX_TOTAL, documents: MAX_DOCUMENTS } }; }
+  function snapshot(profileId) { scope(profileId); const enabled = settings(), documents = rows.filter(row => row.profileId === profileId && enabled[row.kind]); return { profileId, documents: documents.map(metadata).sort((a,b) => b.indexedAt.localeCompare(a.indexedAt)), busy: active.has(profileId), semanticAvailable: Boolean(rank && onDeviceEnabled()), enabled, limits: { documentBytes: MAX_TEXT, totalBytes: MAX_TOTAL, documents: MAX_DOCUMENTS } }; }
   function allowed(kind) { ensureOpen(); syncPolicy(); if (!settings()[kind]) throw fail('Enable the corresponding memory setting first', 'VEK_MEMORY_DISABLED'); }
   function upsert(items) { const next = rows.slice(); for (const item of items) { const at = next.findIndex(row => row.profileId === item.profileId && row.kind === item.kind && row.source === item.source && (item.kind === 'file' ? row.projectId === item.projectId : row.spaceId === item.spaceId)); if (at < 0) next.push(item); else next[at] = { ...item, id: next[at].id }; } persist(next); }
   function indexPage(profileId, page) { scope(profileId); allowed('page'); const url = new URL(page.url); url.search = ''; url.hash = ''; upsert([record({ id: randomUUID(), profileId, kind: 'page', spaceId: page.spaceId, source: url.href, title: page.title || '', text: page.text, indexedAt: new Date().toISOString() })]); return snapshot(profileId); }
@@ -91,8 +108,38 @@ function createMemoryService({ dataDir, policy = () => ({}), projects = () => []
       if (items.length) upsert(items); return { indexed: items.length, warnings, ...snapshot(profileId), busy: false };
     } finally { active.delete(profileId); try { onChange(); } catch {} }
   }
+  async function semanticSearch(profileId, payload, query) {
+    if (!rank || !onDeviceEnabled()) throw fail('Enable on-device models to use semantic search');
+    if (searches.size) throw fail('An on-device search is already running');
+    const enabled = settings();
+    const documents = rows.filter(row => row.profileId === profileId && enabled[row.kind] &&
+      (!payload.projectId || row.projectId === payload.projectId) &&
+      (payload.spaceId === undefined || row.spaceId === payload.spaceId));
+    if (!documents.length) return {profileId,query,total:0,results:[]};
+    const controller = new AbortController(), generation = revision;
+    searches.set(profileId, controller);
+    try {
+      const matches = await rank(query, documents.map(({title,text}) => ({title,text})), controller.signal);
+      if (controller.signal.aborted || generation !== revision || closed || !onDeviceEnabled()) throw fail('Saved text changed during semantic search');
+      if (!Array.isArray(matches) || matches.length > documents.length) throw fail('Invalid on-device search result');
+      const seen = new Set();
+      const results = matches.map(({index,offset,score}) => {
+        const row = documents[index];
+        if (!Number.isInteger(index) || !row || seen.has(index) || !Number.isInteger(offset) ||
+            offset < 0 || offset > row.text.length || !Number.isFinite(score) || score < 0 || score > 1) throw fail('Invalid on-device search result');
+        seen.add(index);
+        return {...metadata(row),snippet:row.text.slice(offset,offset+320),score};
+      });
+      results.sort((a,b)=>b.score-a.score||b.indexedAt.localeCompare(a.indexedAt));
+      return {profileId,query,total:results.length,results:results.slice(0,50)};
+    } finally {
+      searches.delete(profileId);
+    }
+  }
   function search(profileId, payload) {
     scope(profileId); const query = string(payload.query, 'query', 512).trim(); if (!query) throw fail('Enter a memory search query');
+    if (payload.mode === 'semantic') return semanticSearch(profileId, payload, query);
+    if (payload.mode !== undefined && payload.mode !== 'literal') throw fail('Unknown saved text search mode');
     const terms = [...new Set(fold(query).split(/\s+/).filter(Boolean))]; if (terms.length > 16) throw fail('Use at most 16 query terms');
     const enabled = settings(); const results = [];
     for (const row of rows) {
@@ -107,13 +154,13 @@ function createMemoryService({ dataDir, policy = () => ({}), projects = () => []
     if (action === 'memory:snapshot') return snapshot(payload.profileId);
     if (action === 'memory:search') return search(payload.profileId, payload);
     if (action === 'memory:index:files') return indexFiles(payload.profileId, payload);
-    if (action === 'memory:cancel') { const operation = active.get(payload.profileId); if (operation) operation.cancelled = true; return snapshot(payload.profileId); }
+    if (action === 'memory:cancel') { searches.get(payload.profileId)?.abort(); const operation = active.get(payload.profileId); if (operation) operation.cancelled = true; return snapshot(payload.profileId); }
     if (action === 'memory:clear') { const operation = active.get(payload.profileId); if (operation) operation.cancelled = true; persist(rows.filter(row => row.profileId !== payload.profileId)); return snapshot(payload.profileId); }
     const row = rows.find(row => row.id === payload.id && row.profileId === payload.profileId && settings()[row.kind]); if (!row) throw fail('Memory document not found', 'VEK_MEMORY_NOT_FOUND');
     if (action === 'memory:read') return clone(row);
     if (action === 'memory:remove') { const operation=active.get(payload.profileId);if(operation)operation.cancelled=true; persist(rows.filter(item => item !== row)); return snapshot(payload.profileId); }
     throw fail('Unknown memory action');
   }
-  try{syncPolicy();}catch(error){unlock();throw error;} return { dispatch, snapshot, syncPolicy, indexPage, close() { closed = true; for (const operation of active.values()) operation.cancelled = true; unlock(); } };
+  try{syncPolicy();}catch(error){unlock();throw error;} return { dispatch, snapshot, syncPolicy, indexPage, close() { closed = true; for (const search of searches.values()) search.abort(); for (const operation of active.values()) operation.cancelled = true; unlock(); } };
 }
 module.exports = { createMemoryService };

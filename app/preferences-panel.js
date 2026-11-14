@@ -4,7 +4,7 @@
   const tr = (message, ...values) => globalThis.WiekI18n?.t(message, ...values) ?? message.replace(/\{(\d+)\}/g, (match, index) => index < values.length ? String(values[index]) : match);
   function createPanel(root, invoke, { embedded = false } = {}) {
     let data, error = '', pending = false, editor = null, draft = '', dirty = false, destroyed = false;
-    let memoryData = null, memoryQuery = '', memoryResults = null, memoryDocument = null, memoryProjectId = '', memoryProjects = [], memoryNotice = '';
+    let memoryData = null, memoryQuery = '', memoryMode = 'literal', memoryResults = null, memoryDocument = null, memoryProjectId = '', memoryProjects = [], memoryNotice = '';
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const make = (tag, value, cls) => { const node = document.createElement(tag); if (value !== undefined) node.textContent = value; if (cls) node.className = cls; return node; };
     const button = (value, fn, cls = '') => { const node = make('button', value, `vp-button ${cls}`); node.type = 'button'; node.disabled = pending; node.onclick = fn; return node; };
@@ -37,7 +37,7 @@
     }
     function memoryIndex() {
       if (!memoryData) return;
-      const card = section(tr("Saved text search"), tr("Explicitly save page text or selected project text files for local search. Saved copies stay in this profile until removed; disabling a memory category deletes its saved copies. Search uses literal words, including Chinese text."));
+      const card = section(tr("Saved text search"), tr("Explicitly save page text or selected project text files for local search. Saved copies stay in this profile until removed; disabling a memory category deletes its saved copies. Search by keywords or use on-device semantic search where available."));
       card.append(make('p', tr("{0} documents in this profile. Copies are not refreshed automatically and are not automatically sent to agents.", (memoryData.documents.length)), 'vp-description'));
       const actions = make('div', '', 'vp-actions'); const page = button(tr("Save current page text"), () => action('memory:index:page')); page.disabled = pending || !data.memory.browserActivity; actions.append(page);
       const projects = make('select'); projects.setAttribute('aria-label', tr("Source project")); projects.disabled = pending;
@@ -46,7 +46,14 @@
       if (memoryData.busy) { const cancel = button(tr("Cancel indexing"), async () => { try { update(await invoke('memory:cancel', {})); } catch (failure) { error = failure.message; render(); } }); cancel.disabled = false; actions.append(cancel); } card.append(actions);
       if (memoryNotice) card.append(make('p', memoryNotice, 'vp-description'));
       const form = make('form', '', 'vp-memory-search'), query = make('input'); query.type = 'search'; query.value = memoryQuery; query.dataset.focus = 'memory-search'; query.setAttribute('aria-label', tr("Search saved text")); query.placeholder = tr("Search saved text"); query.maxLength = 512; query.oninput = () => { memoryQuery = query.value; };
-      const submit = make('button', tr("Search saved text"), 'vp-button'); submit.type = 'submit'; submit.disabled = pending; form.append(query, submit); form.onsubmit = async event => { event.preventDefault(); const result = await action('memory:search', { query: memoryQuery }); if (result) memoryResults = result; render(); }; card.append(form);
+      const mode = make('select'); mode.setAttribute('aria-label', tr('Search mode'));
+      for (const [id, label] of [['literal','Keywords'], ['semantic','On-device semantic search']]) {
+        const option = make('option', tr(label)); option.value = id; option.disabled = id === 'semantic' && !memoryData.semanticAvailable;
+        mode.append(option);
+      }
+      mode.value = memoryData.semanticAvailable ? memoryMode : 'literal';
+      mode.onchange = () => { memoryMode = mode.value; };
+      const submit = make('button', tr("Search saved text"), 'vp-button'); submit.type = 'submit'; submit.disabled = pending; form.append(query, mode, submit); form.onsubmit = async event => { event.preventDefault(); const result = await action('memory:search', { query: memoryQuery, mode: mode.value }); if (result) memoryResults = result; render(); }; card.append(form);
       if (memoryResults) card.append(make('p', tr("{0} displayed results.", (memoryResults.results.length)), 'vp-description'));
       for (const document of memoryResults ? memoryResults.results : memoryData.documents) { const row = make('div', '', 'vp-memory-item'), info = make('div', '', 'vp-grow'); info.append(make('strong', document.title || document.source), make('p', tr("{0} · {1} · saved {2}", (document.kind), (document.source), (new Date(document.indexedAt).toLocaleString(globalThis.WiekI18n?.locale()))), 'vp-description')); if (document.snippet) info.append(make('p', document.snippet, 'vp-memory-snippet')); row.append(info, button(tr("View saved text"), async () => { const result = await action('memory:read', { id: document.id }); if (result) memoryDocument = result; render(); }), button(tr("Delete saved copy"), () => action('memory:remove', { id: document.id }))); card.append(row); }
       if (memoryDocument) { const detail = make('details'); detail.open = true; detail.append(make('summary', memoryDocument.title || memoryDocument.source), make('pre', memoryDocument.text, 'vp-memory-text'), button(tr("Close saved text"), () => { memoryDocument = null; render(); })); card.append(detail); }

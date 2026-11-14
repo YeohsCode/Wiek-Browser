@@ -8,3 +8,8 @@ execFileSync('/usr/bin/xcrun',['swiftc','-O','-target','arm64-apple-macosx12.0',
 const monitor=resolve(root,'app/bin/vek-desktop-monitor');execFileSync('/usr/bin/xcrun',['swiftc','-O','-target','arm64-apple-macosx12.0','-framework','AppKit','-framework','ApplicationServices',resolve(root,'tools/native/desktop-monitor.swift'),'-o',monitor],{stdio:'inherit'});chmodSync(monitor,0o755);console.log(monitor);
 
 const processes=resolve(root,'app/bin/wiek-process-info');execFileSync('/usr/bin/xcrun',['swiftc','-O','-target','arm64-apple-macosx12.0',resolve(root,'tools/native/local-server-processes.swift'),'-o',processes],{stdio:'inherit'});chmodSync(processes,0o755);console.log(processes);
+
+const semantic = resolve(root, 'app/bin/wiek-saved-text-search');
+execFileSync('/usr/bin/xcrun', ['swiftc', '-O', '-target', 'arm64-apple-macosx12.0', '-framework', 'NaturalLanguage', resolve(root, 'tools/native/saved-text-search.swift'), '-o', semantic], {stdio:'inherit'});
+chmodSync(semantic, 0o755);
+console.log(semantic);

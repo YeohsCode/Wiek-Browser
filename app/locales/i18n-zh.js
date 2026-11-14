@@ -653,7 +653,7 @@
     "Explicit local CLI evaluator": "明确的当地CLI评价员",
     "Explicitly confirm this reviewed operation": "明确确认这项经审查的行动",
     "Explicitly recorded application window": "明确记录的应用程序窗口",
-    "Explicitly save page text or selected project text files for local search. Saved copies stay in this profile until removed; disabling a memory category deletes its saved copies. Search uses literal words, including Chinese text.": "明确保存页面文本或选定工程文本文件用于本地搜索。 保存的复制件会留在此配置文件中直到删除; 禁用内存类别会删除其保存的复制件。 搜索使用文字, 包括中文文本。",
+    "Explicitly save page text or selected project text files for local search. Saved copies stay in this profile until removed; disabling a memory category deletes its saved copies. Search by keywords or use on-device semantic search where available.": "明确选择网页文本或项目文本文件并保存在当前资料中。关闭某类资料收集会删除该类副本。可使用关键词搜索，在支持的设备上也可使用本机语义搜索。",
     "Export": "导出",
     "Export JSON": "导出 JSON",
     "Export PNG": "导出 PNG",
@@ -2302,6 +2302,12 @@
     "Full requested address": "请求的完整网址",
     "Address contains an internationalized domain": "网址包含国际化域名",
     "Retry after finishing on the website": "在网站完成后重试",
+    "Search mode": "搜索方式",
+    "Keywords": "关键词",
+    "On-device semantic search": "本机语义搜索",
+    "No on-device model is available for this query language": "本机没有适用于该搜索语言的模型",
+    "On-device search did not complete": "本机语义搜索未完成",
+    "Enable on-device models to use semantic search": "请启用本机模型后使用语义搜索",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

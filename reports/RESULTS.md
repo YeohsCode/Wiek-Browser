@@ -2,6 +2,11 @@
 
 当前开发检查点为 **0.30.0**，日期为 2026-11-14。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
 
+## MCP URL 审核与本机语义检索
+
+- MCP 2025-11-25 支持审核会话式 HTTP 和 stdio 工具请求。实际回环 HTTP 测试覆盖直接请求和需授权后重试的回复。stdio 测试覆盖明确拒绝。
+- macOS 可对当前资料中主动保存的文本运行本机语义搜索。使用系统句向量，每份文档检查标题和最多 64 句，按相关度排序。本机测试使用中文与英文改述查询，验证资料隔离和删除时取消。模型可用性取决于系统和查询语言。[Apple Natural Language](https://developer.apple.com/documentation/naturallanguage/nlembedding/sentenceembedding(for:))
+
 ## 0.30 界面语言
 
 - 设置新增跟随系统、简体中文和 English，即时切换并保留选择。打包版验收覆盖主窗口、独立标签组窗口、菜单、重启恢复和输入法组词中的刷新。用户输入与用户命名保持原样。[语言验收](v030-interface-language.log)

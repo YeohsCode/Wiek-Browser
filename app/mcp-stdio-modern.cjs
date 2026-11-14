@@ -5,7 +5,7 @@ const META='io.modelcontextprotocol/subscriptionId';
 const fail=(message,code='VEK_MCP_PROTOCOL_ERROR')=>Object.assign(new Error(message),{error_code:code});
 const object=value=>value&&typeof value==='object'&&!Array.isArray(value);
 const methods={
- modernParams(params,allowInput=false){return {...params,_meta:{...(params._meta||{}),'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'wiek-browser',version:'0.1.0'},'io.modelcontextprotocol/clientCapabilities':allowInput?{elicitation:{form:{}}}:{}}};},
+ modernParams(params,allowInput=false,allowUrl=false){return {...params,_meta:{...(params._meta||{}),'io.modelcontextprotocol/protocolVersion':'2026-07-28','io.modelcontextprotocol/clientInfo':{name:'wiek-browser',version:'0.1.0'},'io.modelcontextprotocol/clientCapabilities':allowInput?{elicitation:{form:{},...(allowUrl?{url:{}}:{})}}:{}}};},
  consumeModernSubscription(message){
   const response=Object.hasOwn(message,'id')&&!Object.hasOwn(message,'method'),id=response?message.id:message.params?._meta?.[META];
   const stream=this.notificationStreams.get(id);

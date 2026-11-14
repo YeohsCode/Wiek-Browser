@@ -28,3 +28,10 @@
 - 当前完整验收与原生截图见[RESULTS](../reports/RESULTS.md)。这些离线fixture证明本实现边界，不替代Ego同功能运行对测或31项线上模型任务。
 
 下一步P2核对现代OAuth的CIMD/身份机制，随后继续明确来源迁移与P3剩余验收。MRTR资源读取/URL模式仍是缺口；P1继续暂缓。
+
+
+## 0.29 资源、提示与 URL 输入
+
+MCP 2026-07-28 的资源和提示面板提供带输入的读取入口。普通读取继续直接显示结果。交互式读取沿用工具任务的审核、取消、过期和轮次上限，同一服务收到原 URI 或提示参数、新请求 ID、本轮输入和原样的 requestState。资源内容、回答和 URL 路径只在本次会话中使用，资源读取状态保留订阅的原始修订号。
+
+URL 模式只在有桌面交互的调用中声明。面板展示 HTTPS 来源，用户主动点击后由系统浏览器打开；输入回复只携带 accept、decline 或 cancel。接受需要先成功打开，并由用户在完成网页操作后提交；服务端判断网页流程是否完成。收据、路径和查询参数留在主进程。连接断开或请求过期会结束审核。参见 [MCP 规范发布说明](https://blog.modelcontextprotocol.io/posts/2026-07-28/) 和 [官方 SDK 的输入流程](https://ts.sdk.modelcontextprotocol.io/v2/servers/elicitation)。

@@ -10,14 +10,15 @@ const {createMcpService,HttpClient}=require(join(root,'app/mcp-service.cjs'));
 const {prepareInput,validateResponses,validateSchema}=require(join(root,'app/mcp-input.cjs'));
 const schema={type:'object',properties:{name:{type:'string',minLength:2},count:{type:'integer',minimum:1,maximum:3},flag:{type:'boolean'},color:{type:'string',oneOf:[{const:'red',title:'Red'},{const:'blue',title:'Blue'}]},tags:{type:'array',minItems:1,maxItems:2,items:{anyOf:[{const:'a',title:'A'},{const:'b',title:'B'}]}}},required:['name']};
 const input=(state='opaque-secret <raw>')=>({resultType:'input_required',inputRequests:{profile:{method:'elicitation/create',params:{message:'Provide profile <script id="untrusted">',requestedSchema:schema}}},...(state===undefined?{}:{requestState:state})});
-async function fixture(t,{reply,timeout=2000,credential=false}={}){
+async function fixture(t,{reply,timeout=2000,credential=false,openInputUrl}={}){
  const dir=await mkdtemp(join(tmpdir(),'vek-input-')),calls=[],sockets=new Set();let toolCalls=0;
  const server=http.createServer(async(req,res)=>{try{let body='';for await(const b of req)body+=b;const message=JSON.parse(body);calls.push({message,headers:req.headers});let result={resultType:'complete'};
- if(message.method==='server/discover')result={...result,supportedVersions:['2026-07-28'],capabilities:{tools:{}}};
+ if(message.method==='server/discover')result={...result,supportedVersions:['2026-07-28'],capabilities:{tools:{},resources:{},prompts:{}}};
+ else if(message.method==='prompts/list')result={...result,prompts:[{name:'reviewed'}]};
  else if(message.method==='tools/list')result={...result,tools:[{name:'interactive',inputSchema:{type:'object'}}]};
  else{toolCalls++;result=reply?await reply(message,toolCalls,res):message.params.inputResponses?{...result,content:[{type:'text',text:'received '+message.params.inputResponses.profile.content?.name}]}:input();if(res.destroyed||res.writableEnded||result===null)return;}
  res.writeHead(200,{'content-type':'application/json'}).end(JSON.stringify({jsonrpc:'2.0',id:message.id,result}));}catch{res.destroy();}});
- server.on('connection',s=>{sockets.add(s);s.on('close',()=>sockets.delete(s));});await new Promise(r=>server.listen(0,'127.0.0.1',r));const scope={projectId:'p',threadId:'one'},url=`http://127.0.0.1:${server.address().port}/mcp`,service=createMcpService({dataDir:dir,requestTimeoutMs:timeout,resolveScope:async s=>({...s,projectPath:dir}),resolveCredential:()=> 'opaque-secret <raw>'});
+ server.on('connection',s=>{sockets.add(s);s.on('close',()=>sockets.delete(s));});await new Promise(r=>server.listen(0,'127.0.0.1',r));const scope={projectId:'p',threadId:'one'},url=`http://127.0.0.1:${server.address().port}/mcp`,service=createMcpService({dataDir:dir,requestTimeoutMs:timeout,openInputUrl,resolveScope:async s=>({...s,projectPath:dir}),resolveCredential:()=> 'opaque-secret <raw>'});
  await service.dispatch('mcp:integrations:save',{name:'Interactive fixture',transport:'http',url,protocolVersion:'2026-07-28',allowInsecureHttp:true,scope:{projectId:'p'},...(credential?{headerRefs:{Authorization:'env:FIXTURE'}}:{})});const integrationId=service.snapshot().integrations[0].id;
  t.after(async()=>{await service.close();for(const s of sockets)s.destroy();await new Promise(r=>server.close(r));await rm(dir,{recursive:true,force:true});});
  const start=(s=scope,extra={})=>service.dispatch('mcp:tasks:create',{integrationId,scope:s,name:'interactive',arguments:{original:'unchanged'},...extra});
@@ -77,4 +78,56 @@ test('closing and restarting service discards reviews and session-only results w
 });
 test('cancelling an in-flight continuation aborts the POST and does not send legacy cancellation or replay',async t=>{
  let opened=false,closed=false;const f=await fixture(t,{reply:(m,n,res)=>{if(n===1)return input();opened=true;res.writeHead(200,{'content-type':'text/event-stream'});res.flushHeaders();res.on('close',()=>{closed=true;});return null;}}),task=await f.start(),review=await f.wait(task.id,'awaiting_input');await f.respond(review);for(let i=0;i<200&&!opened;i++)await new Promise(r=>setTimeout(r,5));assert.equal(opened,true);await f.service.dispatch('mcp:tasks:cancel',{id:task.id,scope:f.scope});await f.wait(task.id,'cancelled');for(let i=0;i<200&&!closed;i++)await new Promise(r=>setTimeout(r,5));assert.equal(closed,true);assert.equal(f.calls.filter(c=>c.message.method==='tools/call').length,2);assert.equal(f.calls.some(c=>c.message.method==='notifications/cancelled'),false);
+});
+
+test('modern resource reads continue the same URI only after reviewed form and URL inputs',async t=>{
+ const opened=[],address='https://example.test/review?nonce=fixture',uri='file:///fixture/resource';
+ const f=await fixture(t,{openInputUrl:async url=>{opened.push(url);},reply:(m,n)=>{
+   if(n===1)return {...input(),inputRequests:{...input().inputRequests,address:{method:'elicitation/create',params:{mode:'url',message:'Review on the provider website',url:address}}}};
+   return {resultType:'complete',contents:[{uri,text:'resource fixture'}]};
+ }});
+ const payload={integrationId:f.integrationId,scope:f.scope,uri};
+ await assert.rejects(f.service.dispatch('mcp:resources:readInteractive',payload),/MCP panel/);
+ const task=await f.service.dispatch('mcp:resources:readInteractive',payload,{interactive:true});
+ const waiting=await f.wait(task.id,'awaiting_input'),original=f.calls.at(-1).message;
+ assert.deepEqual(original.params._meta['io.modelcontextprotocol/clientCapabilities'],{elicitation:{form:{},url:{}}});
+ assert.deepEqual(opened,[]);
+ assert.equal(waiting.inputReview.forms[1].origin,'https://example.test');
+ const review={id:task.id,scope:f.scope,reviewId:waiting.inputReview.id};
+ const responses={profile:{action:'accept',content:{name:'Alice'}},address:{action:'accept'}};
+ const ui={interactive:true};
+ await assert.rejects(f.service.dispatch('mcp:tasks:respond',{...review,responses},ui),/Open the requested address/);
+ await assert.rejects(f.service.dispatch('mcp:tasks:openInputUrl',{...review,inputId:'address'}),/MCP panel/);
+ await assert.rejects(f.service.dispatch('mcp:tasks:openInputUrl',{...review,inputId:'address',scope:{...f.scope,threadId:'other'}},ui),/outside this scope/);
+ await f.service.dispatch('mcp:tasks:openInputUrl',{...review,inputId:'address',url:'https://ignored.test'},ui);
+ assert.deepEqual(opened,[address]);
+ assert.equal(f.calls.filter(c=>c.message.method==='resources/read').length,1);
+ await f.service.dispatch('mcp:tasks:respond',{...review,responses},ui);
+ const done=await f.wait(task.id,'completed'),last=f.calls.at(-1).message;
+ assert.notEqual(last.id,original.id);
+ assert.equal(last.method,'resources/read');
+ assert.equal(last.params.uri,original.params.uri);
+ assert.equal(last.params.requestState,'opaque-secret <raw>');
+ assert.deepEqual(last.params.inputResponses,responses);
+ assert.deepEqual(done.result.contents,[{uri,text:'resource fixture'}]);
+ assert.equal(done.resultRetained,false);
+ const saved=await readFile(join(f.dir,'mcp/state.json'),'utf8');
+ for(const privateValue of [address,uri,'Alice','opaque-secret','resource fixture'])assert.ok(!saved.includes(privateValue));
+});
+test('modern interactive prompt preview uses the same continuation without changing prompt arguments',async t=>{
+ const f=await fixture(t,{reply:(m,n)=>n===1?input():{resultType:'complete',messages:[{role:'user',content:{type:'text',text:'fixture preview'}}]}});
+ const task=await f.service.dispatch('mcp:prompts:getInteractive',{integrationId:f.integrationId,scope:f.scope,name:'reviewed'},{interactive:true});
+ const waiting=await f.wait(task.id,'awaiting_input');
+ await f.respond(waiting);
+ const result=await f.wait(task.id,'completed');
+ const calls=f.calls.filter(c=>c.message.method==='prompts/get').map(c=>c.message);
+ assert.equal(calls.length,2);
+ assert.equal(calls[1].params.name,calls[0].params.name);
+ assert.deepEqual(calls[1].params.arguments,calls[0].params.arguments);
+ assert.equal(result.result.messages[0].content.text,'fixture preview');
+});
+test('URL input accepts only explicitly enabled credential-free HTTPS addresses',()=>{
+ for(const url of ['http://example.test','file:///tmp/example','https://user:password@example.test','https://example.test/\\path','https://example.test/a b']){
+   assert.throws(()=>prepareInput({...input(),inputRequests:{x:{method:'elicitation/create',params:{mode:'url',message:'Review',url}}}},{allowUrl:true}),/URL|HTTPS/);
+ }
 });

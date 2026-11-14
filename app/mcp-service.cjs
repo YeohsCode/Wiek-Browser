@@ -9,7 +9,7 @@ const { randomUUID, randomBytes, createHash, timingSafeEqual } = require('node:c
 const { prepareInput, validateResponses } = require('./mcp-input.cjs');
 const { createClientDocument } = require('./mcp-client-identity.cjs');
 const { createMcpOAuth } = require('./mcp-oauth.cjs');
-const { methods: resourceMethods, resetResources, resourceNotification } = require('./mcp-resources.cjs');
+const { methods: resourceMethods, resetResources, resourceNotification, uri: resourceUri } = require('./mcp-resources.cjs');
 const {methods:promptMethods,resetPrompts,promptNotification}=require('./mcp-prompts.cjs');
 const {createSubscriptionMethods}=require('./mcp-subscriptions.cjs');
 const {methods:stdioModernMethods}=require('./mcp-stdio-modern.cjs');
@@ -81,8 +81,8 @@ class StdioClient {
   }
   write(message) { if (this.stopped || !this.child?.stdin.writable) throw fail('MCP connection is closed', 'VEK_MCP_DISCONNECTED'); const line=JSON.stringify(message);if(this.modern&&Buffer.byteLength(line)>this.maxMessageBytes)throw fail('MCP stdio request exceeds the size limit','VEK_MCP_CAPACITY');this.child.stdin.write(line + '\n'); }
   notify(method, params) { this.write({ jsonrpc: '2.0', method, ...(params === undefined ? {} : { params }) }); }
-  request(method, params = {}, { timeoutMs = this.timeoutMs, signal, allowInput=false } = {}) {
-    allowInput=allowInput===true&&this.modern&&method==='tools/call';if(this.modern)params=this.modernParams(params,allowInput);
+  request(method, params = {}, { timeoutMs = this.timeoutMs, signal, allowInput=false, allowUrl=false } = {}) {
+    allowInput=allowInput===true&&this.modern&&['tools/call','resources/read','prompts/get'].includes(method);if(this.modern)params=this.modernParams(params,allowInput,allowUrl);
     if (this.pending.size >= 64) return Promise.reject(fail('Too many pending MCP requests', 'VEK_MCP_CAPACITY'));
     if (signal?.aborted) return Promise.reject(fail('MCP request cancelled', 'VEK_MCP_CANCELLED'));
     const id = this.nextId++;
@@ -157,7 +157,7 @@ function createBrowserGateway({ callbacks = {}, resolveScope = async scope => sc
   };
 }
 
-function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveCredential, browserGateway, oauthOptions = {}, requestTimeoutMs = 15000, maxResultBytes = 1024 * 1024 } = {}) {
+function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveCredential, browserGateway, oauthOptions = {}, openInputUrl, requestTimeoutMs = 15000, maxResultBytes = 1024 * 1024 } = {}) {
   if (!dataDir || typeof resolveScope !== 'function') throw fail('dataDir and resolveScope callbacks are required');
   const directory = path.join(path.resolve(dataDir), 'mcp'); fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   if (fs.lstatSync(directory).isSymbolicLink()) throw fail('MCP directory must not be a symlink'); fs.chmodSync(directory, 0o700);
@@ -169,7 +169,7 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
   const connections = new Map(), activeTasks = new Map(), runtimeResults = new Map(), pairings = new Map(), secrets = new Set(), gatewayCalls = new Map(); let closed = false, closing = false, gateway, gatewayPromise;
   let oauthManager;try{oauthManager=createMcpOAuth({dataDir,...oauthOptions,onChange:publish,onSecret:value=>{if(secrets.has(value))return;if(secrets.size>=2048)throw fail('OAuth credential redaction capacity reached; restart before authorizing again','VEK_MCP_CAPACITY');const control=JSON.stringify([state.integrations,state.grants.map(({tokenHash,...row})=>row),state.tasks.map(({id,integrationId,scope,name,grantId})=>({id,integrationId,scope,name,grantId}))]);if(control.includes(value)||control.includes(JSON.stringify(value).slice(1,-1)))throw fail('OAuth token collides with public control data','VEK_MCP_OAUTH');secrets.add(value);}});}catch(error){fs.unlinkSync(lockPath);throw error;}
   for (const task of state.tasks) if (['queued', 'running', 'awaiting_input'].includes(task.status)) { task.status = 'interrupted'; task.completedAt = new Date().toISOString(); }
-  function publicTask(task) { const review=activeTasks.get(task.id)?.review;return redact({...task,...(review?{inputReview:{id:review.id,round:review.round,expiresAt:review.expiresAt,forms:review.forms}}:{}),...(runtimeResults.has(task.id)?{result:runtimeResults.get(task.id)}:{})}, secrets); }
+  function publicTask(task) { const review=activeTasks.get(task.id)?.review;return redact({...task,...(review?{inputReview:{id:review.id,round:review.round,expiresAt:review.expiresAt,forms:review.forms.map(form=>{if(form.mode!=='url')return form;const {url,...display}=form;return {...display,opened:review.openedUrls.has(form.id)};})}}:{}),...(runtimeResults.has(task.id)?{result:runtimeResults.get(task.id)}:{})}, secrets); }
   function snapshot() { return redact({ integrations: state.integrations, tasks: state.tasks.map(publicTask), grants: state.grants.map(({ tokenHash, ...grant }) => grant), connections: [...connections.values()].map(c => ({ integrationId: c.integrationId, scope: c.scope, status: c.client?.state || 'connecting', serverInfo: c.client?.info?.serverInfo, error: c.client?.error, stderr: c.client?.stderr || '', tools: c.client?.tools || [], notificationStreams:c.client?.subscriptionSnapshot?.(), promptCapabilities:c.client?.info?.capabilities?.prompts||null,prompts:c.client?.prompts,resourceCapabilities: c.client?.info?.capabilities?.resources || null, resources: c.client?.resources, resourceTemplates: c.client?.resourceTemplates, resourceSubscriptions: [...(c.client?.resourceSubscriptions?.values() || [])] })), oauth:oauthManager?.snapshot(), gateway: gateway ? { url: gateway.url } : null }, secrets); }
   function publish() { if (closed) return; const tmp = `${stateFile}.${randomUUID()}.tmp`; fs.writeFileSync(tmp, JSON.stringify(redact(state, secrets), null, 2), { mode: 0o600, flag: 'wx' }); fs.renameSync(tmp, stateFile); try { onChange(snapshot()); } catch {} }
   function ensureOpen() { if (closed || closing) throw fail('MCP service is closed', 'VEK_MCP_CLOSED'); }
@@ -199,41 +199,57 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
   async function disconnect(id, scope) { for(const active of [...activeTasks.values()])if(active.task.integrationId===id&&(!scope||scopeKey(active.task.scope)===scopeKey(scope))){active.controller.abort();active.finish('cancelled');} for (const [key, c] of [...connections]) if (c.integrationId === id && (!scope || scopeKey(c.scope) === scopeKey(scope))) { connections.delete(key); await c.ready.catch(() => null); await c.client?.stop(); } publish(); }
   function taskAllowed(task, scope, grant) { if (!task || scopeKey(task.scope) !== scopeKey(scope) || grant && task.grantId !== grant.id) throw fail('Task is outside this scope', 'VEK_MCP_FORBIDDEN'); return task; }
   function limitedResult(result) { const data = redact(result, secrets); const text = JSON.stringify(data); return Buffer.byteLength(text) <= maxResultBytes ? data : { isError: true, content: [{ type: 'text', text: `Tool response exceeded ${maxResultBytes} bytes and was omitted.` }], truncated: true }; }
-  async function startTask(payload, grant) {
-    ensureOpen(); if (activeTasks.size >= 32) throw fail('MCP task concurrency limit reached', 'VEK_MCP_CAPACITY'); const { scope } = await scopeFor(payload.scope); const name = nonempty(payload.name, 'tool name', 256), args = payload.arguments === undefined ? {} : payload.arguments;
+  async function startTask(payload, grant, { kind, interactive=false } = {}) {
+    ensureOpen(); if (activeTasks.size >= 32) throw fail('MCP task concurrency limit reached', 'VEK_MCP_CAPACITY'); const { scope } = await scopeFor(payload.scope); const name = kind==='resource'?resourceUri(payload.uri):nonempty(payload.name,kind==='prompt'?'prompt name':'tool name',kind==='prompt'?4096:256);
+    const args = payload.arguments === undefined ? {} : payload.arguments;
     if (!args || typeof args !== 'object' || Array.isArray(args)) throw fail('Tool arguments must be an object');
     const integrationId = payload.integrationId;
+    if(kind&&(!integrationId||integrationFor(integrationId,scope).protocolVersion!=='2026-07-28'))throw fail('Interactive reads require an MCP 2026-07-28 integration');
     if (integrationId) { integrationFor(integrationId, scope); if (grant && !grant.integrationIds.includes(integrationId)) throw fail('Integration is not allowed by this grant', 'VEK_MCP_FORBIDDEN'); }
     else if (!browserGateway || !name.startsWith('browser.') || grant && !grant.browserMethods.includes(name.slice(8))) throw fail('Tool is not allowed', 'VEK_MCP_FORBIDDEN');
     const timeoutMs = boundedNumber(payload.timeoutMs, requestTimeoutMs, 10, 300000);
-    const task = { id: randomUUID(), integrationId: integrationId || null, name, scope, status: 'queued', createdAt: new Date().toISOString(), ...(grant ? { grantId: grant.id } : {}) };
+    const task = { id: randomUUID(), integrationId: integrationId || null, name:kind==='resource'?'Resource read':name, scope, ...(kind?{kind,interactive:true}:{}), status: 'queued', createdAt: new Date().toISOString(), ...(grant ? { grantId: grant.id } : {}) };
     state.tasks.push(task); state.tasks = state.tasks.filter((item, index) => activeTasks.has(item.id) || index >= state.tasks.length - 500); const controller = new AbortController(); let resolveDone;
     const running = { task, controller, done: new Promise(resolve => { resolveDone = resolve; }), resolveDone: null }; running.resolveDone = resolveDone; activeTasks.set(task.id, running);
-    const finish = (status, result, error) => { if (!activeTasks.has(task.id)) return; clearTimeout(running.timer); task.status = status; task.completedAt = new Date().toISOString(); if (result !== undefined) {if(task.interactive){runtimeResults.set(task.id,limitedResult(result));while(runtimeResults.size>500)runtimeResults.delete(runtimeResults.keys().next().value);task.resultRetained=false;}else task.result = limitedResult(result);} if (error) task.error = task.interactive ? (error === 'VEK_MCP_UNSUPPORTED_CAPABILITY' ? 'The server requested an input type or form schema Wiek does not support.' : 'Interactive tool call ended without a result; no automatic retry was sent.') : safeText(error, secrets); activeTasks.delete(task.id); publish(); resolveDone(publicTask(task)); };
-    running.finish = finish; running.expiresAt = new Date(Date.now()+timeoutMs).toISOString(); running.timer = setTimeout(() => { controller.abort(); finish('timed_out', undefined, 'Tool call timed out'); }, timeoutMs);
+    const finish = (status, result, error) => { if (!activeTasks.has(task.id)) return; clearTimeout(running.timer); task.status = status; task.completedAt = new Date().toISOString(); if (result !== undefined) {if(task.interactive){runtimeResults.set(task.id,limitedResult(result));while(runtimeResults.size>500)runtimeResults.delete(runtimeResults.keys().next().value);task.resultRetained=false;}else task.result = limitedResult(result);} if (error) task.error = task.interactive ? (error === 'VEK_MCP_UNSUPPORTED_CAPABILITY' ? 'The server requested an input type or form schema Wiek does not support.' : 'Interactive MCP request ended without a result; no automatic retry was sent.') : safeText(error, secrets); activeTasks.delete(task.id); publish(); resolveDone(publicTask(task)); };
+    running.finish = finish; running.expiresAt = new Date(Date.now()+timeoutMs).toISOString(); running.timer = setTimeout(() => { controller.abort(); finish('timed_out', undefined, 'MCP request timed out'); }, timeoutMs);
     publish();
     void (async () => {
       try {
         let result; task.status = 'running'; task.startedAt = new Date().toISOString(); publish();
-        if (integrationId) { const client = await connect(integrationId, scope); if (controller.signal.aborted) return; const tools = await client.listTools({ signal: controller.signal }); if (!tools.some(tool => tool.name === name)) throw fail('Unknown MCP tool', 'VEK_MCP_NOT_FOUND'); const original={name,arguments:clone(args)};let continuation={},round=0;
-          while(true){
-            if(controller.signal.aborted)return;
-            result=await client.request('tools/call',{...original,...continuation},{timeoutMs,signal:controller.signal,allowInput:!grant});
-            if(result?.resultType!=='input_required')break;
-            task.interactive=true;
-            if(++round>8)throw fail('MCP input round limit reached','VEK_MCP_CAPACITY');
-            const prepared=prepareInput(result);
-            const inputResponses=await new Promise((resolve,reject)=>{
-              const abort=()=>{running.review=null;reject(fail('Input cancelled','VEK_MCP_CANCELLED'));};
-              const cleanup=()=>controller.signal.removeEventListener('abort',abort);
-              running.review={id:randomUUID(),round,forms:prepared.forms,expiresAt:running.expiresAt,submit:responses=>{cleanup();running.review=null;resolve(responses);}};
-              controller.signal.addEventListener('abort',abort,{once:true});
-              if(controller.signal.aborted){abort();return;}
-              task.status='awaiting_input';publish();
-            });
-            continuation={inputResponses,...(Object.hasOwn(prepared,'requestState')?{requestState:prepared.requestState}:{})};
-            task.status='running';publish();
-          } }
+        if (integrationId) {
+          const client = await connect(integrationId, scope);
+          if (controller.signal.aborted) return;
+          const allowUrl=interactive&&typeof openInputUrl==='function';
+          const request=async(method,original)=>{
+            let continuation={},round=0;
+            while(!controller.signal.aborted){
+              const reply=await client.request(method,{...original,...continuation},{timeoutMs,signal:controller.signal,allowInput:!grant,allowUrl});
+              if(reply?.resultType!=='input_required')return reply;
+              task.interactive=true;
+              if(++round>8)throw fail('MCP input round limit reached','VEK_MCP_CAPACITY');
+              const prepared=prepareInput(reply,{allowUrl});
+              const inputResponses=await new Promise((resolve,reject)=>{
+                const abort=()=>{running.review=null;reject(fail('Input cancelled','VEK_MCP_CANCELLED'));};
+                const cleanup=()=>controller.signal.removeEventListener('abort',abort);
+                running.review={id:randomUUID(),round,forms:prepared.forms,openedUrls:new Set(),openingUrls:new Set(),expiresAt:running.expiresAt,submit:responses=>{cleanup();running.review=null;resolve(responses);}};
+                controller.signal.addEventListener('abort',abort,{once:true});
+                if(controller.signal.aborted){abort();return;}
+                task.status='awaiting_input';publish();
+              });
+              continuation={inputResponses,...(Object.hasOwn(prepared,'requestState')?{requestState:prepared.requestState}:{})};
+              task.status='running';publish();
+            }
+            throw fail('MCP request cancelled','VEK_MCP_CANCELLED');
+          };
+          if(kind==='resource')result=await client.readResource(name,{signal:controller.signal,request});
+          else if(kind==='prompt')result=await client.getPrompt(name,clone(args),{signal:controller.signal,request});
+          else{
+            const tools=await client.listTools({signal:controller.signal});
+            if(!tools.some(tool=>tool.name===name))throw fail('Unknown MCP tool','VEK_MCP_NOT_FOUND');
+            result=await request('tools/call',{name,arguments:clone(args)});
+          }
+        }
         else result = await browserGateway.call(name, args, { scope, signal: controller.signal, ...(grant ? { allowedMethods: grant.browserMethods } : {}) });
         finish('completed', result);
       } catch (error) { finish(controller.signal.aborted ? 'cancelled' : error.error_code === 'VEK_MCP_TIMEOUT' ? 'timed_out' : 'failed', undefined, task.interactive ? error.error_code : error.message); }
@@ -243,7 +259,7 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
   async function readTask(id, scopeValue, grant) { const { scope } = await scopeFor(scopeValue); return publicTask(taskAllowed(state.tasks.find(task => task.id === id), scope, grant)); }
   async function waitTask(id, scopeValue, timeoutMs = 30000, grant) { const task = await readTask(id, scopeValue, grant), active = activeTasks.get(id); if (!active) return task; return Promise.race([active.done, new Promise(resolve => { const timer = setTimeout(() => resolve(publicTask(active.task)), boundedNumber(timeoutMs, 30000, 0, 60000)); timer.unref?.(); })]); }
   async function cancelTask(id, scopeValue, grant) { await readTask(id, scopeValue, grant); const active = activeTasks.get(id); if (active) { active.controller.abort(); active.finish('cancelled'); } return readTask(id, scopeValue, grant); }
-  async function dispatch(action, p = {}) {
+  async function dispatch(action, p = {}, {interactive=false} = {}) {
     ensureOpen();
     if (action === 'mcp:snapshot') return snapshot();
     if(action.startsWith('mcp:oauth:')){const {scope}=await scopeFor(p.scope),config=integrationFor(p.integrationId,scope);if(!config.enabled||config.transport!=='http'||!config.oauth)throw fail('Choose an enabled HTTP integration with a public OAuth client ID');if(action==='mcp:oauth:client-document')return {document:createClientDocument(config.oauth)};if(action==='mcp:oauth:prepare'){const preparing=oauthManager.prepare(config,scope).then(value=>({value}),error=>({error}));await disconnect(config.id,scope);const result=await preparing;if(result.error)throw result.error;return result.value;}if(action==='mcp:oauth:open')return oauthManager.open(p.flowId,config,scope);if(action==='mcp:oauth:cancel')return oauthManager.cancel(p.flowId,config,scope);if(action==='mcp:oauth:forget'){await disconnect(config.id,scope);oauthManager.forget(config,scope);return snapshot();}throw fail('Unknown OAuth action');}
@@ -276,16 +292,34 @@ function createMcpService({ dataDir, onChange = () => {}, resolveScope, resolveC
     if(action==='mcp:prompts:list')return {prompts:await (await connect(p.integrationId,p.scope)).listPrompts()};
     if(action==='mcp:prompts:get')return (await connect(p.integrationId,p.scope)).getPrompt(p.name,p.arguments);
     if (action === 'mcp:resources:list' || action === 'mcp:resources:templates') return { [action.endsWith(':templates') ? 'resourceTemplates' : 'resources']: await (await connect(p.integrationId, p.scope)).listResources({ templates: action.endsWith(':templates') }) };
+    if (action === 'mcp:resources:readInteractive' || action === 'mcp:prompts:getInteractive') {
+      if(!interactive)throw fail('Use the MCP panel for interactive reads','VEK_MCP_FORBIDDEN');
+      return startTask(p,undefined,{kind:action.startsWith('mcp:resources:')?'resource':'prompt',interactive});
+    }
     if (action === 'mcp:resources:read') return (await connect(p.integrationId, p.scope)).readResource(p.uri);
     if (action === 'mcp:resources:subscribe' || action === 'mcp:resources:unsubscribe') { await (await connect(p.integrationId, p.scope)).setResourceSubscription(p.uri, action.endsWith(':subscribe')); return snapshot(); }
-    if (action === 'mcp:tasks:create' || action === 'mcp:tools:call') return startTask(p);
+    if (action === 'mcp:tasks:create' || action === 'mcp:tools:call') return startTask(p,undefined,{interactive});
     if (action === 'mcp:tasks:read') return readTask(p.id, p.scope);
     if (action === 'mcp:tasks:wait') return waitTask(p.id, p.scope, p.timeoutMs);
-    if (action === 'mcp:tasks:respond') {
+    if (action === 'mcp:tasks:respond' || action === 'mcp:tasks:openInputUrl') {
       const {scope}=await scopeFor(p.scope);taskAllowed(state.tasks.find(task=>task.id===p.id),scope);
       const active=activeTasks.get(p.id),review=active?.review;
       if(!review||review.id!==p.reviewId||active.controller.signal.aborted)throw fail('This input review has ended or changed','VEK_MCP_INPUT_EXPIRED');
-      const responses=validateResponses(review.forms,p.responses);review.submit(responses);return publicTask(active.task);
+      const urlForms=review.forms.filter(form=>form.mode==='url');
+      if(urlForms.length&&!interactive)throw fail('Use the MCP panel for URL input','VEK_MCP_FORBIDDEN');
+      if(action==='mcp:tasks:openInputUrl'){
+        const form=urlForms.find(form=>form.id===p.inputId);
+        if(!form||typeof openInputUrl!=='function'||safeText(form.url,secrets)!==form.url)throw fail('Unknown MCP URL input');
+        if(review.openedUrls.has(form.id)||review.openingUrls.has(form.id))throw fail('This input URL was already opened or is opening');
+        review.openingUrls.add(form.id);
+        try{await openInputUrl(form.url);if(active.review!==review)throw fail('This input review has ended or changed');review.openedUrls.add(form.id);}
+        catch{throw fail('Could not open the requested address');}
+        finally{review.openingUrls.delete(form.id);}
+        return {opened:true};
+      }
+      const responses=validateResponses(review.forms,p.responses);
+      if(urlForms.some(form=>responses[form.id].action==='accept'&&!review.openedUrls.has(form.id)))throw fail('Open the requested address and finish there before continuing');
+      review.submit(responses);return publicTask(active.task);
     }
     if (action === 'mcp:tasks:cancel') return cancelTask(p.id, p.scope);
     if (action === 'mcp:gateway:start') { await startGateway(); return snapshot(); }

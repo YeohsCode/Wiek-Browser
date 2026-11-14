@@ -77,7 +77,8 @@ jobs:
           VEK_STORAGE_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
           WIEK_INDEXEDDB_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
           WIEK_MCP_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
-        run: node --test --test-concurrency=1 tests/profile-web-storage.test.mjs tests/profile-indexeddb.test.mjs tests/mcp-prompts-panel.test.mjs > reports/ci-migration-mcp-panels.log 2>&1
+          VEK_MCP_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
+        run: node --test --test-concurrency=1 tests/profile-web-storage.test.mjs tests/profile-indexeddb.test.mjs tests/mcp-prompts-panel.test.mjs tests/mcp-input-panel.test.mjs tests/mcp-modern-panel.test.mjs > reports/ci-migration-mcp-panels.log 2>&1
       - name: Packaged browser continuation
         env:
           WIEK_RECOVERY_CLI: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app/cli/wiek-browser.mjs

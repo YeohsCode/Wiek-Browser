@@ -48,9 +48,9 @@ const methods = {
     }
     throw fail('MCP resources pagination exceeded the limit');
   },
-  async readResource(value, { signal } = {}) {
+  async readResource(value, { signal, request = this.request.bind(this) } = {}) {
     capability(this); uri(value); const subscription = this.resourceSubscriptions.get(value), revision = subscription?.revision, generation = this.resourceSubscriptions;
-    const result = object(await this.request('resources/read', { uri: value }, { signal }));
+    const result = object(await request('resources/read', { uri: value }, { signal }));
     if (this.state !== 'connected' || generation !== this.resourceSubscriptions) throw fail('MCP connection changed during resource read');
     if (!Array.isArray(result.contents) || !result.contents.length || result.contents.length > 100 || Buffer.byteLength(JSON.stringify(result)) > MAX_BYTES) throw fail('Invalid or oversized MCP resource contents');
     const contents = result.contents.map(item => {

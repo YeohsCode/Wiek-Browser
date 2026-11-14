@@ -26,7 +26,12 @@ readline.createInterface({input:process.stdin}).on('line',line=>{
  }
  if(m.method==='prompts/get'){if(modes.has('--change-on-get'))emit('notifications/prompts/list_changed');return result(m.id,{messages:[{role:modes.has('--bad-role')?'system':'user',content:{type:'text',text:'PRIVATE_PROMPT <script>window.promptExecuted=true</script> '+p.arguments.subject}}]});}
  if(m.method==='resources/list')return result(m.id,{resources:[{uri:'fixture:///notes',name:'Notes'}]});
- if(m.method==='resources/read')return result(m.id,{contents:[{uri:p.uri,text:'fixture resource'}]});
+ if(m.method==='resources/read'){
+  if(modes.has('--resource-input')&&!p.inputResponses)return send({jsonrpc:'2.0',id:m.id,result:{resultType:'input_required',requestState:'resource-state',inputRequests:{ask:{method:'elicitation/create',params:{message:'Continue the read',requestedSchema:{type:'object',properties:{}}}}}}});
+  if(modes.has('--resource-input')&&(p.requestState!=='resource-state'||p.inputResponses?.ask?.action!=='accept'))throw Error('Invalid fixture continuation');
+  return result(m.id,{contents:[{uri:p.uri,text:'fixture resource'}]});
+ }
+
  if(m.method==='tools/call'){
   const action=p.arguments?.action;
   if(action==='invalid-utf8'){process.stdout.write(Buffer.from([0xff]));return;}

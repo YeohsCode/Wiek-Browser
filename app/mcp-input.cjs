@@ -50,13 +50,24 @@ function validateSchema(schema) {
   }
   return schema;
 }
-function prepareInput(result) {
+function prepareInput(result,{allowUrl=false}={}) {
   if (!object(result) || result.resultType !== 'input_required' || Buffer.byteLength(JSON.stringify(result)) > 131072 || result.requestState !== undefined && !text(result.requestState, 65536) || !Object.hasOwn(result, 'inputRequests') && !Object.hasOwn(result, 'requestState')) throw fail('Malformed MCP input-required result');
   const requests = result.inputRequests === undefined ? {} : result.inputRequests;
   if (!object(requests) || Object.keys(requests).length > 8) throw fail('Invalid MCP input request map');
   const forms = Object.entries(requests).map(([id, request]) => {
-    if (!safeKey(id) || !allowed(request, ['method', 'params']) || request.method !== 'elicitation/create' || !allowed(request.params, ['mode', 'message', 'requestedSchema', '_meta']) || request.params.mode !== undefined && request.params.mode !== 'form') throw fail('Only form elicitation is supported for interactive tool tasks', 'VEK_MCP_UNSUPPORTED_CAPABILITY');
-    if (!text(request.params.message) || !request.params.message.trim()) throw fail('Invalid MCP input message');
+    const params=request?.params;
+    const unsupported=()=>fail('Unsupported MCP input request','VEK_MCP_UNSUPPORTED_CAPABILITY');
+    if (!safeKey(id) || !allowed(request,['method','params']) || request.method!=='elicitation/create') throw unsupported();
+    if (params?.mode==='url'){
+      if(!allowUrl||!allowed(params,['mode','message','url','_meta']))throw unsupported();
+      if(!text(params.message)||!params.message.trim()||!text(params.url,8192)||/[\s\\]/u.test(params.url))throw fail('Invalid MCP URL input');
+      let url;
+      try{url=new URL(params.url);}catch{throw fail('Invalid MCP input URL');}
+      if(url.protocol!=='https:'||url.username||url.password)throw fail('MCP input URLs must use HTTPS without embedded credentials');
+      return {id,mode:'url',message:params.message,origin:url.origin,url:url.href};
+    }
+    if (!allowed(params,['mode','message','requestedSchema','_meta'])||params.mode!==undefined&&params.mode!=='form')throw unsupported();
+    if (!text(params.message) || !params.message.trim()) throw fail('Invalid MCP input message');
     return { id, message: request.params.message, schema: validateSchema(request.params.requestedSchema) };
   });
   return { forms, ...(Object.hasOwn(result, 'requestState') ? { requestState: result.requestState } : {}) };
@@ -66,7 +77,7 @@ function validateResponses(forms, responses) {
   return Object.fromEntries(forms.map(form => {
     const response = responses[form.id];
     if (!allowed(response, ['action', 'content']) || !['accept', 'decline', 'cancel'].includes(response.action)) throw fail('Invalid input response action');
-    if (response.action !== 'accept') { if (Object.hasOwn(response, 'content')) throw fail('Decline and cancel must omit form content'); return [form.id, { action: response.action }]; }
+    if (response.action !== 'accept'||form.mode==='url') { if (Object.hasOwn(response, 'content')) throw fail('This input response must omit form content'); return [form.id, { action: response.action }]; }
     const content = response.content, schema = form.schema;
     if (!object(content) || Object.keys(content).some(key => !Object.hasOwn(schema.properties, key)) || (schema.required || []).some(key => !Object.hasOwn(content, key)) || Object.entries(content).some(([key, value]) => !validateValue(schema.properties[key], value))) throw fail('Input does not match the requested form schema');
     return [form.id, { action: 'accept', content: JSON.parse(JSON.stringify(content)) }];

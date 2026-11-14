@@ -53,15 +53,20 @@
       const result = await action('mcp:tools:list', { integrationId: integration.id, scope: scope() });
       if (result && integration.protocolVersion!=='2026-07-28') tools.set(`${integration.id}:${projectId}:${threadId}`, result.tools); render();
     }
-    async function readResource(integration, uri) {
+    async function readResource(integration, uri, interactive=false) {
       const selectedScope = JSON.stringify(scope());
+      if(interactive){
+        const task=await action('mcp:resources:readInteractive',{integrationId:integration.id,scope:scope(),uri});
+        if(task&&selectedScope===JSON.stringify(scope())){view='tasks';render();}
+        return;
+      }
       const result = await action('mcp:resources:read', { integrationId: integration.id, scope: scope(), uri });
       if (!result || selectedScope !== JSON.stringify(scope())) return;
       const contents = result.contents.map(row => row.blob === undefined ? row : { uri: row.uri, mimeType: row.mimeType, binaryBase64Characters: row.blob.length });
       dialog = { title: 'Resource contents', readonly: true, notice: result.stale ? 'Changed during this read. Read again for current content.' : 'Returned by the selected MCP server. Text is displayed as data; binary content is not opened.', fields: [field('Resource URI', 'uri', uri), field('Contents', 'contents', JSON.stringify(contents, null, 2), true)] }; render();
     }
-    function resourceUri(integration, template = '') {
-      dialog = { title: 'Read resource URI', notice: template ? `Template: ${template}. Enter a complete resource URI. It is sent to this MCP server only.` : 'Enter a complete resource URI. Wiek sends it to this MCP server and displays the returned data.', fields: [field('Resource URI', 'uri', '')], submit: values => readResource(integration, values.uri) }; render();
+    function resourceUri(integration, template = '', interactive=false) {
+      dialog = { title: 'Read resource URI', notice: template ? `Template: ${template}. Enter a complete resource URI. It is sent to this MCP server only.` : 'Enter a complete resource URI. Wiek sends it to this MCP server and displays the returned data.', fields: [field('Resource URI', 'uri', '')], submit: values => readResource(integration, values.uri, interactive) }; render();
     }
     function reviewSignIn(item, flow) {
       dialog={title:'Review OAuth sign-in',notice:`Authorize access to ${item.url}. Sign-in opens in your system browser. Review the issuer and permissions there; Wiek will store the resulting tokens using OS encryption. Tool requests are not automatically retried.`,submitLabel:'Open sign-in page',fields:[...(flow.clientIdentity?[{...field('Client identity','clientId',flow.clientIdentity.clientId),readonly:true},{...field('Registration mechanism','registration',flow.clientIdentity.registration),readonly:true},...(flow.clientIdentity.clientName?[{...field('Client name from metadata','clientName',flow.clientIdentity.clientName),readonly:true}]:[]),{...field('Loopback callback','redirectUri',flow.clientIdentity.redirectUri),readonly:true}]:[]),{...field('Authorization server','issuer',flow.issuer),readonly:true},{...field('MCP resource','resource',flow.resource),readonly:true},{...field('Requested permissions','scopes',flow.scopes.join(' ')||'(none specified)'),readonly:true}],submit:()=>action('mcp:oauth:open',{integrationId:item.id,scope:scope(),flowId:flow.id})};render();
@@ -83,8 +88,8 @@
       if (connection?.status !== 'connected') return;
       if (!connection.resourceCapabilities) return;
       const section = make('details'); section.dataset.resourceKey = `${item.id}:${projectId}:${threadId}`; section.open = resourceSections.get(section.dataset.resourceKey) === true; section.append(make('summary', 'Resources'));
-      const actions = make('div', '', 'vm-actions'); actions.append(button('List resources', () => action('mcp:resources:list', { integrationId: item.id, scope: scope() })), button('List templates', () => action('mcp:resources:templates', { integrationId: item.id, scope: scope() })), button('Read URI', () => resourceUri(item))); section.append(actions);
-      for (const resource of connection.resources || []) { const row = make('div', '', 'vm-tool'), info = make('div', '', 'vm-grow'); info.append(make('strong', resource.title || resource.name), make('p', resource.description || ''), make('code', resource.uri)); row.append(info, button('Read resource', () => readResource(item, resource.uri))); if (connection.resourceCapabilities.subscribe === true && !(connection.resourceSubscriptions || []).some(entry => entry.uri === resource.uri)) row.append(button('Subscribe', () => action('mcp:resources:subscribe', { integrationId: item.id, scope: scope(), uri: resource.uri }))); section.append(row); }
+      const actions = make('div', '', 'vm-actions'); actions.append(button('List resources', () => action('mcp:resources:list', { integrationId: item.id, scope: scope() })), button('List templates', () => action('mcp:resources:templates', { integrationId: item.id, scope: scope() })), button('Read URI', () => resourceUri(item))); if(item.protocolVersion==='2026-07-28')actions.append(button('Read URI with input',()=>resourceUri(item,'',true))); section.append(actions);
+      for (const resource of connection.resources || []) { const row = make('div', '', 'vm-tool'), info = make('div', '', 'vm-grow'); info.append(make('strong', resource.title || resource.name), make('p', resource.description || ''), make('code', resource.uri)); row.append(info, button('Read resource', () => readResource(item, resource.uri))); if(item.protocolVersion==='2026-07-28')row.append(button('Read with input',()=>readResource(item,resource.uri,true))); if (connection.resourceCapabilities.subscribe === true && !(connection.resourceSubscriptions || []).some(entry => entry.uri === resource.uri)) row.append(button('Subscribe', () => action('mcp:resources:subscribe', { integrationId: item.id, scope: scope(), uri: resource.uri }))); section.append(row); }
       if (connection.resources?.length === 0) section.append(make('p', 'No resources listed by this server.', 'vm-muted'));
       for (const template of connection.resourceTemplates || []) { const row = make('div', '', 'vm-tool'); row.append(make('span', `${template.title || template.name} · ${template.uriTemplate}`, 'vm-grow'), button('Use template', () => resourceUri(item, template.uriTemplate))); section.append(row); }
       for (const entry of connection.resourceSubscriptions || []) { const row = make('div', '', 'vm-tool'); row.append(make('span', `${entry.uri} · ${entry.status} · ${entry.revision > entry.readRevision ? 'changed — read again' : 'no unread update'} · updates ${entry.revision}`, 'vm-grow'), button('Read latest', () => readResource(item, entry.uri)), button('Unsubscribe', () => action('mcp:resources:unsubscribe', { integrationId: item.id, scope: scope(), uri: entry.uri }))); if(item.protocolVersion==='2026-07-28'&& !['subscribed','subscribing','unsubscribing'].includes(entry.status))row.append(button('Retry subscription',()=>action('mcp:resources:subscribe',{integrationId:item.id,scope:scope(),uri:entry.uri}))); if(entry.error)row.append(make('span',entry.error,'vm-error')); section.append(row); }
@@ -93,7 +98,13 @@
     function prompts(card,item,connection) {
       if(connection?.status!=='connected'||!connection.promptCapabilities)return;
       const section=make('details');section.dataset.resourceKey=`${item.id}:${projectId}:${threadId}:prompts`;section.open=resourceSections.get(section.dataset.resourceKey)===true;section.append(make('summary','Prompts'),button('List prompts',()=>action('mcp:prompts:list',{integrationId:item.id,scope:scope()})));
-      for(const prompt of connection.prompts||[]){const row=make('div','','vm-tool'),info=make('div','','vm-grow');info.append(make('strong',prompt.title||prompt.name),make('p',prompt.description||''));row.append(info,button('Preview prompt',()=>{dialog={title:prompt.title||prompt.name,notice:'Arguments are sent to this server only. Returned messages are previewed as data and are not sent to an Agent.',fields:[field('Prompt arguments — JSON object of strings','arguments','{}',true)],submitLabel:'Read prompt',submit:async values=>{let args;try{args=JSON.parse(values.arguments);}catch{throw new Error('Prompt arguments must be valid JSON.');}const selected=JSON.stringify(scope()),result=await action('mcp:prompts:get',{integrationId:item.id,scope:scope(),name:prompt.name,arguments:args});if(result&&selected===JSON.stringify(scope())){dialog={title:'Prompt preview',readonly:true,notice:result.stale?'The prompt list changed during this read. Refresh it before using these messages.':'Untrusted server messages. Previewing does not execute them or add them to an Agent conversation.',fields:[field('Messages','messages',JSON.stringify(result.messages,null,2),true)]};render();}}};render();}));section.append(row);}
+      for(const prompt of connection.prompts||[]){const row=make('div','','vm-tool'),info=make('div','','vm-grow');info.append(make('strong',prompt.title||prompt.name),make('p',prompt.description||''));row.append(info,button('Preview prompt',()=>{dialog={title:prompt.title||prompt.name,notice:'Arguments are sent to this server only. Returned messages are previewed as data and are not sent to an Agent.',fields:[field('Prompt arguments — JSON object of strings','arguments','{}',true)],submitLabel:'Read prompt',submit:async values=>{let args;try{args=JSON.parse(values.arguments);}catch{throw new Error('Prompt arguments must be valid JSON.');}const selected=JSON.stringify(scope()),result=await action('mcp:prompts:get',{integrationId:item.id,scope:scope(),name:prompt.name,arguments:args});if(result&&selected===JSON.stringify(scope())){dialog={title:'Prompt preview',readonly:true,notice:result.stale?'The prompt list changed during this read. Refresh it before using these messages.':'Untrusted server messages. Previewing does not execute them or add them to an Agent conversation.',fields:[field('Messages','messages',JSON.stringify(result.messages,null,2),true)]};render();}}};render();}));if(item.protocolVersion==='2026-07-28')row.append(button('Preview with input',()=>{
+        dialog={title:prompt.title||prompt.name,fields:[field('Prompt arguments — JSON object of strings','arguments','{}',true)],submitLabel:'Start preview',submit:async values=>{
+          let args;try{args=JSON.parse(values.arguments);}catch{throw new Error('Prompt arguments must be valid JSON.');}
+          const selected=JSON.stringify(scope()),task=await action('mcp:prompts:getInteractive',{integrationId:item.id,scope:scope(),name:prompt.name,arguments:args});
+          if(task&&selected===JSON.stringify(scope())){view='tasks';render();}
+        }};render();
+      }));section.append(row);}
       if(connection.prompts?.length===0)section.append(make('p','No prompts listed by this server.','vm-muted'));
       section.append(make('p','List changes invalidate this connection’s prompt list. Refresh it explicitly; previews are not persisted.','vm-muted'));card.append(section);
     }
@@ -127,6 +138,12 @@
       for(const [index,form] of review.forms.entries()){
         const actionKey=`action-${index}`;fields.push({label:form.message,key:actionKey,value:'accept',options:[{value:'accept',label:'Provide input'},{value:'decline',label:'Decline this input'},{value:'cancel',label:'Dismiss this input'}]});
         const entries=[];
+        if(form.mode==='url'){
+          const address={...field(form.opened?'Opened HTTPS site. Finish there before submitting.':'Requested HTTPS site',`url-${index}`,form.origin),readonly:true};
+          fields.push(address);
+          groups.push({id:form.id,actionKey,entries,address,opened:form.opened});
+          continue;
+        }
         for(const [key,schema] of Object.entries(form.schema.properties)){
           const fieldKey=`input-${index}-${entries.length}`,required=(form.schema.required||[]).includes(key),f={label:`${schema.title||key}${required?' (required)':''}${schema.description?' — '+schema.description:''}`,key:fieldKey,value:schema.default??'',optional:true,schema};
           const choice=value=>value.enum?.map(v=>({value:v,label:v}))||(value.oneOf||value.anyOf)?.map(v=>({value:v.const,label:v.title}));
@@ -139,20 +156,20 @@
         groups.push({id:form.id,actionKey,entries});
       }
       const payload=responses=>({id:task.id,scope:task.scope,reviewId:review.id,responses});
-      dialog={title:'Review requested input',taskId:task.id,reviewId:review.id,submitLabel:'Submit reviewed inputs',notice:`${integration?.name||task.integrationId} · ${integration?.url||''}\nTool: ${task.name} · Scope: ${scopeName(task.scope)} · Round ${review.round} · Expires ${new Date(review.expiresAt).toLocaleString()}. Inputs go to this server. Do not enter passwords, API keys or payment credentials. Submitted values and interactive results are kept only for this running app session.`,fields,
-        extraActions:[{label:'Decline all',run:()=>action('mcp:tasks:respond',payload(Object.fromEntries(groups.map(g=>[g.id,{action:'decline'}]))))},{label:'Cancel task',run:()=>action('mcp:tasks:cancel',{id:task.id,scope:task.scope})}],
-        submit:values=>{const responses=Object.fromEntries(groups.map(g=>{const selected=values[g.actionKey];if(selected!=='accept')return[g.id,{action:selected}];const content=Object.fromEntries(g.entries.flatMap(f=>{let value=values[f.fieldKey];if(value===''&&!f.required||f.schema.type==='array'&&!value.length&&!f.required)return[];if(f.schema.type==='boolean')value=value==='true'?true:value==='false'?false:undefined;else if(['number','integer'].includes(f.schema.type))value=value===''?undefined:Number(value);return[[f.key,value]];}));return[g.id,{action:'accept',content}];}));return action('mcp:tasks:respond',payload(responses));}};render();
+      dialog={title:'Review requested input',taskId:task.id,reviewId:review.id,submitLabel:'Submit reviewed inputs',notice:`${integration?.name||task.integrationId} · ${integration?.url||''}\n${task.kind==='resource'?'Resource':task.kind==='prompt'?'Prompt':'Tool'}: ${task.name} · Scope: ${scopeName(task.scope)} · Round ${review.round} · Expires ${new Date(review.expiresAt).toLocaleString()}. Inputs go to this server. Do not enter passwords, API keys or payment credentials. Submitted values and interactive results are kept only for this running app session.`,fields,
+        extraActions:[...groups.filter(g=>g.address&&!g.opened).map(g=>({label:'Open requested address',run:async()=>{const active=dialog;if(await action('mcp:tasks:openInputUrl',{...payload(),inputId:g.id},{close:false})&&dialog===active){g.address.label='Opened HTTPS site. Finish there before submitting.';g.opened=true;render();}},available:()=>!g.opened})),{label:'Decline all',run:()=>action('mcp:tasks:respond',payload(Object.fromEntries(groups.map(g=>[g.id,{action:'decline'}]))))},{label:'Cancel task',run:()=>action('mcp:tasks:cancel',{id:task.id,scope:task.scope})}],
+        submit:values=>{const responses=Object.fromEntries(groups.map(g=>{const selected=values[g.actionKey];if(selected!=='accept'||g.address)return[g.id,{action:selected}];const content=Object.fromEntries(g.entries.flatMap(f=>{let value=values[f.fieldKey];if(value===''&&!f.required||f.schema.type==='array'&&!value.length&&!f.required)return[];if(f.schema.type==='boolean')value=value==='true'?true:value==='false'?false:undefined;else if(['number','integer'].includes(f.schema.type))value=value===''?undefined:Number(value);return[[f.key,value]];}));return[g.id,{action:'accept',content}];}));return action('mcp:tasks:respond',payload(responses));}};render();
     }
     function tasks(body) {
       const list = [...data.tasks].reverse().filter(t => t.scope.projectId === projectId && (!threadId || t.scope.threadId === threadId));
-      if (!list.length) body.append(make('div', 'Tool calls appear here with their real status and result.', 'vm-empty'));
+      if (!list.length) body.append(make('div', 'Tool calls and interactive reads appear here.', 'vm-empty'));
       for (const task of list) {
         const card = make('article', '', 'vm-card'), row = make('div', '', 'vm-row'), info = make('div', '', 'vm-grow');
         info.append(make('h3', task.name), make('p', `${scopeName(task.scope)} · ${new Date(task.createdAt).toLocaleString()}`)); row.append(info, make('span', task.status, `vm-status vm-${task.status}`));
         if(task.inputReview)row.append(button('Review input',()=>reviewInput(task)));
         if (['queued', 'running','awaiting_input'].includes(task.status)) row.append(button('Cancel', () => action('mcp:tasks:cancel', { id: task.id, scope: task.scope })));
         card.append(row); if(task.resultRetained===false)card.append(make('p','Interactive results are not saved in task history.','vm-muted')); if (task.error) card.append(make('div', task.error, 'vm-error'));
-        if (task.result !== undefined) { const details = make('details'); details.append(make('summary', 'Tool result'), make('pre', JSON.stringify(task.result, null, 2), 'vm-result')); card.append(details); } body.append(card);
+        if (task.result !== undefined) { const details = make('details'); details.append(make('summary',task.kind==='resource'?'Resource contents':task.kind==='prompt'?'Prompt preview':'Tool result'), make('pre', JSON.stringify(task.result,(key,value)=>task.kind==='resource'&&key==='blob'&&typeof value==='string'?{binaryBase64Characters:value.length}:value,2), 'vm-result')); card.append(details); } body.append(card);
       }
     }
     function clients(body) {
@@ -168,7 +185,7 @@
         input.name = f.key; input.readOnly = Boolean(dialog.readonly||f.readonly); input.required = !dialog.readonly&&!f.optional&&!dialog.reviewId; input.dataset.focus = f.key; input.oninput = () => { f.value = f.multiple?[...input.selectedOptions].map(o=>o.value):input.value; }; label.append(input); form.append(label); }
       if (error) form.append(make('div', error, 'vm-error'));
       const buttons = make('div', '', 'vm-actions'); buttons.append(button(dialog.readonly ? 'Done' : 'Cancel', () => { dialog = null; error = ''; render(); }));
-      for(const extra of dialog.extraActions||[])buttons.append(button(extra.label,extra.run));
+      for(const extra of dialog.extraActions||[])if(!extra.available||extra.available())buttons.append(button(extra.label,extra.run));
       if (!dialog.readonly) { const submit = make('button', pending ? 'Working…' : dialog.submitLabel||'Save / continue', 'vm-button vm-primary'); submit.type = 'submit'; submit.disabled = pending; buttons.append(submit); }
       form.append(buttons); form.onsubmit = async event => { event.preventDefault(); error = ''; try { await dialog.submit(Object.fromEntries(dialog.fields.map(f => [f.key, f.value]))); } catch (failure) { error = failure.message; render(); } }; overlay.append(form); return overlay;
     }

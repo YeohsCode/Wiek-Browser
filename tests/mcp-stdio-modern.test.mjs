@@ -24,3 +24,25 @@ test('modern stdio service configuration, prompt reads and notification state st
 
 test('modern stdio rejects malformed UTF-8 without accepting partial response text',async t=>{const c=await client(t);await assert.rejects(control(c,'invalid-utf8'),/UTF-8/);assert.equal(c.state,'disconnected');});
 test('modern stdio input-required results are allowed only for explicitly interactive tool requests',async t=>{const c=await client(t);await assert.rejects(control(c,'input'),e=>e.error_code==='VEK_MCP_UNSUPPORTED_CAPABILITY');const result=await c.request('tools/call',{name:'control',arguments:{action:'input'}},{allowInput:true});assert.equal(result.resultType,'input_required');assert.equal(result.requestState,'PRIVATE_CONTINUATION');const resumed=await c.request('tools/call',{name:'control',arguments:{action:'input'},requestState:result.requestState,inputResponses:{ask:{action:'accept',content:{value:'reviewed'}}}},{allowInput:true});assert.equal(resumed.content[0].text,'Reviewed form accepted');});
+
+test('modern stdio resource continuation keeps subscriptions and completes only after explicit review',async t=>{
+ const dir=await mkdtemp(join(tmpdir(),'wiek-resource-stdio-'));
+ const service=createMcpService({dataDir:dir,resolveScope:async scope=>({...scope,projectPath:dir})});
+ t.after(async()=>{await service.close();await rm(dir,{recursive:true,force:true});});
+ const scope={projectId:'p'},ui={interactive:true};
+ await service.dispatch('mcp:integrations:save',{name:'Resource fixture',command:process.execPath,args:[fixture,'--resource-input'],protocolVersion:'2026-07-28',scope});
+ const integrationId=service.snapshot().integrations[0].id;
+ await service.dispatch('mcp:resources:subscribe',{integrationId,scope,uri});
+ const task=await service.dispatch('mcp:resources:readInteractive',{integrationId,scope,uri},ui);
+ let waiting;
+ for(let attempt=0;attempt<100&&!waiting?.inputReview;attempt++){
+   waiting=await service.dispatch('mcp:tasks:read',{id:task.id,scope});
+   if(!waiting.inputReview)await new Promise(resolve=>setTimeout(resolve,10));
+ }
+ assert.equal(waiting.status,'awaiting_input');
+ await service.dispatch('mcp:tasks:respond',{id:task.id,scope,reviewId:waiting.inputReview.id,responses:{ask:{action:'accept',content:{}}}},ui);
+ const done=await service.dispatch('mcp:tasks:wait',{id:task.id,scope,timeoutMs:3000});
+ assert.equal(done.status,'completed');
+ assert.deepEqual(done.result.contents,[{uri,text:'fixture resource'}]);
+ assert.equal(service.snapshot().connections[0].resourceSubscriptions[0].status,'subscribed');
+});

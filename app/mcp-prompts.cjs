@@ -46,11 +46,11 @@ const methods={
   }
   throw fail('MCP prompts pagination exceeded the limit');
  },
- async getPrompt(name,args={}, {signal}={}){
+ async getPrompt(name,args={}, {signal,request=this.request.bind(this)}={}){
   capability(this);text(name,'name',4096);if(!object(args)||Object.keys(args).length>100||Buffer.byteLength(JSON.stringify(args))>65536||Object.values(args).some(value=>typeof value!=='string'))throw fail('Prompt arguments must be bounded strings');
   const prompts=this.prompts||await this.listPrompts({signal}),selected=prompts.find(row=>row.name===name);if(!selected)throw fail('Choose a listed MCP prompt');
   const definitions=selected.arguments||[];if(Object.keys(args).some(key=>!definitions.some(row=>row.name===key))||definitions.some(row=>row.required===true&&!Object.hasOwn(args,row.name)))throw fail('MCP prompt arguments do not match its definition');
-  const generation=this.promptGeneration,revision=this.promptListRevision,result=await this.request('prompts/get',{name,arguments:args},{signal});
+  const generation=this.promptGeneration,revision=this.promptListRevision,result=await request('prompts/get',{name,arguments:args},{signal});
   if(this.state!=='connected'||generation!==this.promptGeneration)throw fail('MCP connection changed during prompt read');
   if(!object(result)||!Array.isArray(result.messages)||result.messages.length>100||Buffer.byteLength(JSON.stringify(result))>MAX_BYTES)throw fail('Invalid or oversized MCP prompt messages');
   const messages=result.messages.map(message=>{if(!object(message)||!['user','assistant'].includes(message.role))throw fail('Invalid MCP prompt role');return {role:message.role,content:content(message.content)};});

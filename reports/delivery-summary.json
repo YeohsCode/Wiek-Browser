@@ -55,9 +55,12 @@
     "receipt": "v030-install.json"
   },
   "ci": {
-    "status": "in_progress",
+    "status": "failed",
     "runId": 43566737280,
     "testedCommit": "97438b42c280ce662ef6044904cc74a8cd00dcc1",
-    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43566737280"
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43566737280",
+    "failedCase": "Page snapshot lazy iframe",
+    "packageIdentity": "not_run",
+    "packagedInterfaceLanguage": "passed"
   }
 }

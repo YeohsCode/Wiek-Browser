@@ -17,7 +17,7 @@ test('real CLI distinguishes reopening tabs, continuing scripts, completed tasks
   delete env.WIEK_BROWSER_AGENT_WORKSPACE;
   const web = createServer((request, response) => {
     response.setHeader('Content-Type', 'text/html');
-    response.end('<title>Recovery fixture</title><input id="draft"><h1>Local fixture</h1>');
+    response.end('<title>Recovery fixture</title><script>window.firstViewport = [innerWidth, innerHeight]</script><input id="draft"><h1>Local fixture</h1>');
   });
   await new Promise(resolve => web.listen(0, '127.0.0.1', resolve));
   const url = `http://127.0.0.1:${web.address().port}/`;
@@ -35,8 +35,10 @@ test('real CLI distinguishes reopening tabs, continuing scripts, completed tasks
   }
   try {
     await command('start'); running = true;
-    const created = await script(`const task=await taskSpace('recovery-fixture');const page=task.page('p1');await page.goto(${JSON.stringify(url)});await page.fill('#draft','unsaved input');console.log(JSON.stringify({recoveryFixture:true,id:task.spaceId,label:page.label}));`);
+    const created = await script(`const task=await taskSpace('recovery-fixture');const page=task.page('p1');await page.goto(${JSON.stringify(url)});await page.fill('#draft','unsaved input');console.log(JSON.stringify({recoveryFixture:true,id:task.spaceId,label:page.label,viewport:await page.evaluate(()=>window.firstViewport)}));`);
     check(created.label, 'p1');
+    assert.ok(created.viewport[0] >= 490 && created.viewport[1] >= 400,
+      'the first document in a background tab has a usable browser viewport'); checks++;
     const continued = await script(`const task=await taskSpace(${created.id});console.log(JSON.stringify({recoveryFixture:true,value:await task.page('p1').evaluate(()=>document.querySelector('#draft').value)}));`);
     check(continued.value, 'unsaved input');
 

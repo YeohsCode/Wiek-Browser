@@ -158,15 +158,21 @@ function uiState(selectedSpaceId = store.selected) {
 }
 function publish() { if (window && !window.isDestroyed()) window.webContents.send('vek:state', uiState());for(const [id,record]of spaceWindows)if(!record.window.isDestroyed())record.window.webContents.send('vek:state',uiState(id)); }
 let panelOpen = false;
+function pageBounds(owner, detached) {
+  const [width, height] = owner.getContentSize();
+  const { x, y } = detached ? { x: 0, y: 88 } : chromeBounds();
+  return { x, y, width: Math.max(1, width - x), height: Math.max(1, height - y) };
+}
 function layout() {
   if (!window || window.isDestroyed()) return;
-  const [width, height] = window.getContentSize();
-  const bounds=chromeBounds();
+  const mainBounds = pageBounds(window, false);
   for (const t of tabs.values()) {
-    const secondary=spaceWindows.get(t.spaceId)?.window;
-    const visible = (secondary||!panelOpen&&t.spaceId===store.selected) && t.view.webContents.getURL() !== 'about:blank' && t.view.webContents.getURL() !== '' && getSpace(t.spaceId).activeTab === t.id;
-    t.view.setVisible(visible);
-    if (visible) {if(secondary){const [w,h]=secondary.getContentSize();t.view.setBounds({x:0,y:88,width:Math.max(1,w),height:Math.max(1,h-88)});}else t.view.setBounds({ x: bounds.x, y: bounds.y, width: Math.max(1, width - bounds.x), height: Math.max(1, height - bounds.y) });}
+    const secondary = spaceWindows.get(t.spaceId)?.window;
+    const url = t.view.webContents.getURL();
+    const visible = (secondary || !panelOpen && t.spaceId === store.selected) &&
+      url !== 'about:blank' && url !== '' && getSpace(t.spaceId).activeTab === t.id;
+    t.view.setBounds(secondary ? pageBounds(secondary, true) : mainBounds);
+    t.view.setVisible(Boolean(visible));
   }
 }
 function sessionFor(profileId) {
@@ -189,8 +195,12 @@ function sessionFor(profileId) {
 function makeTab(space, url = 'about:blank', { activate = true, reveal = false, nativeOptions, openerId, deferNavigation = false } = {}) {
   const view = new WebContentsView({ ...(nativeOptions?.webContents ? { webContents: nativeOptions.webContents } : {}), webPreferences: { ...nativeOptions?.webPreferences, session: sessionFor(space.profileId), preload: path.join(__dirname, 'page-preload.cjs'), sandbox: true, contextIsolation: true, nodeIntegration: false, webSecurity: true, backgroundThrottling: false, safeDialogs: false } });
   const t = { id: '', spaceId: space.id, view, url, ...(deferNavigation?{restoreUrl:normalizeURL(url)}:{}), openerId, rootSession: null, childSessions: new Set(), favicon: null };
-  (spaceWindows.get(space.id)?.window||window).contentView.addChildView(view);
+  const secondary = spaceWindows.get(space.id)?.window;
+  const owner = secondary || window;
+  // Hidden agent tabs and native popups still need a viewport before parsing.
+  view.setBounds(pageBounds(owner, Boolean(secondary)));
   view.setVisible(false);
+  owner.contentView.addChildView(view);
   const wc = view.webContents;
   wc.on('preload-error', (_, file, error) => console.error('Page preload:', file, error));
   wc.on('context-menu',(_event,params)=>showPageContextMenu(t,params));
@@ -534,11 +544,11 @@ async function captureTabImage(t) {
   // Briefly render the requested page at its real viewport before capture,
   // then restore the chrome/panel layout even when the compositor fails.
   const wc=t.view.webContents,owner=spaceWindows.get(t.spaceId)?.window||window;
-  const [width,height]=owner.getContentSize(),bounds=spaceWindows.has(t.spaceId)?{x:0,y:88}:chromeBounds();
+  const bounds = pageBounds(owner, spaceWindows.has(t.spaceId));
   const current=()=>!wc.isDestroyed()&&getSpace(t.spaceId).activeTab===t.id&&(spaceWindows.has(t.spaceId)||t.spaceId===store.selected);
   if(!current())throw new Error('The page changed before screenshot capture');
   try{
-    t.view.setBounds({x:bounds.x,y:bounds.y,width:Math.max(1,width-bounds.x),height:Math.max(1,height-bounds.y)});t.view.setVisible(true);wc.invalidate();
+    t.view.setBounds(bounds);t.view.setVisible(true);wc.invalidate();
     await new Promise(resolve=>setTimeout(resolve,45));
     for(let attempt=0;attempt<3;attempt++){
       if(!current())throw new Error('The page changed before screenshot capture');

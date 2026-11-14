@@ -79,6 +79,11 @@ jobs:
           WIEK_MCP_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
           VEK_MCP_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
         run: node --test --test-concurrency=1 tests/profile-web-storage.test.mjs tests/profile-indexeddb.test.mjs tests/mcp-prompts-panel.test.mjs tests/mcp-input-panel.test.mjs tests/mcp-modern-panel.test.mjs > reports/ci-migration-mcp-panels.log 2>&1
+      - name: Packaged desktop and recording panels
+        env:
+          VEK_DESKTOP_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
+          WIEK_RECORDER_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
+        run: node --test --test-concurrency=1 tests/desktop-panel.test.mjs tests/desktop-monitor-panel.test.mjs tests/recorder-panel.test.mjs > reports/ci-desktop-panels.log 2>&1
       - name: Packaged interface language
         env:
           WIEK_LANGUAGE_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app

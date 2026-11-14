@@ -9,7 +9,7 @@ const require = createRequire(import.meta.url);
 
 test('real Electron recorder panel previews one requested image and wires explicit record/export/soft-delete controls', { timeout: 30000 }, async () => {
   const directory = await mkdtemp(join(tmpdir(), 'vek-recorder-ui-'));
-  const script = join(directory, 'probe.cjs'), panelPath = resolve(new URL('../app/recorder-panel.js', import.meta.url).pathname);
+  const script = join(directory, 'probe.cjs'), panelPath = resolve(process.env.WIEK_RECORDER_APP_ROOT || join(import.meta.dirname, '..'), 'app/recorder-panel.js');
   const code = `
     const {app,BrowserWindow}=require('electron');const fs=require('node:fs');const assert=require('node:assert/strict');
     app.setPath('userData',${JSON.stringify(join(directory, 'profile'))});

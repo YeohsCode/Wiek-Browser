@@ -1,6 +1,13 @@
 # Wiek Browser 验证结果
 
-当前开发检查点为 **0.29.0**，日期为 2026-11-14。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+当前开发检查点为 **0.30.0**，日期为 2026-11-14。完整功能覆盖和正式发行条件继续见[计划](../PLAN.md)。
+
+## 0.30 界面语言
+
+- 设置新增跟随系统、简体中文和 English，即时切换并保留选择。打包版验收覆盖主窗口、独立标签组窗口、菜单、重启恢复和输入法组词中的刷新。用户输入与用户命名保持原样。[语言验收](v030-interface-language.log)
+- 本地串行源码回归 617/617。0.30 初版应用包宿主 198 项、浏览器同集 69/69 和 1,248 条断言通过。最终应用包包含之后完成的译文和术语校对，语言验收重新通过，207 份发行文件及 81 份原始输入身份一致。[源码](v030-source.log) · [宿主](v030-package-workbench.log) · [同集](v030-browser-suite.log) · [最终应用包核对](v030-package-identity.log)
+- 界面字典覆盖自有菜单、面板、提示与已知错误。网站内容、用户内容、第三方服务输出及系统自身对话框各自显示原有语言。部分低频错误和动态状态仍需逐项核对。
+- 源码提交 `97438b4` 已推送，本机命令和指南链接已更新。[安装](v030-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43566737280)
 
 ## 0.29 专项验收
 
@@ -10,7 +17,7 @@
 - P3 打包桌面面板 2/2 及后台启动器隔离验收通过。桌面面板使用合成捕获，实机录屏、撤权、多屏和系统后台注册待验收。[桌面](v029-package-desktop.log) · [启动器](v029-package-scheduler.log)
 - P4 的 31 项线上任务顺序校验通过。本地评估框架首次 335/336，系统 PATH 上的 CLI 安装缺少原生组件；仅在测试进程内切换到本机已有的可用 CLI 后，336/336 通过。线上模型评估仍需测试环境配置。[首次](v029-framework.log) · [复测](v029-framework-retest.log) · [任务身份](p4-benchmark-readiness.json)
 - 本机串行源码回归 614/616。两项合成 Git/PR 用例分别收到不确定结果和超时，原期限单独复测 2/2。[全量](v029-source.log) · [复测](v029-git-cases.log)
-- 本机命令与三处指南链接已更新，源码提交 `d0b34dc` 已推送。[安装记录](v029-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43552273366)
+- 本机命令与三处指南链接已更新，源码提交 `d0b34dc` 已推送，远端 CI 已通过。[安装记录](v029-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43552273366)
 
 ## 0.28 专项验收
 

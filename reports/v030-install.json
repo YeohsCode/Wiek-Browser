@@ -1,0 +1,12 @@
+{
+  "installed": true,
+  "command": "/Users/andrewyeoh/.local/bin/wiek-browser",
+  "skill": "/Users/andrewyeoh/.agents/skills/wiek-browser",
+  "root": "/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/dist-validation/v030-final/mac-arm64/Wiek Browser.app/Contents/Resources/app",
+  "changedEntries": [
+    "/Users/andrewyeoh/.local/bin/wiek-browser",
+    "/Users/andrewyeoh/.agents/skills/wiek-browser",
+    "/Users/andrewyeoh/.codex/skills/wiek-browser",
+    "/Users/andrewyeoh/.claude/skills/wiek-browser"
+  ]
+}

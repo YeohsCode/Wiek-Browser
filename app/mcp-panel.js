@@ -80,6 +80,16 @@
       const credential=data.oauth?.credentials?.find(same),flow=data.oauth?.flows?.filter(same).at(-1),actions=make('div','','vm-actions');
       if(credential)card.append(make('p',tr("Signed in with {0} · {1}{2}", (credential.issuer), (credential.scopes.join(' ') || tr('no scopes returned')), (credential.expiresAt?` · expires ${new Date(credential.expiresAt).toLocaleString(globalThis.WiekI18n?.locale())}`:'')),'vm-muted'));
       if(flow)card.append(make('p',tr("OAuth: {0}{1}", tr(flow.status), flow.error ? ' · ' + (globalThis.WiekI18n?.error(flow.error) ?? flow.error) : ''),'vm-muted'));
+      const additional = data.oauth?.additionalScopes?.find(same);
+      if(additional){
+        card.append(make('p',tr('Additional permissions requested: {0}',additional.scopes.join(' ')),'vm-muted'));
+        const review=button(tr('Review additional permissions'),async()=>{
+          const result=await action('mcp:oauth:prepare',{integrationId:item.id,scope:scope(),stepUp:true});
+          if(result?.status==='prepared')reviewSignIn(item,result);
+        });
+        review.disabled=pending||!data.oauth?.available||['discovering','prepared','authorizing','exchanging'].includes(flow?.status);
+        actions.append(review);
+      }
       if(!data.oauth?.available)card.append(make('p',tr("OAuth sign-in is unavailable: secure OS credential storage is required."),'vm-error'));
       if(!flow||!['discovering','prepared','authorizing','exchanging'].includes(flow.status)){const prepare=button(credential?tr("Authorize again"):tr("Prepare sign-in"),async()=>{const result=await action('mcp:oauth:prepare',{integrationId:item.id,scope:scope()});if(result?.status==='prepared')reviewSignIn(item,result)});prepare.disabled=pending||!data.oauth?.available;actions.append(prepare);}
       if(flow?.status==='prepared')actions.append(button(tr("Review sign-in"),()=>reviewSignIn(item,flow)));

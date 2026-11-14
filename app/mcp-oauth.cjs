@@ -82,13 +82,13 @@ function tokenData(data, previous, meta) {
 function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, openExternal, onChange = () => {}, onSecret = () => {}, timeoutMs = 180000 } = {}) {
   const directory = path.join(dataDir, 'mcp'), file = path.join(directory, 'oauth-tokens.json'); fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   if (fs.lstatSync(directory).isSymbolicLink()) throw fail('OAuth directory must not be a symlink');fs.chmodSync(directory,0o700);
-  let credentials = [], closed = false; const flows = new Map(), refreshing = new Map();
+  let credentials = [], closed = false; const flows = new Map(), refreshing = new Map(), scopeChallenges = new Map();
   if (fs.existsSync(file)) { const stat = fs.lstatSync(file); if (!stat.isFile() || stat.isSymbolicLink() || stat.size > 4 * 1024 * 1024) throw fail('Invalid encrypted OAuth store'); const saved = JSON.parse(fs.readFileSync(file, 'utf8')); if (saved.version !== 1 || !Array.isArray(saved.credentials) || saved.credentials.length > 256) throw fail('Invalid OAuth store version'); credentials = saved.credentials.map(row=>{if(!row||typeof row!=='object'||Array.isArray(row)||Object.keys(row).some(key=>!['key','integrationId','scope','fingerprint','issuer','resource','scopes','expiresAt','sealed'].includes(key))||!/^[a-f0-9]{64}$/.test(row.key)||!/^[a-f0-9]{64}$/.test(row.fingerprint)||!row.scope||Object.keys(row.scope).some(key=>!['projectId','threadId'].includes(key)))throw fail('Invalid OAuth credential record');text(row.integrationId,'integration ID',200);text(row.scope.projectId,'project ID',200);if(row.scope.threadId!==undefined)text(row.scope.threadId,'thread ID',200);text(row.issuer,'stored issuer',16384);text(row.resource,'stored resource',16384);scopes(row.scopes);if(row.expiresAt!==null&&(!Number.isFinite(row.expiresAt)||row.expiresAt<=0))throw fail('Invalid OAuth expiry');if(typeof row.sealed!=='string'||row.sealed.length>131072||!row.sealed||Buffer.from(row.sealed,'base64').toString('base64')!==row.sealed)throw fail('Invalid encrypted OAuth token');return row;});if(new Set(credentials.map(row=>row.key)).size!==credentials.length)throw fail('Duplicate OAuth credentials');fs.chmodSync(file,0o600); }
   function persist(next) { if (next.length > 256) throw fail('OAuth credential limit reached'); const data = JSON.stringify({ version: 1, credentials: next }); if (Buffer.byteLength(data) > 4 * 1024 * 1024) throw fail('OAuth store exceeds its size limit'); const temporary = file + '.' + randomUUID() + '.tmp'; try { fs.writeFileSync(temporary, data, { flag: 'wx', mode: 0o600 }); fs.renameSync(temporary, file); credentials = next; } finally { try { fs.unlinkSync(temporary); } catch {} } }
   function publish() { try { onChange(); } catch {} }
   function ensure() { if (closed) throw fail('OAuth manager is closed'); if (!available() || typeof encrypt !== 'function' || typeof decrypt !== 'function') throw fail('Secure OS credential storage is unavailable'); }
   function publicFlow(flow) { return { id: flow.id, integrationId: flow.integrationId, scope: flow.scope, status: flow.status, issuer: flow.meta?.issuer, resource: flow.meta?.resource, scopes: flow.meta?.scopes, expiresAt: flow.expiresAt, error: flow.error, ...(flow.clientIdentity?{clientIdentity:flow.clientIdentity}:{}) }; }
-  function snapshot() { return { available: !closed && available(), credentials: credentials.map(({ sealed, key, fingerprint, ...row }) => row), flows: [...flows.values()].map(publicFlow) }; }
+  function snapshot() { return { available: !closed && available(), credentials: credentials.map(({ sealed, key, fingerprint, ...row }) => row), flows: [...flows.values()].map(publicFlow), additionalScopes: credentials.flatMap(row => {const requested=scopeChallenges.get(row.key);return requested?.binding===row.fingerprint?[{integrationId:row.integrationId,scope:row.scope,scopes:requested.scopes}]:[];}) }; }
   function finish(flow, status, error) { flow.status = status; flow.error = error; clearTimeout(flow.timer); flow.controller.abort(); flow.server?.closeIdleConnections?.(); flow.server?.close(); flow.verifier = ''; flow.state = ''; flow.authorizationUrl = ''; publish(); }
   function save(config, scope, data) {
     ensure(); const key = keyFor(config, scope), fingerprint = binding(config, scope);
@@ -99,7 +99,28 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
     onSecret(data.accessToken);if(data.refreshToken)onSecret(data.refreshToken);
     persist([...credentials.filter(item=>item.key!==key),row]);publish();
   }
-  async function prepare(config, scope) {
+  function scopeChallenge(config, scope, header) {
+    const key = keyFor(config, scope);
+    const credential = credentials.find(row => row.key === key && row.fingerprint === binding(config, scope));
+    if (!credential) return;
+    try {
+      const parsed = challenge(header);
+      if (parsed.error !== 'insufficient_scope' || !parsed.scope) return;
+      const required = scopes(parsed.scope.split(' ').filter(Boolean));
+      if (!required.some(value => !credential.scopes.includes(value))) return;
+      const requested = scopes([...credential.scopes, ...required]);
+      if (!scopeChallenges.has(key) && scopeChallenges.size >= 256) scopeChallenges.delete(scopeChallenges.keys().next().value);
+      scopeChallenges.set(key, { binding: credential.fingerprint, scopes: requested });
+      publish();
+    } catch {
+      // A malformed challenge cannot add permissions to the review.
+    }
+  }
+  async function prepare(config, scope, { stepUp = false } = {}) {
+    const key = keyFor(config, scope);
+    const upgrade = stepUp ? scopeChallenges.get(key) : null;
+    if (stepUp && upgrade?.binding !== binding(config, scope)) throw fail('No additional OAuth permissions are pending');
+
     ensure(); if (!normalizeOAuth(config.oauth)) throw fail('Configure a public OAuth client ID first');
     for (const old of flows.values()) if (old.integrationId === config.id && JSON.stringify(old.scope) === JSON.stringify(scope) && ['discovering','prepared','authorizing','exchanging'].includes(old.status)) throw fail('OAuth sign-in is already in progress');
     if ([...flows.values()].filter(row => ['discovering','prepared','authorizing','exchanging'].includes(row.status)).length >= 8) throw fail('Too many pending OAuth sign-ins');
@@ -107,8 +128,9 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
     const flow = { id: randomUUID(), integrationId: config.id, scope: copy(scope), fingerprint: binding(config, scope), controller: new AbortController(), status: 'discovering', expiresAt: new Date(Date.now() + timeoutMs).toISOString() }; flows.set(flow.id, flow); flow.timer = setTimeout(() => finish(flow, 'expired', 'Sign-in expired; start a new authorization'), timeoutMs); flow.timer.unref?.(); publish();
     try {
       flow.meta = await discover(config, flow.controller.signal);
+      if (upgrade) flow.meta.scopes = upgrade.scopes;
       const previous=credentials.find(row=>row.key===keyFor(config,scope)&&row.fingerprint===binding(config,scope));
-      if(config.oauth.registration!=='metadata'&&previous){
+      if((upgrade||config.oauth.registration!=='metadata')&&previous){
         let identity;try{identity=JSON.parse(decrypt(Buffer.from(previous.sealed,'base64')));if(identity.binding!==binding(config,scope)||identity.resource!==canonical(config.url)||typeof identity.issuer!=='string')throw Error();}catch{throw fail('Encrypted OAuth client identity cannot be verified; sign in again');}
         if(identity.issuer!==flow.meta.issuer)throw fail('Pre-registered client belongs to a different authorization server; configure the expected issuer before authorizing again');
       }
@@ -131,7 +153,11 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
           const token = await fetchBounded(url(flow.meta.tokenEndpoint, config), { method: 'POST', body, signal: flow.controller.signal });
           if (token.status !== 200) throw fail(`OAuth token exchange failed (HTTP ${token.status}); no automatic retry`);
           if (flow.controller.signal.aborted || closed || flow.fingerprint !== binding(config, scope)) throw fail('OAuth configuration changed or sign-in cancelled');
-          save(config, scope, tokenData(token.data, null, flow.meta)); reply(200, 'Authorization complete. Return to Wiek.'); finish(flow, 'authorized');
+          const granted = tokenData(token.data, null, flow.meta);
+          if (upgrade && !upgrade.scopes.every(value => granted.scopes.includes(value))) throw fail('OAuth server did not grant the reviewed scopes');
+          save(config, scope, granted);
+          if (upgrade && scopeChallenges.get(key) === upgrade) scopeChallenges.delete(key);
+          reply(200, 'Authorization complete. Return to Wiek.'); finish(flow, 'authorized');
         } catch { reply(400, 'Authorization failed. Return to Wiek and start again.'); if (!['cancelled','expired'].includes(flow.status)) finish(flow, 'failed', 'Token exchange failed; start a new sign-in. The code was not replayed.'); }
       });
       flow.server.maxConnections = 16; flow.server.requestTimeout = 5000; flow.server.headersTimeout = 5000;
@@ -145,7 +171,7 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
   function flowFor(id, config, scope) { const flow = flows.get(id); if (!flow || flow.integrationId !== config.id || flow.fingerprint !== binding(config, scope)) throw fail('OAuth flow is outside this configuration/scope'); return flow; }
   async function open(id, config, scope) { ensure(); const flow = flowFor(id, config, scope); if (flow.status !== 'prepared') throw fail('OAuth flow is not ready to open'); if (typeof openExternal !== 'function') throw fail('External browser sign-in is unavailable'); flow.status = 'authorizing'; publish(); try { await openExternal(flow.authorizationUrl); } catch { finish(flow, 'failed', 'Could not open the authorization page'); throw fail('Could not open the authorization page'); } return publicFlow(flow); }
   function cancel(id, config, scope) { const flow = flowFor(id, config, scope); if (['discovering','prepared','authorizing','exchanging'].includes(flow.status)) finish(flow, 'cancelled'); return publicFlow(flow); }
-  function forget(config, scope) { for (const flow of flows.values()) if (flow.integrationId === config.id && (!scope || JSON.stringify(flow.scope) === JSON.stringify(scope)) && ['discovering','prepared','authorizing','exchanging'].includes(flow.status)) finish(flow, 'cancelled'); for (const active of refreshing.values()) if (active.integrationId === config.id && (!scope || active.key === keyFor(config, scope))) active.controller.abort(); persist(credentials.filter(row => row.integrationId !== config.id || scope && row.key !== keyFor(config, scope))); publish(); }
+  function forget(config, scope) { for(const row of credentials)if(row.integrationId===config.id&&(!scope||row.key===keyFor(config,scope)))scopeChallenges.delete(row.key);for (const flow of flows.values()) if (flow.integrationId === config.id && (!scope || JSON.stringify(flow.scope) === JSON.stringify(scope)) && ['discovering','prepared','authorizing','exchanging'].includes(flow.status)) finish(flow, 'cancelled'); for (const active of refreshing.values()) if (active.integrationId === config.id && (!scope || active.key === keyFor(config, scope))) active.controller.abort(); persist(credentials.filter(row => row.integrationId !== config.id || scope && row.key !== keyFor(config, scope))); publish(); }
   async function authorization(config, scope, signal) {
     ensure();if([...flows.values()].some(flow=>flow.integrationId===config.id&&JSON.stringify(flow.scope)===JSON.stringify(scope)&&['discovering','prepared','authorizing','exchanging'].includes(flow.status)))throw fail('OAuth sign-in is in progress; finish or cancel it before connecting','VEK_MCP_OAUTH_REQUIRED');  const key = keyFor(config, scope), row = credentials.find(item => item.key === key && item.fingerprint === binding(config, scope)); if (!row) throw fail('OAuth sign-in is required; prepare authorization explicitly', 'VEK_MCP_OAUTH_REQUIRED');
     let data; try { data = JSON.parse(decrypt(Buffer.from(row.sealed, 'base64')));if(data.binding!==binding(config,scope)||data.resource!==canonical(config.url)||data.expiresAt!==null&&(!Number.isFinite(data.expiresAt)||data.expiresAt<=0))throw fail('OAuth credential binding mismatch'); tokenData({ token_type: 'Bearer', access_token: data.accessToken, ...(data.refreshToken ? { refresh_token: data.refreshToken } : {}) }, data, data); } catch { throw fail('Encrypted OAuth credential cannot be opened; sign in again'); }
@@ -164,6 +190,6 @@ function createMcpOAuth({ dataDir, encrypt, decrypt, available = () => false, op
     })(); return operation.promise;
   }
   function close() { if (closed) return; closed = true; for (const flow of flows.values()) if (['discovering','prepared','authorizing','exchanging'].includes(flow.status)) finish(flow, 'cancelled'); for (const operation of refreshing.values()) operation.controller.abort();for(const flow of flows.values())flow.server?.closeAllConnections?.(); }
-  return { snapshot, prepare, open, cancel, forget, authorization, close };
+  return { snapshot, prepare, open, cancel, forget, authorization, scopeChallenge, close };
 }
 module.exports = { createMcpOAuth, normalizeOAuth, challenge, discover };

@@ -17,7 +17,7 @@ async function fixture(t, settings = {}) {
   let body = ''; for await (const chunk of req) body += chunk;
   const parsed = new URL(req.url, base), form = new URLSearchParams(req.headers['content-type']==='application/json'?'':body); calls.push({ method: req.method, path: parsed.pathname, body: Object.fromEntries(form), authorization: req.headers.authorization });
   const json = (value, status = 200) => { res.writeHead(status, { 'content-type': 'application/json' }); res.end(JSON.stringify(value)); };
-  if ((parsed.pathname === '/mcp' || parsed.pathname === '/mcp/')&&settings.mcp&&req.method==='POST'&&!settings.unauthorized&&req.headers.authorization===`Bearer ${tokens.at(-1)?.access_token}`){const message=JSON.parse(body);if(!Object.hasOwn(message,'id')){res.writeHead(202);res.end();return;}let result={};if(message.method==='initialize')result={protocolVersion:'2025-11-25',serverInfo:{name:'oauth-peer'},capabilities:{tools:{}}};if(message.method==='tools/list')result={tools:[{name:'echo',inputSchema:{type:'object'}}]};if(message.method==='tools/call')result={content:[{type:'text',text:JSON.stringify({authorized:true,credential:req.headers.authorization})}]};return json({jsonrpc:'2.0',id:message.id,result});}
+  if ((parsed.pathname === '/mcp' || parsed.pathname === '/mcp/')&&settings.mcp&&req.method==='POST'&&!settings.unauthorized&&req.headers.authorization===`Bearer ${tokens.at(-1)?.access_token}`){const message=JSON.parse(body);if(!Object.hasOwn(message,'id')){res.writeHead(202);res.end();return;}let result={};if(message.method==='initialize')result={protocolVersion:'2025-11-25',serverInfo:{name:'oauth-peer'},capabilities:{tools:{}}};if(message.method==='tools/list')result={tools:[{name:'echo',inputSchema:{type:'object'}}]};if(message.method==='tools/call'&&settings.stepUpChallenge){res.writeHead(403,{'WWW-Authenticate':settings.stepUpChallenge});res.end();return;}if(message.method==='tools/call')result={content:[{type:'text',text:JSON.stringify({authorized:true,credential:req.headers.authorization})}]};return json({jsonrpc:'2.0',id:message.id,result});}
   if((parsed.pathname==='/mcp'||parsed.pathname==='/mcp/')&&settings.mcp&&req.method==='GET'&&req.headers.authorization===`Bearer ${tokens.at(-1)?.access_token}`){res.writeHead(405);res.end();return;}
   if (parsed.pathname === '/mcp' || parsed.pathname === '/mcp/') { res.writeHead(401, settings.noChallenge ? {} : { 'WWW-Authenticate': `Basic realm="other", Bearer realm="fixture, public", resource_metadata="${base}/metadata", scope="notes:read"` }); res.end(); return; }
   if (parsed.pathname === '/metadata' || parsed.pathname.startsWith('/.well-known/oauth-protected-resource')) {
@@ -38,11 +38,12 @@ async function fixture(t, settings = {}) {
    assert.equal(form.get('resource'), base + '/mcp'); assert.equal(form.get('client_id'), 'public-client'); assert.equal(req.headers.authorization, undefined);
    if(settings.slowToken)await pause(settings.slowToken);
    if (settings.tokenFailure) return json({}, 503);
+   let requestedScope;
    if (form.get('grant_type') === 'authorization_code') {
-    const code = codes.get(form.get('code')); if (!code) return json({}, 400); codes.delete(form.get('code'));
+    const code = codes.get(form.get('code')); if (!code) return json({}, 400); codes.delete(form.get('code')); requestedScope=code.scope;
     assert.equal(form.get('redirect_uri'), code.redirect_uri); assert.equal(createHash('sha256').update(form.get('code_verifier')).digest('base64url'), code.code_challenge);
    } else { assert.equal(form.get('grant_type'), 'refresh_token'); assert.equal(form.get('refresh_token'), tokens.at(-1).refresh_token); if (settings.refreshFailure) return json({}, 503); }
-   const result = { access_token: 'access-fixture-' + randomUUID(), refresh_token: 'refresh-fixture-' + randomUUID(), token_type: 'Bearer', expires_in: ++issued === 1 ? settings.expiresIn || 3600 : 3600, scope: 'notes:read',...settings.tokenOverride };
+   const result = { access_token: 'access-fixture-' + randomUUID(), refresh_token: 'refresh-fixture-' + randomUUID(), token_type: 'Bearer', expires_in: ++issued === 1 ? settings.expiresIn || 3600 : 3600, scope: form.get('grant_type')==='authorization_code' ? requestedScope || 'notes:read' : 'notes:read',...settings.tokenOverride };
    if(settings.sameRotation&&form.get('grant_type')==='refresh_token')result.refresh_token=tokens.at(-1).refresh_token;
    if (settings.noRotation && form.get('grant_type') === 'refresh_token') delete result.refresh_token;
    tokens.push(result); return json(result);
@@ -174,4 +175,35 @@ test('invalid token types, unsafe header tokens, short values and invalid lifeti
 
 test('cancelling an in-flight code exchange never stores late-issued credentials or replays the code',async t=>{
  const h=await fixture(t,{slowToken:200});const flow=await h.prepare();await h.manager.open(flow.id,h.config,scope);const redirect=await fetch(h.opened(),{redirect:'manual'});const pending=fetch(redirect.headers.get('location'));for(let i=0;i<50&&!h.calls.some(row=>row.path==='/token');i++)await pause(5);assert.equal(h.calls.filter(row=>row.path==='/token').length,1);h.manager.cancel(flow.id,h.config,scope);assert.equal((await pending).status,400);await pause(220);assert.equal(h.manager.snapshot().credentials.length,0);assert.equal(h.manager.snapshot().flows[0].status,'cancelled');assert.equal(h.calls.filter(row=>row.path==='/token').length,1);
+});
+
+
+test('HTTP insufficient_scope opens a scoped, reviewed OAuth upgrade and does not replay the failed tool', async t => {
+ const h = await serviceFixture(t);
+ await h.authorize();
+ assert.equal((await h.callTool()).status, 'completed');
+ const posts = () => h.calls.filter(call => call.method === 'POST' && call.path === '/mcp').length;
+ const before = posts();
+ h.settings.stepUpChallenge = 'Bearer error="insufficient_scope", scope="notes:write"';
+ assert.equal((await h.callTool()).status, 'failed');
+ assert.equal(posts(), before + 1);
+ assert.deepEqual(h.service.snapshot().oauth.additionalScopes, [
+   { integrationId: h.id, scope, scopes: ['notes:read', 'notes:write'] }
+ ]);
+ await assert.rejects(h.action('prepare', { stepUp: true, scope: { projectId: 'p', threadId: 'other' } }), /pending/);
+ const oldUrl = h.opened();
+ const flow = await h.action('prepare', { stepUp: true });
+ assert.deepEqual(flow.scopes, ['notes:read', 'notes:write']);
+ assert.equal(h.opened(), oldUrl);
+ await h.action('open', { flowId: flow.id });
+ const authorization = new URL(h.opened());
+ assert.equal(authorization.searchParams.get('scope'), 'notes:read notes:write');
+ const redirect = await fetch(authorization, { redirect: 'manual' });
+ const callback = await fetch(redirect.headers.get('location'));
+ assert.equal(callback.status, 200, await callback.text());
+ assert.equal(posts(), before + 1);
+ assert.deepEqual(h.service.snapshot().oauth.additionalScopes, []);
+ assert.deepEqual(h.service.snapshot().oauth.credentials[0].scopes, ['notes:read', 'notes:write']);
+ delete h.settings.stepUpChallenge;
+ assert.equal((await h.callTool()).status, 'completed');
 });

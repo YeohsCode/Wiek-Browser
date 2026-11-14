@@ -2273,6 +2273,9 @@
     "no unread update": "无未读更新",
     "no scopes returned": "未返回授权范围",
     "Web storage covers current unpartitioned top-level HTTP(S) origins in open tabs. IndexedDB includes supported values, attachments and auto-increment stores. Unsupported values such as CryptoKey are skipped. The archive also excludes iframe storage, service workers, site permissions and extension binaries.": "网页存储覆盖已打开标签页当前未分区的顶层 HTTP(S) 网站。IndexedDB 支持常见数据、附件和自增主键仓库。备份会跳过 CryptoKey 等不支持的数据类型，也不包含 iframe 存储、Service Worker、网站权限和扩展程序文件。",
+    "Additional permissions requested: {0}": "服务请求增加权限：{0}",
+    "Review additional permissions": "审核新增权限",
+    "No additional OAuth permissions are pending": "没有待审核的 OAuth 新增权限",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

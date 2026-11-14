@@ -18,6 +18,8 @@
 
 - [x] 加密档案 v4 保留每个标签页最多 64 条前进和后退记录及当前位置，继续读取 v1 至 v3。保留当前网站的独立标签页会话。专项 22/22，实际应用 IPC 42 项检查。
 
+- [x] MCP 服务返回 HTTP 403 和新增权限时，按集成与对话显示审核入口。授权保留现有权限及所需新权限，原请求由用户重新发起。OAuth 与 HTTP 专项 55/55。[协议](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization#step-up-authorization-flow)
+
 ## 0.29 检查点
 
 - [x] P2 MCP 现代协议资源读取和提示预览支持人工审核续传，工具、资源和提示可使用表单或 HTTPS URL 输入。
@@ -114,7 +116,7 @@
 |---|---|---|
 | P0：文件与 turn 一致性 | turn 前后快照、实际 diff、显式恢复、保护快照、linked worktree 隔离 | 新增单文件 2 MiB 与 2,000 文件上限的回退验收，覆盖工作树、索引、快照和锁。更多目录布局与总大小边界待验收 |
 | P1：provider 与会话 | 已接入的原生协议、目录、可见历史导入、分支/审批/中断与退出等待 | 按既有优先级暂缓其他 provider；源会话完整迁移、后台任务和 gateway 注入继续保留 |
-| P2：MCP | 传统/现代stdio与HTTP、作用域、工具/资源、显式订阅、提示列表/预览和变更失效、预注册OAuth/PKCE、身份审核、工具、资源和提示的表单及 URL 续传 | 托管客户端身份、DCR/完整 step-up、旧版 URL 流程、sampling/roots |
+| P2：MCP | 传统/现代stdio与HTTP、作用域、工具/资源、显式订阅、提示列表/预览和变更失效、预注册OAuth/PKCE、身份审核、工具、资源和提示的表单及 URL 续传、审核式 OAuth 增量授权 | 托管客户端身份发布、DCR、旧版 URL 流程、sampling/roots |
 | P2：资料迁移 | 选择来源的基础 Chromium 导入；v4 加密归档及标签页前进和后退记录、显式顶层localStorage/当前页sessionStorage、有界IndexedDB（含 Map、Set、RegExp、自增键、共享与循环引用、稀疏数组、固定缓冲区视图和 Blob/File） | 多来源完整迁移、CryptoKey 等其余 IndexedDB 类型、跨来源或嵌入页面的会话状态及 OS 绑定密文兼容 |
 | P3：桌面与录制 | 显式截图/选区、被动工具栏、指定应用录制、孤儿监听自停 | 最终包正向、多屏、实际撤权和更多应用矩阵 |
 | P3：自动化 | 时区/DST、执行模式、显式后台作业、忙碌延期、记忆/结果、停止判定、崩溃恢复、8种安装布局与代码身份保护 | 物理sleep/wake、logout/login、后台项撤销和更多发行布局 |

@@ -1,0 +1,16 @@
+{
+  "fixtureOnly": true,
+  "runtimeVersion": "0.30.0",
+  "realOSBootstrap": true,
+  "realRunAtLoad": true,
+  "foregroundGateRespected": true,
+  "noDuplicate": true,
+  "sameDedicatedThreadAcrossOSChecks": true,
+  "realOSBootout": true,
+  "cleanupConfirmed": true,
+  "physicalSleepWakeTested": false,
+  "loginFileInUserLibrary": false,
+  "modelCalls": 0,
+  "externalAccountActions": 0,
+  "completedAt": "2026-11-14T09:42:18.519Z"
+}

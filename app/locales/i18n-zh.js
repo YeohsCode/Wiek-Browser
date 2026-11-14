@@ -2293,6 +2293,7 @@
     "Refresh lists the project’s listening processes. Refresh and identify also reads titles from up to 12 local addresses.": "刷新会列出此项目中正在监听的进程。刷新并识别还会尝试读取最多 12 个本地地址的页面标题。",
     "This address did not return supported HTML.": "此地址没有返回支持的 HTML 页面。",
     "No title found.": "未找到标题。",
+    "Browser tools": "浏览器工具",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

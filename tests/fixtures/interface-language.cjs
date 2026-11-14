@@ -48,6 +48,12 @@ async function verify(window) {
     await js(`window.vek.action("space:attach-window", ${tabGroup})`);
     await set('zh-CN');
     await wait('document.documentElement.lang === "zh-CN"');
+    assert.equal(await js('document.querySelector("#browser-tools").open'), false);
+    assert.equal(await js('document.querySelector("#browser-tools summary").textContent'), '浏览器工具');
+    await js('document.querySelector("#browser-tools summary").click()');
+    await wait('document.querySelector("#browser-tools").open');
+    await js('document.querySelector("#browser-tools [data-panel=history]").click()');
+    await wait('!document.querySelector("#browser-tools").open && document.querySelector("#panel-content h1")?.textContent === "历史记录"');
     await js('document.querySelector("[data-panel=agents]").click()');
     await wait('document.querySelector("#agent-root h1")?.textContent === "智能体工作区"');
     await js('document.querySelector("[data-panel=settings]").click()');

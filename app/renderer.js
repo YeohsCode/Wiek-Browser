@@ -210,7 +210,10 @@ $('rename-space').onclick = async () => { $('space-menu').hidden = true; const n
 $('finish-task').onclick = () => { act('space:finish'); closeMenu(); };
 $('close-space').onclick = () => { if (confirm(tr("Close this tab group and all of its tabs?"))) act('space:close'); closeMenu(); };
 function closeMenu() { $('space-menu').hidden = true; act('panel', Boolean(currentPanel)); }
-for (const b of document.querySelectorAll('[data-panel]')) b.onclick = () => showPanel(b.dataset.panel);
+for (const b of document.querySelectorAll('[data-panel]')) b.onclick = () => {
+  if (b.closest('#browser-tools')) $('browser-tools').open = false;
+  return showPanel(b.dataset.panel);
+};
 window.addEventListener('vek:show-panel', event => { if (['agents','voice','catalog','workspace','mcp','preferences','library','recorder','spaces','desktop','scheduler'].includes(event.detail)) void showPanel(event.detail); });
 document.addEventListener('keydown', e => { if (!e.isComposing && e.key === 'Escape') { if (!$('space-modal').hidden) $('cancel-space').click(); closeMenu(); } });
 window.WiekDesktopActions={openImage:async value=>{await showPanel('library');if(window.WiekLibraryPanel.hasDraft()&&!confirm(tr("Replace your unsaved screenshot edits with this desktop capture?")))return false;await window.WiekLibraryPanel.openCapture(value);return true;}};

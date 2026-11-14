@@ -60,3 +60,21 @@ test('checkpoint size limits leave files, references and index unchanged and rel
   await fs.rm(generated, { recursive: true });
   assert.ok((await f.action('create', { name: 'Retry' })).checkpoint.id);
 });
+
+test('aggregate checkpoint limit preserves all files and releases the index lock', async t => {
+  const f = await fixture(t);
+  const index = await f.read('.git/index');
+  const directory = path.join(f.root, 'large-corpus');
+  await fs.mkdir(directory);
+  const block = Buffer.alloc(2 * 1024 * 1024, 6);
+  for (let i = 0; i < 16; i++) await fs.writeFile(path.join(directory, String(i)), block);
+  // Tracked fixture files put the total just above the aggregate limit.
+  await assert.rejects(f.action('create', {name:'Aggregate limit'}), /Checkpoint content exceeds 32 MiB/);
+  assert.deepEqual((await f.action('list')).checkpoints, []);
+  assert.deepEqual(await f.read('.git/index'), index);
+  await assert.rejects(f.read('.git/index.lock'), {code:'ENOENT'});
+  assert.equal((await fs.readdir(directory)).length,16);
+  assert.deepEqual(await fs.readFile(path.join(directory,'15')),block);
+  await fs.rm(directory,{recursive:true});
+  assert.ok((await f.action('create',{name:'After removing oversized corpus'})).checkpoint.id);
+});

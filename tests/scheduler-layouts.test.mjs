@@ -97,3 +97,25 @@ test('symlinked package metadata is rejected during review before login setup is
   const f=await fixture(t),outside=join(f.base,'metadata.json');await rename(join(f.root,'package.json'),outside);await symlink(outside,join(f.root,'package.json'));
   await assert.rejects(f.act('prepare'),/canonical regular file/);assert.deepEqual(f.calls,[]);
 });
+
+test('an atomic app replacement at the original path requires a fresh review', async t => {
+  const f = await fixture(t);
+  await f.enable();
+  const previous = join(f.base, 'previous release');
+  await rename(f.root, previous);
+  await mkdir(join(f.root, 'app'), { recursive: true });
+  await copyFile(join(previous, 'package.json'), join(f.root, 'package.json'));
+  await copyFile(join(previous, 'app/scheduler-launch.cjs'), join(f.root, 'app/scheduler-launch.cjs'));
+  const marker = join(f.base, 'replacement-ran');
+  await writeFile(join(f.root, 'app/scheduler-worker.cjs'), `
+    exports.runSchedulerTick = async () => {
+      require('node:fs').writeFileSync(${JSON.stringify(marker)}, 'reviewed');
+      return {status:'completed', attempted:[], skipped:[]};
+    };`);
+  assert.equal((await launch(join(f.data, 'scheduler'))).status, 'needs-review');
+  assert.equal(existsSync(marker), false);
+  await f.act('disable');
+  await f.enable();
+  assert.equal((await launch(join(f.data, 'scheduler'))).status, 'completed');
+  assert.equal(await readFile(marker, 'utf8'), 'reviewed');
+});

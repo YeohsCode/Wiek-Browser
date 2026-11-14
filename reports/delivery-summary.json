@@ -73,5 +73,37 @@
     },
     "packageIdentity": "passed",
     "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43573976448"
+  },
+  "followUp": {
+    "testedSourceCommit": "e92f4f1",
+    "fullSourceBaseline": {
+      "passed": 624,
+      "failed": 0,
+      "subsequentFocusedTestsPassed": true
+    },
+    "localPackage": {
+      "targetedPassed": 20,
+      "browserPassed": 69,
+      "browserAssertions": 1248,
+      "packageFiles": 208,
+      "originalInputs": 81
+    },
+    "benchmarkInputs": {
+      "frameworkFiles": 263,
+      "tasks": 31,
+      "onlineRun": false
+    },
+    "desktopPreflight": {
+      "displays": 1,
+      "screen": true,
+      "accessibility": true,
+      "inputMonitoring": true,
+      "captureTestPerformed": false
+    },
+    "ci": {
+      "runId": 43581417475,
+      "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43581417475",
+      "status": "in_progress"
+    }
   }
 }

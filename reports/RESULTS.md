@@ -9,6 +9,8 @@
 - 界面字典覆盖自有菜单、面板、提示与已知错误。网站内容、用户内容、第三方服务输出及系统自身对话框各自显示原有语言。部分低频错误和动态状态仍需逐项核对。
 - 源码提交 `97438b4` 已推送，本机命令和指南链接已更新。[安装](v030-install.json) · [远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43566737280)
 
+- 0.30 初始远端运行中，延迟 iframe 在滚动前发出请求。后台标签页先设尺寸后，修复提交 `addd02c` 的本地和远端同集均通过 69/69 项、1,248 条断言，远端发行文件及原始输入核对通过。[远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/43573976448)
+
 ## 0.29 专项验收
 
 - MCP 现代 HTTP 与 stdio 支持交互式资源读取和提示预览续传。实际 Electron 面板验证 URL 打开和继续提交为两个动作，打开操作由测试回调记录。续传保留原请求参数与服务端状态。普通读取继续保留直达预览。[实现范围](../analysis/mcp-input-continuations.md)

@@ -62,5 +62,16 @@
     "failedCase": "Page snapshot lazy iframe",
     "packageIdentity": "not_run",
     "packagedInterfaceLanguage": "passed"
+  },
+  "stabilizationCi": {
+    "status": "passed",
+    "runId": 43573976448,
+    "testedCommit": "addd02ca9e44563a8309fb9bb6bab501376b376d",
+    "browserSuite": {
+      "pass": 69,
+      "assertions": 1248
+    },
+    "packageIdentity": "passed",
+    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43573976448"
   }
 }

@@ -2,7 +2,7 @@
 
 (() => {
   const tr = (message, ...values) => globalThis.WiekI18n?.t(message, ...values) ?? message.replace(/\{(\d+)\}/g, (match, index) => index < values.length ? String(values[index]) : match);
-  function createPanel(root, invoke) {
+  function createPanel(root, invoke, { embedded = false } = {}) {
     let data, error = '', pending = false, editor = null, draft = '', dirty = false, destroyed = false;
     let memoryData = null, memoryQuery = '', memoryResults = null, memoryDocument = null, memoryProjectId = '', memoryProjects = [], memoryNotice = '';
     const media = window.matchMedia('(prefers-color-scheme: dark)');
@@ -56,7 +56,7 @@
       if (destroyed) return;
       const active = root.contains(document.activeElement) ? document.activeElement : null, focus = active?.dataset.focus, selection = active && 'selectionStart' in active ? [active.selectionStart,active.selectionEnd] : null;
       root.classList.add('vek-preferences-panel'); root.dataset.theme = data?.theme === 'system' ? media.matches ? 'dark' : 'light' : data?.theme || 'light'; root.replaceChildren();
-      const heading = make('div', '', 'vp-heading'); heading.append(make('h1', tr("Preferences")), button(tr("Refresh"), async () => update(await invoke('preferences:snapshot', {})))); root.append(heading);
+      const heading = make('div', '', 'vp-heading'); if (!embedded) heading.append(make('h1', tr("Preferences"))); heading.append(button(tr("Refresh"), async () => update(await invoke('preferences:snapshot', {})))); root.append(heading);
       if (!data) { root.append(make('p', tr("Loading preferences…"))); return; }
       if (error && !editor) root.append(make('div', (globalThis.WiekI18n?.error(error) ?? (error)), 'vp-error'));
       const appearance = section(tr("Appearance"), tr("Choose how your browser workspace looks."));
@@ -83,5 +83,5 @@
     const onTheme=()=>render();media.addEventListener?.('change',onTheme);render();
     return {update,destroy(){destroyed=true;media.removeEventListener?.('change',onTheme);editor=null;root.replaceChildren();root.classList.remove('vek-preferences-panel')}};
   }
-  let mounted;window.createWiekPreferencesPanel=createPanel;window.WiekPreferencesPanel={mount(root,invoke){mounted?.destroy();mounted=createPanel(root,invoke);return mounted},update(value){mounted?.update(value)},destroy(){mounted?.destroy();mounted=null}};
+  let mounted;window.createWiekPreferencesPanel=createPanel;window.WiekPreferencesPanel={mount(root,invoke,options){mounted?.destroy();mounted=createPanel(root,invoke,options);return mounted},update(value){mounted?.update(value)},destroy(){mounted?.destroy();mounted=null}};
 })();

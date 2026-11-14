@@ -2294,6 +2294,9 @@
     "This address did not return supported HTML.": "此地址没有返回支持的 HTML 页面。",
     "No title found.": "未找到标题。",
     "Browser tools": "浏览器工具",
+    "Settings sections": "设置分区",
+    "Profiles and data": "资料与数据",
+    "Appearance & shortcuts": "外观与快捷键",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

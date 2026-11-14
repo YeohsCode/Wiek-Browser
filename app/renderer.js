@@ -1,6 +1,6 @@
 'use strict';
 const tr = (message, ...values) => globalThis.WiekI18n?.t(message, ...values) ?? message.replace(/\{(\d+)\}/g, (match, index) => index < values.length ? String(values[index]) : match);
-let state, currentPanel = null, addressEditing = false;
+let state, currentPanel = null, addressEditing = false, settingsSection = 'data';
 const $ = id => document.getElementById(id);
 const text = (tag, content, cls) => { const e = document.createElement(tag); e.textContent = content; if (cls) e.className = cls; return e; };
 async function act(name, value) { try { if(['navigate','space:select','tab:new','tab:select','tab:close'].includes(name))window.WiekToolsPanel.dispose();const next = await window.vek.action(name, value); if (next?.spaces && next?.tabs) render(next); return next; } catch (e) { toast(e.message); } }
@@ -14,6 +14,7 @@ function render(next) {
   if(currentPanel!=='translation')window.WiekTranslationPanel?.dispose();
   if(currentPanel!=='desktop')window.WiekDesktopPanel?.dispose();
   if(currentPanel!=='scheduler')window.WiekSchedulerPanel?.dispose();
+  if(currentPanel!=='settings')window.WiekPreferencesPanel.destroy();
   document.documentElement.dataset.theme=next.darkMode?'dark':'light';document.body.dataset.tabLayout=next.preferences?.tabLayout||'horizontal';
   $('version').textContent = next.version;
   const spaces = $('spaces'); spaces.replaceChildren();
@@ -52,7 +53,13 @@ function render(next) {
   $('panel-content').hidden = !currentPanel;
   if (currentPanel) renderPanel();
 }
-async function showPanel(name) { if (currentPanel === 'voice' && name !== 'voice') window.WiekToolsPanel.dispose(); currentPanel = name; await act('panel', true); renderPanel(); }
+async function showPanel(name) {
+  if (currentPanel === 'voice' && name !== 'voice') window.WiekToolsPanel.dispose();
+  if (name === 'preferences') settingsSection = 'appearance';
+  currentPanel = name === 'preferences' ? 'settings' : name;
+  await act('panel', true);
+  renderPanel();
+}
 const panelTitles = { workspace:'Project files & Git', mcp:'External tools (MCP)', catalog:'Agent skills & shortcuts', voice:'Voice input', preferences:'Browser preferences', library:'Saved items & screenshots', recorder:'Page action history', desktop:'Desktop tools', scheduler:'Run tasks while browser is closed', agents:'Agents & automations' };
 function updatePanelLanguage() {
   const heading = document.querySelector('#panel-content > .panel-heading');
@@ -64,7 +71,7 @@ function updatePanelLanguage() {
 function renderPanel() {
   if (window.WiekI18n.deferWhileComposing($('panel-content'), renderPanel)) return;
   const p = $('panel-content'); p.hidden = false; $('empty').hidden = true;
-  if (['workspace','mcp','catalog','voice','preferences','library','recorder','desktop','scheduler'].includes(currentPanel)) {
+  if (['workspace','mcp','catalog','voice','library','recorder','desktop','scheduler'].includes(currentPanel)) {
     const name = currentPanel;
     let root = document.getElementById(`workbench-${name}`);
     if (!root) {
@@ -76,7 +83,6 @@ function renderPanel() {
       else if (name==='mcp') window.WiekMcpPanel.mount(root,dispatch,state.agents || {});
       else if (name==='desktop') window.WiekDesktopPanel.mount(root,dispatch);
       else if(name==='scheduler')window.WiekSchedulerPanel.mount(root,dispatch);
-      else if (name==='preferences') window.WiekPreferencesPanel.mount(root,dispatch);
       else if (name==='library') window.WiekLibraryPanel.mount(root,dispatch);
       else if (name==='recorder') window.WiekRecorderPanel.mount(root,dispatch);
       else window.WiekToolsPanel.mount(root,dispatch,state,name);
@@ -85,7 +91,6 @@ function renderPanel() {
     else if (name==='mcp') window.WiekMcpPanel.update(state);
     else if (name==='desktop') window.WiekDesktopPanel.update(state);
     else if(name==='scheduler')window.WiekSchedulerPanel.update(state);
-    else if (name==='preferences') window.WiekPreferencesPanel.update(state);
     else if (name==='library') window.WiekLibraryPanel.update(state.library);
     else if (name==='recorder') window.WiekRecorderPanel.update(state.recorder);
     else window.WiekToolsPanel.update(state);
@@ -108,6 +113,13 @@ function renderPanel() {
     window.WiekAgentPanel.update(state.agents || {});
     return;
   }
+  if (currentPanel === 'settings' && settingsSection === 'appearance' &&
+      p.querySelector('[data-settings-section="appearance"][aria-current="true"]') &&
+      p.dataset.settingsLocale === state.interfaceLocale) {
+    window.WiekPreferencesPanel.update(state);
+    return;
+  }
+  if (currentPanel === 'settings') p.dataset.settingsLocale = state.interfaceLocale;
   p.replaceChildren();
   const labels = { bookmarks: ['Bookmarks', 'A place for the pages you want to keep.'], history: ['History', 'Your recent browsing, stored on this device.'], downloads: ['Downloads', 'Files from your browsing sessions.'], settings: ['Settings', 'Profiles, browser data, and local preferences.'] };
   const heading = text('div', '', 'panel-heading'), left = text('div', ''); left.append(text('h1', tr(labels[currentPanel][0])), text('p', tr(labels[currentPanel][1]))); heading.append(left);
@@ -130,6 +142,28 @@ function renderPanel() {
   if (currentPanel === 'history' && list.length) { const clear = text('button', tr("Clear history"), 'subtle-button'); clear.onclick = () => act('history:clear'); p.append(clear); }
 }
 function settingsPanel(p) {
+  const sections = text('nav', '', 'settings-actions');
+  sections.setAttribute('aria-label', tr('Settings sections'));
+  for (const [id, label] of [['data','Profiles and data'], ['appearance','Appearance & shortcuts']]) {
+    const button = text('button', tr(label), 'subtle-button');
+    button.dataset.settingsSection = id;
+    button.setAttribute('aria-current', String(settingsSection === id));
+    button.onclick = () => {
+      if (settingsSection === id) return;
+      if (id === 'data') window.WiekPreferencesPanel.destroy();
+      settingsSection = id;
+      renderPanel();
+    };
+    sections.append(button);
+  }
+  p.append(sections);
+  if (settingsSection === 'appearance') {
+    const root = text('div','','tools-root');
+    p.append(root);
+    window.WiekPreferencesPanel.mount(root, (action, value) => window.vek.action(action, value), { embedded: true });
+    window.WiekPreferencesPanel.update(state);
+    return;
+  }
   function card(title, description) { const c = text('div', '', 'card'); c.append(text('h3', title), text('p', description)); p.append(c); return c; }
   const language = card(tr('Interface language'), tr('Choose the language used in Wiek Browser.'));
   const languageSelect = document.createElement('select');
@@ -146,7 +180,6 @@ function settingsPanel(p) {
     render(await window.vek.state());
   };
   language.append(languageSelect);
-  const preferences=card(tr("Make Wiek yours"),tr("Appearance, tab layout, shortcuts, background tasks, local context, and selection actions."));const openPreferences=text('button',tr("Appearance & shortcuts…"),'subtle-button');openPreferences.onclick=()=>showPanel('preferences');preferences.append(openPreferences);
   const profiles = card(tr("Browser profiles"), tr("Each profile keeps its own cookies, sessions, cache, and local storage. Tab groups using the same profile share login state."));
   for (const profile of state.profiles) { const row = text('div', '', 'row'); row.append(text('div', profile.name, 'row-main')); if (profile.isDefault) row.append(text('span', tr("DEFAULT"), 'badge')); else { const button = text('button', tr("Make default")); button.onclick = () => act('profile:default', profile.id); row.append(button); } profiles.append(row); }
   const add = text('button', tr("＋ Add profile"), 'subtle-button'); add.onclick = async () => { const name = await askText(tr("Browser profile name")); if (name) act('profile:create', name); }; profiles.append(add);

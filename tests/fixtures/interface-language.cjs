@@ -32,6 +32,11 @@ async function verify(window) {
 
   if (phase === 'switch') {
     assert.equal(await js('document.querySelector("#interface-language").getAttribute("aria-label")'), '界面语言');
+    await js('document.querySelector("[data-settings-section=appearance]").click()');
+    await wait('document.querySelector(".vek-preferences-panel")?.textContent.includes("外观")');
+    assert.equal(await js('document.querySelector("#panel-content h1").textContent'), '设置');
+    await js('document.querySelector("[data-settings-section=data]").click()');
+    await wait('!!document.querySelector("#interface-language")');
     await js('window.vek.state().then(s => window.vek.action("space:create", {name:"Settings",profileId:s.profiles[0].id}))');
     await wait('[...document.querySelectorAll(".space-title")].some(node => node.textContent === "Settings")');
     const tabGroup = await js('window.vek.state().then(s => s.spaces.find(group => group.name === "Settings").id)');

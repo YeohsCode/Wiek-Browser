@@ -50,6 +50,12 @@ async function verify(window) {
     await wait('document.documentElement.lang === "zh-CN"');
     await js('document.querySelector("[data-panel=agents]").click()');
     await wait('document.querySelector("#agent-root h1")?.textContent === "智能体工作区"');
+    await js('document.querySelector("[data-panel=settings]").click()');
+    await wait('!!document.querySelector("#interface-language")');
+    await js('([...document.querySelectorAll("button")].find(b => b.textContent === globalThis.WiekI18n.t("Desktop capture & global shortcuts…"))).click()');
+    await wait('document.querySelector("#workbench-desktop")?.textContent.includes("选中文本监听：已关闭")');
+    await js('document.querySelector("[data-panel=agents]").click()');
+    await wait('document.querySelector("#agent-root h1")?.textContent === "智能体工作区"');
     const composition = await js(`(() => {
       const input = document.createElement('input');
       document.querySelector('#agent-root').append(input);

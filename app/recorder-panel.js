@@ -42,21 +42,21 @@
     const recordings = [...state.sessions].filter(item => !!item.deletedAt === deletedView).sort((a, b) => String(b.startedAt).localeCompare(String(a.startedAt)));
     for (const item of recordings) {
       const row = button('', () => chooseSession(item.id), `vr-session ${item.id === selectedId ? 'is-active' : ''}`);
-      row.append(element('strong', item.name), element('small', tr("{0} actions · {1}", ((item.events || []).length), (item.status))), element('small', when(item.startedAt))); rail.append(row);
+      row.append(element('strong', item.name), element('small', tr("{0} actions · {1}", ((item.events || []).length), tr(item.status))), element('small', when(item.startedAt))); rail.append(row);
     }
     if (!recordings.length) rail.append(element('p', deletedView ? tr("No deleted recordings.") : tr("No recordings yet. Recording is off by default."), 'vr-hint'));
     layout.append(rail);
     const main = element('section', undefined, 'vr-main'), current = session();
     if (!current) main.append(element('div', tr("Start a recording on the page you want to inspect."), 'vr-empty'));
     else {
-      const heading = element('div', undefined, 'vr-session-heading'), info = element('div'); info.append(element('h2', current.name), element('p', current.url || tr("No URL metadata")), element('p', `${current.title || ''} · ${current.status}${current.stopReason ? ` · ${current.stopReason}` : ''}`));
+      const heading = element('div', undefined, 'vr-session-heading'), info = element('div'); info.append(element('h2', current.name), element('p', current.url || tr("No URL metadata")), element('p', `${current.title || ''} · ${tr(current.status)}${current.stopReason ? ` · ${tr(current.stopReason)}` : ''}`));
       const actions = element('div', undefined, 'vr-actions'); actions.append(button(tr("Export action history (JSON)"), () => action('recorder:file:export', { id: current.id })), button(current.deletedAt ? tr("Restore recording") : tr("Delete recording"), () => action(current.deletedAt ? 'recorder:restore' : 'recorder:delete', { id: current.id }), current.deletedAt ? '' : 'vr-danger')); heading.append(info, actions); main.append(heading);
       const stats = element('p', tr("{0}/{1} actions · {2} MiB of screenshots · {3} MiB per session maximum", ((current.events || []).length), (state.limits?.maxEvents || 200), ((Number(current.imageBytes || 0) / 1048576).toFixed(2)), ((Number(state.limits?.maxTotalImageBytes || 52428800) / 1048576).toFixed(0))), 'vr-hint'); main.append(stats);
       if (current.deletedAt) main.append(element('p', tr("Soft deleted. The local recording and screenshots remain recoverable."), 'vr-notice'));
       const content = element('div', undefined, 'vr-content'), timeline = element('ol', undefined, 'vr-timeline'); timeline.setAttribute('aria-label', tr("Recorded actions"));
       for (const event of current.events || []) {
         const row = element('li'), select = button('', () => chooseEvent(event), `vr-event ${event.id === selectedEventId ? 'is-active' : ''}`);
-        select.append(element('strong', describe(event)), element('code', event.selector || (event.box ? tr("Element geometry recorded") : tr("Page action"))), element('small', `${when(event.at)} · ${event.screenshotStatus || 'No screenshot'}`)); row.append(select); timeline.append(row);
+        select.append(element('strong', describe(event)), element('code', event.selector || (event.box ? tr("Element geometry recorded") : tr("Page action"))), element('small', `${when(event.at)} · ${tr(event.screenshotStatus || 'No screenshot')}`)); row.append(select); timeline.append(row);
       }
       if (!(current.events || []).length) timeline.append(element('li', current.status === 'recording' ? tr("Waiting for a supported action on the recorded page…") : tr("No supported actions were captured."), 'vr-hint'));
       const viewer = element('section', undefined, 'vr-preview'); viewer.setAttribute('aria-label', tr("Recorded screenshot preview"));
@@ -64,7 +64,7 @@
       if (event) {
         viewer.append(element('h3', describe(event)));
         if (preview?.eventId === event.id) { const image = element('img'); image.alt = tr("Screenshot captured after the recorded action"); image.src = preview.source; viewer.append(image); }
-        else viewer.append(element('p', event.image ? tr("Loading recorded screenshot…") : tr("No screenshot: {0}.", (event.screenshotStatus || 'not captured')), 'vr-hint'));
+        else viewer.append(element('p', event.image ? tr("Loading recorded screenshot…") : tr("No screenshot: {0}.", tr(event.screenshotStatus || 'not captured')), 'vr-hint'));
         if (event.box) viewer.append(element('code', tr("Element box · x {0}, y {1}, width {2}, height {3}", (event.box.x), (event.box.y), (event.box.width), (event.box.height))));
         viewer.append(element('p', event.url, 'vr-hint'));
       } else viewer.append(element('div', tr("Choose an action to inspect its screenshot and element box."), 'vr-empty'));

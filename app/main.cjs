@@ -682,7 +682,7 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       const passwords=value?.includePasswords?vaultFor(s.profileId).list().map(row=>({origin:row.origin,...vaultFor(s.profileId).forOrigin(row.id,row.origin)})):[];
       const payload={profile:{name:profile(s.profileId).name,id:s.profileId},spaces,...(captured.webStorage?{webStorage:captured.webStorage}:{}),...(indexed.indexedDB?{indexedDB:indexed.indexedDB}:{}),bookmarks:store.bookmarks.filter(row=>belongsToProfile(row,s.profileId)&&/^https?:/i.test(row.url)).map(row=>({url:row.url,title:row.title||row.url,...(row.folder?{folder:row.folder}:{})})),history:store.history.filter(row=>(row.profileId===s.profileId||!row.profileId&&s.profileId==='Default')&&/^https?:/i.test(row.url)).map(row=>({url:row.url,title:row.title||row.url,at:row.at})),cookies,passwords,extensionsMetadata:(store.extensionPaths[s.profileId]||[]).map(row=>({id:row.id,name:row.name||'Extension',version:row.version||'0',enabled:row.enabled!==false}))};
       const encoded=await createProfileArchive().encode(payload,passphrase);writePrivateFile(pick.filePath,encoded);
-      profileArchiveResult={message:"Encrypted profile exported.",counts:{spaces:spaces.length,cookies:cookies.length,passwords:passwords.length,...captured.counts,...indexed.counts},warnings:[...captured.warnings,...indexed.warnings,...(cookieCapture.skipped?[`${cookieCapture.skipped} partitioned cookies were omitted; they are not converted to unpartitioned cookies.`]:[]),'Web storage covers current unpartitioned top-level HTTP(S) origins in open tabs. IndexedDB includes supported values, attachments and auto-increment stores. Unsupported values such as CryptoKey are skipped. The archive also excludes iframe storage, service workers, site permissions and extension binaries.']};
+      profileArchiveResult={message:"Encrypted profile exported.",counts:{spaces:spaces.length,cookies:cookies.length,passwords:passwords.length,...captured.counts,...indexed.counts},warnings:[...captured.warnings,...indexed.warnings,...(cookieCapture.skipped?[{ message: '{0} partitioned cookies were omitted; they are not converted to unpartitioned cookies.', values: [cookieCapture.skipped] }]:[]),'Web storage covers current unpartitioned top-level HTTP(S) origins in open tabs. IndexedDB includes supported values, attachments and auto-increment stores. Unsupported values such as CryptoKey are skipped. The archive also excludes iframe storage, service workers, site permissions and extension binaries.']};
     });
     case 'profile:file:import': return profileArchiveOperation(async()=>{
       const pick=await dialog.showOpenDialog(window,{properties:['openFile'],filters:[{name:tr('Encrypted Wiek profile'),extensions:['json']}]});if(!pick.filePaths[0])return;if(fs.statSync(pick.filePaths[0]).size>32*1024*1024)throw new Error('Profile archive exceeds 32 MiB');
@@ -743,10 +743,10 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
         if(saved.tabs.length){closeTab(tabs.get(blank));space.activeTab=space.tabs[saved.activeTabIndex||0];}
         counts.spaces++;
       }
-      else if(sessionCount)warnings.push(`${sessionCount} tab session storage areas were skipped because restored tabs were left closed.`);
+      else if(sessionCount)warnings.push({ message: '{0} tab session storage areas were skipped because restored tabs were left closed.', values: [sessionCount] });
       await Promise.all(pendingSessions);
       if(!store.spaces.some(space=>space.profileId===created.id)){await createSpace(created.name,created.id,'user');counts.spaces++;}
-      if(payload.extensionsMetadata.length)warnings.push(`${payload.extensionsMetadata.length} extension references were recorded; load their unpacked folders separately.`);
+      if(payload.extensionsMetadata.length)warnings.push({ message: '{0} extension references were recorded; load their unpacked folders separately.', values: [payload.extensionsMetadata.length] });
       created.importedExtensions=payload.extensionsMetadata;profileArchiveResult={message:"Profile restored into a new profile.",counts,warnings:[...new Set(warnings)]};openPanel('settings');
     });
     case 'permissions:snapshot': return sitePermissions.snapshot(s?.profileId);

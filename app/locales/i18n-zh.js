@@ -2308,6 +2308,13 @@
     "No on-device model is available for this query language": "本机没有适用于该搜索语言的模型",
     "On-device search did not complete": "本机语义搜索未完成",
     "Enable on-device models to use semantic search": "请启用本机模型后使用语义搜索",
+    "{0} partitioned cookies were omitted; they are not converted to unpartitioned cookies.": "已跳过 {0} 条分区 Cookie，保留来源资料中的分区状态。",
+    "{0} tab session storage areas were skipped because restored tabs were left closed.": "标签页保持关闭，已跳过 {0} 个标签页的会话存储。",
+    "{0} extension references were recorded; load their unpacked folders separately.": "已记录 {0} 项扩展信息。可另行加载对应的解包扩展文件夹。",
+    "{0} unsupported or closed tabs were omitted.": "已跳过 {0} 个不受支持或已关闭的标签页。",
+    "Indexed {0} files.": "已索引 {0} 个文件。",
+    "{0}: {1}": "{0}：{1}",
+    "File unavailable or not valid UTF-8 text": "文件无法读取或内容并非有效的 UTF-8 文本",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

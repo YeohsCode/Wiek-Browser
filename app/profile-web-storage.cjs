@@ -46,7 +46,7 @@ async function captureProfileTabs(spaces,{includeWebStorage=false,signal}={}) {
     }
     saved.push({name:space.name,pinned:Boolean(space.pinned),tabs:rows,...(rows.length?{activeTabIndex:activeTabIndex??0}:{})});
   }
-  if(skippedTabs)warnings.push(`${skippedTabs} unsupported or closed tabs were omitted.`);
+  if(skippedTabs)warnings.push({message:'{0} unsupported or closed tabs were omitted.',values:[skippedTabs]});
   return {spaces:saved,...(includeWebStorage?{webStorage:{encoding:ENCODING,localStorage:[...local.values()]}}:{}),counts:{localStorageOrigins:local.size,sessionStorageTabs:sessionAreas},warnings:[...new Set(warnings)]};
 }
 async function captureProfileCookies(ses,wc) {

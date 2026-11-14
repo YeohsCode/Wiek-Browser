@@ -115,3 +115,23 @@ test('actual temporary TCP servers are discovered by native identity and only th
   assert.equal(stopped.stopped,true);assert.equal(foreign.child.exitCode,null);assert.equal(foreign.child.signalCode,null);
   assert.equal((await service.dispatch('workspace:servers:list',{projectId:'p'})).servers.some(row=>row.pid===mine.child.pid),false);
 });
+
+
+test('explicit bulk identification reads at most twelve project endpoints and tolerates a failed title', async () => {
+  const visited=[];
+  const f=fixture({fetchTitle:async url=>{
+    visited.push(url);
+    if(url.includes(':5001'))throw new Error('disconnected');
+    return {status:'read',title:'Fixture'};
+  }});
+  f.listeners=Array.from({length:15},(_,index)=>({pid,address:'127.0.0.1',port:5000+index}));
+  await f.act('list',{},ctx,{});
+  assert.deepEqual(visited,[]);
+  await assert.rejects(f.act('identify',{},ctx,{}),/controls/);
+  const result=await f.act('identify');
+  assert.equal(result.attemptedTitles,12);
+  assert.equal(visited.length,12);
+  assert.equal(Object.keys(result.servers[0].titles).length,11);
+  assert.equal(result.servers[0].urls.length,15);
+  assert.deepEqual(f.signals,[]);
+});

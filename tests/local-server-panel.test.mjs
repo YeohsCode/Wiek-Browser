@@ -36,6 +36,8 @@ await window.webContents.session.cookies.set({url:'http://127.0.0.1:'+port+'/',n
 await e('click('+JSON.stringify('Read title '+port)+');undefined');await wait('!!document.querySelector(".vw-server-title")');
 eq(await e('document.querySelector(".vw-server-title").textContent'),port+': Fixture <img src=x onerror=attack>');
 eq(await e('document.querySelector(".vw-server-row img")===null'),true);eq(titleRequests,[{method:'GET',url:'/',cookie:null}]);
+await e('click("Refresh and identify local services");undefined');await wait('!!document.querySelector(".vw-server-title")&&![...document.querySelectorAll("button")].find(b=>b.textContent==="Refresh and identify local services").disabled');
+eq(titleRequests,[{method:'GET',url:'/',cookie:null},{method:'GET',url:'/',cookie:null}]);
 await e('click("Review stop");undefined');await wait('!!document.querySelector(".vw-server-review")');eq(server.exitCode,null);eq(await e('document.querySelector(".vw-server-review").textContent.includes('+JSON.stringify(String(server.pid))+')'),true);
 await e('click("Cancel stop review");undefined');await wait('!document.querySelector(".vw-server-review")');eq(server.exitCode,null);
 await e('click("Review stop");undefined');await wait('!!document.querySelector(".vw-server-review")');const exited=once(server,'close');await e('click("Confirm stop");undefined');await exited;

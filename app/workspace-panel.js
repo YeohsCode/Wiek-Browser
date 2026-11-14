@@ -91,10 +91,16 @@
   async function loadServers(){const mine=generation;const result=await request('workspace:servers:list');if(mine===generation)localServers=result;}
   function serversView(body){
     const section=node('section','','vw-wide');
-    section.append(node('h2',tr("Project local services")),node('p',tr("Refresh to find listening processes in this project. Choose Read title to identify a local page."),'vw-hint'));
+    section.append(node('h2',tr("Project local services")),node('p',tr("Refresh lists the project’s listening processes. Refresh and identify also reads titles from up to 12 local addresses."),'vw-hint'));
     const refresh=button(tr("Refresh local services"),()=>perform(async()=>{serverReview=null;serverNotice='';await loadServers();}));
     if(state.capabilities?.localServers===false){refresh.disabled=true;section.append(node('p',tr("Native local service discovery is unavailable on this installation."),'vw-hint'));}
-    section.append(refresh);
+    const identify = button(tr('Refresh and identify local services'),()=>perform(async()=>{
+      serverReview=null;serverNotice='';
+      const mine=generation,result=await request('workspace:servers:identify');
+      if(mine===generation)localServers=result;
+    }));
+    if(state.capabilities?.localServers===false)identify.disabled=true;
+    section.append(refresh,identify);
     if(serverNotice){const notice=node('p',serverNotice,'vw-notice');notice.role='status';section.append(notice);}
     if(localServers&&!localServers.servers.length)section.append(node('p',tr("No listening services found in this project."),'vw-empty'));
     for(const row of localServers?.servers||[]){
@@ -106,12 +112,12 @@
         actions.append(button(tr("Open {0}", (port)),()=>invoke('navigate',url)),button(tr("Read title {0}", (port)),()=>perform(async()=>{
           const mine=generation,result=await request('workspace:servers:title',{pid:row.pid,fingerprint:row.fingerprint,url});
           if(mine===generation&&localServers?.servers.includes(row)){
-            row.titles||=new Map();row.titles.set(url,result);
+            (row.titles ??= {})[url]=result;
           }
         })));
-        const result=row.titles?.get(url);
+        const result=row.titles?.[url];
         if(result){
-          const title=node('p',`${port}: ${result.title|| (result.status==='unsupported'?'This address did not return supported HTML.':'No title found.')}`,'vw-server-title');
+          const title=node('p',`${port}: ${result.title || tr(result.status==='unsupported'?'This address did not return supported HTML.':'No title found.')}`,'vw-server-title');
           title.dataset.serverUrl=url;card.append(title);
         }
       }

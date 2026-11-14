@@ -85,6 +85,23 @@ function createLocalServerService({probe=createNativeServerProbe(),signal=(pid,v
   async function dispatch(action,payload,ctx,authority={}){
     ensure();
     if(action==='workspace:servers:list')return list(ctx);
+    if (action === 'workspace:servers:identify') {
+      if (!authority.interactive) throw fail('Use the local service controls to identify services','WIEK_LOCAL_SERVER_INTERACTIVE');
+      const result = await list(ctx);
+      const tasks = result.servers.flatMap(row => row.urls.map(url => ({row, url}))).slice(0, 12);
+      for (let offset = 0; offset < tasks.length; offset += 3) {
+        await Promise.all(tasks.slice(offset, offset + 3).map(async ({row, url}) => {
+          try {
+            const value = await dispatch('workspace:servers:title', {pid:row.pid, fingerprint:row.fingerprint, url}, ctx, authority);
+            (row.titles ??= {})[url] = value;
+          } catch {
+            // A failed or stale read leaves the original listener available.
+          }
+        }));
+      }
+      ensure();
+      return {...result, attemptedTitles:tasks.length};
+    }
     if(action==='workspace:servers:title'){
       if(!authority.interactive)throw fail('Use the local service controls to read a title','WIEK_LOCAL_SERVER_INTERACTIVE');
       if(titleReads.size>=4)throw fail('Too many title reads','WIEK_LOCAL_SERVER_CAPACITY');

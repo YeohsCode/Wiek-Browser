@@ -2289,6 +2289,10 @@
     "Select up to 12 Chromium profile folders": "最多选择 12 个 Chromium 浏览器资料文件夹",
     "Combined import limit reached": "已达到本次导入的总量上限",
     "Selected profile could not be read": "无法读取所选浏览器资料",
+    "Refresh and identify local services": "刷新并识别本地服务",
+    "Refresh lists the project’s listening processes. Refresh and identify also reads titles from up to 12 local addresses.": "刷新会列出此项目中正在监听的进程。刷新并识别还会尝试读取最多 12 个本地地址的页面标题。",
+    "This address did not return supported HTML.": "此地址没有返回支持的 HTML 页面。",
+    "No title found.": "未找到标题。",
   };
   if (typeof module === 'object' && module.exports) module.exports = messages;
   else root.WiekChineseMessages = messages;

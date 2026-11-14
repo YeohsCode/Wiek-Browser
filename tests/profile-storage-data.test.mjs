@@ -28,3 +28,13 @@ test('aggregate storage budget covers both local origins and per-tab sessions',(
 test('v2 archived fixture remains readable with exact storage data and no invented IndexedDB',async()=>{
  const {payload,metadata}=await createProfileArchive().decode(await fs.readFile(new URL('fixtures/profile-v2.json',import.meta.url)),'public v2 fixture passphrase');assert.equal(metadata.version,2);assert.equal(payload.profile.name,'V2 compatibility fixture');assert.deepEqual(decodeEntries(payload.webStorage.localStorage[0]),[['odd','\0\ud800你好']]);assert.equal(Object.hasOwn(payload,'indexedDB'),false);
 });
+
+test('a v3 fixture with IndexedDB and tab session storage remains readable', async () => {
+  const input = await fs.readFile(new URL('fixtures/profile-v3.json', import.meta.url));
+  const { payload, metadata } = await createProfileArchive().decode(input, 'public v3 fixture passphrase');
+  assert.equal(metadata.version, 3);
+  assert.equal(payload.profile.name, 'V3 compatibility fixture');
+  assert.deepEqual(decodeEntries(payload.spaces[0].tabs[0].sessionStorage), [['tab', 'v3 session']]);
+  assert.deepEqual(payload.indexedDB, { encoding: 'wiek-idb-portable-v1', origins: [] });
+  assert.equal(Object.hasOwn(payload.spaces[0].tabs[0], 'navigation'), false);
+});

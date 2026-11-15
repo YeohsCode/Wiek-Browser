@@ -1,6 +1,9 @@
 'use strict';
-const { captureNavigation } = require('./profile-navigation.cjs');
+const { randomUUID } = require('node:crypto');
+const { captureNavigation, historyOrigins, MAX_HISTORY_SESSION_ORIGINS, MAX_ARCHIVE_HISTORY_SESSION_ORIGINS } = require('./profile-navigation.cjs');
 const {ENCODING,LIMITS,exactOrigin,validateArea}=require('./profile-storage-data.cjs');
+const storageCopies = new WeakMap();
+const COPY_PREFIX = 'wiek-profile-storage-';
 const blank=url=>url==='about:blank';
 function originOf(url) {try{const u=new URL(url);return ['http:','https:'].includes(u.protocol)&&!u.username&&!u.password?u.origin:null;}catch{return null}}
 function abort(signal) {if(signal?.aborted)throw new Error('Profile storage operation cancelled');}
@@ -25,10 +28,81 @@ const runStorage=(wc,options)=>bounded(wc.executeJavaScriptInIsolatedWorld(1003,
 async function frame(wc) {const {frameTree}=await send(wc,'Page.getFrameTree'),f=frameTree.frame,origin=originOf(f.url);if(!origin||f.securityOrigin!==origin)throw new Error('Unsupported top-level origin');const {storageKey}=await send(wc,'Storage.getStorageKeyForFrame',{frameId:f.id});if(storageKey!==origin+'/')throw new Error('Partitioned or opaque storage is not portable');return {id:f.id,loaderId:f.loaderId,url:f.url,origin,storageKey};}
 const sameFrame=(a,b)=>a.id===b.id&&a.loaderId===b.loaderId&&a.url===b.url&&a.storageKey===b.storageKey;
 
-// Capture existing, explicitly selected profile tabs only. Never navigate to
-// discover other origins and never evaluate code supplied by the page/archive.
+// Only a one-use popup requested from the private isolated world may be used
+// as a scratch copy. The caller's regular popup handling remains in place.
+function storageCopyPopup(wc, details, createContents) {
+  if (!details.frameName.startsWith(COPY_PREFIX)) return null;
+  const copy = storageCopies.get(wc);
+  if (!copy || details.frameName !== copy.name || details.url !== 'about:blank') return {action: 'deny'};
+  return {
+    action: 'allow',
+    outlivesOpener: true,
+    createWindow: options => {
+      if (storageCopies.get(wc) !== copy || copy.holder || !options.webContents) throw new Error('Storage copy request expired');
+      copy.holder = createContents(options);
+      return copy.holder.webContents;
+    },
+  };
+}
+
+async function openStorageCopy(wc, before) {
+  const copy = {name: COPY_PREFIX + randomUUID()};
+  storageCopies.set(wc, copy);
+  try {
+    // The initial blank document is local. Disconnect the opener before
+    // letting the copy load another document.
+    const opened = await bounded(wc.executeJavaScriptInIsolatedWorld(1003, [{
+      code: `(() => { if (location.href !== ${JSON.stringify(before.url)}) return false;
+        const copy = window.open('', ${JSON.stringify(copy.name)});
+        if (!copy) return false;
+        copy.name = '';
+        copy.opener = null;
+        return copy.opener === null;
+      })()`
+    }]));
+    if (!opened || !copy.holder || !sameFrame(before, await frame(wc))) throw new Error('Cannot copy tab storage');
+    return copy.holder;
+  } catch (failure) {
+    if (copy.holder) await closeContents(copy.holder.webContents).catch(() => {});
+    throw failure;
+  } finally {
+    storageCopies.delete(wc);
+  }
+}
+
+async function copySessionAreas(wc, before, origins, signal) {
+  const holder = await openStorageCopy(wc, before);
+  const areas = [];
+  let skipped = false;
+  try {
+    const scratch = holder.webContents;
+    scratch.debugger.attach('1.3');
+    for (const origin of origins) {
+      abort(signal);
+      try {
+        const entries = await withStorageDocument(scratch, origin, {
+          signal, work: async url => (await runStorage(scratch, {
+            mode: 'read', url, origin, readLocal: false,
+          })).session,
+        });
+        if (entries.length) areas.push(validateArea({origin, entries}));
+      } catch {
+        abort(signal);
+        skipped = true;
+        if (scratch.isDestroyed()) break;
+      }
+    }
+    if (!sameFrame(before, await frame(wc))) throw new Error('Page changed during storage copy');
+    return {areas, skipped};
+  } finally {
+    await closeContents(holder.webContents);
+  }
+}
+
+// Source tabs stay on their current pages. Historical origins are read from a
+// disposable copy in intercepted documents that cannot contact the website.
 async function captureProfileTabs(spaces,{includeWebStorage=false,signal}={}) {
-  const saved=[],local=new Map(),warnings=[],budget={bytes:0};let sessionAreas=0,skippedTabs=0;
+  const saved=[],local=new Map(),warnings=[],budget={bytes:0};let sessionAreas=0,historyAreas=0,historyProbes=0,skippedTabs=0;
   const admit=area=>{const next={bytes:budget.bytes};validateArea(area,next);budget.bytes=next.bytes;return area;};
   for(const space of spaces){abort(signal);const rows=[];let activeTabIndex;
     for(const tab of space.tabs){abort(signal);const wc=tab.webContents;let row;
@@ -42,12 +116,32 @@ async function captureProfileTabs(spaces,{includeWebStorage=false,signal}={}) {
         if(!sameFrame(before,after))throw new Error('Page changed');
         if(localArea){try{if(local.size>=LIMITS.origins)throw new Error('Origin limit');local.set(localArea.origin,admit(localArea));}catch{warnings.push('A local storage origin exceeded the portable limits and was omitted.');}}
         try{row.sessionStorage=admit(sessionArea);sessionAreas++;}catch{warnings.push('A tab session storage area exceeded the portable limits and was omitted.');}
+        const history = [...historyOrigins(row.navigation, row.url)];
+        const eligible = history.slice(0, Math.min(MAX_HISTORY_SESSION_ORIGINS, MAX_ARCHIVE_HISTORY_SESSION_ORIGINS - historyProbes));
+        if (eligible.length < history.length) warnings.push('Some previous-site sessions exceeded the export limit.');
+        if (eligible.length) {
+          historyProbes += eligible.length;
+          try {
+            const {areas, skipped} = await copySessionAreas(wc, before, eligible, signal);
+            if (skipped) warnings.push('Some previous-site sessions could not be exported.');
+            const admitted = [];
+            for (const area of areas) {
+              try { admitted.push(admit(area)); }
+              catch { warnings.push('Some previous-site sessions exceeded the export limit.'); }
+            }
+            if (admitted.length) row.historySessions = admitted;
+            historyAreas += admitted.length;
+          } catch {
+            abort(signal);
+            warnings.push('Some previous-site sessions could not be exported.');
+          }
+        }
       }catch{abort(signal);warnings.push('Web storage from a changed, closed, unsupported or oversized tab was omitted.');}
     }
     saved.push({name:space.name,pinned:Boolean(space.pinned),tabs:rows,...(rows.length?{activeTabIndex:activeTabIndex??0}:{})});
   }
   if(skippedTabs)warnings.push({message:'{0} unsupported or closed tabs were omitted.',values:[skippedTabs]});
-  return {spaces:saved,...(includeWebStorage?{webStorage:{encoding:ENCODING,localStorage:[...local.values()]}}:{}),counts:{localStorageOrigins:local.size,sessionStorageTabs:sessionAreas},warnings:[...new Set(warnings)]};
+  return {spaces:saved,...(includeWebStorage?{webStorage:{encoding:ENCODING,localStorage:[...local.values()]}}:{}),counts:{localStorageOrigins:local.size,sessionStorageTabs:sessionAreas,historySessionAreas:historyAreas},warnings:[...new Set(warnings)]};
 }
 async function captureProfileCookies(ses,wc) {
   if(!wc||wc.isDestroyed()||wc.session!==ses)throw new Error('A tab in the selected profile is required to export cookies');
@@ -61,10 +155,10 @@ async function captureProfileCookies(ses,wc) {
 // Bootstrap a same-origin document through CDP Fetch.fulfillRequest. All request
 // types are intercepted, never continued. The bootstrap runs no website or
 // archive-supplied script and sends no requests or cookies to a server.
-async function restoreArea(wc,area,{isLocalStorage,signal,timeoutMs=5000}={}) {
-  validateArea(area);exactOrigin(area.origin);abort(signal);
-  const url=area.origin+'/',debuggerApi=wc.debugger;
-  let fatal,intercepting=false,wrote=false,closing=false;const commands=new Set();
+async function withStorageDocument(wc, origin, {signal, timeoutMs=5000, work}) {
+  exactOrigin(origin);abort(signal);
+  const url=origin+'/',debuggerApi=wc.debugger;
+  let fatal,intercepting=false,closing=false;
   const close=async()=>{closing=true;await closeContents(wc);};
   const stop=()=>{fatal ||= new Error('Profile storage operation cancelled');void close().catch(()=>{});};
   const listener=(_event,method,params)=>{
@@ -72,26 +166,25 @@ async function restoreArea(wc,area,{isLocalStorage,signal,timeoutMs=5000}={}) {
     const expected=params.request.url===url&&params.resourceType==='Document';
     if(!expected)fatal ||= new Error('Unexpected storage bootstrap request');
     const command=debuggerApi.sendCommand(expected?'Fetch.fulfillRequest':'Fetch.failRequest',expected?{requestId:params.requestId,responseCode:200,responseHeaders:[{name:'Content-Type',value:'text/html; charset=utf-8'},{name:'Cache-Control',value:'no-store'},{name:'Content-Security-Policy',value:"default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"}],body:Buffer.from('<!doctype html><title>Restoring profile storage</title>').toString('base64')}:{requestId:params.requestId,errorReason:'Aborted'});
-    commands.add(command);command.catch(()=>{fatal ||= new Error('Storage bootstrap interception failed');}).finally(()=>commands.delete(command));
+    command.catch(()=>{fatal ||= new Error('Storage bootstrap interception failed');});
   };
   debuggerApi.on('message',listener);signal?.addEventListener('abort',stop,{once:true});
+  let result;
   try {
-    await bounded((async()=>{
+    result = await bounded((async()=>{
       // Renderer domains can wait indefinitely before the initial document has
       // been created in a new Electron WebContents. Initialize locally first.
       await wc.loadURL('about:blank');abort(signal);
       await send(wc,'Network.setBypassServiceWorker',{bypass:true});abort(signal);
       await send(wc,'Fetch.enable',{patterns:[{urlPattern:'*',requestStage:'Request'}]});intercepting=true;abort(signal);
       await wc.loadURL(url);abort(signal);if(fatal)throw fatal;
-      const f=await frame(wc);if(f.url!==url||f.origin!==area.origin)throw new Error('Storage bootstrap origin changed');
-      // Destination must be fresh. Refuse an existing keyset instead of clearing
-      // unrelated data or trying to roll back concurrent site writes.
-      const existing=await runStorage(wc,{mode:'read',url,origin:area.origin,readLocal:!!isLocalStorage});if((isLocalStorage?existing.local:existing.session).length)throw new Error('Destination storage is not empty');
-      abort(signal);if(fatal)throw fatal;wrote=true;
-      await runStorage(wc,{mode:'write',url,origin:area.origin,isLocalStorage:!!isLocalStorage,entries:area.entries});
+      const f=await frame(wc);if(f.url!==url||f.origin!==origin)throw new Error('Storage bootstrap origin changed');
       abort(signal);if(fatal)throw fatal;
+      const value = await work(url);
+      abort(signal);if(fatal)throw fatal;
+      return value;
     })(),timeoutMs);
-  }catch(failure){try{await close();}catch{}failure.storageMayHaveChanged=wrote;throw failure;}
+  }catch(failure){try{await close();}catch{}throw failure;}
   finally {
     // After timeout/abort the destination is closed, so no late command can
     // mutate a later user's page. Successful bootstrap leaves no interception.
@@ -101,10 +194,45 @@ async function restoreArea(wc,area,{isLocalStorage,signal,timeoutMs=5000}={}) {
     debuggerApi.removeListener('message',listener);
   }
   if(wc.isDestroyed())throw new Error('Storage destination closed during cleanup');
+  return result;
 }
+async function restoreArea(wc, area, {isLocalStorage, signal, timeoutMs}={}) {
+  validateArea(area);
+  let wrote = false;
+  try {
+    await withStorageDocument(wc, area.origin, {
+      signal, timeoutMs, work: async url => {
+        // The destination must be fresh. Preserve any keys already written.
+        const options = {url, origin: area.origin, readLocal: Boolean(isLocalStorage)};
+        const existing = await runStorage(wc, {...options, mode: 'read'});
+        if ((isLocalStorage ? existing.local : existing.session).length) throw new Error('Destination storage is not empty');
+        abort(signal);
+        wrote = true;
+        await runStorage(wc, {...options, mode: 'write', isLocalStorage: Boolean(isLocalStorage), entries:area.entries});
+      },
+    });
+  } catch (failure) {
+    failure.storageMayHaveChanged = wrote;
+    throw failure;
+  }
+}
+// A blank native child receives the prepared namespace and can still accept
+// Chromium navigation history. The temporary opener never loads website code.
+async function restoreHistorySessions(holder, areas, createTab) {
+  const wc = holder.webContents;
+  wc.setWindowOpenHandler(details => storageCopyPopup(wc, details, createTab) || {action: 'deny'});
+  try {
+    wc.debugger.attach('1.3');
+    for (const area of areas) await restoreArea(wc, area, {isLocalStorage: false});
+    return await openStorageCopy(wc, await frame(wc));
+  } finally {
+    await closeContents(wc);
+  }
+}
+
 async function restoreLocalStorage(ses,areas,{createContents,signal}={}) {
   let restored=0;const warnings=[];
   for(const area of areas){abort(signal);const holder=createContents(ses),wc=holder.webContents||holder;try{wc.debugger.attach('1.3');await restoreArea(wc,area,{isLocalStorage:true,signal});restored++;}catch(failure){warnings.push('A local storage origin could not be fully restored.');if(failure.storageMayHaveChanged)try{await bounded(ses.clearStorageData({origin:area.origin,storages:['localstorage']}));}catch{warnings.push('Partial local storage cleanup failed for an imported origin.');}abort(signal);}finally{const live=holder.webContents||wc;if(!live.isDestroyed())await closeContents(live);}}
   return {restored,warnings:[...new Set(warnings)]};
 }
-module.exports={captureProfileTabs,captureProfileCookies,restoreArea,restoreLocalStorage,originOf,storageFrame:frame,sameStorageFrame:sameFrame,closeContents};
+module.exports={storageCopyPopup,restoreHistorySessions,captureProfileTabs,captureProfileCookies,restoreArea,restoreLocalStorage,originOf,storageFrame:frame,sameStorageFrame:sameFrame,closeContents};

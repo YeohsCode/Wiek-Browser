@@ -4,11 +4,11 @@ const { randomBytes, scrypt, createCipheriv, createDecipheriv } = require('node:
 const { promisify } = require('node:util');
 const { TextDecoder } = require('node:util');
 const derive = promisify(scrypt);
-const { MAX_NAVIGATION_ENTRIES } = require('./profile-navigation.cjs');
+const { MAX_NAVIGATION_ENTRIES, MAX_HISTORY_SESSION_ORIGINS, MAX_ARCHIVE_HISTORY_SESSION_ORIGINS, historyOrigins } = require('./profile-navigation.cjs');
 const { validateIndexedDb } = require('./profile-indexeddb-data.cjs');
 const { ENCODING, LIMITS: STORAGE_LIMITS, validateArea } = require('./profile-storage-data.cjs');
 // The on-disk identifier is retained so existing encrypted archives still decode.
-const FORMAT = 'vek-browser-profile', MIME_TYPE = 'application/vnd.vek.profile+json', VERSION = 4;
+const FORMAT = 'vek-browser-profile', MIME_TYPE = 'application/vnd.vek.profile+json', VERSION = 5;
 const KDF = 'scrypt-131072-8-1', CIPHER = 'aes-256-gcm';
 const DEFAULT_MAX_BYTES = 32 * 1024 * 1024;
 const SCRYPT = Object.freeze({ N: 131072, r: 8, p: 1, maxmem: 256 * 1024 * 1024 });
@@ -71,7 +71,7 @@ function normalizePayload(input, maxBytes, version = VERSION) {
   const profile = object(source.profile, ['id','name'], 'profile', ['name']);
   const out = { profile: { name: string(profile.name, 'profile name', 1024, false) }, spaces: [], bookmarks: [], history: [], cookies: [], passwords: [], extensionsMetadata: [] };
   optionalText(out.profile, profile, 'id', 128);
-  let totalTabs = 0; const storageBudget={bytes:0};
+  let totalTabs = 0, totalHistorySessions = 0; const storageBudget={bytes:0};
   out.spaces = array(source.spaces === undefined ? [] : source.spaces, 'spaces', SPACE_LIMIT).map(space => {
     object(space, ['name','pinned','activeTabIndex','tabs'], 'space', ['name','tabs']);
     const tabs = array(space.tabs, 'tabs', 1024); totalTabs += tabs.length;
@@ -79,7 +79,7 @@ function normalizePayload(input, maxBytes, version = VERSION) {
     const normalized = {
       name: string(space.name, 'space name', 1024, false),
       tabs: tabs.map(tab => {
-        object(tab, ['url', 'title', ...(version >= 2 ? ['sessionStorage'] : []), ...(version >= 4 ? ['navigation'] : [])], 'tab', ['url']);
+        object(tab, ['url', 'title', ...(version >= 2 ? ['sessionStorage'] : []), ...(version >= 4 ? ['navigation'] : []), ...(version >= 5 ? ['historySessions'] : [])], 'tab', ['url']);
         const result = { url: url(tab.url, 'tab', true) };
         optionalText(result, tab, 'title');
         if (Object.hasOwn(tab, 'sessionStorage')) {
@@ -94,6 +94,19 @@ function normalizePayload(input, maxBytes, version = VERSION) {
           });
           if (entries.length < 2 || !Number.isInteger(saved.index) || entries[saved.index]?.url !== result.url) throw error('Navigation history must contain the active tab URL at its saved index');
           result.navigation = { index: saved.index, entries };
+        }
+        if (Object.hasOwn(tab, 'historySessions')) {
+          if (!result.navigation || result.url === 'about:blank') throw error('Previous-site sessions require HTTP(S) navigation history');
+          const eligible = historyOrigins(result.navigation, result.url);
+          const areas = array(tab.historySessions, 'previous-site sessions', MAX_HISTORY_SESSION_ORIGINS);
+          totalHistorySessions += areas.length;
+          if (totalHistorySessions > MAX_ARCHIVE_HISTORY_SESSION_ORIGINS) throw error('Too many previous-site sessions', 'VEK_PROFILE_ARCHIVE_LIMIT');
+          result.historySessions = areas.map(area => {
+            const validated = validateArea(area, storageBudget);
+            if (!validated.entries.length) throw error('Previous-site session must contain at least one entry');
+            if (!eligible.delete(validated.origin)) throw error('Previous-site session must match a distinct origin in its tab history');
+            return validated;
+          });
         }
         return result;
       })
@@ -180,7 +193,7 @@ function createProfileArchive({maxBytes=DEFAULT_MAX_BYTES}={}) {
       envelope=plainClone(envelope,maxBytes);
       object(envelope,[...headerFields,'tag','data'],'archive envelope',[...headerFields,'tag','data']);
       if(envelope.format!==FORMAT||envelope.mimeType!==MIME_TYPE)throw error('Unrecognized Wiek profile archive format or MIME type');
-      if(![1,2,3,VERSION].includes(envelope.version))throw error('Unsupported Wiek profile archive version','VEK_PROFILE_ARCHIVE_VERSION');
+      if(![1,2,3,4,VERSION].includes(envelope.version))throw error('Unsupported Wiek profile archive version','VEK_PROFILE_ARCHIVE_VERSION');
       if(envelope.kdf!==KDF||envelope.cipher!==CIPHER)throw error('Unsupported archive encryption parameters');
       date(envelope.createdAt,'archive creation date');if(envelope.expiresAt!==null)date(envelope.expiresAt,'archive expiry');
       const salt=base64(envelope.salt,'salt',16,16),iv=base64(envelope.iv,'IV',12,12),tag=base64(envelope.tag,'tag',16,16),data=base64(envelope.data,'ciphertext',null,maxBytes);

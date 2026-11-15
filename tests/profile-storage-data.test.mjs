@@ -6,7 +6,7 @@ const require=createRequire(import.meta.url),{createProfileArchive}=require('../
 const origin='https://storage.fixture.test',area=()=>encodeArea(origin,[['constructor','<script>never executed</script>'],['__proto__','你好\0\ud800'],['','']]);
 test('current ciphertext roundtrip preserves exact UTF-16 storage keys and independent tab sessions',async()=>{
  const a=createProfileArchive(),local=area(),one=encodeArea(origin,[['tab','one']]),two=encodeArea(origin,[['tab','two']]);const payload={profile:{name:'Storage fixture'},webStorage:{encoding:ENCODING,localStorage:[local]},spaces:[{name:'Tabs',tabs:[{url:origin+'/first',sessionStorage:one},{url:origin+'/second',sessionStorage:two}],activeTabIndex:1}]};
- const json=await a.encode(payload,'public storage fixture passphrase');assert.equal(json.includes('storage.fixture'),false);assert.equal(json.includes(local.entries[0][0]),false);const result=await a.decode(json,'public storage fixture passphrase');assert.equal(result.metadata.version,4);assert.deepEqual(result.payload,a.validate(payload));assert.deepEqual(decodeEntries(result.payload.webStorage.localStorage[0]),[['constructor','<script>never executed</script>'],['__proto__','你好\0\ud800'],['','']]);assert.notDeepEqual(result.payload.spaces[0].tabs[0].sessionStorage,result.payload.spaces[0].tabs[1].sessionStorage);
+ const json=await a.encode(payload,'public storage fixture passphrase');assert.equal(json.includes('storage.fixture'),false);assert.equal(json.includes(local.entries[0][0]),false);const result=await a.decode(json,'public storage fixture passphrase');assert.equal(result.metadata.version,5);assert.deepEqual(result.payload,a.validate(payload));assert.deepEqual(decodeEntries(result.payload.webStorage.localStorage[0]),[['constructor','<script>never executed</script>'],['__proto__','你好\0\ud800'],['','']]);assert.notDeepEqual(result.payload.spaces[0].tabs[0].sessionStorage,result.payload.spaces[0].tabs[1].sessionStorage);
  const envelope=JSON.parse(json);envelope.version=1;await assert.rejects(a.decode(JSON.stringify(envelope),'public storage fixture passphrase'),/authentication/);
 });
 test('v1 archived fixture from 0.12 decodes without inventing web storage',async()=>{
@@ -37,4 +37,32 @@ test('a v3 fixture with IndexedDB and tab session storage remains readable', asy
   assert.deepEqual(decodeEntries(payload.spaces[0].tabs[0].sessionStorage), [['tab', 'v3 session']]);
   assert.deepEqual(payload.indexedDB, { encoding: 'wiek-idb-portable-v1', origins: [] });
   assert.equal(Object.hasOwn(payload.spaces[0].tabs[0], 'navigation'), false);
+});
+
+test('previous-site sessions are bounded and tied to distinct origins in their own tab history', () => {
+  const archive = createProfileArchive();
+  const prior = encodeArea('https://other.fixture.test', [['tab', 'prior']]);
+  const tab = {
+    url: origin + '/',
+    navigation: { index: 1, entries: [{ url: prior.origin + '/first', title: 'Previous' }, { url: origin + '/', title: 'Current' }] },
+    historySessions: [prior],
+  };
+  const payload = (...tabs) => ({ profile: { name: 'Fixture' }, spaces: [{ name: 'Tabs', tabs }] });
+  assert.deepEqual(archive.validate(payload(tab)).spaces[0].tabs[0].historySessions, [prior]);
+  assert.throws(() => archive.validate(payload({ url: tab.url, historySessions: [prior] })), /require HTTP/);
+  assert.throws(() => archive.validate(payload({ ...tab, historySessions: [prior, prior] })), /distinct origin/);
+  assert.throws(() => archive.validate(payload({ ...tab, historySessions: [area()] })), /distinct origin/);
+  assert.throws(() => archive.validate(payload({ ...tab, historySessions: [{ ...prior, entries: [] }] })), /at least one entry/);
+  assert.throws(() => archive.validate(payload({ ...tab, historySessions: Array(9).fill(prior) })), /count/);
+  assert.throws(() => archive.validate(payload(...Array(65).fill(tab))), /Too many previous-site sessions/);
+});
+
+test('v4 archives retain tab history and the current session', async () => {
+  const input = await fs.readFile(new URL('fixtures/profile-v4.json', import.meta.url));
+  const { payload, metadata } = await createProfileArchive().decode(input, 'public v4 fixture passphrase');
+  assert.equal(metadata.version, 4);
+  const tab = payload.spaces[0].tabs[0];
+  assert.deepEqual(tab.navigation.entries.map(entry => entry.url), ['https://previous.fixture.test/', 'https://current.fixture.test/page']);
+  assert.deepEqual(decodeEntries(tab.sessionStorage), [['tab', 'v4 session']]);
+  assert.equal(Object.hasOwn(tab, 'historySessions'), false);
 });

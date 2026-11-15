@@ -33,7 +33,7 @@ let translationService,desktopMonitorService,selectionToolbar;
 const { createDesktopService } = require('./desktop-service.cjs');
 const { createNativeDesktop } = require('./desktop-native.cjs');
 const { physicalChord } = require('./preferences-service.cjs');
-const { captureProfileTabs, captureProfileCookies, restoreArea, restoreLocalStorage } = require('./profile-web-storage.cjs');
+const { captureProfileTabs, captureProfileCookies, restoreArea, restoreLocalStorage, storageCopyPopup, restoreHistorySessions } = require('./profile-web-storage.cjs');
 const archiveTabSessions = new Map();
 const {captureProfileIndexedDB,restoreProfileIndexedDB}=require('./profile-indexeddb.cjs');
 const { createSitePermissions } = require('./site-permissions.cjs');
@@ -205,7 +205,12 @@ function makeTab(space, url = 'about:blank', { activate = true, reveal = false, 
   const wc = view.webContents;
   wc.on('preload-error', (_, file, error) => console.error('Page preload:', file, error));
   wc.on('context-menu',(_event,params)=>showPageContextMenu(t,params));
-  wc.setWindowOpenHandler(details => ({ action: 'allow', outlivesOpener: true, createWindow: options => {
+  wc.setWindowOpenHandler(details => storageCopyPopup(wc, details, options => {
+    const scratch = new WebContentsView({ webContents: options.webContents });
+    scratch.webContents.on('will-frame-navigate', event => event.preventDefault());
+    scratch.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+    return scratch;
+  }) || ({ action: 'allow', outlivesOpener: true, createWindow: options => {
     // Returning the real WebContents through Electron's native creation hook
     // preserves Chromium's opener/window proxy and Target discovery metadata.
     const popup = makeTab(space, details.url, { nativeOptions: options, openerId: t.id });
@@ -234,7 +239,7 @@ function makeTab(space, url = 'about:blank', { activate = true, reveal = false, 
   wc.debugger.attach('1.3');
   const info = await wc.debugger.sendCommand('Target.getTargetInfo');
   t.id = info.targetInfo.targetId;
-  t.openerId ||= info.targetInfo.openerId;
+  if (!deferNavigation) t.openerId ||= info.targetInfo.openerId;
   tabs.set(t.id, t);
   space.tabs.push(t.id);
   wc.debugger.on('message', (_, method, params, sessionId) => onDebuggerEvent(t, method, params, sessionId));
@@ -682,15 +687,33 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       const passwords=value?.includePasswords?vaultFor(s.profileId).list().map(row=>({origin:row.origin,...vaultFor(s.profileId).forOrigin(row.id,row.origin)})):[];
       const payload={profile:{name:profile(s.profileId).name,id:s.profileId},spaces,...(captured.webStorage?{webStorage:captured.webStorage}:{}),...(indexed.indexedDB?{indexedDB:indexed.indexedDB}:{}),bookmarks:store.bookmarks.filter(row=>belongsToProfile(row,s.profileId)&&/^https?:/i.test(row.url)).map(row=>({url:row.url,title:row.title||row.url,...(row.folder?{folder:row.folder}:{})})),history:store.history.filter(row=>(row.profileId===s.profileId||!row.profileId&&s.profileId==='Default')&&/^https?:/i.test(row.url)).map(row=>({url:row.url,title:row.title||row.url,at:row.at})),cookies,passwords,extensionsMetadata:(store.extensionPaths[s.profileId]||[]).map(row=>({id:row.id,name:row.name||'Extension',version:row.version||'0',enabled:row.enabled!==false}))};
       const encoded=await createProfileArchive().encode(payload,passphrase);writePrivateFile(pick.filePath,encoded);
-      profileArchiveResult={message:"Encrypted profile exported.",counts:{spaces:spaces.length,cookies:cookies.length,passwords:passwords.length,...captured.counts,...indexed.counts},warnings:[...captured.warnings,...indexed.warnings,...(cookieCapture.skipped?[{ message: '{0} partitioned cookies were omitted; they are not converted to unpartitioned cookies.', values: [cookieCapture.skipped] }]:[]),'Web storage covers current unpartitioned top-level HTTP(S) origins in open tabs. IndexedDB includes supported values, attachments and auto-increment stores. Unsupported values such as CryptoKey are skipped. The archive also excludes iframe storage, service workers, site permissions and extension binaries.']};
+      profileArchiveResult={message:"Encrypted profile exported.",counts:{spaces:spaces.length,cookies:cookies.length,passwords:passwords.length,...captured.counts,...indexed.counts},warnings:[...captured.warnings,...indexed.warnings,...(cookieCapture.skipped?[{ message: '{0} partitioned cookies were omitted; they are not converted to unpartitioned cookies.', values: [cookieCapture.skipped] }]:[]),'Web storage includes current HTTP(S) sites and supported sessions from other sites in tab history. IndexedDB includes supported values, attachments and auto-increment stores. Unsupported values such as CryptoKey are skipped. The archive also excludes iframe storage, service workers, site permissions and extension binaries.']};
     });
     case 'profile:file:import': return profileArchiveOperation(async()=>{
       const pick=await dialog.showOpenDialog(window,{properties:['openFile'],filters:[{name:tr('Encrypted Wiek profile'),extensions:['json']}]});if(!pick.filePaths[0])return;if(fs.statSync(pick.filePaths[0]).size>32*1024*1024)throw new Error('Profile archive exceeds 32 MiB');
       const passphrase=await requestSecret(tr("Unlock the selected Wiek profile archive"));if(passphrase===null)return;
       const {payload}=await createProfileArchive().decode(fs.readFileSync(pick.filePaths[0]),passphrase);
-      const sessionCount=payload.spaces.reduce((n,space)=>n+space.tabs.filter(tab=>tab.sessionStorage).length,0),localAreas=payload.webStorage?.localStorage||[];
-      const answer=await dialog.showMessageBox(window,{type:'question',title:tr("Import browser profile"),message:tr("Create a profile “{0}” with {1} cookies, {2} saved logins and {3} tab groups?", (payload.profile.name), (payload.cookies.length), (payload.passwords.length), (payload.spaces.length)),detail:tr('{0} local storage origins and {1} tab sessions are in this archive. {2} IndexedDB databases are also included. ', localAreas.length, sessionCount, payload.indexedDB?.origins.reduce((n,a)=>n+a.databases.length,0)||0)+(value?.restoreTabs===false?tr('Tabs stay closed; tab session storage will be skipped.'):tr('Restored HTTP(S) tabs will open after storage restoration. Current-origin tab sessions are restored separately.'))+tr(' Existing profiles remain available. Extension metadata does not install extensions.'),buttons:[tr('Cancel'),tr('Restore')],defaultId:0,cancelId:0});if(answer.response!==1)return;
-      const created={id:`profile-${crypto.randomUUID()}`,name:`${payload.profile.name} (imported)`,isDefault:false};store.profiles.push(created);const ses=sessionFor(created.id),warnings=[],counts={cookies:0,passwords:0,spaces:0,bookmarks:0,history:0,localStorageOrigins:0,sessionStorageTabs:0,indexedDBOrigins:0,indexedDBDatabases:0};
+      const archivedTabs = payload.spaces.flatMap(space => space.tabs);
+      const sessionCount = archivedTabs.filter(tab => tab.sessionStorage).length;
+      const historySessionCount = archivedTabs.reduce((sum, tab) => sum + (tab.historySessions?.length || 0), 0);
+      const localAreas = payload.webStorage?.localStorage || [];
+      const detail = [
+        tr('{0} local storage origins and {1} tab sessions are in this archive. {2} IndexedDB databases are also included. ', localAreas.length, sessionCount, payload.indexedDB?.origins.reduce((n, area) => n + area.databases.length, 0) || 0),
+        historySessionCount ? tr('The archive includes {0} sessions from other sites in tab history. ', historySessionCount) : '',
+        value?.restoreTabs === false ? tr('Tabs stay closed; tab session storage will be skipped.') : tr('Restored HTTP(S) tabs will open after storage restoration.'),
+        tr(' Existing profiles remain available. Extension metadata does not install extensions.'),
+      ].join('');
+      const answer = await dialog.showMessageBox(window,{
+        type: 'question',
+        title: tr('Import browser profile'),
+        message: tr('Create a profile “{0}” with {1} cookies, {2} saved logins and {3} tab groups?', payload.profile.name, payload.cookies.length, payload.passwords.length, payload.spaces.length),
+        detail,
+        buttons: [tr('Cancel'), tr('Restore')],
+        defaultId: 0,
+        cancelId: 0,
+      });
+      if (answer.response !== 1) return;
+      const created={id:`profile-${crypto.randomUUID()}`,name:`${payload.profile.name} (imported)`,isDefault:false};store.profiles.push(created);const ses=sessionFor(created.id),warnings=[],counts={cookies:0,passwords:0,spaces:0,bookmarks:0,history:0,localStorageOrigins:0,sessionStorageTabs:0,historySessionAreas:0,indexedDBOrigins:0,indexedDBDatabases:0};
       const localResult=await restoreLocalStorage(ses,localAreas,{createContents:ses=>new WebContentsView({webPreferences:{session:ses,sandbox:true,contextIsolation:true,nodeIntegration:false}})});counts.localStorageOrigins=localResult.restored;warnings.push(...localResult.warnings);
       if(payload.indexedDB){try{const indexed=await restoreProfileIndexedDB(ses,payload.indexedDB,{createContents:ses=>new WebContentsView({webPreferences:{session:ses,sandbox:true,contextIsolation:true,nodeIntegration:false}})});counts.indexedDBOrigins=indexed.restoredOrigins;counts.indexedDBDatabases=indexed.restoredDatabases;warnings.push(...indexed.warnings);}catch(failure){store.profiles=store.profiles.filter(p=>p.id!==created.id);throw failure;}}
       for(const row of payload.cookies){const cookie={...row};delete cookie.hostOnly;delete cookie.session;if(row.hostOnly)delete cookie.domain;try{await ses.cookies.set(cookie);counts.cookies++;}catch{warnings.push('A cookie was rejected by the browser.');}}
@@ -704,11 +727,31 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
         const blank=space.tabs[0];
         for(const tab of saved.tabs){
           const makeRestoredTab=()=>createTab(space,tab.url,{activate:false,deferNavigation:true,restoreSessionInPreload:Boolean(tab.navigation && tab.sessionStorage)});
-          let restored=await makeRestoredTab();
+          let restored, historySessionsRestored = false;
+          if (tab.historySessions?.length) {
+            let copied;
+            try {
+              const scratch = new WebContentsView({webPreferences:{session:ses,preload:path.join(__dirname,'page-preload.cjs'),sandbox:true,contextIsolation:true,nodeIntegration:false}});
+              const areas = [...tab.historySessions, ...(tab.sessionStorage ? [tab.sessionStorage] : [])];
+              await restoreHistorySessions(scratch, areas, options => {
+                copied = makeTab(space, tab.url, {activate:false, deferNavigation:true, nativeOptions:options});
+                copied.ready.catch(() => {});
+                return copied.view;
+              });
+              restored = await copied.ready;
+              historySessionsRestored = true;
+              counts.historySessionAreas += tab.historySessions.length;
+              if (tab.sessionStorage) counts.sessionStorageTabs++;
+            } catch {
+              if (copied && !copied.view.webContents.isDestroyed()) closeTab(copied);
+              warnings.push('Some previous-site sessions could not be restored.');
+            }
+          }
+          restored ||= await makeRestoredTab();
           if (tab.navigation) {
             const contents = restored.view.webContents;
             restored.restoringNavigation = true;
-            if (tab.sessionStorage) {
+            if (tab.sessionStorage && !historySessionsRestored) {
               pendingSessions.push(new Promise(resolve => {
                 const id = contents.id;
                 const finish = success => {
@@ -726,7 +769,7 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
               }));
             }
             void contents.navigationHistory.restore(tab.navigation).catch(failure => {
-              if (contents.isDestroyed() || contents.getURL() || failure.code === 'ERR_ABORTED') return;
+              if (contents.isDestroyed() || (contents.getURL() && contents.getURL() !== 'about:blank') || failure.code === 'ERR_ABORTED') return;
               restored.restoringNavigation = false;
               return contents.loadURL(tab.url).catch(() => {});
             }).finally(() => { restored.restoringNavigation = false; });
@@ -743,7 +786,7 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
         if(saved.tabs.length){closeTab(tabs.get(blank));space.activeTab=space.tabs[saved.activeTabIndex||0];}
         counts.spaces++;
       }
-      else if(sessionCount)warnings.push({ message: '{0} tab session storage areas were skipped because restored tabs were left closed.', values: [sessionCount] });
+      else if(sessionCount+historySessionCount)warnings.push({ message: '{0} tab session storage areas were skipped because restored tabs were left closed.', values: [sessionCount+historySessionCount] });
       await Promise.all(pendingSessions);
       if(!store.spaces.some(space=>space.profileId===created.id)){await createSpace(created.name,created.id,'user');counts.spaces++;}
       if(payload.extensionsMetadata.length)warnings.push({ message: '{0} extension references were recorded; load their unpacked folders separately.', values: [payload.extensionsMetadata.length] });

@@ -1,6 +1,8 @@
 'use strict';
 
 const MAX_NAVIGATION_ENTRIES = 64;
+const MAX_HISTORY_SESSION_ORIGINS = 8;
+const MAX_ARCHIVE_HISTORY_SESSION_ORIGINS = 64;
 
 function navigationUrl(value) {
   if (value === 'about:blank') return value;
@@ -33,4 +35,12 @@ function captureNavigation(contents, currentUrl) {
   return { index, entries: result };
 }
 
-module.exports = { captureNavigation, MAX_NAVIGATION_ENTRIES };
+function historyOrigins(navigation, currentUrl) {
+  if (!navigation) return new Set();
+  const currentOrigin = new URL(currentUrl).origin;
+  const candidates = navigation.entries.map((entry, index) => ({ url: entry.url, index }));
+  candidates.sort((a, b) => Math.abs(a.index - navigation.index) - Math.abs(b.index - navigation.index));
+  return new Set(candidates.filter(entry => entry.url !== 'about:blank').map(entry => new URL(entry.url).origin).filter(origin => origin !== currentOrigin));
+}
+
+module.exports = { captureNavigation, historyOrigins, MAX_NAVIGATION_ENTRIES, MAX_HISTORY_SESSION_ORIGINS, MAX_ARCHIVE_HISTORY_SESSION_ORIGINS };

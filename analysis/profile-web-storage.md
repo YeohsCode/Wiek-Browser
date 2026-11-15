@@ -1,8 +1,18 @@
 # 0.13 Profile web storage portability
 
-独立实现：`app/profile-storage-data.cjs`、`app/profile-web-storage.cjs`、`app/profile-archive.cjs` 与实际应用导入/导出。只显式采集所选 Vek Profile 已打开的顶层 HTTP(S) 页面；不兼容未知 Ego export 格式，不读其他浏览器的 LevelDB，不自动发现个人资料。
+独立实现：`app/profile-storage-data.cjs`、`app/profile-web-storage.cjs`、`app/profile-archive.cjs` 与实际应用导入/导出。只显式采集所选 Wiek 配置 已打开的顶层 HTTP(S) 页面。
 
-## 采集与恢复
+## v5 标签页浏览记录中的会话存储
+
+勾选「包含已打开标签页的网页存储」时，除了当前页面，Wiek 也会采集该标签页前进和后退记录里其他顶层 HTTP(S) 网站的 sessionStorage。采集使用独立的临时标签页副本。它通过 Chromium 复制原标签页的 sessionStorage，再用浏览器内部生成的空白文档读取各网站的存储。原标签页保持在原页面。临时文档绕过 Service Worker，页面请求由浏览器在本地满足。
+
+每个标签页最多检查最靠近当前位置的 8 个其他网站来源，每份归档最多检查 64 个。空存储省略，非空存储计入现有 8 MiB 网页存储额度，超限或读取失败会显示提示。v5 将这些会话与对应标签页和浏览记录一起加密封存，读取器兼容 v1–v4。
+
+导入并打开标签页时，先把各网站会话写入新配置的独立临时标签页，再将已验证的会话复制给全新的正式标签页，并加载保存的前进和后退记录。页面首次运行脚本时即可读到会话。关闭标签页方式导入会跳过这些数据。嵌入页面、已关闭的标签页、超出归档浏览记录的网站和浏览器正常退出后的会话恢复仍待覆盖。
+
+完整应用测试使用三个独立来源验证导出和导入过程都没有向站点发送临时根文档请求，验证恢复当前页面、切回先前网站、标签页之间的会话隔离、前进和后退记录及初始页面脚本读取。
+
+## v2 采集与恢复
 
 Settings → Encrypted profile archive 新增默认不勾选的 **Include web storage from open tabs**。导出沿用系统保存框、两次输入口令和 AES-256-GCM/scrypt；磁盘只写加密文件，原子替换、0600。cookies 原有范围保留，saved logins 仍单独选择。MCP token、memory 文本、Agent 认证、扩展代码和网站权限不进入归档。
 
@@ -12,11 +22,11 @@ Settings → Encrypted profile archive 新增默认不勾选的 **Include web st
 
 主应用 bootstrap 期间不抓 favicon、不记虚构根页面历史；UI/磁盘保留预定 URL，实际导航提交后采用真正 URL，并清掉bootstrap引入的虚构前后退记录。修正原实现筛除不可迁移标签后 activeTabIndex 可能指错的问题。
 
-不勾选 **Open restored tabs** 时仍恢复 localStorage/cookies，但明确跳过 per-tab sessionStorage。这些是此次打开标签的运行会话；Vek 正常退出/重启目前不持久恢复 sessionStorage，不冒充完整 Chrome session restore 或前后退历史迁移。
+不勾选 **Open restored tabs** 时仍恢复 localStorage/cookies，但明确跳过 per-tab sessionStorage。这些是此次打开标签的运行会话；Wiek 正常退出/重启目前不持久恢复 sessionStorage，不冒充完整 Chrome session restore 或前后退历史迁移。
 
 ## v2 格式与限制
 
-新 envelope `version:2`，原密码/KDF/密文认证不变，version 仍在 AAD。读取器兼容 v1；v1 不接受新增字段，也不凭空补存储。未知版本拒绝，旧 Vek 不支持读取 v2。
+新 envelope `version:2`，原密码/KDF/密文认证不变，version 仍在 AAD。读取器兼容 v1；v1 不接受新增字段，也不凭空补存储。未知版本拒绝，v1 读取器仅支持对应的版本。
 
 ```js
 {
@@ -44,7 +54,7 @@ Settings → Encrypted profile archive 新增默认不勾选的 **Include web st
 
 Electron Cookie API 不暴露 CHIPS partition key。导出从明确属于所选 session 的 tab 使用 Network.getAllCookies 取实际 partition metadata；partitionKey/opaque key cookie 遗漏并警告，防止变成普通 cookie。实际 Electron fixture 验证所选/其他 Profile、HttpOnly/hostOnly 和 CHIPS。协议不可用时导出失败，不退回丢失 partition 信息的读取。
 
-## 验证与剩余项
+## v2 验证与剩余项
 
 专项含 v1 固定旧制品、v2 密文/UTF-16/额度/恶意字段、捕获竞态，以及两套实际 Electron：真实 sessions（iframe排除、source不变、无 bootstrap 网络、冲突、注入部分写失败/abort/超时）和完整主应用 IPC/renderer/口令表单（系统文件/确认框由 fixture 注入；取消不建 Profile、关闭标签导入、独立会话和选中标签）。只用本地 HTTP fixture、临时 Profile，无真实账号、个人源目录、付费模型或 Keychain 读取。最终打包和原生系统框观察以 [RESULTS](../reports/RESULTS.md) 为准。
 

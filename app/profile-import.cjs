@@ -108,19 +108,23 @@ async function readProfile({ directory, bookmarks = true, history = true, cookie
   for (const category of ['bookmarks', 'history', 'cookies', 'passwords']) output.counts[category] = output[category].length;
   return output;
 }
-async function readSelectedProfiles({ directories, ...options }) {
+async function readSelectedProfiles({ directories, browserForDirectory, getPassword, ...options }) {
   if (!Array.isArray(directories) || directories.length < 1 || directories.length > 12) throw new Error('Select up to 12 Chromium profile folders');
   const roots = new Set();
   const result = { bookmarks: [], history: [], cookies: [], passwords: [], warnings: [], sources: 0 };
   const categories = ['bookmarks', 'history', 'cookies', 'passwords'];
-  let sourceKey;
+  const sourceKeys = new Map();
   for (const directory of directories) {
     let root;
     try {
       root = sourceDirectory(directory);
       if (roots.has(root)) continue;
       roots.add(root);
-      const profile = await readProfile({ ...options, directory: root, getPassword: () => sourceKey ??= Promise.resolve().then(() => options.getPassword?.()) });
+      const profile = await readProfile({ ...options, directory: root, getPassword: () => {
+        const browser = browserForDirectory?.(directory);
+        if (!sourceKeys.has(browser)) sourceKeys.set(browser, Promise.resolve().then(() => getPassword?.(browser)));
+        return sourceKeys.get(browser);
+      } });
       result.sources++;
       for (const category of categories) {
         const room = MAX_ROWS - result[category].length;

@@ -800,18 +800,55 @@ async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false
       if (!pick.filePaths[0]) break;
       if (pick.filePaths.length > 12) throw new Error("Select up to 12 Chromium profile folders");
       const options = { bookmarks: value?.bookmarks !== false, history: value?.history !== false, cookies: value?.cookies === true, passwords: value?.passwords === true };
+      const browsers = [
+        {id:'chrome', label:tr('Google Chrome'), keychain:'Chrome Safe Storage'},
+        {id:'chromium', label:tr('Chromium'), keychain:'Chromium Safe Storage'},
+        {id:'edge', label:tr('Microsoft Edge'), keychain:'Microsoft Edge Safe Storage'},
+        {id:'brave', label:tr('Brave'), keychain:'Brave Safe Storage'},
+      ];
+      const defaultBrowser = value?.sourceBrowser || 'chrome';
+      const sourceBrowsers = new Map();
+      if (defaultBrowser !== 'mixed' && !browsers.some(browser => browser.id === defaultBrowser)) throw new Error('Unknown source browser');
       if (options.cookies || options.passwords) {
-        const answer = await dialog.showMessageBox(window, { type: 'question', title: tr("Import protected browser data"), message: tr("Import selected login data into this Wiek profile?"), detail: tr("Source: {0}\nCookies and saved passwords will be decrypted using the selected browser’s macOS Safe Storage key. macOS may request Keychain access. Passwords are encrypted again in Wiek’s local vault. Unsupported records will be reported.", (pick.filePaths.join("\n"))), buttons: [tr('Cancel'), tr('Import')], defaultId: 0, cancelId: 0 });
+        if (defaultBrowser === 'mixed') {
+          for (const directory of pick.filePaths) {
+            const answer = await dialog.showMessageBox(window, {
+              type:'question',
+              title:tr('Source browser'),
+              message:tr('Which browser created this profile folder?'),
+              detail:directory,
+              buttons:[tr('Cancel'), ...browsers.map(browser => browser.label)],
+              defaultId:0,
+              cancelId:0,
+            });
+            const browser = browsers[answer.response - 1];
+            if (!browser) return uiState(selectedSpaceId);
+            sourceBrowsers.set(directory, browser.id);
+          }
+        }
+        const sources = pick.filePaths.map(directory => {
+          const browser = browsers.find(item => item.id === (sourceBrowsers.get(directory) || defaultBrowser));
+          return `${browser.label} · ${directory}`;
+        });
+        const answer = await dialog.showMessageBox(window, { type: 'question', title: tr("Import protected browser data"), message: tr("Import selected login data into this Wiek profile?"), detail: tr("Source: {0}\nCookies and saved passwords will be decrypted using the selected browser’s macOS Safe Storage key. macOS may request Keychain access. Passwords are encrypted again in Wiek’s local vault. Unsupported records will be reported.", sources.join("\n")), buttons: [tr('Cancel'), tr('Import')], defaultId: 0, cancelId: 0 });
         if (answer.response !== 1) break;
       }
-      const services = { chrome: 'Chrome Safe Storage', chromium: 'Chromium Safe Storage', edge: 'Microsoft Edge Safe Storage', brave: 'Brave Safe Storage' };
-      const serviceName = services[value?.sourceBrowser || 'chrome'];
-      if (!serviceName) throw new Error('Unknown source browser');
-      const imported = await readSelectedProfiles({ directories: pick.filePaths, ...options, getPassword: async () => {
-        if (process.platform !== 'darwin') throw new Error('Encrypted migration is supported on macOS');
-        try { const result = await execFileAsync('/usr/bin/security', ['find-generic-password', '-s', serviceName, '-w'], { timeout: 60000, maxBuffer: 4096 }); return result.stdout.replace(/\r?\n$/, ''); }
-        catch { throw new Error('Source browser key access was denied or unavailable'); }
-      } });
+      const imported = await readSelectedProfiles({
+        directories: pick.filePaths,
+        ...options,
+        browserForDirectory: directory => sourceBrowsers.get(directory) || defaultBrowser,
+        getPassword: async browser => {
+          if (process.platform !== 'darwin') throw new Error('Encrypted migration is supported on macOS');
+          const selected = browsers.find(item => item.id === browser);
+          if (!selected) throw new Error('Unknown source browser');
+          try {
+            const result = await execFileAsync('/usr/bin/security', ['find-generic-password', '-s', selected.keychain, '-w'], { timeout: 60000, maxBuffer: 4096 });
+            return result.stdout.replace(/\r?\n$/, '');
+          } catch {
+            throw new Error('Source browser key access was denied or unavailable');
+          }
+        },
+      });
       const counts = { bookmarks: 0, history: 0, cookies: 0, passwords: 0 };
       const bookmarkUrls = new Set(store.bookmarks.filter(item => belongsToProfile(item, s.profileId)).map(item => item.url));
       for (const item of imported.bookmarks) {

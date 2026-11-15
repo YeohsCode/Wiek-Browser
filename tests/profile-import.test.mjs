@@ -4,13 +4,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 import crypto from 'node:crypto';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
-const { inspectProfile, readProfile, readSelectedProfiles, decryptMac, createCredentialVault } = createRequire(import.meta.url)('../app/profile-import.cjs');
+const require = createRequire(import.meta.url);
+const { inspectProfile, readProfile, readSelectedProfiles, decryptMac, createCredentialVault } = require('../app/profile-import.cjs');
 const { DatabaseSync } = createRequire(import.meta.url)('node:sqlite');
 const password = 'temporary fixture key';
-function encrypted(value, domain) {
-  const cipher = crypto.createCipheriv('aes-128-cbc', crypto.pbkdf2Sync(password, 'saltysalt', 1003, 16, 'sha1'), Buffer.alloc(16, 32));
+function encrypted(value, domain, key = password) {
+  const cipher = crypto.createCipheriv('aes-128-cbc', crypto.pbkdf2Sync(key, 'saltysalt', 1003, 16, 'sha1'), Buffer.alloc(16, 32));
   const plain = Buffer.concat([domain ? crypto.createHash('sha256').update(domain).digest() : Buffer.alloc(0), Buffer.from(value)]);
   return Buffer.concat([Buffer.from('v10'), cipher.update(plain), cipher.final()]);
 }
@@ -89,4 +90,63 @@ test('multi-profile import reads each selected canonical folder once and reports
   assert.deepEqual(await fs.readFile(path.join(first, 'Bookmarks')), firstBytes);
   await assert.rejects(readSelectedProfiles({ directories: [path.join(first, 'missing')] }), /ENOENT/);
   await assert.rejects(readSelectedProfiles({ directories: Array(13).fill(first) }), /up to 12/);
+});
+
+test('mixed browser import groups key requests by the selected source browser', async t => {
+  const browserKeys = { chrome: 'chrome fixture key', edge: 'edge fixture key' };
+  const selections = new Map();
+  const calls = [];
+  for (const [browser, name] of [['chrome', 'first'], ['edge', 'second'], ['chrome', 'third']]) {
+    const root = await fixture(t);
+    selections.set(root, browser);
+    const db = new DatabaseSync(path.join(root, 'Login Data'));
+    db.exec('CREATE TABLE logins(origin_url,username_value,password_value BLOB,blacklisted_by_user)');
+    db.prepare('INSERT INTO logins VALUES (?, ?, ?, 0)').run('https://fixture.test', name, encrypted(name, null, browserKeys[browser]));
+    db.close();
+  }
+  const result = await readSelectedProfiles({
+    directories: [...selections.keys()],
+    passwords: true,
+    browserForDirectory: directory => selections.get(directory),
+    getPassword: browser => { calls.push(browser); return browserKeys[browser]; },
+  });
+  assert.deepEqual(calls, ['chrome', 'edge']);
+  assert.deepEqual(result.passwords.map(row => [row.username, row.password]), [['first', 'first'], ['second', 'second'], ['third', 'third']]);
+  assert.deepEqual(result.warnings, []);
+  const unavailable = await readSelectedProfiles({
+    directories: [...selections.keys()],
+    passwords: true,
+    browserForDirectory: directory => selections.get(directory),
+    getPassword: browser => {
+      if (browser === 'edge') throw new Error('Fixture key was denied');
+      return browserKeys[browser];
+    },
+  });
+  assert.deepEqual(unavailable.passwords.map(row => row.password), ['first', 'third']);
+  assert.deepEqual(unavailable.warnings, [{ category: 'passwords', reason: 'Unsupported encryption or unavailable source key', count: 1 }]);
+});
+
+test('the settings flow assigns each protected source and verifies the choices before reading credentials', { skip: process.platform !== 'darwin' }, async t => {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'wiek-mixed-import-'));
+  t.after(() => fs.rm(root, { recursive: true, force: true }));
+  const directories = [];
+  for (const browser of ['chrome', 'edge']) {
+    const directory = await fixture(t);
+    directories.push(directory);
+    const db = new DatabaseSync(path.join(directory, 'Cookies'));
+    db.exec("CREATE TABLE meta(key,value); INSERT INTO meta VALUES('version','24'); CREATE TABLE cookies(host_key,name,value,encrypted_value BLOB,path,expires_utc,is_secure,is_httponly,samesite)");
+    db.prepare("INSERT INTO cookies VALUES('.fixture.test', ?, '', ?, '/', 0, 1, 1, 1)").run(browser, encrypted(browser + ' cookie', '.fixture.test', browser + ' fixture key'));
+    db.close();
+  }
+  const env = { ...process.env, WIEK_DATA_DIR: root, VEK_DATA_DIR: root, WIEK_MIXED_PROFILES: JSON.stringify(directories) };
+  delete env.ELECTRON_RUN_AS_NODE;
+  const child = spawn(require('electron'), [path.join(import.meta.dirname, 'fixtures/profile-import-mixed-host.cjs')], { env, stdio: ['ignore', 'pipe', 'pipe'] });
+  let output = '';
+  child.stdout.on('data', buffer => { output += buffer; });
+  child.stderr.on('data', buffer => { output += buffer; });
+  const timer = setTimeout(() => child.kill('SIGKILL'), 30000);
+  const code = await new Promise(resolve => child.once('close', resolve));
+  clearTimeout(timer);
+  assert.equal(code, 0, output);
+  assert.match(output, /"mixedSourceImport":true/);
 });

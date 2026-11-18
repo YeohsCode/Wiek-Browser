@@ -1,6 +1,6 @@
 # 文档索引
 
-当前开发检查点 **Wiek Browser 0.30.0**。功能覆盖、研究来源与验收结果分别记录；完整功能和线上模型评估仍未完成。
+当前开发检查点 **Wiek Browser 0.31.0**。功能覆盖、研究来源与验收结果分别记录；完整功能和线上模型评估仍未完成。
 
 | 用途 | 文档 |
 |---|---|
@@ -10,6 +10,7 @@
 | 验收与发行身份 | [当前结果](../reports/RESULTS.md)、[交付摘要](../reports/delivery-summary.json) |
 | 同集测试 | [结果](../reports/comparison.md) |
 | 名称与功能必要性 | [术语表](terminology.md)、[自动化阻塞与功能审计](../reports/usability-audit.md) |
+| 浏览器操作经验 | [设计与接口](browser-operation-experience.md)、[使用指南](browser-operation-experience-usage.md) |
 | 项目工具接口 | [API 指南](../skills/wiek-browser/API.md) |
 | 文件恢复 | [Linked worktree checkpoint](../analysis/linked-worktree-checkpoints.md) |
 | 基准适配器 | [共享 V2 说明](../benchmark/sdk-v2/README.md) |

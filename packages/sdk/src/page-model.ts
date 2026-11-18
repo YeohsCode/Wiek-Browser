@@ -332,6 +332,7 @@ type RuntimeTab = {
 };
 
 type PageModelServices = {
+  experience?(action: string, payload: Record<string, unknown>): Promise<any>;
   ledger: LedgerPort;
   pageRefs: PageRefRegistry;
   gate: OperationGate;
@@ -679,6 +680,14 @@ const defaultGate: OperationGate = {
 };
 
 const baseDefaultServices: Omit<PageModelServices, "ledger" | "pageBudget"> = {
+  async experience(action, payload) {
+    if (!globalThis.wiek) return undefined;
+    const runtime = browserWiek();
+    if (typeof runtime.browserExperience !== "function") return undefined;
+    return invokeWiek("page.experience", () =>
+      runtime.browserExperience(action, payload),
+    );
+  },
   gate: defaultGate,
   pageRefs: defaultPageRefs,
   async createTab(url) {
@@ -1623,6 +1632,22 @@ class Page {
     return this.#openedBy;
   }
 
+  /** Scoped operation history, reviewed hints and checked replay. Review lives in Settings. */
+  async experience(
+    action: string,
+    payload: Record<string, unknown> = {},
+  ): Promise<any> {
+    const page = await this.#resolve();
+    return this.#services.gate.withPage(page, async () => {
+      if (!this.#services.experience)
+        throw new Error("Browser operation experience is unavailable");
+      return this.#services.experience(action, {
+        ...payload,
+        targetId: page.targetId,
+      });
+    });
+  }
+
   async goto(
     url: string,
     options: PageGotoOptions = {},
@@ -1641,6 +1666,8 @@ class Page {
           waitUntil,
         });
       },
+      false,
+      "navigate",
     );
     return receipt;
   }
@@ -1658,6 +1685,8 @@ class Page {
           waitUntil,
         });
       },
+      false,
+      "reload",
     );
     return receipt;
   }
@@ -1761,7 +1790,13 @@ class Page {
       );
       const content = result?.content || "";
       const header = await this.#snapshotHeader(page);
-      return `${header}\n${content}`;
+      const recalled = await this.#services.experience?.("observeRecall", {
+        targetId: page.targetId,
+      });
+      const hints = recalled?.candidates?.length
+        ? `\n<reviewed-browser-experience>\n${JSON.stringify(recalled)}\n</reviewed-browser-experience>`
+        : "";
+      return `${header}\n${content}${hints}`;
     });
   }
 
@@ -2079,25 +2114,27 @@ class Page {
     const page = await this.#resolve();
     return this.#services.gate.withPage(page, async ({ sessionId }) => {
       await this.#activate(page.targetId);
-      const response = await evaluateInSession<PageFetchResult>(
-        this.#services,
-        sessionId,
-        fetchInPage,
-        true,
-        payload,
-        payload.timeoutMs + 1_000,
-      );
-      if ("fetchError" in response) {
-        throw new Error(response.fetchError);
-      }
-      if (!saveAs) return response;
-      if (typeof response.bodyBase64 !== "string") {
-        throw new Error("page.fetch received no binary response body");
-      }
-      await mkdir(dirname(saveAs), { recursive: true });
-      await writeFile(saveAs, Buffer.from(response.bodyBase64, "base64"));
-      const { bodyBase64: _bodyBase64, ...metadata } = response;
-      return { ...metadata, savedPath: saveAs };
+      return this.#recordExperience(page, "fetch", async () => {
+        const response = await evaluateInSession<PageFetchResult>(
+          this.#services,
+          sessionId,
+          fetchInPage,
+          true,
+          payload,
+          payload.timeoutMs + 1_000,
+        );
+        if ("fetchError" in response) {
+          throw new Error(response.fetchError);
+        }
+        if (!saveAs) return response;
+        if (typeof response.bodyBase64 !== "string") {
+          throw new Error("page.fetch received no binary response body");
+        }
+        await mkdir(dirname(saveAs), { recursive: true });
+        await writeFile(saveAs, Buffer.from(response.bodyBase64, "base64"));
+        const { bodyBase64: _bodyBase64, ...metadata } = response;
+        return { ...metadata, savedPath: saveAs };
+      });
     });
   }
 
@@ -2117,11 +2154,8 @@ class Page {
         await this.#activate(page.targetId);
       }
       try {
-        return await this.#services.cdp(
-          method,
-          params,
-          sessionId,
-          options.timeout,
+        return await this.#recordExperience(page, "cdp", () =>
+          this.#services.cdp(method, params, sessionId, options.timeout),
         );
       } finally {
         // Raw CDP can navigate or mutate the document, so existing refs are no
@@ -2524,36 +2558,41 @@ class Page {
     const page = await this.#resolve();
     return this.#services.gate.withPage(page, async ({ sessionId }) => {
       if (activate) await this.#activate(page.targetId);
-      try {
-        return await evaluateInSession<T>(
-          this.#services,
-          sessionId,
-          expression,
-          hasArgument,
-          serializedArgument,
-          PAGE_EVALUATE_TRANSPORT_TIMEOUT_MS,
-          PAGE_EVALUATE_EXECUTION_TIMEOUT_MS,
-        );
-      } catch (error) {
-        if (isEvaluationExecutionDeadlineError(error)) {
-          throw evaluationExecutionDeadlineError(
-            "page.evaluate",
-            PAGE_EVALUATE_EXECUTION_TIMEOUT_MS,
-          );
-        }
-        if (isRuntimeEvaluateTransportTimeout(error)) {
-          throw await recoverPageEvaluationTimeout(
+      const execute = async () => {
+        try {
+          return await evaluateInSession<T>(
             this.#services,
             sessionId,
-            "page.evaluate",
+            expression,
+            hasArgument,
+            serializedArgument,
             PAGE_EVALUATE_TRANSPORT_TIMEOUT_MS,
+            PAGE_EVALUATE_EXECUTION_TIMEOUT_MS,
           );
+        } catch (error) {
+          if (isEvaluationExecutionDeadlineError(error)) {
+            throw evaluationExecutionDeadlineError(
+              "page.evaluate",
+              PAGE_EVALUATE_EXECUTION_TIMEOUT_MS,
+            );
+          }
+          if (isRuntimeEvaluateTransportTimeout(error)) {
+            throw await recoverPageEvaluationTimeout(
+              this.#services,
+              sessionId,
+              "page.evaluate",
+              PAGE_EVALUATE_TRANSPORT_TIMEOUT_MS,
+            );
+          }
+          if (typeof expression === "function") {
+            throw enrichPageCallbackReferenceError(error, "page.evaluate");
+          }
+          throw error;
         }
-        if (typeof expression === "function") {
-          throw enrichPageCallbackReferenceError(error, "page.evaluate");
-        }
-        throw error;
-      }
+      };
+      return activate
+        ? this.#recordExperience(page, "evaluate", execute)
+        : execute();
     });
   }
 
@@ -2593,6 +2632,8 @@ class Page {
             operation(sessionId, refMap, iframeSessions, services),
         ),
       options.guardFileChooser,
+      actionName,
+      selectors.length === 1 ? selectors[0] : undefined,
     );
     return receipt;
   }
@@ -2727,13 +2768,43 @@ class Page {
     });
   }
 
+  async #recordExperience<T>(
+    page: PageTarget,
+    name: string,
+    operation: () => Promise<T>,
+  ): Promise<T> {
+    const observed = await this.#services.experience?.("observeBegin", {
+      targetId: page.targetId,
+      name,
+    });
+    let status = "uncertain";
+    try {
+      const result = await operation();
+      status = "executed";
+      return result;
+    } finally {
+      if (observed?.operationId) {
+        try {
+          await this.#services.experience?.("end", {
+            targetId: page.targetId,
+            runId: observed.runId,
+            operationId: observed.operationId,
+            status,
+          });
+        } catch {}
+      }
+    }
+  }
+
   async #runInputBoundary<T>(
     page: PageTarget,
     operation: (sessionId: string) => Promise<T>,
   ): Promise<T> {
     return this.#services.gate.withPage(page, async ({ sessionId }) => {
       await this.#activate(page.targetId);
-      return operation(sessionId);
+      return this.#recordExperience(page, "rawInput", () =>
+        operation(sessionId),
+      );
     });
   }
 
@@ -2741,6 +2812,8 @@ class Page {
     page: PageTarget,
     operation: (sessionId: string) => Promise<T>,
     guardFileChooser = false,
+    operationName = "input",
+    selector?: string,
   ): Promise<{ value: T; receipt: PageActionReceipt }> {
     const explicitDownload = this.#pendingDownload;
     const armedDownload = explicitDownload
@@ -2768,8 +2841,17 @@ class Page {
               cancel: true,
             })
           : undefined;
+      let observed: any;
+      let executionStatus = "uncertain";
       try {
         await fileChooserGuard?.ready;
+        observed = await this.#services.experience?.("observeBegin", {
+          targetId: page.targetId,
+          name: operationName,
+          ...(selector && /^#[A-Za-z_][A-Za-z0-9_-]{0,79}$/.test(selector)
+            ? { locator: selector }
+            : {}),
+        });
         const before = new Set(
           (await this.#services.listTabs()).map((tab) => tab.targetId),
         );
@@ -2818,11 +2900,25 @@ class Page {
 
         if (actionError) throw actionError;
         if (popupError) throw popupError;
+        executionStatus = "executed";
         return {
           value: value as T,
           receipt: popups.length > 0 ? { popups } : {},
         };
       } finally {
+        if (observed?.operationId) {
+          // Never turn a dispatched action into a retry merely because saving its receipt failed.
+          try {
+            await this.#services.experience?.("end", {
+              targetId: page.targetId,
+              runId: observed.runId,
+              operationId: observed.operationId,
+              status: executionStatus,
+            });
+          } catch {
+            /* The host retains an unfinished/uncertain operation and refuses replay. */
+          }
+        }
         await fileChooserGuard?.dispose();
       }
     });

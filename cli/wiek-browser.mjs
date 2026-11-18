@@ -215,7 +215,7 @@ function createWiekAdapter(rpc) {
   for (const method of [
     'getBrowserVersion','listProfiles','createTab','listTabs','snapshot','listTaskSpaces',
     'createTaskSpace','claimTaskSpace','closeTaskSpace','completeTaskSpace','handOffTaskSpace',
-    'takeOverTaskSpace','setAgentTaskState','animationHighlightMouseToPosition',
+    'takeOverTaskSpace','setAgentTaskState','animationHighlightMouseToPosition','browserExperience',
   ]) {
     wiek[method] = (...args) => {
       if (noArg.has(method) && args.length) throw invalid(`${method} accepts no arguments`);

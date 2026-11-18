@@ -49,6 +49,10 @@ Use `WIEK_DATA_DIR=/absolute/path` to start an isolated instance. Development da
 
 Project local services require the macOS native helper. Only matching project directories are shown; protected processes and unsupported runtimes cannot be stopped. A process that ignores the signal remains reported as running. No force-stop escalation is performed.
 
+## Browser operation experience
+
+Optional local task records separate execution from checked results. Review suggestions in Settings, then reuse hints or steps with before/after checks. Changed or uncertain results pause replay without retrying. SDK and MCP share the same profile/project/site scope. See the [design and contract](docs/browser-operation-experience.md) and [usage guide](docs/browser-operation-experience-usage.md). This is off by default; ordinary automation does not require it.
+
 ## Browser automation
 
 ```sh

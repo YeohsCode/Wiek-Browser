@@ -171,7 +171,7 @@ function renderPanel() {
 function settingsPanel(p) {
   const sections = text('nav', '', 'settings-actions');
   sections.setAttribute('aria-label', tr('Settings sections'));
-  for (const [id, label] of [['data','Profiles and data'], ['appearance','Appearance & shortcuts']]) {
+  for (const [id, label] of [['data','Profiles and data'], ['appearance','Appearance & shortcuts'], ['experience','Browser operation experience']]) {
     const button = text('button', tr(label), 'subtle-button');
     button.dataset.settingsSection = id;
     button.setAttribute('aria-current', String(settingsSection === id));
@@ -184,6 +184,7 @@ function settingsPanel(p) {
     sections.append(button);
   }
   p.append(sections);
+  if(settingsSection==='experience'){const root=text('div','','tools-root');p.append(root);window.WiekExperiencePanel.mount(root,(action,value)=>window.vek.action(action,value));window.WiekExperiencePanel.update(state);return;}
   if (settingsSection === 'appearance') {
     const root = text('div','','tools-root');
     p.append(root);

@@ -85,6 +85,10 @@ jobs:
           VEK_MCP_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
           WIEK_MEMORY_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
         run: node --test --test-concurrency=1 tests/mcp-legacy-url.test.mjs tests/memory-service.test.mjs > reports/ci-mcp-url-search.log 2>&1
+      - name: Packaged browser operation experience
+        env:
+          WIEK_EXPERIENCE_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app
+        run: node --test --test-concurrency=1 tests/browser-experience.test.mjs tests/browser-experience-host.test.mjs > reports/ci-browser-experience.log 2>&1
       - name: Packaged desktop and recording panels
         env:
           VEK_DESKTOP_APP_ROOT: ${{ github.workspace }}/dist/mac-arm64/Wiek Browser.app/Contents/Resources/app

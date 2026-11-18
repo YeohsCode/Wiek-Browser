@@ -19,6 +19,9 @@ const { createVoiceService } = require('./voice-service.cjs');
 const { createPreferencesService } = require('./preferences-service.cjs');
 const { createLibraryService } = require('./library-service.cjs');
 const { createActionRecorder } = require('./action-recorder.cjs');
+const {createBrowserExperience}=require('./browser-experience.cjs');
+const {createExperiencePage}=require('./browser-experience-page.cjs');
+let experienceService;
 const { createMemoryService } = require('./memory-service.cjs');
 const { createProfileArchive } = require('./profile-archive.cjs');
 const {claimForeground}=require('./scheduler-control.cjs');
@@ -155,7 +158,7 @@ function interfaceLocale() {
 function uiState(selectedSpaceId = store.selected) {
   const s = store.spaces.find(s => s.id === selectedSpaceId);
   const active = s && tabs.get(s.activeTab);
-  return { interfaceLocale:interfaceLocale(), translation:translationService?.snapshot(),desktopMonitor:desktopMonitorService?.snapshot(),schedulerJob:schedulerJobService?.snapshot(),agents: agentService?.snapshot(), desktop:desktopService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
+  return { interfaceLocale:interfaceLocale(), translation:translationService?.snapshot(),desktopMonitor:desktopMonitorService?.snapshot(),schedulerJob:schedulerJobService?.snapshot(),agents: agentService?.snapshot(), desktop:desktopService?.snapshot(), preferences:preferencesService?.snapshot(), memory:s ? memoryService?.snapshot(s.profileId) : null, experience:s ? experienceService?.snapshot(experienceScope(s)) : null, library:libraryService?.snapshot(), recorder:recorderService?.snapshot(), darkMode:nativeTheme.shouldUseDarkColors, panelOpen, chromeBounds:chromeBounds(), closedSpaces:store.closedSpaces.map(({tabs,...s})=>({...s,tabCount:tabs.length})), workspace: workspaceService?.snapshot(), mcp: mcpService?.snapshot(), homePins: s ? store.homePins[s.profileId] || [] : [], savedLogins: s ? vaultFor(s.profileId).list() : [], importResult, profileArchiveResult, sitePermissions:sitePermissions.snapshot(s?.profileId), version: app.getVersion(), browserInstanceId: INSTANCE, profiles: store.profiles, spaces: [...store.spaces].sort((a,b)=>Number(Boolean(b.pinned))-Number(Boolean(a.pinned))).map(descriptor), selectedSpaceId: s?.id, tabs: s ? s.tabs.map((id, i) => tabs.get(id) && tabDescriptor(tabs.get(id), i)).filter(Boolean) : [], activeTabId: active?.id, canGoBack: active?.view.webContents.navigationHistory.canGoBack() || false, canGoForward: active?.view.webContents.navigationHistory.canGoForward() || false, loading: active?.view.webContents.isLoading() || false, taskState: s?.taskState || '', bookmarks: store.bookmarks.filter(row=>belongsToProfile(row,s?.profileId)), history: store.history.filter(row=>belongsToProfile(row,s?.profileId)).slice(-200).reverse(), downloads: downloads.filter(row=>belongsToProfile(row,s?.profileId)).map(d => ({ id: d.id, name: d.name, path: d.path, url: d.url, state: d.state, paused:Boolean(d.paused), canResume:Boolean(d.canResume), received: d.received, total: d.total })), extensions: s ? (store.extensionPaths[s.profileId] || []).map(e => ({ ...e, loaded: Boolean(sessionFor(s.profileId).extensions.getExtension(e.id)) })) : [] };
 }
 function publish() { if (window && !window.isDestroyed()) window.webContents.send('vek:state', uiState());for(const [id,record]of spaceWindows)if(!record.window.isDestroyed())record.window.webContents.send('vek:state',uiState(id)); }
 let panelOpen = false;
@@ -418,6 +421,7 @@ async function rpc(client, method, args = [], spaceId) {
     return null;
   }
   const s = controlled(sid);
+  if (method === 'browserExperience') return experienceAction(s,args[0],args[1]);
   if (method === 'createTab') return tabDescriptor(await createTab(s, args[0]));
   if (method === 'listTabs') return { tabs: s.tabs.map((id, i) => tabDescriptor(tabs.get(id), i)) };
   if (method === 'snapshot') { const t = targetFor(s); const sessionId = routeRoot(t, client); return snapshotPage({ sendCDP: (method, params, sid) => sendCDP(s, method, params, sid || sessionId, client), targetId: t.id, sessionId, options: args[0] || {} }); }
@@ -563,7 +567,25 @@ async function captureTabImage(t) {
     }
   }finally{layout();}
 }
+function experienceScope(s, projectId) {
+  const linked=s.agentScopeKey?.split(':')[0];
+  const thread=agentService?.snapshot().threads.find(t=>t.browserSpaceId===s.id||s.name===`agent-${t.id}`);
+  if(!s.experienceProjectId&&(linked||thread?.projectId)){s.experienceProjectId=linked||thread.projectId;persist();}
+  if(projectId&&s.experienceProjectId&&projectId!==s.experienceProjectId)throw error('Project binding changed','WIEK_EXPERIENCE_SCOPE');
+  return {profileId:s.profileId,projectId:projectId??s.experienceProjectId??null,spaceId:s.id};
+}
+async function experienceAction(s, action, value={}, interactive=false, projectId) {
+  const ctx={...experienceScope(s,projectId),interactive};
+  const {targetId,...payload}=value;
+  if((action==='list'&&interactive)||['settings','review','edit','rollback','delete','clear'].includes(action))return experienceService.dispatch(action,payload,ctx);
+  const t=targetFor(s,targetId),contents=t.view.webContents,url=contents.getURL();
+  const assertControl=()=>{if(closing)throw error('Browser is closing','WIEK_EXPERIENCE_CLOSED');controlled(s.id);if(contents.isDestroyed()||!s.tabs.includes(t.id))throw error('Experience page was closed','WIEK_EXPERIENCE_SCOPE');};
+  if(['perform','replay'].includes(action)){assertControl();activateTab(t);}
+  const page=createExperiencePage({contents,assertControl,origin:new URL(url||'about:blank').origin,dispatchInput:(method,params)=>sendCDP(s,method,params,routeRoot(t))});
+  return experienceService.dispatch(action,payload,{...ctx,targetId:t.id,url,assertControl,...page});
+}
 async function uiAction(action, value, selectedSpaceId, interactiveDesktop=false) {
+  if(action.startsWith('experience:'))return experienceAction(getSpace(selectedSpaceId??store.selected),action.slice(11),value,interactiveDesktop);
   if(action.startsWith('scheduler:'))return schedulerJobService.dispatch(action,value,{interactive:interactiveDesktop});
   if(['translation:copy','translation:save'].includes(action)){if(!interactiveDesktop||typeof value?.text!=='string'||Buffer.byteLength(value.text)>131072)throw new Error('Use the translation panel');if(action==='translation:copy'){clipboard.writeText(value.text);return {copied:true};}return libraryService.dispatch('library:items:create',{kind:'text',title:String(value.title||'Translation').slice(0,200),text:value.text});}
   if(action.startsWith('translation:'))return translationService.dispatch(action,value,{interactive:interactiveDesktop});
@@ -924,6 +946,7 @@ app.whenReady().then(async () => {
   const reservedShortcuts=[['CommandOrControl+C','Copy'],['CommandOrControl+X','Cut'],['CommandOrControl+V','Paste'],['CommandOrControl+A','Select all'],['CommandOrControl+Z','Undo'],['CommandOrControl+Shift+Z','Redo'],['CommandOrControl+P','Print'],['CommandOrControl+G','Find next'],['CommandOrControl+Shift+G','Find previous'],['Alt+CommandOrControl+I','Developer tools']].map(([accelerator,label])=>({accelerator,label}));
   preferencesService=createPreferencesService({dataDir:DATA,reservedShortcuts,externalShortcuts:()=>desktopService?.reserved()||[],onChange:applyPreferences});nativeTheme.themeSource=preferencesService.snapshot().theme;
   memoryService=createMemoryService({dataDir:DATA,policy:()=>preferencesService.snapshot().memory,onDeviceEnabled:()=>preferencesService.snapshot().onDeviceModels,projects:()=>agentService?.snapshot().projects||[],onChange:publish});
+  experienceService=createBrowserExperience({dataDir:DATA,onChange:publish});
   nativeTheme.on('updated',()=>publish());
   agentService = createAgentService({ dataDir: DATA, onChange: () => publish(), turnCheckpoints:{before:args=>turnCheckpointService.before(args),after:args=>turnCheckpointService.after(args),locked:id=>turnCheckpointService?.locked(id)||false,dispatch:(...args)=>turnCheckpointService.dispatch(...args)}, runContext: ({thread,project}) => ({
     env: { WIEK_BROWSER_CLI:path.join(ROOT,'cli/wiek-browser.mjs'),WIEK_DATA_DIR:DATA, VEK_BROWSER_CLI: path.join(ROOT, 'cli/wiek-browser.mjs'), VEK_DATA_DIR: DATA, VEK_THREAD_ID: thread.id, VEK_PROJECT_ID: thread.projectId, VEK_BROWSER_INSTANCE_ID: INSTANCE },
@@ -945,10 +968,11 @@ app.whenReady().then(async () => {
   for(const event of ['suspend','resume','lock-screen','unlock-screen','user-did-resign-active','user-did-become-active'])powerMonitor.on(event,()=>{const mapped={'user-did-resign-active':'session-resigned','user-did-become-active':'session-active'}[event]||event;selectionToolbar.hide();void agentService.lifecycle(mapped).catch(error=>console.error('Scheduler lifecycle:',error.message));});
   recorderService=createActionRecorder({dataDir:DATA,onChange:()=>{for(const t of tabs.values())sendPageConfig(t);publish();},activePage:()=>{const t=visibleTab();return t?{targetId:t.id,url:t.view.webContents.getURL(),title:t.view.webContents.getTitle()}:null;},capture:async({targetId})=>{const t=tabs.get(targetId);if(!t||t.view.webContents.isDestroyed())throw new Error('Recorded page was closed');return {pngBase64:(await captureTabImage(t)).toPNG().toString('base64')};}});
   const browserGateway = createBrowserGateway({ resolveScope: resolveAgentScope, callbacks: {
+    experience:async ({scope,arguments:args})=>experienceAction(await spaceForScope(scope),args.action,{...args.payload,targetId:args.targetId},false,scope.projectId),
     listTabs: async ({scope}) => { const s = await spaceForScope(scope); return { tabs: s.tabs.map((id, i) => tabDescriptor(tabs.get(id), i)) }; },
     createTab: async ({scope, arguments:args}) => { const s = await spaceForScope(scope); const url = normalizeURL(args.url); if (!/^(https?:|about:blank$)/i.test(url)) throw new Error('MCP navigation permits HTTP(S) or a blank page'); return tabDescriptor(await createTab(s, url)); },
-    navigate: async ({scope, arguments:args}) => { const s = await spaceForScope(scope), t = targetFor(s, args.targetId); const url = normalizeURL(args.url); if (!/^https?:/i.test(url)) throw new Error('MCP navigation permits HTTP(S)'); await t.view.webContents.loadURL(url); return tabDescriptor(t); },
-    snapshot: async ({scope, arguments:args}) => { const s = await spaceForScope(scope), t = targetFor(s,args.targetId), sessionId = routeRoot(t); return snapshotPage({ sendCDP: (method, params, sid) => sendCDP(s, method, params, sid || sessionId), targetId:t.id, sessionId, options:args.options || {} }); },
+    navigate: async ({scope, arguments:args}) => { const s = await spaceForScope(scope), t = targetFor(s, args.targetId); const url = normalizeURL(args.url); if (!/^https?:/i.test(url)) throw new Error('MCP navigation permits HTTP(S)'); let observed;try{observed=await experienceAction(s,'observeBegin',{targetId:t.id,name:'navigate'},false,scope.projectId);await t.view.webContents.loadURL(url);}catch(err){if(observed?.operationId)try{await experienceAction(s,'end',{targetId:t.id,...observed,status:'uncertain'},false,scope.projectId);}catch{}throw err;}if(observed?.operationId)try{await experienceAction(s,'end',{targetId:t.id,...observed,status:'executed'},false,scope.projectId);}catch{}return tabDescriptor(t); },
+    snapshot: async ({scope, arguments:args}) => { const s = await spaceForScope(scope), t = targetFor(s,args.targetId), sessionId = routeRoot(t); const result=await snapshotPage({ sendCDP: (method, params, sid) => sendCDP(s, method, params, sid || sessionId), targetId:t.id, sessionId, options:args.options || {} });const experience=await experienceAction(s,'observeRecall',{targetId:t.id},false,scope.projectId);return experience?.candidates?.length?{...result,experience}:result; },
   } });
   mcpService = createMcpService({ dataDir: DATA, openInputUrl:url=>shell.openExternal(url), oauthOptions:{available:()=>safeStorage.isEncryptionAvailable()&&(process.platform!=='linux'||['gnome_libsecret','kwallet','kwallet5','kwallet6'].includes(safeStorage.getSelectedStorageBackend())),encrypt:value=>safeStorage.encryptString(value),decrypt:value=>safeStorage.decryptString(value),openExternal:url=>shell.openExternal(url)}, resolveScope: resolveAgentScope, resolveCredential: ref => { if (!/^env:[A-Za-z_][A-Za-z0-9_]*$/.test(ref)) throw new Error('Only explicit environment credential references are supported'); const name=ref.slice(4); if (!process.env[name]) throw new Error('Referenced credential is unavailable'); return process.env[name]; }, browserGateway, onChange: publish });
   window = new BrowserWindow({icon:path.join(__dirname,'assets/wiek.png'), width: 1380, height: 930, minWidth: 900, minHeight: 600, title: 'Wiek Browser', backgroundColor: '#f6f7fb', webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, sandbox: true, nodeIntegration: false } });
@@ -1024,5 +1048,5 @@ app.on('before-quit', event => {
   for (const c of connections) c.ws.close(); server?.close();
   tray?.destroy();
   selectionToolbar?.close();
-  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([schedulerJobService?.close(),desktopMonitorService?.close(),translationService?.close(),desktopService?.close(),agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),memoryService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
+  if (agentService || mcpService || voiceService || workspaceService) { event.preventDefault(); void Promise.allSettled([schedulerJobService?.close(),desktopMonitorService?.close(),translationService?.close(),desktopService?.close(),agentService?.close(), mcpService?.close(), voiceService?.close(), libraryService?.close(), preferencesService?.close(),memoryService?.close(),experienceService?.close(),recorderService?.close()]).then(async()=>{turnCheckpointService?.close();await workspaceService?.close();}).finally(() => app.quit()); }
 });

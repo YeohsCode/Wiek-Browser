@@ -49,6 +49,10 @@ node cli/wiek-browser.mjs stop
 
 本地服务发现需要 macOS helper，只列出目录属于所选项目的监听进程。受保护进程及未支持的 runtime 不能停止；忽略终止信号的进程仍显示为运行，不自动升级为强制停止。
 
+## 浏览器操作经验
+
+可选的本地任务记录将操作执行与结果验证分开保存。先在设置中审核建议，再复用提示或带前后检查的步骤。页面变化或结果不确定时，重放会暂停且不会重试。SDK 与 MCP 共用浏览器资料、项目和网站作用域。参见[设计与接口](docs/browser-operation-experience.md)和[使用指南](docs/browser-operation-experience-usage.md)。默认关闭，不影响正常自动化。
+
 ## 浏览器控制
 
 ```sh

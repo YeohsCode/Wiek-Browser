@@ -169,6 +169,7 @@ const HttpClient = createHttpClientClass(StdioClient);
 // must continue enforcing task Space ownership in each callback.
 function createBrowserGateway({ callbacks = {}, resolveScope = async scope => scope } = {}) {
   const definitions = {
+    experience: {description: 'Record a task, recall reviewed browser experience, check results, propose a draft, or replay checked steps. Enabling and review require browser Settings.', inputSchema:{type:'object',properties:{action:{type:'string'},targetId:{type:'string'},payload:{type:'object'}},required:['action'],additionalProperties:false}},
     listTabs: { description: 'List tabs in this agent scope', inputSchema: { type: 'object', additionalProperties: false } },
     snapshot: { description: 'Snapshot a scoped page, or the active page when targetId is omitted', inputSchema: { type: 'object', properties: { targetId: { type: 'string' }, options: { type: 'object' } }, additionalProperties: false } },
     createTab: { description: 'Create a tab in this agent scope', inputSchema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'], additionalProperties: false } },

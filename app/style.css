@@ -27,3 +27,5 @@ html[data-theme=dark] .rail-bottom,html[data-theme=dark] .row,html[data-theme=da
 #browser-tools>button{padding-left:23px}
 
 .bookmark-search{box-sizing:border-box;width:100%;max-width:480px;margin:0 0 12px;padding:8px 10px;font:inherit;color:inherit;background:transparent;border:1px solid currentColor;border-radius:7px}
+
+.experience-panel pre{max-height:320px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}.experience-panel textarea{width:100%;min-height:80px}.experience-panel label{display:block;margin-top:12px}.experience-panel button{margin:4px}.experience-panel select{max-width:100%}

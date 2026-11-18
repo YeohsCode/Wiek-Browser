@@ -201,6 +201,12 @@ export const PUBLIC_API_SCHEMA: readonly PublicApiEntry[] = [
       "Internal browser target identifier for advanced Target-domain CDP only.",
   },
   {
+    name: "Page.experience",
+    signature: "await page.experience(action, payload?)",
+    summary:
+      "Off by default; enabling and review require Settings. Actions: start {task}; recall {task}; verify {checks}; propose {note, format?:1, source?, eventIds?}; perform {recipe}; replay {id, version}. Checks: [{kind:element,selector,attribute?:text|aria-label|data-state|data-status,equals}] or [{kind:url,path}]. Recipes require before/after check arrays, plus type:click,selector,tag,text,role? or type:navigate,path (same origin, no query). Only host-checked operations can be proposed as executable steps; imported scripts and form values are unsupported. SDK actions record names/results after start; verify checks the goal independently. New same-task snapshots include enabled suggestions as historical data. A suspended replay requires observation before recovery; mayHaveDispatched forbids blind retries. completeWorkflow:false is only partial progress. Edits and rollbacks require review again.",
+  },
+  {
     name: "Page.goto",
     signature: "await page.goto(url, { referer?, timeout?, waitUntil? })",
     summary:

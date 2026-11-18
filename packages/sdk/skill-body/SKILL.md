@@ -493,6 +493,14 @@ await page.fetch("/image.png", { saveAs: "/absolute/path/image.png" });
 Use standard Node.js `fetch()` for background requests that do not need Page
 browser semantics.
 
+## Optional browser operation experience
+
+`page.experience(action, payload?)` records scoped task outcomes, recalls reviewed
+suggestions, and replays checked steps. It is off by default and is not required
+for normal automation. Read `help("page.experience")` before using it. Only the browser Settings panel can enable
+or review suggestions. A successful action does not verify the user's goal;
+check results explicitly. Suspended replay requires observation before recovery.
+
 ## User control and completion
 
 When `wiek-browser nodejs` encounters a control error, it exits with status 1

@@ -9,7 +9,7 @@
 - 三组对照比较第二轮操作：无经验重复了 1 次已知错误；已审核建议与检查步骤重放均未再发生该错误，页面都显示预期结果。建议组实际根据召回证据中的恢复目标选择按钮。按钮文字或 ID 变化时未点击；相同文字但业务效果错误时只发送一次点击并暂停。这是确定性夹具，模型调用为 0，不能据此宣称真实网站或模型成本收益。
 - 初始完整回归曾有 Git/PR 合成命令超时。进程跟踪记录到新脚本首次启动约 1.39 秒、后续约 44 毫秒。修复仅增加有界的夹具准备阶段，保持全部协议断言及 1.5 秒操作超时。失败记录继续保留，未修改原始测试输入。
 
-[机器验收记录](browser-experience-validation.json)、[交付摘要](delivery-summary.json)、[设计](../docs/browser-operation-experience.md)、[使用方法](../docs/browser-operation-experience-usage.md)。远端 CI 单独记录实际状态；线上模型、物理设备与签名验收不计入上述结果。
+[机器验收记录](browser-experience-validation.json)、[交付摘要](delivery-summary.json)、[设计](../docs/browser-operation-experience.md)、[使用方法](../docs/browser-operation-experience-usage.md)。最终验证提交的[远端 CI](https://github.com/YeohsCode/Wiek-Browser/actions/runs/44371425712) 当前排队，尚未计为通过；线上模型、物理设备与签名验收不计入上述结果。
 
 ## 2026-11-15 浏览器资料迁移
 

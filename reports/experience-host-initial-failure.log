@@ -25,7 +25,7 @@ test at tests/browser-experience-host.test.mjs:9:1
       at Receiver._write (/Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/node_modules/ws/lib/receiver.js:117:10)
       at writeOrBuffer (node:internal/streams/writable:570:12)
       at _write (node:internal/streams/writable:499:10)
-  
+
       at genericNodeError (node:internal/errors:985:15)
       at wrappedFn (node:internal/errors:539:14)
       at ChildProcess.exithandler (node:child_process:417:12)
@@ -34,10 +34,10 @@ test at tests/browser-experience-host.test.mjs:9:1
       at Socket.<anonymous> (node:internal/child_process:498:11)
       at Socket.emit (node:events:509:28)
       at Pipe.<anonymous> (node:net:355:12)
-  
-  
+
+
   1 !== 0
-  
+
       at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/browser-experience-host.test.mjs:12:442)
       at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
       at async Test.run (node:internal/test_runner/test:1113:7)

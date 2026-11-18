@@ -1,8 +1,8 @@
 {
   "passed": true,
-  "version": "0.30.0",
-  "filesChecked": 203,
-  "textFilesChecked": 191,
+  "version": "0.31.0",
+  "filesChecked": 208,
+  "textFilesChecked": 195,
   "scannedDirectories": [
     "app",
     "cli",

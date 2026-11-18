@@ -353,7 +353,9 @@ async function run(window) {
       assertions: counted,
       comparison: {
         noExperience: {
-          failedAttempts: baseline.failures,
+          failedAttempts: baseline.failures - 1,
+          trainingFailedAttempts: 1,
+          totalFailuresAcrossTwoRounds: baseline.failures,
           repeatedErrors: baseline.failures - 1,
           businessOutcome: baseline.businessOutcome,
         },
@@ -368,6 +370,7 @@ async function run(window) {
           businessOutcome: replayedOutcome,
         },
         modelCalls: 0,
+        evaluatedRound: 2,
         consumer: "deterministic fixture, not a language model",
       },
       changedLabelDispatches: 0,

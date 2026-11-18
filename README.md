@@ -98,7 +98,7 @@ The app is built at `dist/mac-arm64/Wiek Browser.app`. It remains unsigned and u
 
 The local 69-case browser suite and the 31-task online model benchmark are separate. Online evaluation requires matched model/thinking/limits and dedicated test accounts; it has not run. See the [shared adapter setup](benchmark/sdk-v2/README.md) and [current results](reports/RESULTS.md).
 
-Remaining work includes broader profile migration, additional MCP flows, semantic memory, other provider integrations, final native-device acceptance, and signed release. Physical sleep/login, multiple displays, permission revocation and real account workflows are recorded separately from synthetic tests.
+Remaining work includes broader profile migration, additional MCP flows, cross-language semantic retrieval, other provider integrations, final native-device acceptance, and signed release. Physical sleep/login, multiple displays, permission revocation and real account workflows are recorded separately from synthetic tests.
 
 ## License
 

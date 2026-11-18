@@ -1,0 +1,33 @@
+EXPERIENCE_COMPARISON {"experienceHost":true,"assertions":34,"comparison":{"noExperience":{"failedAttempts":1,"trainingFailedAttempts":1,"totalFailuresAcrossTwoRounds":2,"repeatedErrors":1,"businessOutcome":"Done"},"reviewedHints":{"receivedSuggestions":true,"failedAttempts":0,"businessOutcome":"Done"},"checkedReplay":{"status":"verified","failedAttempts":0,"businessOutcome":"Done"},"modelCalls":0,"evaluatedRound":2,"consumer":"deterministic fixture, not a language model"},"changedLabelDispatches":0,"changedIdDispatches":0,"wrongResultDispatches":1}
+✔ actual Wiek SDK, trusted settings and Chromium replay validate two rounds and changed-page effects (7683.014833ms)
+✔ disabled default is non-blocking for automatic observation, and agents cannot enable or approve (44.134ms)
+✔ execution is separate from business validation; two rounds recall only a reviewed evidence-linked suggestion (54.451625ms)
+✔ profile, project, page, task, and exact origin isolate records and recalled hints (34.525792ms)
+✔ operation IDs cannot be reused, mismatched or injected with payloads and secrets (18.296917ms)
+✔ checked replay requires both profile opt-in and an approved immutable candidate version (62.746333ms)
+✔ changed precondition dispatches nothing, demotes stale experience and suspends rather than retries (54.099625ms)
+✔ wrong business result after one dispatch is uncertain and never automatically repeated (63.198041ms)
+✔ partial recovery never becomes a fully replayed workflow (83.899125ms)
+✔ a user handoff interrupts replay before any dispatch and preserves the result uncertainty (67.756167ms)
+✔ revisions, edit, rollback and deletion invalidate old approvals and survive a restart (57.125375ms)
+✔ restart does not resume unfinished input or accept a prior operation ID (21.385708ms)
+✔ a live writer lock prevents concurrent hosts and clear permanently removes scoped evidence (42.4915ms)
+✔ concurrent replay and review are rejected while a host result check is pending (18.495375ms)
+✔ external suggestions are versioned drafts and cannot inject code or fabricated steps (43.721667ms)
+✔ known candidate IDs cannot replay on another site or task (52.819917ms)
+✔ replay preserves standard user-control hard stops (66.970792ms)
+✔ recovery automatically produces a pending hint, never an automatically enabled rule (42.850958ms)
+✔ consecutive partial steps preserve their checked order and never claim whole-task completion (106.17225ms)
+✔ repeated verified observations are counted as evidence, not as an asserted success rate (69.989375ms)
+✔ MCP allowlists and resolved scopes apply to experience just like other browser capabilities (26.07025ms)
+✔ normal automation does not get blocked by cross-origin navigation or an exhausted optional recorder (5429.329ms)
+✔ a real crash after dispatch withdraws replay approval before the next host starts (138.652ms)
+✔ the desktop switches languages live, preserves names, and restores the chosen language on restart (2267.043792ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16740.769667

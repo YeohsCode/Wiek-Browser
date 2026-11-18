@@ -1,6 +1,6 @@
 # Wiek Browser 术语表
 
-更新于 2026-11-11。界面用词描述用户实际得到的结果。代码中的公开 API、数据字段和错误码继续兼容已有调用。
+更新于 2026-11-19。界面用词描述用户实际得到的结果。代码中的公开 API、数据字段和错误码继续兼容已有调用。
 
 | 原名称或容易混淆的说法 | 统一中文名称 | 界面英文名称 | 实际含义与边界 |
 |---|---|---|---|
@@ -29,6 +29,9 @@
 | run memory | 定时任务的持久笔记 | Scheduled task notes | 为一个定时任务保存跨次运行的文本 |
 | Library | 已保存内容 | Saved items & screenshots | 本地网页引用、文本、图片和截图的管理入口 |
 | Collections / groups，收藏内容 | 收藏文件夹 / 子分组 | Collections / Groups | 已保存内容的两层组织方式。与浏览器标签组分别解释 |
+| Browser operation experience | 浏览器操作经验 | Browser operation experience | 本地保存操作与结果检查，供审核后在同任务中参考 |
+| candidate / draft | 待审核建议 | Suggestion awaiting review | 有证据支持但尚未启用的建议，不具有执行权限 |
+| replay | 步骤重放 | Checked step replay | 逐步检查当前页面后执行；失败暂停，部分步骤不等于整个任务完成 |
 | Action recorder、录制 | 网页操作记录 | Page action history | 点击、部分按键、滚动及附带截图的时间线 |
 | application recording | 应用操作记录 | Application action history | 对选定应用记录受支持的输入事件及截图 |
 | Background scheduling | 关闭浏览器后运行定时任务 | Run tasks while browser is closed | 可选 macOS 登录后台任务，须单独启用相应定时任务 |

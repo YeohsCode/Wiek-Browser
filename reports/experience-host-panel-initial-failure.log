@@ -1,0 +1,37 @@
+✖ actual Wiek SDK, trusted settings and Chromium replay validate two rounds and changed-page effects (6485.688792ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6544.732541
+
+✖ failing tests:
+
+test at tests/browser-experience-host.test.mjs:9:1
+✖ actual Wiek SDK, trusted settings and Chromium replay validate two rounds and changed-page effects (6485.688792ms)
+  AssertionError [ERR_ASSERTION]: Wiek Browser ready on 127.0.0.1:54585
+  Error: Script failed to execute, this normally means an error was thrown. Check the renderer console for the error.
+      at node:electron/js2c/sandbox_bundle:2:105042
+      at IpcRendererInternal.<anonymous> (node:electron/js2c/sandbox_bundle:2:99546)
+      at IpcRendererInternal.emit (node:electron/js2c/sandbox_bundle:2:37399)
+      at Object.onMessage (node:electron/js2c/sandbox_bundle:2:98612)
+  [15105:1119/015511.268480:ERROR:base/process/process_mac.cc:53] task_policy_set TASK_CATEGORY_POLICY: (os/kern) invalid argument (4)
+  [15105:1119/015511.268494:ERROR:base/process/process_mac.cc:98] task_policy_set TASK_SUPPRESSION_POLICY: (os/kern) invalid argument (4)
+  
+  
+  1 !== 0
+  
+      at TestContext.<anonymous> (file:///Users/andrewyeoh/Werk/projects/v-browser-uz/vek-browser/tests/browser-experience-host.test.mjs:12:442)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async Test.run (node:internal/test_runner/test:1113:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

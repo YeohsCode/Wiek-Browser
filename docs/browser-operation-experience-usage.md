@@ -40,6 +40,6 @@ console.log(result);
 
 A `suspended` result means observe the current page before recovery. `mayHaveDispatched:true` means input may already have happened: do not automatically repeat it. A `verified` partial replay with `completeWorkflow:false` does not finish the user's task. Respect existing user takeover and permission prompts. Edits and rollbacks create a new pending version; never approve your own suggestions or route around browser review.
 
-MCP exposes the same contract through `browser.experience` with `{action,targetId?,payload?}`, subject to existing grant allowlists and project/thread scope. External suggestions use `propose` payload `{format:1,source,note,steps?}`. Sources are self-reported; submitted steps must match host-checked evidence and still require review.
+MCP exposes the same contract through `browser.experience` with `{action,targetId?,payload?}`, subject to existing grant allowlists and project/thread scope. Include `experience` in the pairing grant’s `browserMethods` array to expose this tool. External suggestions use `propose` payload `{format:1,source,note,steps?}`. Sources are self-reported; submitted steps must match host-checked evidence and still require review.
 
 中文：该功能默认关闭，不是自动化的前置条件。任务执行成功和结果验证分开记录；历史建议需要在浏览器设置中审核后才会复用。步骤暂停时先观察页面，可能已经提交的操作不得直接重试。部分步骤执行成功不代表整个任务完成。默认不记录输入值；明确提供的检查文字和建议会保存在本机。

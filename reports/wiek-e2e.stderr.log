@@ -1,9 +1,9 @@
 
-  dist/src/page-model.js                         86.7kb
+  dist/src/page-model.js                         89.6kb
   dist/src/element-resolver.js                   69.6kb
   dist/src/driver/page-actions.js                46.4kb
   dist/src/browser-runtime.js                    41.6kb
-  dist/src/public-api-schema.js                  23.9kb
+  dist/src/public-api-schema.js                  24.9kb
   dist/src/driver/page-waits.js                  20.6kb
   dist/src/driver/page-keyboard.js               18.5kb
   dist/src/helpers.js                            18.4kb
@@ -21,7 +21,7 @@
   dist/src/index.js                               6.1kb
   ...and 25 more output files...
 
-⚡ Done in 16ms
+⚡ Done in 23ms
 [wiek-browser] js() received a function and auto-wrapped it (() => document.title).
   js() is a thin wrapper over CDP Runtime.evaluate; it takes a string expression,
   not a Puppeteer/Playwright-style callable. Auto-wrap does NOT capture closure

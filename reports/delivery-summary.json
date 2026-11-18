@@ -1,148 +1,83 @@
 {
-  "schemaVersion": 5,
-  "clientDate": "2026-11-14",
+  "schemaVersion": 6,
+  "clientDate": "2026-11-19",
   "project": "Wiek Browser",
+  "version": "0.31.0",
   "repository": "https://github.com/YeohsCode/Wiek-Browser",
+  "generatedAt": "2026-11-18T18:33:34.033152+00:00",
+  "previousCheckpoint": "wiek-v030-before-experience.json",
   "fullParity": false,
   "runtimeIndependent": true,
   "paidModelCalls": 0,
   "externalAccountActions": 0,
   "signed": false,
   "notarized": false,
-  "version": "0.30.0",
-  "generatedAt": "2026-11-14T06:33:48.924087+00:00",
-  "previousCheckpoint": "wiek-v0.29-checkpoint.json",
   "localTests": {
-    "passCount": 617,
+    "tests": 659,
+    "pass": 659,
     "fail": 0,
-    "log": "v030-source.log"
+    "skipped": 0,
+    "log": "experience-source-tests.log"
   },
-  "interfaceLanguage": {
-    "passed": true,
-    "packaged": true,
-    "liveSwitch": true,
-    "restartPersistence": true,
-    "detachedWindow": true,
-    "compositionGuard": true,
-    "log": "v030-interface-language.log"
+  "originalSdk": {
+    "tests": 532,
+    "pass": 532,
+    "fail": 0,
+    "skipped": 0,
+    "log": "experience-sdk-regression.log"
+  },
+  "packagedExperienceAndLanguage": {
+    "tests": 24,
+    "pass": 24,
+    "fail": 0,
+    "skipped": 0,
+    "hostAssertions": 34,
+    "log": "experience-packaged-tests.log"
   },
   "packagedHost": {
-    "passCount": 198,
-    "version": "0.30.0",
-    "log": "v030-package-workbench.log"
+    "passed": true,
+    "checks": 198,
+    "hostVersion": "0.31.0",
+    "paidModelCalls": 0,
+    "externalAccountActions": 0,
+    "log": "experience-packaged-workbench.log"
   },
   "browserSuite": {
-    "status": "passed",
     "total": 69,
+    "selected": 69,
     "pass": 69,
     "fail": 0,
     "skip": 0,
+    "notRun": 0,
     "assertions": 1248,
-    "log": "v030-browser-suite.log",
-    "result": "comparison.json",
-    "initialPackage": true
+    "log": "experience-browser-suite.log"
   },
   "packageIdentity": {
-    "passed": true,
-    "checkedFiles": 207,
-    "immutableInputs": 81,
+    "version": "0.31.0",
+    "packageFiles": 212,
+    "sourceMatches": true,
     "sdkMatchesCompared": true,
-    "log": "v030-package-identity.log"
+    "upstreamFiles": 81,
+    "upstreamUnchanged": true,
+    "unexpected": []
   },
   "installedEntrypoints": {
     "updated": true,
     "verifiedLinks": 4,
-    "receipt": "v030-install.json"
+    "receipt": "experience-install.json"
+  },
+  "operationExperience": {
+    "implemented": true,
+    "defaultEnabled": false,
+    "reviewRequired": true,
+    "evidence": "browser-experience-validation.json"
   },
   "ci": {
-    "status": "failed",
-    "runId": 43566737280,
-    "testedCommit": "97438b42c280ce662ef6044904cc74a8cd00dcc1",
-    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43566737280",
-    "failedCase": "Page snapshot lazy iframe",
-    "packageIdentity": "not_run",
-    "packagedInterfaceLanguage": "passed"
+    "status": "pending_final_validation_push"
   },
-  "stabilizationCi": {
-    "status": "passed",
-    "runId": 43573976448,
-    "testedCommit": "addd02ca9e44563a8309fb9bb6bab501376b376d",
-    "browserSuite": {
-      "pass": 69,
-      "assertions": 1248
-    },
-    "packageIdentity": "passed",
-    "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43573976448"
-  },
-  "followUp": {
-    "testedSourceCommit": "e92f4f1",
-    "fullSourceBaseline": {
-      "passed": 624,
-      "failed": 0,
-      "subsequentFocusedTestsPassed": true
-    },
-    "localPackage": {
-      "targetedPassed": 20,
-      "browserPassed": 69,
-      "browserAssertions": 1248,
-      "packageFiles": 208,
-      "originalInputs": 81
-    },
-    "benchmarkInputs": {
-      "frameworkFiles": 263,
-      "tasks": 31,
-      "onlineRun": false
-    },
-    "desktopPreflight": {
-      "displays": 1,
-      "screen": true,
-      "accessibility": true,
-      "inputMonitoring": true,
-      "captureTestPerformed": false
-    },
-    "ci": {
-      "runId": 43581417475,
-      "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43581417475",
-      "status": "passed",
-      "sourceTests": 625,
-      "browserTests": 69,
-      "browserAssertions": 1248,
-      "packageFiles": 208,
-      "originalInputs": 81
-    },
-    "latestLocalSource": {
-      "total": 626,
-      "passed": 624,
-      "failed": 2,
-      "isolatedRetryPassed": 2
-    }
-  },
-  "urlReviewAndSemanticSearch": {
-    "testedCommit": "787c44b32980574057a6aec4ee559114fd1f8b18",
-    "sourceLocal": {
-      "pass": 632,
-      "fail": 0
-    },
-    "packagedTargetedLocal": 22,
-    "browserLocalSerial": {
-      "pass": 68,
-      "fail": 1,
-      "individualRetryAssertions": 24
-    },
-    "browserLocalOverlap": {
-      "pass": 40,
-      "fail": 29
-    },
-    "ci": {
-      "status": "passed",
-      "runId": 43612042448,
-      "sourcePassed": 631,
-      "sourceSkipped": 1,
-      "browserPassed": 69,
-      "browserAssertions": 1248,
-      "packageFiles": 209,
-      "originalInputs": 81,
-      "url": "https://github.com/YeohsCode/Wiek-Browser/actions/runs/43612042448"
-    }
-  }
+  "externalAcceptance": [
+    "31-task online matched-model benchmark not run",
+    "Physical device/session and real account acceptance remain separate",
+    "Signing and notarization credentials not configured"
+  ]
 }

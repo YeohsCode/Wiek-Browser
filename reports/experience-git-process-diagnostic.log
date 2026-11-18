@@ -1,0 +1,15 @@
+{"trace":"spawn","command":"git-gh-wrapper","pid":74356,"ms":0.7096669999998539}
+{"trace":"close","pid":74356,"ms":58.211249999999836,"code":0,"signal":null,"bytes":39,"stdinFinished":true}
+{"trace":"spawn","command":"gh-fixture","pid":74358,"ms":0.356333000000177}
+{"trace":"close","pid":74358,"ms":1392.583583,"code":0,"signal":null,"bytes":284,"stdinFinished":true}
+{"trace":"spawn","command":"gh-fixture","pid":74359,"ms":0.3958339999999225}
+{"trace":"close","pid":74359,"ms":43.93666699999994,"code":0,"signal":null,"bytes":300000,"stdinFinished":true}
+✔ large PR diffs have an explicit bounded preview instead of a silently shortened full-diff claim (3210.356208ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 1
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3285.292375

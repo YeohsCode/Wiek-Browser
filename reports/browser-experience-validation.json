@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "version": "0.31.0",
+  "date": "2026-11-19",
+  "generatedAt": "2026-11-18T18:33:34.033152+00:00",
+  "implementationCommits": [
+    "45f48a5",
+    "9767794"
+  ],
+  "scope": "Local browser operation experience: reviewed hints, checked replay, partial steps, versioned external drafts.",
+  "source": {
+    "tests": 659,
+    "pass": 659,
+    "fail": 0,
+    "skipped": 0,
+    "log": "experience-source-tests.log"
+  },
+  "originalSdk": {
+    "tests": 532,
+    "pass": 532,
+    "fail": 0,
+    "skipped": 0,
+    "log": "experience-sdk-regression.log"
+  },
+  "packagedExperienceAndLanguage": {
+    "tests": 24,
+    "pass": 24,
+    "fail": 0,
+    "skipped": 0,
+    "hostAssertions": 34,
+    "log": "experience-packaged-tests.log"
+  },
+  "packagedWorkbench": {
+    "passed": true,
+    "checks": 198,
+    "hostVersion": "0.31.0",
+    "paidModelCalls": 0,
+    "externalAccountActions": 0,
+    "log": "experience-packaged-workbench.log"
+  },
+  "browserSuite": {
+    "total": 69,
+    "selected": 69,
+    "pass": 69,
+    "fail": 0,
+    "skip": 0,
+    "notRun": 0,
+    "assertions": 1248,
+    "log": "experience-browser-suite.log"
+  },
+  "identity": {
+    "version": "0.31.0",
+    "packageFiles": 212,
+    "sourceMatches": true,
+    "sdkMatchesCompared": true,
+    "upstreamFiles": 81,
+    "upstreamUnchanged": true,
+    "unexpected": []
+  },
+  "comparison": {
+    "experienceHost": true,
+    "assertions": 34,
+    "comparison": {
+      "noExperience": {
+        "failedAttempts": 1,
+        "trainingFailedAttempts": 1,
+        "totalFailuresAcrossTwoRounds": 2,
+        "repeatedErrors": 1,
+        "businessOutcome": "Done"
+      },
+      "reviewedHints": {
+        "receivedSuggestions": true,
+        "failedAttempts": 0,
+        "businessOutcome": "Done"
+      },
+      "checkedReplay": {
+        "status": "verified",
+        "failedAttempts": 0,
+        "businessOutcome": "Done"
+      },
+      "modelCalls": 0,
+      "evaluatedRound": 2,
+      "consumer": "deterministic fixture, not a language model"
+    },
+    "changedLabelDispatches": 0,
+    "changedIdDispatches": 0,
+    "wrongResultDispatches": 1
+  },
+  "interpretation": "Evaluation round 2 uses a deterministic consumer of the recalled operation evidence. It is not an LLM benchmark or a measured model-cost reduction.",
+  "initialFailures": {
+    "sourceLogs": [
+      "experience-source-initial-failure.log",
+      "experience-source-before-fixture-fix.log"
+    ],
+    "diagnostic": "experience-git-process-diagnostic.log",
+    "resolution": "The generated synthetic CLI now has a bounded readiness launch during fixture setup; protocol assertions and 1500 ms operation deadlines remain unchanged.",
+    "hostLogs": [
+      "experience-host-initial-failure.log",
+      "experience-host-panel-initial-failure.log"
+    ]
+  },
+  "limits": [
+    "Feature off by default; browser Settings review required.",
+    "Reuse scoped to exact task/profile/project/site; no arbitrary script or typed-value replay.",
+    "No real account writes or paid model calls.",
+    "No online model-benefit claim; unsigned and unnotarized local build."
+  ]
+}
